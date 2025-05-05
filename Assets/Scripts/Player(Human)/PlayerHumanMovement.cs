@@ -5,18 +5,28 @@ using UnityEngine;
 public class PlayerHumanMovement : MonoBehaviour
 {
     private Rigidbody2D rb;
+    private SpriteRenderer spriteRenderer;
 
     [Header("이동 관련 설정")]
-    public float movePower = 2f;       // 기본 이동 속도
-    public float dashPower = 8f;       // 대쉬 시 속도
-    public float croushPower = 1f;     // 웅크릴 때 속도 감소
+    [SerializeField] private float movePower = 2f;       // 기본 이동 속도
+
+    [Header("웅크리기 관련 변수")]
+    [SerializeField] private bool isCrouching = false;
+    [SerializeField] private Sprite crouchSprite;    // 웅크린 상태의 스프라이트
+    private Sprite originalSprite;                   // 기본 스프라이트
 
     private void Start()
     {
         rb = GetComponent<Rigidbody2D>();
+        spriteRenderer = GetComponent<SpriteRenderer>();
+        originalSprite = spriteRenderer.sprite;  // 기본 스프라이트 저장
     }
 
     private void Update()
+    {
+        Crouch();       // 웅크리기 처리
+    }
+    private void FixedUpdate()
     {
         Move();             // 이동
     }
@@ -28,25 +38,31 @@ public class PlayerHumanMovement : MonoBehaviour
 
     void Move()
     {
-        Vector3 moveVelocity = Vector3.zero;
+        float horizontalInput = Input.GetAxisRaw("Horizontal");
         float currentPower = movePower;
 
-        float horizontalInput = Input.GetAxisRaw("Horizontal");
-
-        // 좌우 방향 설정
-        if (horizontalInput < 0)
+        if (!isCrouching)
         {
-            moveVelocity = Vector3.left;
-            this.GetComponent<SpriteRenderer>().flipX = true;
+            Vector3 moveVelocity = new Vector3(horizontalInput, 0, 0);
+            transform.position += moveVelocity * currentPower * Time.deltaTime;
         }
-        else if (horizontalInput > 0)
+        
+    }
+
+    void Crouch()
+    {
+        // S키 입력으로 인한 웅크리기
+        if (Input.GetKeyDown(KeyCode.S))
         {
-            moveVelocity = Vector3.right;
-            this.GetComponent<SpriteRenderer>().flipX = false;
-
+            // 웅크리기 시작
+            isCrouching = true;
+            spriteRenderer.sprite = crouchSprite;  // 웅크린 스프라이트로 변경
         }
-
-        // 이동 처리
-        transform.position += moveVelocity * currentPower * Time.deltaTime;
+        else if (Input.GetKeyUp(KeyCode.S))
+        {
+            // 웅크리기 종료
+            isCrouching = false;
+            spriteRenderer.sprite = originalSprite;  // 기본 스프라이트로 복귀
+        }
     }
 }

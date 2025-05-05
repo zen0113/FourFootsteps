@@ -6,39 +6,42 @@ public class PlayerCatMovement : MonoBehaviour
 {
     private Rigidbody2D rb;
     private BoxCollider2D boxCollider;
+    private SpriteRenderer spriteRenderer;
 
     [Header("지상 체크")]
-    public Transform groundCheck;
-    public float groundCheckRadius = 0.2f;
-    public LayerMask groundMask;
+    [SerializeField] private Transform groundCheck;
+    [SerializeField] private float groundCheckRadius = 0.2f;
+    [SerializeField] private LayerMask groundMask;
     private bool isOnGround;
 
     [Header("이동 관련 변수")]
-    public float movePower = 2f;       // 기본 이동 속도
-    public float dashPower = 8f;        // 대쉬 속도
-    public float jumpPower = 5f;        // 점프 힘
-    public float crouchPower = 1f;      // 웅크린 상태 이동 속도
+    [SerializeField] private float movePower = 2f;       // 기본 이동 속도
+    [SerializeField] private float dashPower = 8f;        // 대쉬 속도
+    [SerializeField] private float jumpPower = 5f;        // 점프 힘
+    [SerializeField] private float crouchPower = 1f;      // 웅크린 상태 이동 속도
 
     [Header("점프 중력 보정")]
-    public float fallMultiplier = 2.5f; // 낙하할 때 중력 가중치
-    public float lowJumpMultiplier = 2f;// 짧은 점프 시 중력 가중치
+    [SerializeField] private float fallMultiplier = 2.5f; // 낙하할 때 중력 가중치
+    [SerializeField] private float lowJumpMultiplier = 2f;// 짧은 점프 시 중력 가중치
 
     private int jumpCount = 0;          // 점프 횟수(2단 점프까지)
 
     [Header("사다리 관련")]
-    public float climbSpeed = 2f;       // 사다리 타기 속도
-    public float ladderCheckRadius = 0.2f; // 사다리 체크 범위
+    [SerializeField] private float climbSpeed = 2f;       // 사다리 타기 속도
+    [SerializeField] private float ladderCheckRadius = 0.2f; // 사다리 체크 범위
     private Collider2D currentLadder;  // 현재 접촉 중인 사다리
 
     private bool isClimbing = false;    // 사다리 타고 있는지
     private bool isNearLadder = false;  // 사다리 근처에 있는지
 
     [Header("웅크리기 관련 변수")]
-    public bool isCrouching = false;
-    public Transform headCheck;    // 머리 체크 위치
-    public Transform tailCheck;    // 꼬리 체크 위치
-    public float headCheckLength;  // 머리 체크 길이
-    public float tailCheckLength;  // 꼬리 체크 길이
+    [SerializeField] private bool isCrouching = false;
+    [SerializeField] private Transform headCheck;    // 머리 체크 위치
+    [SerializeField] private Transform tailCheck;    // 꼬리 체크 위치
+    [SerializeField] private float headCheckLength;  // 머리 체크 길이
+    [SerializeField] private float tailCheckLength;  // 꼬리 체크 길이
+    [SerializeField] private Sprite crouchSprite;    // 웅크린 상태의 스프라이트
+    private Sprite originalSprite;                   // 기본 스프라이트
 
     // 콜라이더 크기 저장용
     private Vector2 originalColliderSize;
@@ -51,6 +54,8 @@ public class PlayerCatMovement : MonoBehaviour
     {
         rb = GetComponent<Rigidbody2D>();
         boxCollider = GetComponent<BoxCollider2D>();
+        spriteRenderer = GetComponent<SpriteRenderer>();
+        originalSprite = spriteRenderer.sprite;  // 기본 스프라이트 저장
 
         // 기본 콜라이더 크기와 오프셋 저장
         originalColliderSize = boxCollider.size;
@@ -67,75 +72,34 @@ public class PlayerCatMovement : MonoBehaviour
         // 지상 체크 업데이트
         isOnGround = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundMask);
 
+        // 좌우 방향 설정
+        float horizontalInput = Input.GetAxisRaw("Horizontal");
+        if (horizontalInput != 0)
+        {
+            spriteRenderer.flipX = horizontalInput < 0;
+        }
+
         HandleLadderInput();
 
         if (!isClimbing)
         {
-            Move();        // 일반 이동
             Jump();        // 점프 처리
             BetterJump();  // 점프 물리 보정
-        }
-        else
-        {
-            Climb();       // 사다리 타기 처리
         }
 
         // 웅크리기 처리
         HandleCrouch();
     }
 
-    bool HeadDetect()
+    private void FixedUpdate()
     {
-        bool hit = Physics2D.Raycast(headCheck.position, Vector2.up, headCheckLength, groundMask);
-        return hit;
+        if (!isClimbing)
+            Move();
+        else
+            Climb();
     }
 
-    bool TailDetect()
-    {
-        bool hit = Physics2D.Raycast(tailCheck.position, Vector2.up, tailCheckLength, groundMask);
-        return hit;
-    }
-
-    private void HandleCrouch()
-    {
-        bool isHeadHitting = HeadDetect();
-        bool isTailHitting = TailDetect();
-        bool isBodyHitting = isHeadHitting || isTailHitting;  // 머리나 꼬리 중 하나라도 충돌 중이면 true
-        
-        // 몸체 충돌 체크
-        if (isBodyHitting && !isCrouching && isOnGround)
-        {
-            // 강제 웅크리기
-            isCrouching = true;
-            boxCollider.size = crouchColliderSize;
-            boxCollider.offset = crouchColliderOffset;
-        }
-        
-        // S키 입력으로 인한 웅크리기
-        if (Input.GetKeyDown(KeyCode.S) && isOnGround)
-        {
-            // 웅크리기 시작
-            isCrouching = true;
-            boxCollider.size = crouchColliderSize;
-            boxCollider.offset = crouchColliderOffset;
-        }
-        else if (Input.GetKeyUp(KeyCode.S) && !isBodyHitting)
-        {
-            // 웅크리기 해제 (몸 전체가 장애물에서 벗어났을 때만)
-            isCrouching = false;
-            boxCollider.size = originalColliderSize;
-            boxCollider.offset = originalColliderOffset;
-        }
-
-        // 몸 전체가 장애물에서 벗어나고 S키도 누르고 있지 않으면 자동으로 일어나기
-        if (!isBodyHitting && isCrouching && !Input.GetKey(KeyCode.S))
-        {
-            isCrouching = false;
-            boxCollider.size = originalColliderSize;
-            boxCollider.offset = originalColliderOffset;
-        }
-    }
-
+    // 입력 처리 함수
     private void HandleLadderInput()
     {
         if (isNearLadder)
@@ -155,54 +119,55 @@ public class PlayerCatMovement : MonoBehaviour
         }
     }
 
-    private void OnTriggerStay2D(Collider2D collision)
+    private void HandleCrouch()
     {
-        if (collision.CompareTag("Ladder"))
+        bool isHeadHitting = HeadDetect();
+        bool isTailHitting = TailDetect();
+        bool isBodyHitting = isHeadHitting || isTailHitting;  // 머리나 꼬리 중 하나라도 충돌 중이면 true
+        
+        // 몸체 충돌 체크
+        if (isBodyHitting && !isCrouching && isOnGround)
         {
-            isNearLadder = true;
-            currentLadder = collision;
+            // 강제 웅크리기
+            isCrouching = true;
+            boxCollider.size = crouchColliderSize;
+            boxCollider.offset = crouchColliderOffset;
+            spriteRenderer.sprite = crouchSprite;  // 웅크린 스프라이트로 변경
+        }
+        
+        // S키 입력으로 인한 웅크리기
+        if (Input.GetKeyDown(KeyCode.S) && isOnGround)
+        {
+            // 웅크리기 시작
+            isCrouching = true;
+            boxCollider.size = crouchColliderSize;
+            boxCollider.offset = crouchColliderOffset;
+            spriteRenderer.sprite = crouchSprite;  // 웅크린 스프라이트로 변경
+        }
+        else if (Input.GetKeyUp(KeyCode.S) && !isBodyHitting)
+        {
+            // 웅크리기 해제 (몸 전체가 장애물에서 벗어났을 때만)
+            isCrouching = false;
+            boxCollider.size = originalColliderSize;
+            boxCollider.offset = originalColliderOffset;
+            spriteRenderer.sprite = originalSprite;  // 기본 스프라이트로 복귀
+        }
+
+        // 몸 전체가 장애물에서 벗어나고 S키도 누르고 있지 않으면 자동으로 일어나기
+        if (!isBodyHitting && isCrouching && !Input.GetKey(KeyCode.S))
+        {
+            isCrouching = false;
+            boxCollider.size = originalColliderSize;
+            boxCollider.offset = originalColliderOffset;
+            spriteRenderer.sprite = originalSprite;  // 기본 스프라이트로 복귀
         }
     }
 
-    private void OnTriggerExit2D(Collider2D collision)
-    {
-        if (collision.CompareTag("Ladder"))
-        {
-            isNearLadder = false;
-            if (isClimbing && currentLadder == collision)
-            {
-                ExitLadder(false);
-            }
-            currentLadder = null;
-        }
-    }
-
-    private void OnCollisionEnter2D(Collision2D collision)
-    {
-        if (collision.gameObject.CompareTag("Ground"))
-        {
-            jumpCount = 0; // 바닥에 닿으면 점프 리셋
-        }
-    }
-
+    // 핵심 동작 함수
     void Move()
     {
-        Vector3 moveVelocity = Vector3.zero;
-        float currentPower = movePower;
-
         float horizontalInput = Input.GetAxisRaw("Horizontal");
-
-        // 좌우 방향 설정
-        if (horizontalInput < 0)
-        {
-            moveVelocity = Vector3.left;
-            GetComponent<SpriteRenderer>().flipX = true;
-        }
-        else if (horizontalInput > 0)
-        {
-            moveVelocity = Vector3.right;
-            GetComponent<SpriteRenderer>().flipX = false;
-        }
+        float currentPower = movePower;
 
         // 웅크린 상태에서는 이동 속도 감소
         if (isCrouching)
@@ -216,6 +181,7 @@ public class PlayerCatMovement : MonoBehaviour
         }
 
         // 이동 처리
+        Vector3 moveVelocity = new Vector3(horizontalInput, 0, 0);
         transform.position += moveVelocity * currentPower * Time.deltaTime;
     }
 
@@ -290,6 +256,51 @@ public class PlayerCatMovement : MonoBehaviour
         Debug.Log("사다리에서 내림");
     }
 
+    // 물리/충돌 관련 함수
+    private void OnTriggerStay2D(Collider2D collision)
+    {
+        if (collision.CompareTag("Ladder"))
+        {
+            isNearLadder = true;
+            currentLadder = collision;
+        }
+    }
+
+    private void OnTriggerExit2D(Collider2D collision)
+    {
+        if (collision.CompareTag("Ladder"))
+        {
+            isNearLadder = false;
+            if (isClimbing && currentLadder == collision)
+            {
+                ExitLadder(false);
+            }
+            currentLadder = null;
+        }
+    }
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.gameObject.CompareTag("Ground"))
+        {
+            jumpCount = 0; // 바닥에 닿으면 점프 리셋
+        }
+    }
+
+    // 유틸리티/헬퍼 함수
+    bool HeadDetect()
+    {
+        bool hit = Physics2D.Raycast(headCheck.position, Vector2.up, headCheckLength, groundMask);
+        return hit;
+    }
+
+    bool TailDetect()
+    {
+        bool hit = Physics2D.Raycast(tailCheck.position, Vector2.up, tailCheckLength, groundMask);
+        return hit;
+    }
+
+    // 디버그/시각화 함수
     private void OnDrawGizmos()
     {
         // 머리 체크 기즈모

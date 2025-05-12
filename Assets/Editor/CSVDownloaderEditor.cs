@@ -29,7 +29,7 @@ public class CSVDownloaderEditor : EditorWindow
             {
                 var asyncOperation = webRequest.SendWebRequest();
                 while (!asyncOperation.isDone)
-                    System.Threading.Thread.Sleep(100); // µ¿±âÀû ´ë±â
+                    System.Threading.Thread.Sleep(100); // ë™ê¸°ì  ëŒ€ê¸°
 
                 if (webRequest.result == UnityWebRequest.Result.Success)
                 {

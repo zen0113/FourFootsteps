@@ -71,6 +71,25 @@ public class PlayerCatMovement : MonoBehaviour
     {
         // 지상 체크 업데이트
         isOnGround = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundMask);
+        
+        // 박스 위에 있는지 추가 체크 (태그 기반)
+        Collider2D[] colliders = Physics2D.OverlapCircleAll(groundCheck.position, groundCheckRadius);
+        bool onBox = false;
+        
+        foreach (Collider2D col in colliders)
+        {
+            if (col.CompareTag("Box"))
+            {
+                onBox = true;
+                break;
+            }
+        }
+        
+        // 땅이나 박스 위에 있으면 지상으로 판정
+        if (onBox)
+        {
+            isOnGround = true;
+        }
 
         // 좌우 방향 설정
         float horizontalInput = Input.GetAxisRaw("Horizontal");
@@ -167,22 +186,42 @@ public class PlayerCatMovement : MonoBehaviour
     void Move()
     {
         float horizontalInput = Input.GetAxisRaw("Horizontal");
-        float currentPower = movePower;
-
-        // 웅크린 상태에서는 이동 속도 감소
-        if (isCrouching)
+    float currentPower = movePower;
+    
+    // PlayerBoxInteraction 컴포넌트 가져오기
+    PlayerBoxInteraction boxInteraction = GetComponent<PlayerBoxInteraction>();
+    bool isInteractingWithBox = false;
+    
+    if (boxInteraction != null)
+    {
+        // 리플렉션을 사용하여 private 필드에 접근 (또는 public 프로퍼티로 만들기)
+        System.Reflection.FieldInfo fieldInfo = boxInteraction.GetType().GetField("isInteracting", 
+            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        if (fieldInfo != null)
         {
-            currentPower = crouchPower;
+            isInteractingWithBox = (bool)fieldInfo.GetValue(boxInteraction);
         }
-        // 웅크리지 않은 상태에서만 대시 가능
-        else if (Input.GetKey(KeyCode.LeftShift) && !isCrouching)
-        {
-            currentPower = dashPower;
-        }
+    }
 
-        // 이동 처리
-        Vector3 moveVelocity = new Vector3(horizontalInput, 0, 0);
-        transform.position += moveVelocity * currentPower * Time.deltaTime;
+    // 박스와 상호작용 중일 때는 이동 속도 감소
+    if (isInteractingWithBox)
+    {
+        currentPower = movePower * 0.5f; // 박스 밀 때는 절반 속도
+    }
+    // 웅크린 상태에서는 이동 속도 감소
+    else if (isCrouching)
+    {
+        currentPower = crouchPower;
+    }
+    // 웅크리지 않고 박스와 상호작용 중이 아닐 때만 대시 가능
+    else if (Input.GetKey(KeyCode.LeftShift) && !isCrouching && !isInteractingWithBox)
+    {
+        currentPower = dashPower;
+    }
+
+    // 이동 처리
+    Vector3 moveVelocity = new Vector3(horizontalInput, 0, 0);
+    transform.position += moveVelocity * currentPower * Time.deltaTime;
     }
 
     void Jump()
@@ -281,9 +320,18 @@ public class PlayerCatMovement : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (collision.gameObject.CompareTag("Ground"))
+       // 바닥 또는 박스에 닿으면 점프 리셋
+        if (collision.gameObject.CompareTag("Ground") || collision.gameObject.CompareTag("Box"))
         {
-            jumpCount = 0; // 바닥에 닿으면 점프 리셋
+            // 위에서 아래로 충돌했는지 확인 (발이 닿았는지)
+            foreach (ContactPoint2D contact in collision.contacts)
+            {
+                if (contact.normal.y > 0.5f) // 아래쪽에서 충돌
+                {
+                    jumpCount = 0; // 점프 카운트 리셋
+                    break;
+                }
+            }
         }
     }
 

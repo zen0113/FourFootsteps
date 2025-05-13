@@ -50,23 +50,23 @@ public class ResultManager : MonoBehaviour
     {
         string variableName;
 
-        // ------------------------ ÀÌ°÷¿¡ ¸ğµç µ¿ÀÛÀ» ¼öµ¿À¸·Î Ãß°¡ ------------------------
+        // ------------------------ ì´ê³³ì— ëª¨ë“  ë™ì‘ì„ ìˆ˜ë™ìœ¼ë¡œ ì¶”ê°€ ------------------------
         switch (resultID)
         {
-            case string when resultID.StartsWith("Result_StartDialogue"):  // ´ë»ç ½ÃÀÛ
+            case string when resultID.StartsWith("Result_StartDialogue"):  // ëŒ€ì‚¬ ì‹œì‘
                 variableName = resultID["Result_StartDialogue".Length..];
                 DialogueManager.Instance.StartDialogue(variableName);
                 break;
 
-            // GameManagerÀÇ ÇØ´ç º¯¼ö¸¦ Á¶Á¤ °¡´É(+1 / -1)
-            case string when resultID.StartsWith("Result_Increment"):  // °ª++
+            // GameManagerì˜ í•´ë‹¹ ë³€ìˆ˜ë¥¼ ì¡°ì • ê°€ëŠ¥(+1 / -1)
+            case string when resultID.StartsWith("Result_Increment"):  // ê°’++
                 variableName = resultID["Result_Increment".Length..];
-                //GameManager.Instance.IncrementVariable(variableName);
+                GameManager.Instance.IncrementVariable(variableName);
                 break;
 
-            case string when resultID.StartsWith("Result_Decrement"):  // °ª--
+            case string when resultID.StartsWith("Result_Decrement"):  // ê°’--
                 variableName = resultID["Result_Decrement".Length..];
-                //GameManager.Instance.DecrementVariable(variableName);
+                GameManager.Instance.DecrementVariable(variableName);
                 break;
 
 

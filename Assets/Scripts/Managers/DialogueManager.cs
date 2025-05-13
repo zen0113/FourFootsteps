@@ -11,7 +11,7 @@ public class DialogueManager : MonoBehaviour
 
     // Dialogue UI
     [Header("Dialogue UI")]
-    public DialogueType dialogueType = DialogueType.PLAYER_TALKING; // »ç¿ëÇÒ ´ëÈ­Ã¢ Á¾·ù
+    public DialogueType dialogueType = DialogueType.PLAYER_TALKING; // ì‚¬ìš©í•  ëŒ€í™”ì°½ ì¢…ë¥˜
     public GameObject[] dialogueSet;
     public TextMeshProUGUI[] speakerTexts;
     public TextMeshProUGUI[] scriptText;
@@ -21,21 +21,21 @@ public class DialogueManager : MonoBehaviour
     public GameObject choicePrefab;
     public GameObject[] skipText;
 
-    // Å¸ÀÚ È¿°ú ¼Óµµ
+    // íƒ€ì íš¨ê³¼ ì†ë„
     [Header("Typing Speed")]
     public float typeSpeed = 0.05f;
 
-    // ±ÛÀÚ Èçµé¸®´Â È¿°ú
+    // ê¸€ì í”ë“¤ë¦¬ëŠ” íš¨ê³¼
     [Header("Text Shake")]
     public float shakeAmount = 1.0f;
     public float shakeSpeed = 30.0f;
     private bool isTextShaking = false;
 
-    // ÀÚ·á ±¸Á¶
+    // ìë£Œ êµ¬ì¡°
     public Dictionary<string, Dialogue> dialogues = new Dictionary<string, Dialogue>();
     private Dictionary<string, Choice> choices = new Dictionary<string, Choice>();
 
-    // »óÅÂ º¯¼ö
+    // ìƒíƒœ ë³€ìˆ˜
     private string currentDialogueID = "";
     public bool isDialogueActive = false;
     private bool isTyping = false;
@@ -45,9 +45,6 @@ public class DialogueManager : MonoBehaviour
 
     // Dialogue Queue
     private Queue<string> dialogueQueue = new Queue<string>();
-
-    public string TempPlayerName = "ÁÖÀÎ°ø";
-    public string TempYourCatName = "ºí·¡Å°";
 
     void Awake()
     {
@@ -75,7 +72,7 @@ public class DialogueManager : MonoBehaviour
     // ---------------------------------------------- Dialogue methods ----------------------------------------------
     public void StartDialogue(string dialogueID)
     {
-        if (isDialogueActive)  // ÀÌ¹Ì ´ëÈ­°¡ ÁøÇàÁßÀÌ¸é Å¥¿¡ ³ÖÀ½
+        if (isDialogueActive)  // ì´ë¯¸ ëŒ€í™”ê°€ ì§„í–‰ì¤‘ì´ë©´ íì— ë„£ìŒ
         {
             Debug.Log($"dialogue ID: {dialogueID} queued!");
 
@@ -85,7 +82,7 @@ public class DialogueManager : MonoBehaviour
 
         isDialogueActive = true;
 
-        // ´ë»ç°¡ 2°³ ÀÌ»óÀÌ¶ó¸é skip ¹öÆ° È°¼ºÈ­
+        // ëŒ€ì‚¬ê°€ 2ê°œ ì´ìƒì´ë¼ë©´ skip ë²„íŠ¼ í™œì„±í™”
         if (dialogues[dialogueID].Lines.Count > 1)
             foreach (GameObject skip in skipText)
                 skip.SetActive(true);
@@ -97,13 +94,13 @@ public class DialogueManager : MonoBehaviour
         DisplayDialogueLine(initialDialogueLine);
     }
 
-    // ´ë»ç Ãâ·ÂÀ» secondÃÊ ÈÄ¿¡ Ãâ·ÂÀ» ½ÃÀÛÇÔ.
-    // ±âº»°ª second 0À¸·Î ³Ö±â
+    // ëŒ€ì‚¬ ì¶œë ¥ì„ secondì´ˆ í›„ì— ì¶œë ¥ì„ ì‹œì‘í•¨.
+    // ê¸°ë³¸ê°’ second 0ìœ¼ë¡œ ë„£ê¸°
     public IEnumerator StartDialogue(string dialogueID, float second = 0f)
     {
         yield return new WaitForSeconds(second);
 
-        if (isDialogueActive)  // ÀÌ¹Ì ´ëÈ­°¡ ÁøÇàÁßÀÌ¸é Å¥¿¡ ³ÖÀ½
+        if (isDialogueActive)  // ì´ë¯¸ ëŒ€í™”ê°€ ì§„í–‰ì¤‘ì´ë©´ íì— ë„£ìŒ
         {
             Debug.Log($"dialogue ID: {dialogueID} queued!");
 
@@ -113,7 +110,7 @@ public class DialogueManager : MonoBehaviour
 
         isDialogueActive = true;
 
-        // ´ë»ç°¡ 2°³ ÀÌ»óÀÌ¶ó¸é skip ¹öÆ° È°¼ºÈ­
+        // ëŒ€ì‚¬ê°€ 2ê°œ ì´ìƒì´ë¼ë©´ skip ë²„íŠ¼ í™œì„±í™”
         if (dialogues[dialogueID].Lines.Count > 1)
             foreach (GameObject skip in skipText)
                 skip.SetActive(true);
@@ -148,13 +145,11 @@ public class DialogueManager : MonoBehaviour
             switch (dialogueLine.SpeakerID)
             {
                 case "PlayerName":
-                    //speakerText.text = GameManager.Instance.GetVariable("PlayerName").ToString();
-                    speakerText.text = TempPlayerName;
+                    speakerText.text = GameManager.Instance.GetVariable("PlayerName").ToString();
                     break;
 
                 case "YourCatName":
-                    //speakerText.text = GameManager.Instance.GetVariable("YourCatName").ToString();
-                    speakerText.text = TempYourCatName;
+                    speakerText.text = GameManager.Instance.GetVariable("YourCatName").ToString();
                     break;
 
                 default:
@@ -180,7 +175,7 @@ public class DialogueManager : MonoBehaviour
                 switch (effect)
                 {
                     case "RED":
-                    // ¹®Àå ÀüÃ¼¸¦ »¡°²°Ô ÇÔ
+                    // ë¬¸ì¥ ì „ì²´ë¥¼ ë¹¨ê°›ê²Œ í•¨
                         sentence = $"<color=red>{sentence}</color>";
                         break;
                     case "AUTO":
@@ -192,8 +187,7 @@ public class DialogueManager : MonoBehaviour
                         fast = true;
                         break;
                     case "TRUE":
-                        //var playerName = (string)GameManager.Instance.GetVariable("PlayerName");
-                        var playerName = TempPlayerName;
+                        var playerName = (string)GameManager.Instance.GetVariable("PlayerName");
                         sentence = sentence.Replace("{PlayerName}", playerName);
                         break;
                     case "SHAKE":
@@ -249,8 +243,8 @@ public class DialogueManager : MonoBehaviour
             yield return null;
         }
 
-        // Èçµé±â Á¾·á ÈÄ ÅØ½ºÆ® ÃÊ±âÈ­
-        scriptText[dialogueType].ForceMeshUpdate(); // ¿ø·¡ ¹öÅØ½º·Î Àç¼³Á¤
+        // í”ë“¤ê¸° ì¢…ë£Œ í›„ í…ìŠ¤íŠ¸ ì´ˆê¸°í™”
+        scriptText[dialogueType].ForceMeshUpdate(); // ì›ë˜ ë²„í…ìŠ¤ë¡œ ì¬ì„¤ì •
         isTextShaking = false;
     }
 
@@ -315,8 +309,8 @@ public class DialogueManager : MonoBehaviour
                 dialogueType = DialogueType.NPC;
                 break;
 
-            // »ı°¢ ÁßÀÏ ¶§ ÀÌ°É º¸Åë speakerID·Î ½Äº°Çß´Âµ¥ ¶È°°ÀÌ PlayerNameÀ¸·Î ÇØµÖ¼­
-            // ½ºÅ©¸³Æ® ³»¿ë¿¡ »ı°¢ ÁßÀÌ ÀÖÀ¸¸é PlayerNameÀ¸·Î¸¸ ÇÏ´Â °Í ¸»°í ´Ù¸¥ ¹æ¹ı Ã£±â
+            // ìƒê° ì¤‘ì¼ ë•Œ ì´ê±¸ ë³´í†µ speakerIDë¡œ ì‹ë³„í–ˆëŠ”ë° ë˜‘ê°™ì´ PlayerNameìœ¼ë¡œ í•´ë‘¬ì„œ
+            // ìŠ¤í¬ë¦½íŠ¸ ë‚´ìš©ì— ìƒê° ì¤‘ì´ ìˆìœ¼ë©´ PlayerNameìœ¼ë¡œë§Œ í•˜ëŠ” ê²ƒ ë§ê³  ë‹¤ë¥¸ ë°©ë²• ì°¾ê¸°
             //case "DialogueC_004":
             //    dialogueType = DialogueType.PLAYER_THINKING;
             //    break;    
@@ -329,7 +323,7 @@ public class DialogueManager : MonoBehaviour
         dialogueSet[dialogueType.ToInt()].SetActive(false);
         //foreach (Image characterImage in characterImages)
         //    characterImage.gameObject.SetActive(false);
-        if (dialogueQueue.Count > 0)  // Å¥¿¡ ´ÙÀÌ¾ó·Î±×°¡ µé¾îÀÖÀ¸¸é ´Ù½Ã ´ëÈ­ ½ÃÀÛ
+        if (dialogueQueue.Count > 0)  // íì— ë‹¤ì´ì–¼ë¡œê·¸ê°€ ë“¤ì–´ìˆìœ¼ë©´ ë‹¤ì‹œ ëŒ€í™” ì‹œì‘
         {
             string queuedDialogueID = dialogueQueue.Dequeue();
             StartDialogue(queuedDialogueID);
@@ -355,7 +349,7 @@ public class DialogueManager : MonoBehaviour
         CompleteSentence();
         if (isFast)
         {
-            typeSpeed *= 1.75f; // Å¸ÀÌÇÎ ¼Óµµ µÇµ¹·Á ³õ±â
+            typeSpeed *= 1.75f; // íƒ€ì´í•‘ ì†ë„ ë˜ëŒë ¤ ë†“ê¸°
             isFast = false;
         }
         if (isAuto) isAuto = false;
@@ -369,34 +363,34 @@ public class DialogueManager : MonoBehaviour
         int currentDialogueLineIndex = dialogues[currentDialogueID].CurrentLineIndex;
         string next = dialogues[currentDialogueID].Lines[currentDialogueLineIndex].Next;
 
-        if (EventManager.Instance.events.ContainsKey(next))  // EventÀÎ °æ¿ì
+        if (EventManager.Instance.events.ContainsKey(next))  // Eventì¸ ê²½ìš°
         {
             EndDialogue();
             EventManager.Instance.CallEvent(next);
         }
-        if (dialogues.ContainsKey(next))  // DialogueÀÎ °æ¿ì
+        if (dialogues.ContainsKey(next))  // Dialogueì¸ ê²½ìš°
         {
             EndDialogue();
             StartDialogue(next);
         }
-        else if (string.IsNullOrWhiteSpace(next))  // ºóÄ­ÀÎ °æ¿ì ´ÙÀ½ ÁÙ(´ë»ç)·Î ÀÌµ¿
+        else if (string.IsNullOrWhiteSpace(next))  // ë¹ˆì¹¸ì¸ ê²½ìš° ë‹¤ìŒ ì¤„(ëŒ€ì‚¬)ë¡œ ì´ë™
         {
             currentDialogueLineIndex++;
 
             if (currentDialogueLineIndex >= dialogues[currentDialogueID].Lines.Count)
             {
-                EndDialogue();  // ´õ ÀÌ»ó DialogueLineÀÌ Á¸ÀçÇÏÁö ¾ÊÀ¸¸é ´ëÈ­ Á¾·á
+                EndDialogue();  // ë” ì´ìƒ DialogueLineì´ ì¡´ì¬í•˜ì§€ ì•Šìœ¼ë©´ ëŒ€í™” ì¢…ë£Œ
                 return;
             }
             else if (currentDialogueLineIndex == dialogues[currentDialogueID].Lines.Count - 1)
             {
-                foreach (GameObject skip in skipText) skip.SetActive(false); //  ´ÙÀÌ¾ó·Î±×ÀÇ ¸¶Áö¸· ´ë»ç´Â ½ºÅµ ºÒ°¡´É
+                foreach (GameObject skip in skipText) skip.SetActive(false); //  ë‹¤ì´ì–¼ë¡œê·¸ì˜ ë§ˆì§€ë§‰ ëŒ€ì‚¬ëŠ” ìŠ¤í‚µ ë¶ˆê°€ëŠ¥
             }
             dialogues[currentDialogueID].SetCurrentLineIndex(currentDialogueLineIndex);
             DialogueLine nextDialogueLine = dialogues[currentDialogueID].Lines[currentDialogueLineIndex];
             DisplayDialogueLine(nextDialogueLine);
         }
-        else if (choices.ContainsKey(next)) // ChoiceÀÎ °æ¿ì
+        else if (choices.ContainsKey(next)) // Choiceì¸ ê²½ìš°
         {
             DisplayChoices(next);
         }
@@ -407,21 +401,21 @@ public class DialogueManager : MonoBehaviour
         scriptText[dialogueType.ToInt()].text = "";
         fullSentence = sentence;
 
-        // <color=red> °°Àº ±Û¾¾ È¿°úµéÀº Ãâ·ÂµÇÁö ¾Êµµ·Ï º¯¼ö ¼³Á¤
+        // <color=red> ê°™ì€ ê¸€ì”¨ íš¨ê³¼ë“¤ì€ ì¶œë ¥ë˜ì§€ ì•Šë„ë¡ ë³€ìˆ˜ ì„¤ì •
         var isEffect = false;
         var effectText = "";
 
-        // FAST ÀÎ °æ¿ì µÎ¹èÀÇ ¼Óµµ·Î Å¸ÀÌÇÎ
+        // FAST ì¸ ê²½ìš° ë‘ë°°ì˜ ì†ë„ë¡œ íƒ€ì´í•‘
         if (isFast) typeSpeed /= 1.75f;
 
         foreach (char letter in sentence.ToCharArray())
         {
             if (letter == '<')
             {
-                effectText = ""; // effectText ÃÊ±âÈ­
+                effectText = ""; // effectText ì´ˆê¸°í™”
                 isEffect = true;
             }
-            else if (letter == '>') // > °¡ ³ª¿À¸é scriptText¿¡ ÇÑ¹ø¿¡ ºÙÀÎ´Ù
+            else if (letter == '>') // > ê°€ ë‚˜ì˜¤ë©´ scriptTextì— í•œë²ˆì— ë¶™ì¸ë‹¤
             {
                 effectText += letter;
                 scriptText[dialogueType.ToInt()].text += effectText;
@@ -429,14 +423,14 @@ public class DialogueManager : MonoBehaviour
                 continue;
             }
 
-            if (isEffect) // < °¡ ³ª¿Â ÀÌÈÄºÎÅÍ´Â effectText¿¡ ºÙÀÎ´Ù
+            if (isEffect) // < ê°€ ë‚˜ì˜¨ ì´í›„ë¶€í„°ëŠ” effectTextì— ë¶™ì¸ë‹¤
             {
                 effectText += letter;
                 continue;
             }
 
             scriptText[dialogueType.ToInt()].text += letter;
-            //SoundPlayer.Instance.UISoundPlay(Sound_Typing); // Å¸ÀÚ ¼Ò¸® ÇÑ¹ø¾¿¸¸
+            //SoundPlayer.Instance.UISoundPlay(Sound_Typing); // íƒ€ì ì†Œë¦¬ í•œë²ˆì”©ë§Œ
             yield return new WaitForSeconds(typeSpeed);
         }
         isTyping = false;
@@ -444,14 +438,14 @@ public class DialogueManager : MonoBehaviour
 
         if (isFast)
         {
-            typeSpeed *= 1.75f; // Å¸ÀÌÇÎ ¼Óµµ µÇµ¹·Á ³õ±â
+            typeSpeed *= 1.75f; // íƒ€ì´í•‘ ì†ë„ ë˜ëŒë ¤ ë†“ê¸°
             isFast = false;
         }
         if (isAuto)
         {
             isAuto = false;
             yield return new WaitForSeconds(0.25f);
-            OnDialoguePanelClick(); // ÀÚµ¿À¸·Î ³Ñ¾î°¨
+            OnDialoguePanelClick(); // ìë™ìœ¼ë¡œ ë„˜ì–´ê°
 
             foreach (GameObject skip in skipText) skip.SetActive(true);
         }

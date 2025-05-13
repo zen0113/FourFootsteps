@@ -13,8 +13,8 @@ public class CSVDownloaderEditor : EditorWindow
         {"conditions", "1296282168"},
         {"results", "1774091709"},
         {"dialogues", "184365766"},
-        {"choices", "1314559638"}
-        //{"variables", ""}
+        {"choices", "1314559638"},
+        {"variables", "1868321381"}
     };
 
     [MenuItem("Tools/Download CSVs")]

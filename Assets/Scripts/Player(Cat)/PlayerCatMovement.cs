@@ -28,7 +28,7 @@ public class PlayerCatMovement : MonoBehaviour
 
     [Header("사다리 관련")]
     [SerializeField] private float climbSpeed = 2f;       // 사다리 타기 속도
-    [SerializeField] private float ladderCheckRadius = 0.2f; // 사다리 체크 범위
+    //[SerializeField] private float ladderCheckRadius = 0.2f; // 사다리 체크 범위
     private Collider2D currentLadder;  // 현재 접촉 중인 사다리
 
     private bool isClimbing = false;    // 사다리 타고 있는지

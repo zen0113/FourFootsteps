@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -9,23 +10,23 @@ public class PlayerHp : MonoBehaviour
     private int currentHealth;
 
     [Header("UI Components")]
-    [SerializeField] private Image[] hearts;
-    [SerializeField] private Sprite fullHeart;
-    [SerializeField] private Sprite emptyHeart;
+    //[SerializeField] private Image[] hearts;
+    //[SerializeField] private Sprite fullHeart;
+    //[SerializeField] private Sprite emptyHeart;
+    [SerializeField] private TextMeshProUGUI healthText;
 
     // Start is called before the first frame update
     void Start()
     {
         currentHealth = maxHealth;
-        UpdateHeartsUI();
+        UpdateHealthUI();
     }
 
-    // µ¥¹ÌÁö¸¦ ¹Þ¾Æ Ã¼·ÂÀ» °¨¼Ò½ÃÅµ´Ï´Ù.
     public void TakeDamage(int damage)
     {
         currentHealth -= damage;
-        currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth); // À½¼ö ¹æÁö
-        UpdateHeartsUI();
+        currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
+        UpdateHealthUI();
 
         if (currentHealth <= 0)
         {
@@ -33,26 +34,24 @@ public class PlayerHp : MonoBehaviour
         }
     }
 
-
-    // Ã¼·Â UI¸¦ °»½ÅÇÕ´Ï´Ù.
-    private void UpdateHeartsUI()
+    // HP í…ìŠ¤íŠ¸ UIë¥¼ ì—…ë°ì´íŠ¸í•©ë‹ˆë‹¤.
+    private void UpdateHealthUI()
     {
-        for (int i = 0; i < hearts.Length; i++)
-        {
-            if (i < currentHealth)
-                hearts[i].sprite = fullHeart;
-            else
-                hearts[i].sprite = emptyHeart;
-        }
+        //for (int i = 0; i < hearts.Length; i++)
+        //{
+        //    if (i < currentHealth)
+        //        hearts[i].sprite = fullHeart;
+        //    else
+        //        hearts[i].sprite = emptyHeart;
+        //}
+        healthText.text = $"x {currentHealth}";
     }
 
-    // Ã¼·ÂÀÌ 0ÀÌ µÇ¾úÀ» ¶§ ½ÇÇàµË´Ï´Ù.
     private void Die()
     {
-        Debug.Log("ÇÃ·¹ÀÌ¾î »ç¸Á!");
-        // °ÔÀÓ ¿À¹ö Ã³¸®, ¸®½ºÆù, ¾À ÀÌµ¿ µî
+        Debug.Log("í”Œë ˆì´ì–´ ì‚¬ë§!");
+        // ì‚¬ë§ ì²˜ë¦¬, ì• ë‹ˆë©”ì´ì…˜, ì´ë™ ë“±
     }
 
-    // Ã¼·ÂÀ» ¿ÜºÎ¿¡¼­ È®ÀÎÇÒ ¼ö ÀÖµµ·Ï ¼Ó¼º Á¦°ø
     public int CurrentHealth => currentHealth;
 }

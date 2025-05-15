@@ -29,7 +29,7 @@ public class DialogueManager : MonoBehaviour
     [Header("Text Shake")]
     public float shakeAmount = 1.0f;
     public float shakeSpeed = 30.0f;
-    private bool isTextShaking = false;
+    //private bool isTextShaking = false;
 
     // 자료 구조
     public Dictionary<string, Dialogue> dialogues = new Dictionary<string, Dialogue>();
@@ -200,7 +200,7 @@ public class DialogueManager : MonoBehaviour
 
     private IEnumerator TextShakeEffectCoroutine(int dialogueType)
     {
-        isTextShaking = true;
+        //isTextShaking = true;
         float elapsed = 0f;
 
         while (true)
@@ -245,7 +245,7 @@ public class DialogueManager : MonoBehaviour
 
         // 흔들기 종료 후 텍스트 초기화
         scriptText[dialogueType].ForceMeshUpdate(); // 원래 버텍스로 재설정
-        isTextShaking = false;
+        //isTextShaking = false;
     }
 
     private void PlayDialogueSound(DialogueLine dialogueLine)

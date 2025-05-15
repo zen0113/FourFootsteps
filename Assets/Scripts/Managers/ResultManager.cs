@@ -62,6 +62,13 @@ public class ResultManager : MonoBehaviour
             case string when resultID.StartsWith("Result_Increment"):  // 값++
                 variableName = resultID["Result_Increment".Length..];
                 GameManager.Instance.IncrementVariable(variableName);
+
+                // 증가시킨게 책임감 점수면 ChangeResponsibilityGauge 호출
+                if (variableName== "ResponsibilityScore")
+                {
+                    if (ResponsibilityManager.Instance)
+                        ResponsibilityManager.Instance.ChangeResponsibilityGauge();
+                }    
                 break;
 
             case string when resultID.StartsWith("Result_Decrement"):  // 값--

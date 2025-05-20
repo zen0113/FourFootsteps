@@ -4,37 +4,37 @@ using UnityEngine;
 
 public class PlayerHumanMovement : MonoBehaviour
 {
-    private Rigidbody2D rb;
-    private SpriteRenderer spriteRenderer;
+    Rigidbody2D rb;
+    SpriteRenderer spriteRenderer;
 
-    [Header("ÀÌµ¿ °ü·Ã ¼³Á¤")]
-    [SerializeField] private float movePower = 2f;       // ±âº» ÀÌµ¿ ¼Óµµ
+    [Header("ì´ë™")]
+    [SerializeField] private float movePower = 2f;       // ê¸°ë³¸ ì´ë™ ì†ë„
 
-    [Header("¿õÅ©¸®±â °ü·Ã º¯¼ö")]
+    [Header("ì›…í¬ë¦¬ê¸°")]
     [SerializeField] private bool isCrouching = false;
-    [SerializeField] private Sprite crouchSprite;    // ¿õÅ©¸° »óÅÂÀÇ ½ºÇÁ¶óÀÌÆ®
-    private Sprite originalSprite;                   // ±âº» ½ºÇÁ¶óÀÌÆ®
+    [SerializeField] private Sprite crouchSprite;    // ì›…í¬ë¦° ìƒíƒœì˜ ìŠ¤í”„ë¼ì´íŠ¸
+    private Sprite originalSprite;                   // ê¸°ë³¸ ìŠ¤í”„ë¼ì´íŠ¸
 
     private void Start()
     {
         rb = GetComponent<Rigidbody2D>();
         spriteRenderer = GetComponent<SpriteRenderer>();
-        originalSprite = spriteRenderer.sprite;  // ±âº» ½ºÇÁ¶óÀÌÆ® ÀúÀå
+        originalSprite = spriteRenderer.sprite;  // ê¸°ë³¸ ìŠ¤í”„ë¼ì´íŠ¸ ì €ì¥
     }
 
     private void Update()
     {
-        Crouch();       // ¿õÅ©¸®±â Ã³¸®
+        float horizontalInput = Input.GetAxisRaw("Horizontal");
+        if (horizontalInput != 0)
+            spriteRenderer.flipX = horizontalInput < 0;
+
+        Crouch();       // ì›…í¬ë¦¬ê¸° ì²˜ë¦¬
     }
     private void FixedUpdate()
     {
-        Move();             // ÀÌµ¿
+        Move();             // ì´ë™
     }
 
-    private void OnCollisionEnter2D(Collision2D collision)
-    {
-
-    }
 
     void Move()
     {
@@ -51,18 +51,18 @@ public class PlayerHumanMovement : MonoBehaviour
 
     void Crouch()
     {
-        // SÅ° ÀÔ·ÂÀ¸·Î ÀÎÇÑ ¿õÅ©¸®±â
+        // Sí‚¤ ì…ë ¥ìœ¼ë¡œ ì¸í•œ ì›…í¬ë¦¬ê¸°
         if (Input.GetKeyDown(KeyCode.S))
         {
-            // ¿õÅ©¸®±â ½ÃÀÛ
+            // ì›…í¬ë¦¬ê¸° ì‹œì‘
             isCrouching = true;
-            spriteRenderer.sprite = crouchSprite;  // ¿õÅ©¸° ½ºÇÁ¶óÀÌÆ®·Î º¯°æ
+            spriteRenderer.sprite = crouchSprite;  // ì›…í¬ë¦° ìŠ¤í”„ë¼ì´íŠ¸ë¡œ ë³€ê²½
         }
         else if (Input.GetKeyUp(KeyCode.S))
         {
-            // ¿õÅ©¸®±â Á¾·á
+            // ì›…í¬ë¦¬ê¸° ì¢…ë£Œ
             isCrouching = false;
-            spriteRenderer.sprite = originalSprite;  // ±âº» ½ºÇÁ¶óÀÌÆ®·Î º¹±Í
+            spriteRenderer.sprite = originalSprite;  // ê¸°ë³¸ ìŠ¤í”„ë¼ì´íŠ¸ë¡œ ë³µê·€
         }
     }
 }

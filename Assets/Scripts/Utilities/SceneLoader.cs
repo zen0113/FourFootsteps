@@ -6,6 +6,8 @@ using UnityEngine.UI;
 // 씬 전환 시 로딩 화면을 보여주는 싱글턴 클래스
 public class SceneLoader : MonoBehaviour
 {
+    private float fadeInOutTime = 2f;
+
     // 싱글턴 인스턴스
     protected static SceneLoader instance;
     public static SceneLoader Instance
@@ -103,11 +105,11 @@ public class SceneLoader : MonoBehaviour
         float startAlpha = isFadeIn ? 0f : 1f;
         float endAlpha = isFadeIn ? 1f : 0f;
 
-        while (timer <= 1f)
+        while (timer <= fadeInOutTime)
         {
             yield return null;
             //timer += Time.unscaledDeltaTime * 2f;
-            timer += Time.unscaledDeltaTime * 1.5f;
+            timer += Time.unscaledDeltaTime;
             sceneLoaderCanvasGroup.alpha = Mathf.Lerp(startAlpha, endAlpha, timer);
         }
 

@@ -76,6 +76,11 @@ public class ResultManager : MonoBehaviour
                 GameManager.Instance.DecrementVariable(variableName);
                 break;
 
+            // 낡은 소파 조사 시, 회상1 씬으로 이동.
+            case "Result_GoToReminiscence1":
+                SceneLoader.Instance.LoadScene("Reminiscence1");
+                break;
+
 
 
             default:

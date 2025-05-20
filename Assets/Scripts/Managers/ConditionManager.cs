@@ -24,7 +24,7 @@ public class ConditionManager : MonoBehaviour
         }
     }
 
-    // conditions.csv ÆÄÀÏ ÆÄ½Ì
+    // conditions.csv íŒŒì¼ íŒŒì‹±
     public void ParseConditions()
     {
         string[] lines = conditionsCSV.text.Split('\n');
@@ -46,40 +46,39 @@ public class ConditionManager : MonoBehaviour
         }
     }
 
-    // Condition ID¸¦ ¹Þ¾Æ¼­ °³º° Á¶°ÇÀÇ true/false ÆÇ´Ü
+    // Condition IDë¥¼ ë°›ì•„ì„œ ê°œë³„ ì¡°ê±´ì˜ true/false íŒë‹¨
     public bool IsCondition(string conditionID)
     {
         string variableName = conditions[conditionID].VariableName;
         string logic = conditions[conditionID].Logic;
         string value = conditions[conditionID].Value;
 
-        // GameManager »ý±â°í °Å±â¿¡ º¯¼ö °ü¸®ÇÏ´Â °Å ³Ö°Ô µÇ¸é ¼öÁ¤/Ãß°¡
-        //object variableValue = GameManager.Instance.GetVariable(variableName);
+        object variableValue = GameManager.Instance.GetVariable(variableName);
 
-        //if (variableValue is int intVal)
-        //{
-        //    int targetValue = int.Parse(value);
-        //    return logic switch
-        //    {
-        //        "==" => intVal == targetValue,
-        //        "!=" => intVal != targetValue,
-        //        "<" => intVal < targetValue,
-        //        ">" => intVal > targetValue,
-        //        "<=" => intVal <= targetValue,
-        //        ">=" => intVal >= targetValue,
-        //        _ => false,
-        //    };
-        //}
-        //else if (variableValue is bool boolVal)
-        //{
-        //    bool targetValue = bool.Parse(value);
-        //    return logic switch
-        //    {
-        //        "==" => boolVal == targetValue,
-        //        "!=" => boolVal != targetValue,
-        //        _ => false,
-        //    };
-        //}
+        if (variableValue is int intVal)
+        {
+            int targetValue = int.Parse(value);
+            return logic switch
+            {
+                "==" => intVal == targetValue,
+                "!=" => intVal != targetValue,
+                "<" => intVal < targetValue,
+                ">" => intVal > targetValue,
+                "<=" => intVal <= targetValue,
+                ">=" => intVal >= targetValue,
+                _ => false,
+            };
+        }
+        else if (variableValue is bool boolVal)
+        {
+            bool targetValue = bool.Parse(value);
+            return logic switch
+            {
+                "==" => boolVal == targetValue,
+                "!=" => boolVal != targetValue,
+                _ => false,
+            };
+        }
 
         return false;
     }

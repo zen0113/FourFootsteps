@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class EventManager : MonoBehaviour
 {
-    // EventManager¸¦ ½Ì±ÛÅÏÀ¸·Î »ı¼º
+    // EventManagerë¥¼ ì‹±ê¸€í„´ìœ¼ë¡œ ìƒì„±
     public static EventManager Instance { get; private set; }
 
     private TextAsset eventsCSV;
@@ -21,12 +21,12 @@ public class EventManager : MonoBehaviour
             Instance = this;
             DontDestroyOnLoad(gameObject);
 
-            // ParseConditions¿Í ParseResults°¡ ¸ÕÀú ½ÇÇàµÇ¾î¾ß ÇÔ
+            // ParseConditionsì™€ ParseResultsê°€ ë¨¼ì € ì‹¤í–‰ë˜ì–´ì•¼ í•¨
             ConditionManager.Instance.ParseConditions();
             ResultManager.Instance.ParseResults();
             ParseEvents();
 
-            // µğ¹ö±ë¿ë
+            // ë””ë²„ê¹…ìš©
             //DebugLogConditions();
             //DebugLogResults();
             //DebugLogEvents();
@@ -38,7 +38,7 @@ public class EventManager : MonoBehaviour
     }
 
 
-    // events.csv ÆÄÀÏ ÆÄ½Ì
+    // events.csv íŒŒì¼ íŒŒì‹±
     private void ParseEvents()
     {
         string[] lines = eventsCSV.text.Split('\n');
@@ -54,11 +54,11 @@ public class EventManager : MonoBehaviour
             string eventDescription = fields[2].Trim();
             string eventLogic = fields[3].Trim();
 
-            // conditions¿Í results: '/' ±âÁØÀ¸·Î ½ºÇÃ¸´ÇÑ ¸®½ºÆ®
+            // conditionsì™€ results: '/' ê¸°ì¤€ìœ¼ë¡œ ìŠ¤í”Œë¦¿í•œ ë¦¬ìŠ¤íŠ¸
             List<Condition> conditions = new List<Condition>();
             List<Result> results = new List<Result>();
 
-            if (!string.IsNullOrWhiteSpace(fields[4].Trim()))  // Á¶°ÇÀÌ Á¸ÀçÇÒ ¶§¸¸ ¼öÇà
+            if (!string.IsNullOrWhiteSpace(fields[4].Trim()))  // ì¡°ê±´ì´ ì¡´ì¬í•  ë•Œë§Œ ìˆ˜í–‰
             {
                 string[] conditionIDs = fields[4].Trim().Split('/');
                 foreach (string conditionID in conditionIDs)
@@ -91,13 +91,13 @@ public class EventManager : MonoBehaviour
                 }
             }
 
-            if (events.ContainsKey(eventID)) // ÀÌ¹Ì Á¸ÀçÇÏ´Â event IDÀÎ °æ¿ì: EventLineÀ» Ãß°¡
+            if (events.ContainsKey(eventID)) // ì´ë¯¸ ì¡´ì¬í•˜ëŠ” event IDì¸ ê²½ìš°: EventLineì„ ì¶”ê°€
             {
                 events[eventID].AddEventLine(eventLogic, conditions, results);
             }
-            else // »õ·Î¿î event IDÀÎ °æ¿ì: events¿¡ »õ·Î Ãß°¡
+            else // ìƒˆë¡œìš´ event IDì¸ ê²½ìš°: eventsì— ìƒˆë¡œ ì¶”ê°€
             {
-                // ¿¹¾à¾î event¸¦ ÇÇÇÏ±â À§ÇØ event_¶ó°í ÀÌ¸§ ÁöÀ½
+                // ì˜ˆì•½ì–´ eventë¥¼ í”¼í•˜ê¸° ìœ„í•´ event_ë¼ê³  ì´ë¦„ ì§€ìŒ
                 Event event_ = new Event(
                     eventID,
                     eventName,
@@ -110,10 +110,10 @@ public class EventManager : MonoBehaviour
         }
     }
 
-    // Event ID¸¦ ¹Ş¾Æ¼­ ÀüÃ¼ Á¶°ÇÀÇ true/false ÆÇ´ÜÇÏ¿© trueÀÎ °æ¿ì °á°ú ¼öÇà
+    // Event IDë¥¼ ë°›ì•„ì„œ ì „ì²´ ì¡°ê±´ì˜ true/false íŒë‹¨í•˜ì—¬ trueì¸ ê²½ìš° ê²°ê³¼ ìˆ˜í–‰
     public void CallEvent(string eventID)
     {
-        //if (GameManager.Instance.isDebug) Debug.Log($"-#-#-#-#-#-#-#-#- event: \"{eventID}\" -#-#-#-#-#-#-#-#-");
+        if (GameManager.Instance.isDebug) Debug.Log($"-#-#-#-#-#-#-#-#- event: \"{eventID}\" -#-#-#-#-#-#-#-#-");
 
         List<EventLine> eventLines = events[eventID].EventLine;
 
@@ -122,19 +122,19 @@ public class EventManager : MonoBehaviour
         foreach (EventLine eventLine in eventLines)
         {
             eventCount++;
-            //if (GameManager.Instance.isDebug) Debug.Log($"--------- #{eventCount} ---------");
+            if (GameManager.Instance.isDebug) Debug.Log($"--------- #{eventCount} ---------");
 
             string logic = eventLine.Logic;
             List<Condition> conditions = eventLine.Conditions;
             List<Result> results = eventLine.Results;
 
             if (conditions.Count == 0)
-            { // Á¶°ÇÀÌ Á¸ÀçÇÏÁö ¾Ê´Â °æ¿ì ¹«Á¶°Ç ½ÇÇà
+            { // ì¡°ê±´ì´ ì¡´ì¬í•˜ì§€ ì•ŠëŠ” ê²½ìš° ë¬´ì¡°ê±´ ì‹¤í–‰
                 ExecuteResults(results);
                 continue;
             }
 
-            if (logic == "AND") // logicÀÌ ANDÀÎ °æ¿ì
+            if (logic == "AND") // logicì´ ANDì¸ ê²½ìš°
             {
                 if (CheckConditions_AND(conditions))
                 {
@@ -142,7 +142,7 @@ public class EventManager : MonoBehaviour
                     return;
                 }
             }
-            else if (logic == "OR") // logicÀÌ ORÀÎ °æ¿ì
+            else if (logic == "OR") // logicì´ ORì¸ ê²½ìš°
             {
                 if (CheckConditions_OR(conditions))
                 {
@@ -150,7 +150,7 @@ public class EventManager : MonoBehaviour
                     return;
                 }
             }
-            else // logicÀÌ ºóÄ­ÀÎ °æ¿ì
+            else // logicì´ ë¹ˆì¹¸ì¸ ê²½ìš°
             {
                 string conditionID = conditions[0].ConditionID;
                 bool isCondition = ConditionManager.Instance.IsCondition(conditionID);
@@ -158,7 +158,7 @@ public class EventManager : MonoBehaviour
                 if (isCondition)
                 {
                     ExecuteResults(results);
-                    // ¹Ø¿¡ return ¾È ³Ö¾îÁÖ¸é °è¼Ó ¾Æ·§ÁÙ¿¡ ÀÖ´Â Conditions¿¡ ¸Â´Â Results±îÁö ºÒ·¯¿À°Ô µÊ
+                    // ë°‘ì— return ì•ˆ ë„£ì–´ì£¼ë©´ ê³„ì† ì•„ë«ì¤„ì— ìˆëŠ” Conditionsì— ë§ëŠ” Resultsê¹Œì§€ ë¶ˆëŸ¬ì˜¤ê²Œ ë¨
                     return;
                 }
             }
@@ -207,7 +207,7 @@ public class EventManager : MonoBehaviour
 
     // -------------------------------------------- Debug Method --------------------------------------------
 
-    //Event Á¤º¸¸¦ ·Î±×·Î Ãâ·ÂÇÏ´Â ¸Ş¼­µå
+    //Event ì •ë³´ë¥¼ ë¡œê·¸ë¡œ ì¶œë ¥í•˜ëŠ” ë©”ì„œë“œ
     private void DebugLogEvents()
     {
         Debug.Log("##### events #####");

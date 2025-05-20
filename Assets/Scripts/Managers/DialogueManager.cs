@@ -188,7 +188,11 @@ public class DialogueManager : MonoBehaviour
                         break;
                     case "TRUE":
                         var playerName = (string)GameManager.Instance.GetVariable("PlayerName");
-                        sentence = sentence.Replace("{PlayerName}", playerName);
+                        var yourCatName = (string)GameManager.Instance.GetVariable("YourCatName");
+                        if (sentence.Contains("{PlayerName}"))
+                            sentence = sentence.Replace("{PlayerName}", playerName);
+                        else if (sentence.Contains("{YourCatName}"))
+                            sentence = sentence.Replace("{YourCatName}", yourCatName);
                         break;
                     case "SHAKE":
                         StartCoroutine(TextShakeEffectCoroutine(dialogueType.ToInt()));

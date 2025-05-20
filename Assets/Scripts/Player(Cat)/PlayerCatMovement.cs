@@ -19,6 +19,7 @@ public class PlayerCatMovement : MonoBehaviour
     [SerializeField] private float dashPower = 8f;        // 대쉬 속도
     [SerializeField] private float jumpPower = 5f;        // 점프 힘
     [SerializeField] private float crouchPower = 1f;      // 웅크린 상태 이동 속도
+    [SerializeField] private float boxInteractingPower = 1.2f; // 박스 상호작용 시 이동 속도
 
     [Header("점프 중력 보정")]
     [SerializeField] private float fallMultiplier = 2.5f; // 낙하할 때 중력 가중치
@@ -28,7 +29,6 @@ public class PlayerCatMovement : MonoBehaviour
 
     [Header("사다리 관련")]
     [SerializeField] private float climbSpeed = 2f;       // 사다리 타기 속도
-    //[SerializeField] private float ladderCheckRadius = 0.2f; // 사다리 체크 범위
     private Collider2D currentLadder;  // 현재 접촉 중인 사다리
 
     private bool isClimbing = false;    // 사다리 타고 있는지
@@ -49,12 +49,16 @@ public class PlayerCatMovement : MonoBehaviour
     private Vector2 crouchColliderSize;
     private Vector2 crouchColliderOffset;
     
+    // 박스 상호작용 관련
+    private PlayerBoxInteraction boxInteraction;
+    private bool isBoxInteractionEnabled = false;
 
     private void Start()
     {
         rb = GetComponent<Rigidbody2D>();
         boxCollider = GetComponent<BoxCollider2D>();
         spriteRenderer = GetComponent<SpriteRenderer>();
+        boxInteraction = GetComponent<PlayerBoxInteraction>();
         originalSprite = spriteRenderer.sprite;  // 기본 스프라이트 저장
 
         // 기본 콜라이더 크기와 오프셋 저장
@@ -95,9 +99,23 @@ public class PlayerCatMovement : MonoBehaviour
         float horizontalInput = Input.GetAxisRaw("Horizontal");
         if (horizontalInput != 0)
         {
-            spriteRenderer.flipX = horizontalInput < 0;
+            // 당기기 상태가 아닐 때만 스프라이트 방향 변경
+            if (!(boxInteraction != null && boxInteraction.IsPulling))
+            {
+                spriteRenderer.flipX = horizontalInput < 0;
+            }
+            // 당기기 중일 때는 시선 방향 반대로 설정 (박스를 바라보게)
+            else
+            {
+                bool isBoxOnRight = boxInteraction.CurrentBox != null && 
+                                   boxInteraction.CurrentBox.transform.position.x > transform.position.x;
+                spriteRenderer.flipX = !isBoxOnRight; // 당기기 중일 때는 항상 박스를 바라보도록
+            }
         }
 
+        // 박스 상호작용 상태 확인
+        isBoxInteractionEnabled = Input.GetKey(KeyCode.E);
+        
         HandleLadderInput();
 
         if (!isClimbing)
@@ -186,42 +204,42 @@ public class PlayerCatMovement : MonoBehaviour
     void Move()
     {
         float horizontalInput = Input.GetAxisRaw("Horizontal");
-    float currentPower = movePower;
-    
-    // PlayerBoxInteraction 컴포넌트 가져오기
-    PlayerBoxInteraction boxInteraction = GetComponent<PlayerBoxInteraction>();
-    bool isInteractingWithBox = false;
-    
-    if (boxInteraction != null)
-    {
-        // 리플렉션을 사용하여 private 필드에 접근 (또는 public 프로퍼티로 만들기)
-        System.Reflection.FieldInfo fieldInfo = boxInteraction.GetType().GetField("isInteracting", 
-            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-        if (fieldInfo != null)
+        float currentPower = movePower;
+        
+        // 박스 상호작용 상태 확인
+        bool isInteractingWithBox = boxInteraction != null && boxInteraction.IsInteracting;
+        bool isPullingBox = boxInteraction != null && boxInteraction.IsPulling;
+        
+        // 박스 상호작용 중이고 E키를 누르고 있을 때
+        if (isInteractingWithBox && isBoxInteractionEnabled)
         {
-            isInteractingWithBox = (bool)fieldInfo.GetValue(boxInteraction);
+            // E키를 누른 상태에서 움직임 제한 (당기기/밀기 속도 조정)
+            currentPower = boxInteractingPower;
+            
+            // 당기기 중일 때 플레이어 시선 조정 (박스를 항상 바라보게)
+            if (isPullingBox && boxInteraction.CurrentBox != null)
+            {
+                bool isBoxOnRight = boxInteraction.CurrentBox.transform.position.x > transform.position.x;
+                spriteRenderer.flipX = !isBoxOnRight; // 박스를 바라보는 방향으로 설정
+            }
         }
-    }
+        // 웅크린 상태에서는 이동 속도 감소
+        else if (isCrouching)
+        {
+            currentPower = crouchPower;
+        }
+        // 웅크리지 않고 박스와 상호작용 중이 아닐 때만 대시 가능
+        else if (Input.GetKey(KeyCode.LeftShift) && !isCrouching && !isInteractingWithBox)
+        {
+            currentPower = dashPower;
+        }
 
-    // 박스와 상호작용 중일 때는 이동 속도 감소
-    if (isInteractingWithBox)
-    {
-        currentPower = movePower * 0.5f; // 박스 밀 때는 절반 속도
-    }
-    // 웅크린 상태에서는 이동 속도 감소
-    else if (isCrouching)
-    {
-        currentPower = crouchPower;
-    }
-    // 웅크리지 않고 박스와 상호작용 중이 아닐 때만 대시 가능
-    else if (Input.GetKey(KeyCode.LeftShift) && !isCrouching && !isInteractingWithBox)
-    {
-        currentPower = dashPower;
-    }
-
-    // 이동 처리
-    Vector3 moveVelocity = new Vector3(horizontalInput, 0, 0);
-    transform.position += moveVelocity * currentPower * Time.deltaTime;
+        // 이동 처리 (플레이어 이동)
+        if (Mathf.Abs(horizontalInput) > 0.1f)
+        {
+            Vector3 moveVelocity = new Vector3(horizontalInput, 0, 0);
+            transform.position += moveVelocity * currentPower * Time.deltaTime;
+        }
     }
 
     void Jump()
@@ -273,8 +291,6 @@ public class PlayerCatMovement : MonoBehaviour
             Vector3 newPosition = transform.position;
             newPosition.x = currentLadder.bounds.center.x;
             transform.position = newPosition;
-
-            Debug.Log("사다리 타기 시작");
         }
     }
 
@@ -291,8 +307,6 @@ public class PlayerCatMovement : MonoBehaviour
         {
             rb.velocity = Vector2.zero;
         }
-        
-        Debug.Log("사다리에서 내림");
     }
 
     // 물리/충돌 관련 함수
@@ -375,6 +389,12 @@ public class PlayerCatMovement : MonoBehaviour
             Gizmos.color = Color.green;
             Gizmos.DrawWireSphere(groundCheck.position, groundCheckRadius);
         }
+        
+        // 박스 상호작용 상태 표시
+        if (boxInteraction != null && boxInteraction.IsInteracting)
+        {
+            Gizmos.color = boxInteraction.IsPushing ? Color.cyan : Color.magenta;
+            Gizmos.DrawWireSphere(transform.position, 0.5f);
+        }
     }
-
 }

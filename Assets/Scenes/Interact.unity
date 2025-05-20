@@ -1198,6 +1198,7 @@ MonoBehaviour:
   dashPower: 5
   jumpPower: 6
   crouchPower: 2
+  boxInteractingPower: 1.2
   fallMultiplier: 2.5
   lowJumpMultiplier: 2
   climbSpeed: 2
@@ -1361,9 +1362,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 20f20f4fd1ab7df4b830cf336ebfd51f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  pushPower: 3
-  pullPower: 3
-  interactionRadius: 1.5
+  pushPullSpeed: 3
+  interactionRange: 1.5
+  touchDistance: 0.3
   boxLayer:
     serializedVersion: 2
     m_Bits: 128

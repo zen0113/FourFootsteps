@@ -15,8 +15,6 @@ public class PlayerCatMovement : MonoBehaviour
     [SerializeField] private float dashPower = 8f;
     [SerializeField] private float jumpPower = 5f;
     [SerializeField] private float crouchPower = 1f;
-    [SerializeField] private float accelerationSmoothing = 0.1f;
-    private float velocityXSmoothing;
 
     // 점프 중력 보정
     [Header("점프 중력 보정")]
@@ -151,10 +149,13 @@ public class PlayerCatMovement : MonoBehaviour
     void Move()
     {
         float horizontalInput = Input.GetAxisRaw("Horizontal");
+
         float speed = isCrouching ? crouchPower : (Input.GetKey(KeyCode.LeftShift) ? dashPower : movePower);
-        float targetX = horizontalInput * speed;
-        float smoothX = Mathf.SmoothDamp(rb.velocity.x, targetX, ref velocityXSmoothing, accelerationSmoothing);
-        rb.velocity = new Vector2(smoothX, rb.velocity.y);
+        float targetVelocityX = horizontalInput * speed;
+        float smoothSpeed = 0.05f;
+        float newVelocityX = Mathf.Lerp(rb.velocity.x, targetVelocityX, smoothSpeed / Time.deltaTime);
+
+        rb.velocity = new Vector2(newVelocityX, rb.velocity.y);
     }
 
     void Jump()

@@ -50,12 +50,6 @@ public class PlayerCatMovement : MonoBehaviour
     private bool isClimbing = false;
     private bool isNearLadder = false;
 
-    // 콜라이더 크기 저장용
-    private Vector2 originalColliderSize;
-    private Vector2 originalColliderOffset;
-    private Vector2 crouchColliderSize;
-    private Vector2 crouchColliderOffset;
-    
     // 박스 상호작용 관련
     private PlayerBoxInteraction boxInteraction;
     private bool isBoxInteractionEnabled = false;
@@ -77,11 +71,11 @@ public class PlayerCatMovement : MonoBehaviour
     {
         bool prevOnGround = isOnGround;
         isOnGround = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundMask);
-        
+
         // 박스 위에 있는지 추가 체크 (태그 기반)
         Collider2D[] colliders = Physics2D.OverlapCircleAll(groundCheck.position, groundCheckRadius);
         bool onBox = false;
-        
+
         foreach (Collider2D col in colliders)
         {
             if (col.CompareTag("Box"))
@@ -90,7 +84,7 @@ public class PlayerCatMovement : MonoBehaviour
                 break;
             }
         }
-        
+
         // 땅이나 박스 위에 있으면 지상으로 판정
         if (onBox)
         {
@@ -112,7 +106,7 @@ public class PlayerCatMovement : MonoBehaviour
             // 당기기 중일 때는 시선 방향 반대로 설정 (박스를 바라보게)
             else
             {
-                bool isBoxOnRight = boxInteraction.CurrentBox != null && 
+                bool isBoxOnRight = boxInteraction.CurrentBox != null &&
                                    boxInteraction.CurrentBox.transform.position.x > transform.position.x;
                 spriteRenderer.flipX = !isBoxOnRight; // 당기기 중일 때는 항상 박스를 바라보도록
             }
@@ -124,7 +118,7 @@ public class PlayerCatMovement : MonoBehaviour
 
         // 박스 상호작용 상태 확인
         isBoxInteractionEnabled = Input.GetKey(KeyCode.E);
-        
+
         HandleLadderInput();
         if (!isClimbing) Jump();
         HandleCrouch(justLanded);
@@ -204,17 +198,17 @@ public class PlayerCatMovement : MonoBehaviour
     {
         float horizontalInput = Input.GetAxisRaw("Horizontal");
         float currentPower = movePower;
-        
+
         // 박스 상호작용 상태 확인
         bool isInteractingWithBox = boxInteraction != null && boxInteraction.IsInteracting;
         bool isPullingBox = boxInteraction != null && boxInteraction.IsPulling;
-        
+
         // 박스 상호작용 중이고 E키를 누르고 있을 때
         if (isInteractingWithBox && isBoxInteractionEnabled)
         {
             // E키를 누른 상태에서 움직임 제한 (당기기/밀기 속도 조정)
             currentPower = boxInteractingPower;
-            
+
             // 당기기 중일 때 플레이어 시선 조정 (박스를 항상 바라보게)
             if (isPullingBox && boxInteraction.CurrentBox != null)
             {
@@ -316,9 +310,9 @@ public class PlayerCatMovement : MonoBehaviour
         }
     }
 
-    void OnDrawGizmos()
+    private void OnCollisionEnter2D(Collision2D collision)
     {
-       // 바닥 또는 박스에 닿으면 점프 리셋
+        // 바닥 또는 박스에 닿으면 점프 리셋
         if (collision.gameObject.CompareTag("Ground") || collision.gameObject.CompareTag("Box"))
         {
             // 위에서 아래로 충돌했는지 확인 (발이 닿았는지)
@@ -330,6 +324,11 @@ public class PlayerCatMovement : MonoBehaviour
                     break;
                 }
             }
+        }
+    }
+
+    void OnDrawGizmos()
+    {
         if (headCheck)
         {
             Gizmos.color = Color.red;
@@ -345,13 +344,13 @@ public class PlayerCatMovement : MonoBehaviour
             Gizmos.color = Color.green;
             Gizmos.DrawWireSphere(groundCheck.position, groundCheckRadius);
         }
-        
+
         // 박스 상호작용 상태 표시
         if (boxInteraction != null && boxInteraction.IsInteracting)
         {
             Gizmos.color = boxInteraction.IsPushing ? Color.cyan : Color.magenta;
             Gizmos.DrawWireSphere(transform.position, 0.5f);
         }
-    }
 
+    }
 }

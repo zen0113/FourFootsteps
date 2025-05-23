@@ -8,6 +8,7 @@ public class PlayerCatMovement : MonoBehaviour
     Rigidbody2D rb;
     BoxCollider2D boxCollider;
     SpriteRenderer spriteRenderer;
+    Animator animator;
 
     // 이동/점프
     [Header("이동 및 점프")]
@@ -48,12 +49,20 @@ public class PlayerCatMovement : MonoBehaviour
     private bool isClimbing = false;
     private bool isNearLadder = false;
 
-    void Start()
+    // 박스 상호작용 관련
+    private PlayerBoxInteraction boxInteraction;
+    private bool isBoxInteractionEnabled = false;
+    private bool isDashing = false;
+
+    private void Start()
     {
         rb = GetComponent<Rigidbody2D>();
         boxCollider = GetComponent<BoxCollider2D>();
         spriteRenderer = GetComponent<SpriteRenderer>();
         originalSprite = spriteRenderer.sprite;
+        boxInteraction = GetComponent<PlayerBoxInteraction>();
+        animator = GetComponent<Animator>();
+        originalSprite = spriteRenderer.sprite;  // 기본 스프라이트 저장
         originalColliderSize = boxCollider.size;
         originalColliderOffset = boxCollider.offset;
         crouchColliderSize = new Vector2(originalColliderSize.x, originalColliderSize.y * 0.5f);
@@ -68,12 +77,74 @@ public class PlayerCatMovement : MonoBehaviour
         if (isOnGround && rb.velocity.y <= 0) jumpCount = 0;
 
         float horizontalInput = Input.GetAxisRaw("Horizontal");
-        if (horizontalInput != 0 && !isClimbing)
-            spriteRenderer.flipX = horizontalInput < 0;
+
+        // 이동 방향에 따른 스프라이트 방향 설정
+        if (horizontalInput != 0)
+        {
+            // 당기기 상태가 아닐 때만 스프라이트 방향 변경
+            if (!(boxInteraction != null && boxInteraction.IsPulling))
+            {
+                spriteRenderer.flipX = horizontalInput < 0;
+            }
+            // 당기기 중일 때는 시선 방향 반대로 설정 (박스를 바라보게)
+            else
+            {
+                bool isBoxOnRight = boxInteraction.CurrentBox != null &&
+                                   boxInteraction.CurrentBox.transform.position.x > transform.position.x;
+                spriteRenderer.flipX = !isBoxOnRight; // 당기기 중일 때는 항상 박스를 바라보도록
+            }
+        }
+        if (isClimbing)
+        {
+            horizontalInput = 0;
+        }
+
+        // 애니메이션 상태 업데이트
+        UpdateAnimationState(horizontalInput);
+
+        // 박스 상호작용 상태 확인
+        isBoxInteractionEnabled = Input.GetKey(KeyCode.E);
 
         HandleLadderInput();
         if (!isClimbing) Jump();
         HandleCrouch(justLanded);
+    }
+
+    void UpdateAnimationState(float horizontalInput)
+    {
+        // 기본 상태 초기화
+        animator.SetBool("Moving", false);
+        animator.SetBool("Dash", false);
+        animator.SetBool("Crouching", false);
+        animator.SetBool("Climbing", false);
+
+        // 대시 상태 체크
+        isDashing = Input.GetKey(KeyCode.LeftShift) && !isCrouching && !(boxInteraction != null && boxInteraction.IsInteracting);
+        
+        // 상태 우선순위에 따라 애니메이션 설정
+        if (isCrouching)
+        {
+            animator.SetBool("Crouching", true);
+        }
+        else if (isDashing)
+        {
+            animator.SetBool("Dash", true);
+        }
+        else if (horizontalInput != 0)
+        {
+            animator.SetBool("Moving", true);
+        }
+        else if (isClimbing)
+        {
+            float verticalInput = Input.GetAxisRaw("Vertical");
+
+            // 오르고 있을 때만 Climbing 애니메이션 재생
+            bool isClimbingMoving = Mathf.Abs(verticalInput) > 0.01f;
+            animator.SetBool("Climbing", isClimbingMoving);
+        }
+
+        // 점프 상태는 별도로 처리 (BetterJump에서 처리)
+        //animator.SetBool("IsJumping", !isOnGround);
     }
 
     void FixedUpdate()
@@ -149,12 +220,38 @@ public class PlayerCatMovement : MonoBehaviour
     void Move()
     {
         float horizontalInput = Input.GetAxisRaw("Horizontal");
+        float currentPower = movePower;
 
-        float speed = isCrouching ? crouchPower : (Input.GetKey(KeyCode.LeftShift) ? dashPower : movePower);
-        float targetVelocityX = horizontalInput * speed;
+        // 박스 상호작용 상태 확인
+        bool isInteractingWithBox = boxInteraction != null && boxInteraction.IsInteracting;
+        bool isPullingBox = boxInteraction != null && boxInteraction.IsPulling;
+
+        // 박스 상호작용 중이고 E키를 누르고 있을 때
+        if (isInteractingWithBox && isBoxInteractionEnabled)
+        {
+            // E키를 누른 상태에서 움직임 제한 (당기기/밀기 속도 조정)
+            currentPower = boxInteractingPower;
+
+            // 당기기 중일 때 플레이어 시선 조정 (박스를 항상 바라보게)
+            if (isPullingBox && boxInteraction.CurrentBox != null)
+            {
+                bool isBoxOnRight = boxInteraction.CurrentBox.transform.position.x > transform.position.x;
+                spriteRenderer.flipX = !isBoxOnRight; // 박스를 바라보는 방향으로 설정
+            }
+        }
+        // 웅크린 상태에서는 이동 속도 감소
+        else if (isCrouching)
+        {
+            currentPower = crouchPower;
+        }
+        else if (isDashing)
+        {
+            currentPower = dashPower;
+        }
+
+        float targetVelocityX = horizontalInput * currentPower;
         float smoothSpeed = 0.05f;
         float newVelocityX = Mathf.Lerp(rb.velocity.x, targetVelocityX, smoothSpeed / Time.deltaTime);
-
         rb.velocity = new Vector2(newVelocityX, rb.velocity.y);
     }
 
@@ -175,17 +272,30 @@ public class PlayerCatMovement : MonoBehaviour
     void BetterJump()
     {
         if (isClimbing) return;
+
         if (rb.velocity.y < 0)
+        {
             rb.velocity += Vector2.up * Physics2D.gravity.y * (fallMultiplier - 1) * Time.deltaTime;
-        else if (rb.velocity.y > 0 && !Input.GetKey(KeyCode.Space))
-            rb.velocity += Vector2.up * Physics2D.gravity.y * (lowJumpMultiplier - 1) * Time.deltaTime;
+            //animator.SetBool("IsFalling", true);
+            //animator.SetBool("IsJumping", false);
+        }
+        else if (rb.velocity.y > 0)
+        {
+            //animator.SetBool("IsFalling", false);
+            //animator.SetBool("IsJumping", true);
+        }
+        else
+        {
+            //animator.SetBool("IsFalling", false);
+            //animator.SetBool("IsJumping", false);
+        }
     }
 
     void Climb()
     {
         float v = Input.GetAxisRaw("Vertical");
-        float h = Input.GetAxisRaw("Horizontal");
-        rb.velocity = new Vector2(h * movePower * 0.25f, v * climbSpeed);
+       // float h = Input.GetAxisRaw("Horizontal");
+        rb.velocity = new Vector2(0, v * climbSpeed);
     }
 
     void StartClimbing()
@@ -203,7 +313,7 @@ public class PlayerCatMovement : MonoBehaviour
     void ExitLadder(bool withJump)
     {
         isClimbing = false;
-        rb.gravityScale = 1f;
+        rb.gravityScale = 1.5f;
         if (withJump)
         {
             float hForce = spriteRenderer.flipX ? -1f : 1f;

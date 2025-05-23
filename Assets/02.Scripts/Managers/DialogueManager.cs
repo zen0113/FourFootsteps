@@ -61,7 +61,16 @@ public class DialogueManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
-        dialogueSet[dialogueType.ToInt()].SetActive(false);
+
+        if (dialogueType.ToInt() >= 0 && dialogueType.ToInt() < dialogueSet.Length)
+        {
+            dialogueSet[dialogueType.ToInt()].SetActive(false);
+        }
+        else
+        {
+            Debug.LogWarning("Index out of range: " + dialogueType.ToInt());
+        }
+        
     }
 
     private void Update()

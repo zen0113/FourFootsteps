@@ -276,10 +276,6 @@ public class PlayerCatMovement : MonoBehaviour
             currentPower = dashPower;
         }
 
-        // 박스 상호작용 상태 확인
-        bool isInteractingWithBox = boxInteraction != null && boxInteraction.IsInteracting;
-        bool isPullingBox = boxInteraction != null && boxInteraction.IsPulling;
-
         // 박스 상호작용 중이고 E키를 누르고 있을 때
         if (isInteractingWithBox && isBoxInteractionEnabled)
         {

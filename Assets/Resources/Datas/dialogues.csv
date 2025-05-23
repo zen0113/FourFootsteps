@@ -1,0 +1,100 @@
+Dialogue ID,Speaker ID,Script Text,Text Effect,Image ID,Sound ID,Next,비고
+Prologue_000,System,당신의 이름을 입력해주세요.,,,,,플레이어 이름 설정
+Prologue_001,엄마,{PlayerName}!! 어딨어!!! ,TRUE/SHAKE/FAST,temp_mom,,,
+,엄마,네 고양이가 또 소파 물어뜯었잖아!! \n이 비싼 걸...!!,SHAKE/FAST,temp_mom,,,
+,PlayerName,아니 내가 아니라 고양이가 잘못한거잖아! \n왜 나한테 그래?!,SHAKE/FAST,temp_playerHUMAN,,,
+,엄마,뭐? {PlayerName}아` 네가 고양이 키울 때 네가 다 책임지겠다고 했잖아.,TRUE,temp_mom,,,
+,엄마,지금 고양이 똥 치우는 것도 엄마가 하고 있고 넌 지금 한 게 뭐가 있니? \n책임진다고 해놓고선 엄마한테 다 떠넘겼잖아.,,temp_mom,,,
+,엄마,네 고양이 네가 관리 안 하고 뭐하는거니?,,temp_mom,,,
+,PlayerName,나도 바빠서 어쩔 수 없다고! 그리고 나도 고양이한테 밥 주고 있잖아!,,temp_playerHUMAN,,,
+,엄마,뭐? 너 전에 얘 아프다고 병원에 데려가놓고선\n병원비 비싸다고 엄마한테 돈 빌려달라고 한 건 기억도 안 나니?,,temp_mom,,,
+,PlayerName,그건 엄마한테 안 빌리고 알아서 냈다고! \n이미 지난 일을 왜 끄집어내고 그래?,,temp_playerHUMAN,,,
+,엄마,너 그것도 적금 들던거 무리하게 깨고 냈잖니! \n그리고 지금 엄마는 고양이 털 때문에 두드러기 난 것도 안 보이니? ,,temp_mom,,,
+,엄마,너 정말 다른 사람도 생각 안 하고 네 생각만 할거야?,,temp_mom,,,
+,PlayerName,내가 그렇게 잘못했어?? 그래! 내가 알아서 책임질게!!,SHAKE,temp_playerHUMAN,,,
+,엄마,{PlayerName}!!!,TRUE/SHAKE,temp_mom,,,
+Prologue_002,System,당신의 고양이의 이름을 입력해주세요.,,,,,고양이 이름 설정
+Prologue_003,PlayerName,…뭐 고양이니까 알아서 살겠지.,,temp_playerHUMAN,,,
+,PlayerName,…왜 이렇게 기분이 찝찝하지?,,temp_playerHUMAN,,,
+,PlayerName,에라 모르겠다... 잠이나 자자.,,temp_playerHUMAN,,,
+Tutorial_001,PlayerName,…여긴… 어디지?,,temp_playerCAT,,,어두운 이동장 속에서 깨어나며
+,PlayerName,어두워서 잘 보이지 않네! 일단 밖으로 나가보자.,,temp_playerCAT,,,이동장 열기 버튼 연타 이전
+Tutorial_002,PlayerName,몸이 이상해… 내가 이렇게 털이 많았나…?,,temp_playerCAT,,,플레이어가 몸을 확인할 때 (물가에서 상호작용 키 입력 시)
+,PlayerName,내가…[고양이]가 되었잖아?! 이거 꿈이지??,SHAKE,temp_playerCAT,,,
+,PlayerName,이게 지금 무슨 상황이지…? 일단 주변을 둘러보자.,,temp_playerCAT,,,
+Stage01_001,PlayerName,어? [낡은 소파에 퍼즐 조각이 있잖아?] 저게 뭐지…?,,temp_playerCAT,,,소파가 있는 구역에 도달했을 시에 뜨는 대사
+Reminiscence1_001,PlayerName,이 녀석 또 소파를 긁었네…,,temp_playerHUMAN,,Choice_001,
+Reminiscence1_002,PlayerName,그래` 스크래쳐라도 놔주자.,,temp_playerHUMAN,,,긍정적 선택지
+,PlayerName,앞으로는 여기에서 긁어라.,,temp_playerHUMAN,,,
+,YourCatName,야옹~,,temp_playerCAT,,EventIncrementResponsibilityScore,
+Reminiscence1_003,PlayerName,너 또 이러면 가만 안 둔다고 했지!,,temp_playerHUMAN,,,부정적 선택지
+,PlayerName,방으로 들어가!,,temp_playerHUMAN,,,
+,YourCatName,야옹…,,temp_playerCAT,,,
+Reminiscence1_004,Monolog,그때는… 그 아이를 생각했었지.,,,,,
+Reminiscence1_005,Monolog,그때는… 내가 너무 했었어.,,,,,
+Stage02_001,PlayerName,앗` 저건 고양이가 되기 전에 꿨던 꿈에서 보았던 하얀 새…?,,temp_playerCAT,,,하얀 새를 발견한 후
+,PlayerName,저 새… 꿈에서 봤어. 분명히 뭔가를 가져갔었는데…,,temp_playerCAT,,,
+,PlayerName,지금의 상황이랑 연관이 있을지 몰라. 한번 쫓아가 보자!,,temp_playerCAT,,,이후 뒷골목 탐색 시작
+Stage02_002,PlayerName,이 길목.. 어딘가 익숙해.,,temp_playerCAT,,,병원 방향으로 시선 유도 시
+,PlayerName,어…? 저긴 {YourCatName}을/를 데리고 갔던 동물 병원이잖아!,TRUE,temp_playerCAT,,,
+,PlayerName,입구라도 살펴보자..,,temp_playerCAT,,,
+Stage02_003,PlayerName,저기 사람이 있다! 얼른 가서 말 걸어보자!,,temp_playerCAT,,,입구 가까이 다가간 후에 병원 직원이 나왔을 때 자동으로 출력.
+Stage02_004,PlayerName,저기요! 제가 정말 고양이로 보이시나요?! 아니죠! 저 {YourCatName} 보호자인데요!,TRUE,temp_playerCAT,,,플레이어가 동물 병원 직원에게 상호작용 시
+,동물 병원 직원,어머~ 귀여운 고양이잖아? 어디서 왔니? 간식이라도 줄까?,,,,,
+,동물 병원 직원,헉` 이제 들어가야겠다. 애기야 잘 있어!,,,,,동물 병원 직원이 병원으로 다시 들어가기 직전
+,PlayerName,… 내 말을 못 알아 듣고 있어…,,temp_playerCAT,,,
+,PlayerName,정말 이게…현실이라고?,,temp_playerCAT,,,
+Stage02_005,PlayerName,어…? 울타리에 하얀 퍼즐 조각… 저건 아까 소파에서 봤던 건데…,,temp_playerCAT,,,소파가 있는 구역에 도달했을 시에 뜨는 대사
+Reminiscence2_001,PlayerName,네? 예방 접종 비용이 그 정도라고요? 조금…비싼데…,,temp_playerHUMAN,,Choice_002,
+Reminiscence2_002,PlayerName,그래도 {YourCatName} 건강을 위해서 라면…,TRUE,temp_playerHUMAN,,,긍정적 선택지
+,의사,접종 도와드릴게요~,,,,,이후 의사와의 상호작용하기
+Reminiscence2_003,YourCatName,야옹!,,temp_playerCAT,,EventIncrementResponsibilityScore,예방접종 시 아파하는 야옹 소리(평소 보다 높은 톤)
+Reminiscence2_004,PlayerName,"아니, 뭐 이렇게 예방 접종이 비싸? 그깟 거 안 맞아도 고양이들 다 잘살아.",,temp_playerHUMAN,,,부정적 선택지
+,PlayerName,집이나 가자.,,temp_playerHUMAN,,,
+,YourCatName,야옹…,,temp_playerCAT,,,
+Reminiscence2_005,Monolog,그때 접종이라도 해서 다행이었지. 안 그랬으면 더 큰 병에 걸릴 뻔했어.,,,,,
+Reminiscence2_006,Monolog,… 비용이 조금 들더라도 예방접종해 줄걸 그랬어.,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+Stage04_Leo_001,PlayerName,저기...,,temp_playerCAT,,,
+,레오,뭐야?,,temp_Leo,,,
+,PlayerName,난 {PlayerName}인데` 넌 이름이 뭐야? 어쩌다 붙잡혔어?,TRUE,temp_playerCAT,,,
+,레오,...레오,,temp_Leo,,,
+,레오,다른 녀석을 도와주려다 붙잡혔어.,,temp_Leo,,,
+,레오,사람 손에 버려졌는데` 다시 잡히다니...,,temp_Leo,,,
+,PlayerName,[버려졌다고?] 어쩌다가?,,temp_playerCAT,,,
+,레오,너무 사납다고 어릴 때 버림받았어.,,temp_Leo,,,
+,레오,할퀴고` 울고` 깨무는 게 싫다고 버렸지.,,temp_Leo,,,
+,레오,너도 내가 잘못했다고 생각해?,,temp_Leo,,Choice_Leo,
+Stage04_Leo_002,PlayerName,그건 네 잘못이 아니야.,,temp_playerCAT,,,
+,레오,말이라도 고맙다.,,temp_Leo,,,
+,레오,[도움이 필요하면 말 해.] 도와주지.,,temp_Leo,,,
+,PlayerName,고마워.,,temp_playerCAT,,,
+Stage04_Leo_003,PlayerName,그건 네가 자제했어야 했어.,,temp_playerCAT,,,
+,레오,... 그래.,,temp_Leo,,,
+,레오,이만 가봐.,,temp_Leo,,,
+,PlayerName,...,,temp_playerCAT,,,

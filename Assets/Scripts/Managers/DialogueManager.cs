@@ -1,0 +1,519 @@
+using System.Collections;
+using System.Collections.Generic;
+using TMPro;
+using UnityEngine;
+using UnityEngine.UI;
+using static Constants;
+
+public class DialogueManager : MonoBehaviour
+{
+    public static DialogueManager Instance { get; private set; }
+
+    // Dialogue UI
+    [Header("Dialogue UI")]
+    public DialogueType dialogueType = DialogueType.PLAYER_TALKING; // 사용할 대화창 종류
+    public GameObject[] dialogueSet;
+    public TextMeshProUGUI[] speakerTexts;
+    public TextMeshProUGUI[] scriptText;
+    //public Image[] backgroundImages;
+    public Image[] characterImages;
+    public Transform[] choicesContainer;
+    public GameObject choicePrefab;
+    public GameObject[] skipText;
+
+    // 타자 효과 속도
+    [Header("Typing Speed")]
+    public float typeSpeed = 0.05f;
+
+    // 글자 흔들리는 효과
+    [Header("Text Shake")]
+    public float shakeAmount = 1.0f;
+    public float shakeSpeed = 30.0f;
+    //private bool isTextShaking = false;
+
+    // 자료 구조
+    public Dictionary<string, Dialogue> dialogues = new Dictionary<string, Dialogue>();
+    private Dictionary<string, Choice> choices = new Dictionary<string, Choice>();
+
+    // 상태 변수
+    private string currentDialogueID = "";
+    public bool isDialogueActive = false;
+    private bool isTyping = false;
+    private bool isAuto = false;
+    private bool isFast = false;
+    private string fullSentence;
+
+    // Dialogue Queue
+    private Queue<string> dialogueQueue = new Queue<string>();
+
+    void Awake()
+    {
+        if (Instance == null)
+        {
+            DialoguesParser dialoguesParser = new DialoguesParser();
+            dialogues = dialoguesParser.ParseDialogues();
+            choices = dialoguesParser.ParseChoices();
+
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+        dialogueSet[dialogueType.ToInt()].SetActive(false);
+    }
+
+    //private void Start()
+    //{
+    //    Debug.Log(dialogueType.ToInt());
+    //}
+
+    // ---------------------------------------------- Dialogue methods ----------------------------------------------
+    public void StartDialogue(string dialogueID)
+    {
+        if (isDialogueActive)  // 이미 대화가 진행중이면 큐에 넣음
+        {
+            Debug.Log($"dialogue ID: {dialogueID} queued!");
+
+            dialogueQueue.Enqueue(dialogueID);
+            return;
+        }
+
+        isDialogueActive = true;
+
+        // 대사가 2개 이상이라면 skip 버튼 활성화
+        if (dialogues[dialogueID].Lines.Count > 1)
+            foreach (GameObject skip in skipText)
+                skip.SetActive(true);
+
+        dialogues[dialogueID].SetCurrentLineIndex(0);
+        currentDialogueID = dialogueID;
+        DialogueLine initialDialogueLine = dialogues[dialogueID].Lines[0];
+
+        DisplayDialogueLine(initialDialogueLine);
+    }
+
+    // 대사 출력을 second초 후에 출력을 시작함.
+    // 기본값 second 0으로 넣기
+    public IEnumerator StartDialogue(string dialogueID, float second = 0f)
+    {
+        yield return new WaitForSeconds(second);
+
+        if (isDialogueActive)  // 이미 대화가 진행중이면 큐에 넣음
+        {
+            Debug.Log($"dialogue ID: {dialogueID} queued!");
+
+            dialogueQueue.Enqueue(dialogueID);
+            yield break;
+        }
+
+        isDialogueActive = true;
+
+        // 대사가 2개 이상이라면 skip 버튼 활성화
+        if (dialogues[dialogueID].Lines.Count > 1)
+            foreach (GameObject skip in skipText)
+                skip.SetActive(true);
+
+        dialogues[dialogueID].SetCurrentLineIndex(0);
+        currentDialogueID = dialogueID;
+        DialogueLine initialDialogueLine = dialogues[dialogueID].Lines[0];
+
+        DisplayDialogueLine(initialDialogueLine);
+    }
+
+    private void ClearPreviousChoices()
+    {
+        if (choicesContainer.Length > dialogueType.ToInt())
+            foreach (Transform child in choicesContainer[dialogueType.ToInt()])
+                Destroy(child.gameObject);
+    }
+
+    private void SetupCanvasAndSpeakerText(DialogueLine dialogueLine)
+    {
+        ChangeDialogueCanvas(dialogueLine.SpeakerID);
+
+        // Deactivate all canvases and then activate the selected one.
+        foreach (GameObject canvas in dialogueSet)
+            if (canvas)
+                canvas.SetActive(false);
+        dialogueSet[dialogueType.ToInt()].SetActive(true);
+
+        // Update speaker text
+        foreach (TextMeshProUGUI speakerText in speakerTexts)
+        {
+            switch (dialogueLine.SpeakerID)
+            {
+                case "PlayerName":
+                    speakerText.text = GameManager.Instance.GetVariable("PlayerName").ToString();
+                    break;
+
+                case "YourCatName":
+                    speakerText.text = GameManager.Instance.GetVariable("YourCatName").ToString();
+                    break;
+
+                default:
+                    speakerText.text = dialogueLine.SpeakerID;
+                    break;
+            }
+        }
+
+
+    }
+
+    private string ProcessTextEffect(DialogueLine dialogueLine, out bool auto, out bool fast)
+    {
+        auto = false;
+        fast = false;
+
+        var sentence = dialogueLine.GetScript();
+
+        if (dialogueLine.TextEffect.Length > 0)
+        {
+            var effects = dialogueLine.TextEffect.Split('/');
+            foreach (var effect in effects)
+                switch (effect)
+                {
+                    case "RED":
+                    // 문장 전체를 빨갛게 함
+                        sentence = $"<color=red>{sentence}</color>";
+                        break;
+                    case "AUTO":
+                        auto = true;
+                        foreach (GameObject skip in skipText)
+                            skip.SetActive(false);
+                        break;
+                    case "FAST":
+                        fast = true;
+                        break;
+                    case "TRUE":
+                        var playerName = (string)GameManager.Instance.GetVariable("PlayerName");
+                        var yourCatName = (string)GameManager.Instance.GetVariable("YourCatName");
+                        if (sentence.Contains("{PlayerName}"))
+                            sentence = sentence.Replace("{PlayerName}", playerName);
+                        else if (sentence.Contains("{YourCatName}"))
+                            sentence = sentence.Replace("{YourCatName}", yourCatName);
+                        break;
+                    case "SHAKE":
+                        StartCoroutine(TextShakeEffectCoroutine(dialogueType.ToInt()));
+                        break;
+                }
+        }
+        return sentence;
+    }
+
+    private IEnumerator TextShakeEffectCoroutine(int dialogueType)
+    {
+        //isTextShaking = true;
+        float elapsed = 0f;
+
+        while (true)
+        {
+            if (Input.GetMouseButtonDown(0))
+                break;
+
+            scriptText[dialogueType].ForceMeshUpdate();
+            var textInfo = scriptText[dialogueType].textInfo;
+
+            for (int i = 0; i < textInfo.characterCount; i++)
+            {
+                if (!textInfo.characterInfo[i].isVisible)
+                    continue;
+
+                int vertexIndex = textInfo.characterInfo[i].vertexIndex;
+                int materialIndex = textInfo.characterInfo[i].materialReferenceIndex;
+                Vector3[] vertices = textInfo.meshInfo[materialIndex].vertices;
+
+                Vector3 offset = new Vector3(
+                    Mathf.Sin(Time.time * shakeSpeed + i) * shakeAmount,
+                    Mathf.Cos(Time.time * shakeSpeed + i) * shakeAmount,
+                    0);
+
+                for (int j = 0; j < 4; j++)
+                {
+                    vertices[vertexIndex + j] += offset;
+                }
+            }
+
+            // Apply changes
+            for (int i = 0; i < textInfo.meshInfo.Length; i++)
+            {
+                var meshInfo = textInfo.meshInfo[i];
+                meshInfo.mesh.vertices = meshInfo.vertices;
+                scriptText[dialogueType].UpdateGeometry(meshInfo.mesh, i);
+            }
+
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+
+        // 흔들기 종료 후 텍스트 초기화
+        scriptText[dialogueType].ForceMeshUpdate(); // 원래 버텍스로 재설정
+        //isTextShaking = false;
+    }
+
+    private void PlayDialogueSound(DialogueLine dialogueLine)
+    {
+        if (string.IsNullOrWhiteSpace(dialogueLine.SoundID))
+            return;
+        var soundID = "Sound_" + dialogueLine.SoundID;
+        var soundNum = (int)typeof(Constants).GetField(soundID).GetValue(null);
+        //SoundPlayer.Instance.UISoundPlay(soundNum);
+    }
+
+    private void UpdateCharacterImages(DialogueLine dialogueLine)
+    {
+        var imageID = dialogueLine.ImageID;
+
+        if (string.IsNullOrWhiteSpace(imageID))
+        {
+            foreach (var characterImage in characterImages)
+                characterImage.color = new Color(1, 1, 1, 0);
+            return;
+        }
+
+        var characterSprite = Resources.Load<Sprite>($"Art/CharacterPortrait/{imageID}");
+
+        characterImages[dialogueType.ToInt()].color = new Color(1, 1, 1, 1);
+        characterImages[dialogueType.ToInt()].sprite = characterSprite;
+        characterImages[dialogueType.ToInt()].gameObject.SetActive(true);
+    }
+
+
+    private void DisplayDialogueLine(DialogueLine dialogueLine)
+    {
+        ClearPreviousChoices();
+        SetupCanvasAndSpeakerText(dialogueLine);
+
+        // Process placeholders and get final sentence.
+        string sentence = ProcessTextEffect(dialogueLine, out bool auto, out bool fast);
+        isAuto = auto;
+        isFast = fast;
+
+        isTyping = true;
+        StartCoroutine(TypeSentence(sentence));
+
+        //UpdateBackground(dialogueLine);
+        PlayDialogueSound(dialogueLine);
+        UpdateCharacterImages(dialogueLine);
+    }
+
+    private void ChangeDialogueCanvas(string speaker)
+    {
+        //if (dialogueType == DialogueType.CENTER)
+        //    dialogueType = DialogueType.PLAYER_TALKING;
+
+        switch (speaker)
+        {
+            case "PlayerName":
+                dialogueType = DialogueType.PLAYER_TALKING;
+                break;
+
+            default:
+                dialogueType = DialogueType.NPC;
+                break;
+
+            // 생각 중일 때 이걸 보통 speakerID로 식별했는데 똑같이 PlayerName으로 해둬서
+            // 스크립트 내용에 생각 중이 있으면 PlayerName으로만 하는 것 말고 다른 방법 찾기
+            //case "DialogueC_004":
+            //    dialogueType = DialogueType.PLAYER_THINKING;
+            //    break;    
+        }
+    }
+
+    public void EndDialogue()
+    {
+        isDialogueActive = false;
+        dialogueSet[dialogueType.ToInt()].SetActive(false);
+        //foreach (Image characterImage in characterImages)
+        //    characterImage.gameObject.SetActive(false);
+        if (dialogueQueue.Count > 0)  // 큐에 다이얼로그가 들어있으면 다시 대화 시작
+        {
+            string queuedDialogueID = dialogueQueue.Dequeue();
+            StartDialogue(queuedDialogueID);
+
+            return;
+        }
+    }
+
+    public void SkipButtonClick()
+    {
+        StopAllCoroutines();
+
+        dialogues[currentDialogueID].SetCurrentLineIndex(dialogues[currentDialogueID].Lines.Count - 2);
+        StartCoroutine(SkipDialogue());
+    }
+
+    private IEnumerator SkipDialogue()
+    {
+        ProceedToNext();
+
+        while (!isTyping) yield return null;
+
+        CompleteSentence();
+        if (isFast)
+        {
+            typeSpeed *= 1.75f; // 타이핑 속도 되돌려 놓기
+            isFast = false;
+        }
+        if (isAuto) isAuto = false;
+
+        OnDialoguePanelClick();
+    }
+
+    // ---------------------------------------------- Script methods ----------------------------------------------
+    private void ProceedToNext()
+    {
+        int currentDialogueLineIndex = dialogues[currentDialogueID].CurrentLineIndex;
+        string next = dialogues[currentDialogueID].Lines[currentDialogueLineIndex].Next;
+
+        if (EventManager.Instance.events.ContainsKey(next))  // Event인 경우
+        {
+            EndDialogue();
+            EventManager.Instance.CallEvent(next);
+        }
+        if (dialogues.ContainsKey(next))  // Dialogue인 경우
+        {
+            EndDialogue();
+            StartDialogue(next);
+        }
+        else if (string.IsNullOrWhiteSpace(next))  // 빈칸인 경우 다음 줄(대사)로 이동
+        {
+            currentDialogueLineIndex++;
+
+            if (currentDialogueLineIndex >= dialogues[currentDialogueID].Lines.Count)
+            {
+                EndDialogue();  // 더 이상 DialogueLine이 존재하지 않으면 대화 종료
+                return;
+            }
+            else if (currentDialogueLineIndex == dialogues[currentDialogueID].Lines.Count - 1)
+            {
+                foreach (GameObject skip in skipText) skip.SetActive(false); //  다이얼로그의 마지막 대사는 스킵 불가능
+            }
+            dialogues[currentDialogueID].SetCurrentLineIndex(currentDialogueLineIndex);
+            DialogueLine nextDialogueLine = dialogues[currentDialogueID].Lines[currentDialogueLineIndex];
+            DisplayDialogueLine(nextDialogueLine);
+        }
+        else if (choices.ContainsKey(next)) // Choice인 경우
+        {
+            DisplayChoices(next);
+        }
+    }
+
+    IEnumerator TypeSentence(string sentence)
+    {
+        scriptText[dialogueType.ToInt()].text = "";
+        fullSentence = sentence;
+
+        // <color=red> 같은 글씨 효과들은 출력되지 않도록 변수 설정
+        var isEffect = false;
+        var effectText = "";
+
+        // FAST 인 경우 두배의 속도로 타이핑
+        if (isFast) typeSpeed /= 1.75f;
+
+        foreach (char letter in sentence.ToCharArray())
+        {
+            if (letter == '<')
+            {
+                effectText = ""; // effectText 초기화
+                isEffect = true;
+            }
+            else if (letter == '>') // > 가 나오면 scriptText에 한번에 붙인다
+            {
+                effectText += letter;
+                scriptText[dialogueType.ToInt()].text += effectText;
+                isEffect = false;
+                continue;
+            }
+
+            if (isEffect) // < 가 나온 이후부터는 effectText에 붙인다
+            {
+                effectText += letter;
+                continue;
+            }
+
+            scriptText[dialogueType.ToInt()].text += letter;
+            //SoundPlayer.Instance.UISoundPlay(Sound_Typing); // 타자 소리 한번씩만
+            yield return new WaitForSeconds(typeSpeed);
+        }
+        isTyping = false;
+        //if (teddyBearIcons.Length > dialogueType.ToInt()) teddyBearIcons[dialogueType.ToInt()].SetActive(true);
+
+        if (isFast)
+        {
+            typeSpeed *= 1.75f; // 타이핑 속도 되돌려 놓기
+            isFast = false;
+        }
+        if (isAuto)
+        {
+            isAuto = false;
+            yield return new WaitForSeconds(0.25f);
+            OnDialoguePanelClick(); // 자동으로 넘어감
+
+            foreach (GameObject skip in skipText) skip.SetActive(true);
+        }
+    }
+
+    public void OnDialoguePanelClick()
+    {
+        if (!isDialogueActive || isAuto) return;
+
+        if (isTyping)
+        {
+            CompleteSentence();
+        }
+        else
+        {
+            ProceedToNext();
+        }
+    }
+
+    private void CompleteSentence()
+    {
+        StopAllCoroutines();
+        scriptText[dialogueType.ToInt()].text = fullSentence;
+        isTyping = false;
+    }
+
+    // ---------------------------------------------- Choice methods ----------------------------------------------
+    private void DisplayChoices(string choiceID)
+    {
+        if (choicesContainer.Length <= dialogueType.ToInt()) return;
+
+        foreach (Transform child in choicesContainer[dialogueType.ToInt()])
+        {
+            Destroy(child.gameObject);
+        }
+
+        List<ChoiceLine> choiceLines = choices[choiceID].Lines;
+
+        foreach (ChoiceLine choiceLine in choiceLines)
+        {
+            var choiceButton = Instantiate(choicePrefab, choicesContainer[dialogueType.ToInt()]).GetComponent<Button>();
+            var choiceText = choiceButton.GetComponentInChildren<TextMeshProUGUI>();
+
+            choiceText.text = choiceLine.GetScript();
+            choiceButton.onClick.AddListener(() => OnChoiceSelected(choiceLine.Next));
+        }
+    }
+
+    private void OnChoiceSelected(string next)
+    {
+        if (dialogues.ContainsKey(next))
+        {
+            EndDialogue();
+            StartDialogue(next);
+        }
+        else if (EventManager.Instance.events.ContainsKey(next))
+        {
+            EventManager.Instance.CallEvent(next);
+        }
+
+        foreach (Transform child in choicesContainer[dialogueType.ToInt()])
+        {
+            Destroy(child.gameObject);
+        }
+
+    }
+}

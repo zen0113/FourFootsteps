@@ -30,6 +30,8 @@ public class PlayerCatMovement : MonoBehaviour
     [SerializeField] private LayerMask groundMask;
     private bool isOnGround;
 
+    [SerializeField] private float boxInteractingPower = 1.2f; // 박스 상호작용 시 이동 속도
+
     // 웅크리기
     [Header("웅크리기")]
     [SerializeField] private Transform headCheck;
@@ -62,6 +64,7 @@ public class PlayerCatMovement : MonoBehaviour
         originalSprite = spriteRenderer.sprite;
         boxInteraction = GetComponent<PlayerBoxInteraction>();
         animator = GetComponent<Animator>();
+        boxInteraction = GetComponent<PlayerBoxInteraction>();
         originalSprite = spriteRenderer.sprite;  // 기본 스프라이트 저장
         originalColliderSize = boxCollider.size;
         originalColliderOffset = boxCollider.offset;
@@ -73,6 +76,26 @@ public class PlayerCatMovement : MonoBehaviour
     {
         bool prevOnGround = isOnGround;
         isOnGround = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundMask);
+
+        // 박스 위에 있는지 추가 체크 (태그 기반)
+        Collider2D[] colliders = Physics2D.OverlapCircleAll(groundCheck.position, groundCheckRadius);
+        bool onBox = false;
+
+        foreach (Collider2D col in colliders)
+        {
+            if (col.CompareTag("Box"))
+            {
+                onBox = true;
+                break;
+            }
+        }
+
+        // 땅이나 박스 위에 있으면 지상으로 판정
+        if (onBox)
+        {
+            isOnGround = true;
+        }
+
         bool justLanded = isOnGround && !prevOnGround;
         if (isOnGround && rb.velocity.y <= 0) jumpCount = 0;
 
@@ -101,6 +124,9 @@ public class PlayerCatMovement : MonoBehaviour
 
         // 애니메이션 상태 업데이트
         UpdateAnimationState(horizontalInput);
+
+        // 박스 상호작용 상태 확인
+        isBoxInteractionEnabled = Input.GetKey(KeyCode.E);
 
         // 박스 상호작용 상태 확인
         isBoxInteractionEnabled = Input.GetKey(KeyCode.E);
@@ -244,6 +270,34 @@ public class PlayerCatMovement : MonoBehaviour
         {
             currentPower = crouchPower;
         }
+        // 웅크리지 않고 박스와 상호작용 중이 아닐 때만 대시 가능
+        else if (Input.GetKey(KeyCode.LeftShift) && !isCrouching && !isInteractingWithBox)
+        {
+            currentPower = dashPower;
+        }
+
+        // 박스 상호작용 상태 확인
+        bool isInteractingWithBox = boxInteraction != null && boxInteraction.IsInteracting;
+        bool isPullingBox = boxInteraction != null && boxInteraction.IsPulling;
+
+        // 박스 상호작용 중이고 E키를 누르고 있을 때
+        if (isInteractingWithBox && isBoxInteractionEnabled)
+        {
+            // E키를 누른 상태에서 움직임 제한 (당기기/밀기 속도 조정)
+            currentPower = boxInteractingPower;
+
+            // 당기기 중일 때 플레이어 시선 조정 (박스를 항상 바라보게)
+            if (isPullingBox && boxInteraction.CurrentBox != null)
+            {
+                bool isBoxOnRight = boxInteraction.CurrentBox.transform.position.x > transform.position.x;
+                spriteRenderer.flipX = !isBoxOnRight; // 박스를 바라보는 방향으로 설정
+            }
+        }
+        // 웅크린 상태에서는 이동 속도 감소
+        else if (isCrouching)
+        {
+            currentPower = crouchPower;
+        }
         else if (isDashing)
         {
             currentPower = dashPower;
@@ -253,6 +307,7 @@ public class PlayerCatMovement : MonoBehaviour
         float smoothSpeed = 0.05f;
         float newVelocityX = Mathf.Lerp(rb.velocity.x, targetVelocityX, smoothSpeed / Time.deltaTime);
         rb.velocity = new Vector2(newVelocityX, rb.velocity.y);
+
     }
 
     void Jump()
@@ -308,6 +363,7 @@ public class PlayerCatMovement : MonoBehaviour
         var pos = transform.position;
         pos.x = currentLadder.bounds.center.x;
         transform.position = pos;
+
     }
 
     void ExitLadder(bool withJump)
@@ -341,6 +397,23 @@ public class PlayerCatMovement : MonoBehaviour
         }
     }
 
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        // 바닥 또는 박스에 닿으면 점프 리셋
+        if (collision.gameObject.CompareTag("Ground") || collision.gameObject.CompareTag("Box"))
+        {
+            // 위에서 아래로 충돌했는지 확인 (발이 닿았는지)
+            foreach (ContactPoint2D contact in collision.contacts)
+            {
+                if (contact.normal.y > 0.5f) // 아래쪽에서 충돌
+                {
+                    jumpCount = 0; // 점프 카운트 리셋
+                    break;
+                }
+            }
+        }
+    }
+
     void OnDrawGizmos()
     {
         if (headCheck)
@@ -358,5 +431,13 @@ public class PlayerCatMovement : MonoBehaviour
             Gizmos.color = Color.green;
             Gizmos.DrawWireSphere(groundCheck.position, groundCheckRadius);
         }
+
+        // 박스 상호작용 상태 표시
+        if (boxInteraction != null && boxInteraction.IsInteracting)
+        {
+            Gizmos.color = boxInteraction.IsPushing ? Color.cyan : Color.magenta;
+            Gizmos.DrawWireSphere(transform.position, 0.5f);
+        }
+
     }
 }

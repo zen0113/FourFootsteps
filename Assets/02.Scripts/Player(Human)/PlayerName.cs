@@ -20,7 +20,7 @@ public class PlayerName : MonoBehaviour
     public Text inputText;
     public Text loadedName;
 
-    private string playerPrefsKey => playerType == PlayerType.Human ? "humanName" : "catName";
+    private string variableKey => playerType == PlayerType.Human ? "PlayerName" : "YourCatName";
 
     // Start is called before the first frame update
     void Start()
@@ -31,7 +31,7 @@ public class PlayerName : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        nameOfPlayer = PlayerPrefs.GetString(playerPrefsKey, "none");
+        nameOfPlayer = GameManager.Instance.GetVariable(variableKey)?.ToString() ?? "none";
         if (loadedName != null)
         {
             loadedName.text = nameOfPlayer;
@@ -43,14 +43,13 @@ public class PlayerName : MonoBehaviour
         if (inputText != null)
         {
             saveName = inputText.text;
-            PlayerPrefs.SetString(playerPrefsKey, saveName);
-            PlayerPrefs.Save();
+            GameManager.Instance.SetVariable(variableKey, saveName);
         }
     }
 
     private void LoadPlayerName()
     {
-        nameOfPlayer = PlayerPrefs.GetString(playerPrefsKey, "none");
+        nameOfPlayer = GameManager.Instance.GetVariable(variableKey)?.ToString() ?? "none";
         if (loadedName != null)
         {
             loadedName.text = nameOfPlayer;

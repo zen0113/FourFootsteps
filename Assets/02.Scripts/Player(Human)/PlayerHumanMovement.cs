@@ -5,15 +5,16 @@ using UnityEngine;
 public class PlayerHumanMovement : MonoBehaviour
 {
     Rigidbody2D rb;
+    Animator animator;
     SpriteRenderer spriteRenderer;
 
     [Header("이동")]
     [SerializeField] private float movePower = 2f;       // 기본 이동 속도
+    [SerializeField] private float dashPower = 8f;
+    private bool isDashing = false;
 
     [Header("웅크리기")]
     [SerializeField] private bool isCrouching = false;
-    [SerializeField] private Sprite crouchSprite;    // 웅크린 상태의 스프라이트
-    private Sprite originalSprite;                   // 기본 스프라이트
 
     private void Start()
     {
@@ -24,7 +25,7 @@ public class PlayerHumanMovement : MonoBehaviour
 
         rb = GetComponent<Rigidbody2D>();
         spriteRenderer = GetComponent<SpriteRenderer>();
-        originalSprite = spriteRenderer.sprite;  // 기본 스프라이트 저장
+        animator = GetComponent<Animator>();
     }
 
     private void Update()
@@ -36,7 +37,34 @@ public class PlayerHumanMovement : MonoBehaviour
         if (horizontalInput != 0)
             spriteRenderer.flipX = horizontalInput < 0;
 
+        // 애니메이션 상태 업데이트
+        UpdateAnimationState(horizontalInput);
+
         Crouch();       // 웅크리기 처리
+    }
+
+    void UpdateAnimationState(float horizontalInput)
+    {
+        // 기본 상태 초기화
+        animator.SetBool("Moving", false);
+        animator.SetBool("Dash", false);
+        animator.SetBool("Crouch", false);
+
+        // 대시 상태 체크
+        isDashing = Input.GetKey(KeyCode.LeftShift) && !isCrouching && horizontalInput != 0;
+
+        if (isDashing)
+        {
+            animator.SetBool("Dash", true);
+        }
+        else if(isCrouching)
+        {
+            animator.SetBool("Crouch", true);
+        }
+        else if (horizontalInput != 0)
+        {
+            animator.SetBool("Moving", true);
+        }
     }
     private void FixedUpdate()
     {
@@ -58,12 +86,20 @@ public class PlayerHumanMovement : MonoBehaviour
         float horizontalInput = Input.GetAxisRaw("Horizontal");
         float currentPower = movePower;
 
-        if (!isCrouching)
+        if (isCrouching)
         {
-            Vector3 moveVelocity = new Vector3(horizontalInput, 0, 0);
-            transform.position += moveVelocity * currentPower * Time.deltaTime;
+            currentPower = 0;
         }
-        
+        else if (isDashing)
+        {
+            currentPower = dashPower;
+        }
+
+        float targetVelocityX = horizontalInput * currentPower;
+        float smoothSpeed = 0.05f;
+        float newVelocityX = Mathf.Lerp(rb.velocity.x, targetVelocityX, smoothSpeed / Time.deltaTime);
+        rb.velocity = new Vector2(newVelocityX, rb.velocity.y);
+
     }
 
     void Crouch()
@@ -73,13 +109,11 @@ public class PlayerHumanMovement : MonoBehaviour
         {
             // 웅크리기 시작
             isCrouching = true;
-            spriteRenderer.sprite = crouchSprite;  // 웅크린 스프라이트로 변경
         }
         else if (Input.GetKeyUp(KeyCode.S))
         {
             // 웅크리기 종료
             isCrouching = false;
-            spriteRenderer.sprite = originalSprite;  // 기본 스프라이트로 복귀
         }
     }
 }

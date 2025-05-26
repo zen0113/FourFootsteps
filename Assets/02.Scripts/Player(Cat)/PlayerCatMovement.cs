@@ -153,7 +153,7 @@ public class PlayerCatMovement : MonoBehaviour
         animator.SetBool("Climbing", false);
 
         // 대시 상태 체크
-        isDashing = Input.GetKey(KeyCode.LeftShift) && !isCrouching && !(boxInteraction != null && boxInteraction.IsInteracting);
+        isDashing = Input.GetKey(KeyCode.LeftShift) && !isCrouching && !(boxInteraction != null && boxInteraction.IsInteracting) && horizontalInput != 0;
         
         // 상태 우선순위에 따라 애니메이션 설정
         if (isCrouching)
@@ -193,7 +193,6 @@ public class PlayerCatMovement : MonoBehaviour
         }
         else
         {
-            Climb();
             Climb();
         }
     }

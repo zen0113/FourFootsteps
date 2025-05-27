@@ -15,7 +15,7 @@ public class PosterInteraction : MonoBehaviour
     private void Start()
     {
         // Canvas의 PosterPanel에 직접 접근
-        Transform canvas = GameObject.Find("Canvas").transform;
+        Transform canvas = GameObject.Find("PosterUICanvas").transform;
         if (canvas != null)
         {
             Transform posterPanel = canvas.Find("PosterPanel");

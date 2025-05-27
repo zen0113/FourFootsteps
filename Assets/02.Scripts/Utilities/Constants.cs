@@ -1,6 +1,6 @@
 public static class Constants
 {
-    //// ¾ÀÀÇ Á¾·ù
+    //// ì”¬ì˜ ì¢…ë¥˜
     //public enum SceneType { START, ROOM_1, FOLLOW_1, ROOM_2, FOLLOW_2, ENDING }
     //public static int ToInt(this SceneType sceneType)
     //{
@@ -29,17 +29,17 @@ public static class Constants
     //    }
     //}
 
-    // ´ëÈ­Ã¢ÀÇ Á¾·ù
-    public enum DialogueType { PLAYER_TALKING, PLAYER_THINKING, NPC, CENTER }
+    // ëŒ€í™”ì°½ì˜ ì¢…ë¥˜
+    public enum DialogueType { PLAYER_TALKING, PLAYER_THINKING, NPC, MONOLOG }
     public static int ToInt(this DialogueType dialogueType)
     {
-        // ´ÙÀÌ¾ó·Î±× Å¸ÀÔ¿¡ µû¶ó ´Ù¸¥ ¼ıÀÚ ¹İÈ¯
+        // ë‹¤ì´ì–¼ë¡œê·¸ íƒ€ì…ì— ë”°ë¼ ë‹¤ë¥¸ ìˆ«ì ë°˜í™˜
         switch (dialogueType)
         {
             case DialogueType.PLAYER_TALKING: return 0;
             case DialogueType.PLAYER_THINKING: return 1;
             case DialogueType.NPC: return 2;
-            //case DialogueType.CENTER: return 3;
+            case DialogueType.MONOLOG: return 3;
             default: return 0;
         }
     }

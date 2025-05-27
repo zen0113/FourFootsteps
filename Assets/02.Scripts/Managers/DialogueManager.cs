@@ -330,6 +330,11 @@ public class DialogueManager : MonoBehaviour
                 dialogueType = DialogueType.PLAYER_TALKING;
                 break;
 
+            // 회상 마지막에 독백
+            case "Monolog":
+                dialogueType = DialogueType.MONOLOG;
+                break;
+
             default:
                 dialogueType = DialogueType.NPC;
                 break;

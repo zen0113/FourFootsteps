@@ -75,6 +75,10 @@ public class PlayerCatMovement : MonoBehaviour
         originalColliderOffset = boxCollider.offset;
         crouchColliderSize = new Vector2(originalColliderSize.x, originalColliderSize.y * 0.5f);
         crouchColliderOffset = new Vector2(originalColliderOffset.x, originalColliderOffset.y - (originalColliderSize.y - crouchColliderSize.y) * 0.5f);
+        // 물리 설정 최적화
+        rb.freezeRotation = true; // 회전 고정으로 안정성 확보
+        rb.interpolation = RigidbodyInterpolation2D.Interpolate; // 부드러운 움직임
+        rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous; // 정확한 충돌 감지
     }
 
     void Update()
@@ -179,6 +183,15 @@ public class PlayerCatMovement : MonoBehaviour
 
         // 점프 상태는 별도로 처리 (BetterJump에서 처리)
         //animator.SetBool("IsJumping", !isOnGround);
+    }
+
+    void LateUpdate()
+    {
+        // 물리 업데이트 후 애니메이션 상태 동기화
+        if (!IsInputBlocked())
+        {
+            UpdateAnimationState(Input.GetAxisRaw("Horizontal"));
+        }
     }
 
     void FixedUpdate()
@@ -317,10 +330,11 @@ public class PlayerCatMovement : MonoBehaviour
             currentPower = dashPower;
         }
 
+        // 부드러운 속도 변화를 위한 보간 적용
         float targetVelocityX = horizontalInput * currentPower;
-        float smoothSpeed = 0.05f;
-        float newVelocityX = Mathf.Lerp(rb.velocity.x, targetVelocityX, smoothSpeed / Time.deltaTime);
-        rb.velocity = new Vector2(newVelocityX, rb.velocity.y);
+        float smoothedVelocityX = Mathf.Lerp(rb.velocity.x, targetVelocityX, Time.fixedDeltaTime * 10f);
+
+        rb.velocity = new Vector2(smoothedVelocityX, rb.velocity.y);
 
     }
 

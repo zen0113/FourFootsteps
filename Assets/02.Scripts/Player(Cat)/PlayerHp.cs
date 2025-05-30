@@ -19,6 +19,10 @@ public class PlayerHp : MonoBehaviour
     //[SerializeField] private Image[] hearts;
     //[SerializeField] private TextMeshProUGUI healthText;
 
+    [Header("플레이어 무적상태")]
+    [SerializeField] private float invincibilityDuration = 1.5f; // 무적 시간 (초)
+    private bool isInvincible = false;
+
 
     private void Awake()
     {
@@ -85,6 +89,8 @@ public class PlayerHp : MonoBehaviour
 
     public void TakeDamage(int damage)
     {
+        if (isInvincible) return; // 무적 상태면 데미지 무시
+
         currentHp -= damage;
         currentHp = Mathf.Clamp(currentHp, 0, maxHp);
         GameManager.Instance.SetVariable("CurrentHP", currentHp);
@@ -95,6 +101,29 @@ public class PlayerHp : MonoBehaviour
         {
             Die();
         }
+        else
+        {
+            StartCoroutine(ActivateInvincibility());
+        }
+    }
+
+    private IEnumerator ActivateInvincibility()
+    {
+        isInvincible = true;
+
+        SpriteRenderer sr = GetComponent<SpriteRenderer>();
+        float elapsed = 0f;
+
+        while (elapsed < invincibilityDuration)
+        {
+            sr.enabled = false;
+            yield return new WaitForSeconds(0.1f);
+            sr.enabled = true;
+            yield return new WaitForSeconds(0.1f);
+            elapsed += 0.2f;
+        }
+
+        isInvincible = false;
     }
 
     //// HP 텍스트 UI를 업데이트합니다.

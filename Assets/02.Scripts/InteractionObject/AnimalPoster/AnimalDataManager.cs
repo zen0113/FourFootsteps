@@ -9,14 +9,14 @@ public class AnimalDataManager : MonoBehaviour
     private static AnimalDataManager _instance;
     public static AnimalDataManager Instance => _instance;
     
-    [SerializeField] private string apiKey;
-    [SerializeField] private string apiUrl = "http://apis.data.go.kr/1543061/abandonmentPublicSrvc/abandonmentPublic";
+    [Header("API 설정")]
+    [SerializeField] private string apiKey = "여기에_실제_API_키_입력";
+    [SerializeField] private string baseUrl = "http://apis.data.go.kr/1543061/abandonmentPublicSrvc";
     
     private List<AnimalData> animalDataPool = new List<AnimalData>();
     private bool isDataLoaded = false;
     private bool isLoading = false;
     
-    // API 요청 성공 여부 확인용
     public bool IsDataLoadedFromApi { get; private set; } = false;
     
     private void Awake()
@@ -34,23 +34,12 @@ public class AnimalDataManager : MonoBehaviour
         AddDummyData();
     }
     
-    // 포스터 근처에서 호출
     public void RequestApiDataIfNeeded()
     {
-        // 이미 API 데이터가 로드되었거나 로딩 중이면 무시
         if (IsDataLoadedFromApi || isLoading)
             return;
         
-        // API 데이터 로드 시작
-        try 
-        {
-            StartCoroutine(LoadAnimalDataFromApi());
-        }
-        catch (Exception e)
-        {
-            Debug.LogError("API 요청 시작 중 오류: " + e.Message);
-            isLoading = false;
-        }
+        StartCoroutine(LoadAnimalDataFromApi());
     }
     
     private IEnumerator LoadAnimalDataFromApi()
@@ -58,92 +47,96 @@ public class AnimalDataManager : MonoBehaviour
         isLoading = true;
         Debug.Log("API 데이터 로드 시작...");
         
-        // API 요청 URL 구성
-        string requestUrl = $"{apiUrl}?serviceKey={apiKey}&numOfRows=10&pageNo=1&_type=json";
+        // URL 인코딩된 API 키 사용 (중요!)
+        string encodedApiKey = UnityWebRequest.EscapeURL(apiKey);
+        
+        // API 요청 URL 구성 (더 많은 파라미터 추가)
+        string requestUrl = $"{baseUrl}/abandonmentPublic" +
+                          $"?serviceKey={encodedApiKey}" +
+                          $"&numOfRows=20" +
+                          $"&pageNo=1" +
+                          $"&_type=json" +
+                          $"&state=protect" +  // 보호중인 동물만
+                          $"&neuter_yn=Y";     // 중성화 완료된 동물만
+        
         Debug.Log($"API 요청 URL: {requestUrl}");
         
-        // try-catch 블록 외부에서 yield 사용
-        UnityWebRequest request = UnityWebRequest.Get(requestUrl);
-        
-        // 타임아웃 설정 (3초)
-        request.timeout = 3;
-        
-        // 요청 시작
-        var operation = request.SendWebRequest();
-        
-        // 진행 상황 모니터링 및 타임아웃 처리
-        float timer = 0f;
-        while (!operation.isDone)
+        using (UnityWebRequest request = UnityWebRequest.Get(requestUrl))
         {
-            timer += Time.deltaTime;
-            if (timer > 5f) // 5초 이상 걸리면 타임아웃으로 간주
-            {
-                Debug.LogWarning("API 요청 타임아웃");
-                break;
-            }
-            yield return null; // 한 프레임 대기
-        }
-        
-        try
-        {
-            // 결과 처리
+            // 헤더 설정
+            request.SetRequestHeader("Accept", "application/json");
+            request.SetRequestHeader("User-Agent", "Unity-Game");
+            
+            // 타임아웃 설정
+            request.timeout = 10;
+            
+            yield return request.SendWebRequest();
+            
             if (request.result == UnityWebRequest.Result.Success)
             {
                 string responseText = request.downloadHandler.text;
-                Debug.Log("API 응답 받음: " + responseText.Substring(0, Mathf.Min(100, responseText.Length)));
+                Debug.Log($"API 응답 성공. 길이: {responseText.Length}");
+                Debug.Log($"응답 내용 일부: {responseText.Substring(0, Mathf.Min(500, responseText.Length))}");
                 
                 try
                 {
-                    // 더미 데이터로 대체 (API 파싱 문제 시)
-                    // 실제 파싱은 임시로 비활성화
-                    AddDummyData();
-                    IsDataLoadedFromApi = true;
-                    Debug.Log("API 데이터 로드 성공 (더미 데이터로 대체)");
+                    // JSON 파싱 시도
+                    AnimalApiResponse apiResponse = JsonUtility.FromJson<AnimalApiResponse>(responseText);
+                    
+                    if (apiResponse?.response?.body?.items?.item != null && apiResponse.response.body.items.item.Length > 0)
+                    {
+                        // 기존 더미 데이터 클리어
+                        animalDataPool.Clear();
+                        
+                        // API 데이터 추가
+                        foreach (var item in apiResponse.response.body.items.item)
+                        {
+                            animalDataPool.Add(item);
+                        }
+                        
+                        IsDataLoadedFromApi = true;
+                        Debug.Log($"API 데이터 {animalDataPool.Count}개 로드 성공!");
+                    }
+                    else
+                    {
+                        Debug.LogWarning("API 응답에 데이터가 없습니다. 더미 데이터 사용");
+                        // 더미 데이터 유지
+                    }
                 }
                 catch (Exception e)
                 {
                     Debug.LogError($"JSON 파싱 오류: {e.Message}");
-                    // 파싱 실패 시 더미 데이터 유지
+                    Debug.LogError($"파싱 시도한 JSON: {responseText}");
+                    // 더미 데이터 유지
                 }
             }
             else
             {
                 Debug.LogError($"API 요청 실패: {request.error}");
-                // 에러 메시지 상세 출력
-                if (request.downloadHandler != null && request.downloadHandler.text != null)
+                Debug.LogError($"Response Code: {request.responseCode}");
+                
+                if (request.downloadHandler != null && !string.IsNullOrEmpty(request.downloadHandler.text))
                 {
-                    Debug.LogError("API 응답 내용: " + request.downloadHandler.text);
+                    Debug.LogError($"오류 응답 내용: {request.downloadHandler.text}");
                 }
             }
         }
-        catch (Exception e)
-        {
-            Debug.LogError($"API 응답 처리 중 예외 발생: {e.Message}");
-        }
-        finally
-        {
-            // 요청 객체 해제
-            request.Dispose();
-            isLoading = false;
-        }
         
-        yield return null;
+        isLoading = false;
     }
     
-    // 더미 데이터 추가
     private void AddDummyData()
     {
         Debug.Log("더미 데이터 추가");
         animalDataPool.Clear();
         
-        for (int i = 0; i < 5; i++)
+        for (int i = 0; i < 8; i++)
         {
             animalDataPool.Add(CreateDummyData(i));
         }
         isDataLoaded = true;
     }
     
-    // 랜덤 동물 데이터 가져오기
     public AnimalData GetRandomAnimalData()
     {
         if (!isDataLoaded || animalDataPool.Count == 0)
@@ -152,26 +145,54 @@ public class AnimalDataManager : MonoBehaviour
             return CreateDummyData(0);
         }
         
-        // Random 클래스를 명확하게 지정
         int randomIndex = UnityEngine.Random.Range(0, animalDataPool.Count);
         return animalDataPool[randomIndex];
     }
     
-    // 더미 데이터 생성
     private AnimalData CreateDummyData(int index)
     {
         string[] sexCodes = { "M", "F", "Q" };
-        string[] ages = { "2023(년생)", "2021(년생)", "2020(년생)", "2022(년생)", "추정 1세" };
-        string[] weights = { "3.5(Kg)", "4.2(Kg)", "2.8(Kg)", "5.1(Kg)", "6.7(Kg)" };
-        string[] states = { "보호중", "임시보호", "입양가능", "치료중", "보호중" };
+        string[] ages = { "2023(년생)", "2021(년생)", "2020(년생)", "2022(년생)", "추정 1세", "추정 2세", "2019(년생)", "추정 3세" };
+        string[] states = { "보호중", "임시보호", "입양가능", "치료중", "보호중", "공고중", "보호중", "입양대기" };
+        string[] breeds = { "[개] 믹스견", "[개] 말티즈", "[개] 리트리버", "[개] 비글", "[개] 푸들", "[개] 시츄", "[개] 요크셔테리어", "[개] 진돗개" };
+        string[] colors = { "갈색", "흰색", "검정색", "황색", "회색", "갈색+흰색", "검정색+흰색", "갈색+검정색" };
+        string[] shelters = { "서울동물복지센터", "경기도동물보호센터", "부산동물보호소", "대구동물보호센터", "인천동물보호센터", "광주동물보호센터", "대전동물보호센터", "울산동물보호센터" };
+        string[] places = { "도로변", "공원", "아파트 단지", "상가 앞", "학교 근처", "병원 앞", "시장 주변", "주택가" };
+        string[] neuterStatus = { "Y", "N", "U" };
         
         return new AnimalData
         {
-            popfile = "", // 이미지 URL 없음
-            sexCd = sexCodes[index % sexCodes.Length],
+            desertionNo = $"202500{1000 + index}",
+            happenDt = "20250601",
+            happenPlace = places[index % places.Length],
+            kindCd = breeds[index % breeds.Length],
+            colorCd = colors[index % colors.Length],
             age = ages[index % ages.Length],
-            weight = weights[index % weights.Length],
-            processState = states[index % states.Length]
+            noticeNo = $"서울-2025-00{100 + index}",
+            noticeSdt = "20250601",
+            noticeEdt = "20250615",
+            processState = states[index % states.Length],
+            sexCd = sexCodes[index % sexCodes.Length],
+            neuterYn = neuterStatus[index % neuterStatus.Length],
+            specialMark = index % 3 == 0 ? "온순함, 사람을 잘 따름" : (index % 3 == 1 ? "활발함, 에너지가 많음" : "조용함, 겁이 많음"),
+            careNm = shelters[index % shelters.Length],
+            careTel = $"02-1234-567{index}"
         };
+    }
+    
+    // 디버깅을 위한 메서드
+    [ContextMenu("Test API Connection")]
+    public void TestApiConnection()
+    {
+        if (Application.isPlaying)
+        {
+            StartCoroutine(TestApiCall());
+        }
+    }
+    
+    private IEnumerator TestApiCall()
+    {
+        Debug.Log("API 연결 테스트 시작...");
+        yield return StartCoroutine(LoadAnimalDataFromApi());
     }
 }

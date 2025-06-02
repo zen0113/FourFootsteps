@@ -135,6 +135,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: PosterUICanvas
       objectReference: {fileID: 0}
+    - target: {fileID: 2845387746234147317, guid: 983cb516190604e4abde0c1058639a55, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 8648604714620771701, guid: 983cb516190604e4abde0c1058639a55, type: 3}
       propertyPath: m_Pivot.x
       value: 0
@@ -1288,8 +1292,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a80ff66240658dc4486bacd2d7f79bfe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  apiKey: G7XRUUpsKRXHmyhDEj32PS9cp0v8ncm/l397vX9uHk4z/dDoul4jSMDUXbnN/l11RVhJO+bjJiZTqF5Jq4yeJQ==
-  apiUrl: https://apis.data.go.kr/1543061/abandonmentPublicSrvc/abandonmentPublic
+  apiKey: G7XRUUpsKRXHmyhDEj32PS9cp0v8ncm%2Fl397vX9uHk4z%2FdDoul4jSMDUXbnN%2Fl11RVhJO%2BbjJiZTqF5Jq4yeJQ%3D%3D
+  baseUrl: http://apis.data.go.kr/1543061/abandonmentPublicSrvc
 --- !u!4 &362861775
 Transform:
   m_ObjectHideFlags: 0
@@ -2451,7 +2455,7 @@ Transform:
   m_GameObject: {fileID: 740803260}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 55.6, y: 3.65, z: 1}
+  m_LocalPosition: {x: -10.05, y: 3.65, z: 1}
   m_LocalScale: {x: 0.6, y: 0.6, z: 0.6}
   m_ConstrainProportionsScale: 1
   m_Children: []

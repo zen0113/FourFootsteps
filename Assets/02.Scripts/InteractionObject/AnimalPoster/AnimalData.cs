@@ -4,12 +4,22 @@ using UnityEngine;
 [Serializable]
 public class AnimalData
 {
-    // PRD에서 요구한 필수 데이터만 유지
-    public string popfile;      // 이미지 URL
-    public string sexCd;        // 성별 (M:수컷, F:암컷, Q:미상)
-    public string age;          // 나이
-    public string weight;       // 체중
-    public string processState; // 상태 (보호중, 임시보호 등)
+    // 실제 API에서 제공되는 필드들 (이미지, 체중 제외)
+    public string desertionNo;   // 유기번호
+    public string happenDt;      // 접수일
+    public string happenPlace;   // 발견장소
+    public string kindCd;        // 품종
+    public string colorCd;       // 색상
+    public string age;           // 나이
+    public string noticeNo;      // 공고번호
+    public string noticeSdt;     // 공고시작일
+    public string noticeEdt;     // 공고종료일
+    public string processState;  // 상태
+    public string sexCd;         // 성별 (M:수컷, F:암컷, Q:미상)
+    public string neuterYn;      // 중성화여부 (Y:예, N:아니오, U:미상)
+    public string specialMark;   // 특징
+    public string careNm;        // 보호소이름
+    public string careTel;       // 보호소전화번호
 }
 
 // API 응답 구조에 맞게 중첩 클래스 정의

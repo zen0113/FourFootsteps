@@ -99,6 +99,12 @@ public class SceneLoader : MonoBehaviour
             SceneManager.sceneLoaded -= OnSceneLoaded;
 
             GameManager.Instance.FinishSceneLoad();
+
+            if (GameManager.Instance != null)
+            {
+                // 씬이 로드된 후, 자동으로 GameManager 업데이트
+                GameManager.Instance.UpdateSceneProgress(scene.name);
+            }
         }
     }
 

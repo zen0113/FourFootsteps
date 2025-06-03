@@ -21,6 +21,10 @@ public class GameManager : MonoBehaviour
 
     public bool IsSceneLoading { get; private set; }
 
+    // 씬 순서
+    public List<SceneData> sceneOrder = new List<SceneData>();
+
+
     // 디버깅용
     [SerializeField] private TextMeshProUGUI variablesText;
     public bool isDebug = false;
@@ -31,6 +35,8 @@ public class GameManager : MonoBehaviour
         {
             Instance = this;
             DontDestroyOnLoad(gameObject);
+
+            InitSceneOrderList();
         }
         else
         {
@@ -43,9 +49,62 @@ public class GameManager : MonoBehaviour
         variablesCSV = Resources.Load<TextAsset>("Datas/variables");
         CreateVariables();
 
+        // 시작 시 현재 씬 이름 자동 등록
+        InitCurrentSceneInfo();
+
         if (isDebug)
             ShowVariables();
     }
+
+    // 씬 순서 초기화
+    private void InitSceneOrderList()
+    {
+        sceneOrder = new List<SceneData>
+            {
+                new SceneData("TitleScene"),
+                new SceneData("Prologue"),
+                new SceneData("Stage1"),
+                new SceneData("Reminiscence1", true),
+                new SceneData("Stage2"),
+                new SceneData("Reminiscence2", true)
+            };
+    }
+
+    // 현재 씬 기준으로 CurrentSceneName, NextSceneName 자동 설정
+    private void InitCurrentSceneInfo()
+    {
+        string loadedScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
+        UpdateSceneProgress(loadedScene);
+    }
+
+
+    // 씬 상태 업데이트
+    public void UpdateSceneProgress(string loadedSceneName)
+    {
+        string currentSceneName = loadedSceneName;
+        SetVariable("CurrentSceneName", currentSceneName);
+        int index = sceneOrder.FindIndex(s => s.sceneName == loadedSceneName);
+        if (index >= 0 && index + 1 < sceneOrder.Count)
+        {
+            string nextSceneName = sceneOrder[index + 1].sceneName;
+            SetVariable("NextSceneName", nextSceneName);
+        }
+        else
+        {
+            SetVariable("NextSceneName", null); // 마지막 씬일 경우
+        }
+    }
+
+    public SceneData GetCurrentSceneData()
+    {
+        return sceneOrder.Find(s => s.sceneName == (string)GetVariable("CurrentSceneName"));
+    }
+
+    public SceneData GetNextSceneData()
+    {
+        return sceneOrder.Find(s => s.sceneName == (string)GetVariable("NextSceneName"));
+    }
+
 
     // variablesCSV 파일 분리해서 variable 변수와 값을 variables에 키와 value로 저장
     private void CreateVariables()
@@ -173,9 +232,8 @@ public class GameManager : MonoBehaviour
         {
             "PlayerName",
             "YourCatName",
-            "ResponsibilityScore",
-            "CurrentHP",
-            "MaxHP"
+            "CurrentSceneName",
+            "NextSceneName",
         });
 
         foreach (var item in variables)

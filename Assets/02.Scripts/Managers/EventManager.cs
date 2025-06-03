@@ -91,9 +91,20 @@ public class EventManager : MonoBehaviour
                 }
             }
 
+            // result 실행 모드
+            // Instant일 경우 즉각 실행, Sequential일 경우 순차 실행
+            string eventExecutionMode = fields.Length > 6 ? fields[6].Trim() : "";
+            if (string.IsNullOrEmpty(eventExecutionMode) || results.Count <= 1)
+            {
+                eventExecutionMode = "Instant";
+            }
+            else
+                eventExecutionMode = eventExecutionMode.Trim();
+
+
             if (events.ContainsKey(eventID)) // 이미 존재하는 event ID인 경우: EventLine을 추가
             {
-                events[eventID].AddEventLine(eventLogic, conditions, results);
+                events[eventID].AddEventLine(eventLogic, conditions, results, eventExecutionMode);
             }
             else // 새로운 event ID인 경우: events에 새로 추가
             {
@@ -103,7 +114,7 @@ public class EventManager : MonoBehaviour
                     eventName,
                     eventDescription
                 );
-                event_.AddEventLine(eventLogic, conditions, results);
+                event_.AddEventLine(eventLogic, conditions, results, eventExecutionMode);
                 events[event_.EventID] = event_;
             }
 
@@ -127,10 +138,11 @@ public class EventManager : MonoBehaviour
             string logic = eventLine.Logic;
             List<Condition> conditions = eventLine.Conditions;
             List<Result> results = eventLine.Results;
+            string executionMode = eventLine.ExecutionMode;
 
             if (conditions.Count == 0)
             { // 조건이 존재하지 않는 경우 무조건 실행
-                ExecuteResults(results);
+                ExecuteResults(results, executionMode);
                 continue;
             }
 
@@ -138,7 +150,7 @@ public class EventManager : MonoBehaviour
             {
                 if (CheckConditions_AND(conditions))
                 {
-                    ExecuteResults(results);
+                    ExecuteResults(results, executionMode);
                     return;
                 }
             }
@@ -146,7 +158,7 @@ public class EventManager : MonoBehaviour
             {
                 if (CheckConditions_OR(conditions))
                 {
-                    ExecuteResults(results);
+                    ExecuteResults(results, executionMode);
                     return;
                 }
             }
@@ -157,7 +169,7 @@ public class EventManager : MonoBehaviour
                 //Debug.Log(conditionID+" : "+isCondition);
                 if (isCondition)
                 {
-                    ExecuteResults(results);
+                    ExecuteResults(results, executionMode);
                     // 밑에 return 안 넣어주면 계속 아랫줄에 있는 Conditions에 맞는 Results까지 불러오게 됨
                     return;
                 }
@@ -195,12 +207,35 @@ public class EventManager : MonoBehaviour
         return true;
     }
 
-    private void ExecuteResults(List<Result> results)
+
+    private void ExecuteResults(List<Result> results, string mode)
+    {
+        if (mode == "Instant")
+        {
+            foreach (Result result in results)
+            {
+                StartCoroutine(ResultManager.Instance.ExecuteResultCoroutine(result.ResultID));
+            }
+        }
+        else if (mode == "Sequential")
+        {
+            StartCoroutine(ExecuteResultsSequentially(results));
+        }
+        else
+        {
+            Debug.LogWarning($"[EventExecutor] Unknown ExecutionMode: {mode}, fallback to Instant.");
+            foreach (Result result in results)
+            {
+                StartCoroutine(ResultManager.Instance.ExecuteResultCoroutine(result.ResultID));
+            }
+        }
+    }
+
+    private IEnumerator ExecuteResultsSequentially(List<Result> results)
     {
         foreach (Result result in results)
         {
-            string resultID = result.ResultID;
-            ResultManager.Instance.ExecuteResult(resultID);
+            yield return StartCoroutine(ResultManager.Instance.ExecuteResultCoroutine(result.ResultID));
         }
     }
 

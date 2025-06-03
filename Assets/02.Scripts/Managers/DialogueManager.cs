@@ -42,6 +42,10 @@ public class DialogueManager : MonoBehaviour
     private bool isAuto = false;
     private bool isFast = false;
     private string fullSentence;
+    private bool isAutoDelayed = false; // 2초 지난 후 자동으로 넘겨짐
+    private bool isFadeOut = false; // AutoDelayed이랑 주로 같이 쓰이며 글자가 투명하게 사라짐
+
+    private float fadeTime = 0.5f;
 
     // Dialogue Queue
     private Queue<string> dialogueQueue = new Queue<string>();
@@ -201,6 +205,20 @@ public class DialogueManager : MonoBehaviour
                         break;
                     case "AUTO":
                         auto = true;
+                        isAutoDelayed = false;
+                        foreach (GameObject skip in skipText)
+                            skip.SetActive(false);
+                        break;
+                    case "AUTO_DELAYED":
+                        // 대사 다 출력 후 몇초 대기 후 다음 대사 자동 출력
+                        auto = true;
+                        isAutoDelayed = true;
+                        foreach (GameObject skip in skipText)
+                            skip.SetActive(false);
+                        break;
+                    case "FADE_OUT":
+                        // 대사 다 출력 후 다음 대사로 넘어가기 전에 투명하게 텍스트가 사라짐.
+                        isFadeOut = true;
                         foreach (GameObject skip in skipText)
                             skip.SetActive(false);
                         break;
@@ -460,7 +478,7 @@ public class DialogueManager : MonoBehaviour
             }
 
             scriptText[dialogueType.ToInt()].text += letter;
-            //SoundPlayer.Instance.UISoundPlay(Sound_Typing); // 타자 소리 한번씩만
+            SoundPlayer.Instance.UISoundPlay(Sound_Typing); // 타자 소리 한번씩만
             yield return new WaitForSeconds(typeSpeed);
         }
         isTyping = false;
@@ -473,13 +491,50 @@ public class DialogueManager : MonoBehaviour
         }
         if (isAuto)
         {
+            while (isTyping) yield return null;
+            //yield return new WaitForSeconds(0.25f);
+
+            // AUTO 타입에 따라 분기
+            if (isAutoDelayed)
+                yield return new WaitForSeconds(2f);  // 2초 대기 후 넘어감
+
+            if (isFadeOut)
+            {
+                // FadeOut 코루틴이 완료될 때까지 기다림
+                yield return StartCoroutine(FadeInOutScriptText(1f, 0f));
+            }
+
             isAuto = false;
-            yield return new WaitForSeconds(0.25f);
+            isAutoDelayed = false;
+            isFadeOut = false;
+
             OnDialoguePanelClick(); // 자동으로 넘어감
 
             foreach (GameObject skip in skipText) skip.SetActive(true);
+
+            // script text 알파값 원상복구
+            scriptText[dialogueType.ToInt()].color = new(1, 1, 1, 1);
         }
     }
+
+    // 스크립트 Fade In / Out 코루틴
+    // start:0, end:1 -> 투명했던 text가 점점 불투명해짐
+    // start:1, end:0 -> 불투명했던 text가 점점 투명해짐
+    private IEnumerator FadeInOutScriptText(float start, float end)
+    {
+        float current = 0, percent = 0;
+
+        while (percent < 1 && fadeTime != 0)
+        {
+            current += Time.deltaTime;
+            percent = current / fadeTime;
+
+            scriptText[dialogueType.ToInt()].color = new(1, 1, 1, Mathf.Lerp(start, end, percent));
+
+            yield return null;
+        }
+    }
+
 
     public void OnDialoguePanelClick()
     {

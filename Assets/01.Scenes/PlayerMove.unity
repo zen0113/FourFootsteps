@@ -152,10 +152,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 06506428961c0454eb58192d9ac0a74b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  tutorials:
-  - {fileID: 2023989628}
-  - {fileID: 2140131828}
-  nextSceneName: 
 --- !u!4 &5591362
 Transform:
   m_ObjectHideFlags: 0
@@ -901,8 +897,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ca19189b8156ebb4289da79b1e2551a7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  variablesText: {fileID: 0}
-  isDebug: 0
+  variablesText: {fileID: 923156710}
+  isDebug: 1
 --- !u!4 &358614018
 Transform:
   m_ObjectHideFlags: 0
@@ -1620,6 +1616,17 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 66542d5616022d34f9417133611193b8, type: 3}
+--- !u!114 &923156710 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 4098248339931582100, guid: 66542d5616022d34f9417133611193b8, type: 3}
+  m_PrefabInstance: {fileID: 923156709}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1050403233
 GameObject:
   m_ObjectHideFlags: 0
@@ -3152,8 +3159,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8da0f6f72767d664e8c47ee2d6cea063, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  responsibilityGaugeGroup: {fileID: 0}
-  responsibilitySlider: {fileID: 0}
 --- !u!4 &1778064914
 Transform:
   m_ObjectHideFlags: 0
@@ -3320,11 +3325,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7261a341ba5f53f45b24d904d3157b10, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerController: {fileID: 234777898}
-  triggerObject: {fileID: 1050403234}
-  uiObject: {fileID: 321278342}
-  requiredKey: 100
-  checkKeyInput: 1
 --- !u!4 &2023989629
 Transform:
   m_ObjectHideFlags: 0
@@ -3508,6 +3508,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3073248042488602413, guid: 3748e216849363f48bf06a48de54cf2d, type: 3}
+      propertyPath: dialogueType
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3073248042488602413, guid: 3748e216849363f48bf06a48de54cf2d, type: 3}
+      propertyPath: isDialogueActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5723956519785947959, guid: 3748e216849363f48bf06a48de54cf2d, type: 3}
       propertyPath: m_Name
       value: Dialogue Canvas
@@ -3601,11 +3609,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7261a341ba5f53f45b24d904d3157b10, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerController: {fileID: 234777898}
-  triggerObject: {fileID: 1953213991}
-  uiObject: {fileID: 759965657}
-  requiredKey: 32
-  checkKeyInput: 1
 --- !u!4 &2140131829
 Transform:
   m_ObjectHideFlags: 0

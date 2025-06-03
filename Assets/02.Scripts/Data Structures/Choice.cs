@@ -13,8 +13,8 @@ public class Choice
         Lines = new List<ChoiceLine>();
     }
 
-    public void AddLine(string script, string next)
+    public void AddLine(string script, string next, int tutorialIndex = -1)
     {
-        Lines.Add(new ChoiceLine(script, next));
+        Lines.Add(new ChoiceLine(script, next, tutorialIndex));
     }
 }

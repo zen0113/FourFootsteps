@@ -498,43 +498,95 @@ public class DialogueManager : MonoBehaviour
     }
 
     // ---------------------------------------------- Choice methods ----------------------------------------------
+    //private void DisplayChoices(string choiceID)
+    //{
+    //    if (choicesContainer.Length <= dialogueType.ToInt()) return;
+
+    //    foreach (Transform child in choicesContainer[dialogueType.ToInt()])
+    //    {
+    //        Destroy(child.gameObject);
+    //    }
+
+    //    List<ChoiceLine> choiceLines = choices[choiceID].Lines;
+
+    //    foreach (ChoiceLine choiceLine in choiceLines)
+    //    {
+    //        var choiceButton = Instantiate(choicePrefab, choicesContainer[dialogueType.ToInt()]).GetComponent<Button>();
+    //        var choiceText = choiceButton.GetComponentInChildren<TextMeshProUGUI>();
+
+    //        choiceText.text = choiceLine.GetScript();
+    //        choiceButton.onClick.AddListener(() => OnChoiceSelected(choiceLine.Next));
+    //    }
+    //}
+
+    //private void OnChoiceSelected(string next)
+    //{
+    //    if (dialogues.ContainsKey(next))
+    //    {
+    //        EndDialogue();
+    //        StartDialogue(next);
+    //    }
+    //    else if (EventManager.Instance.events.ContainsKey(next))
+    //    {
+    //        EventManager.Instance.CallEvent(next);
+    //    }
+
+    //    foreach (Transform child in choicesContainer[dialogueType.ToInt()])
+    //    {
+    //        Destroy(child.gameObject);
+    //    }
+
+    //}
     private void DisplayChoices(string choiceID)
     {
         if (choicesContainer.Length <= dialogueType.ToInt()) return;
-
         foreach (Transform child in choicesContainer[dialogueType.ToInt()])
         {
             Destroy(child.gameObject);
         }
-
         List<ChoiceLine> choiceLines = choices[choiceID].Lines;
-
         foreach (ChoiceLine choiceLine in choiceLines)
         {
             var choiceButton = Instantiate(choicePrefab, choicesContainer[dialogueType.ToInt()]).GetComponent<Button>();
             var choiceText = choiceButton.GetComponentInChildren<TextMeshProUGUI>();
-
             choiceText.text = choiceLine.GetScript();
-            choiceButton.onClick.AddListener(() => OnChoiceSelected(choiceLine.Next));
+            choiceButton.onClick.AddListener(() => OnChoiceSelected(choiceLine)); // ChoiceLine 전체를 전달
         }
     }
 
-    private void OnChoiceSelected(string next)
+    private void OnChoiceSelected(ChoiceLine choiceLine)
     {
-        if (dialogues.ContainsKey(next))
-        {
-            EndDialogue();
-            StartDialogue(next);
-        }
-        else if (EventManager.Instance.events.ContainsKey(next))
-        {
-            EventManager.Instance.CallEvent(next);
-        }
-
+        Debug.Log($"[DialogueManager] 선택지 선택됨: Script={choiceLine.GetScript()}, Next={choiceLine.Next}, TutorialIndex={choiceLine.TutorialIndex}");
+        
+        // 선택지 UI 정리
         foreach (Transform child in choicesContainer[dialogueType.ToInt()])
         {
             Destroy(child.gameObject);
         }
 
+        // 대화 종료
+        EndDialogue();
+
+        // 현재 활성화된 TutorialDialog에게 선택된 튜토리얼 인덱스 전달
+        ReminiDialog currentTutorialDialog = FindObjectOfType<ReminiDialog>();
+        if (currentTutorialDialog != null)
+        {
+            Debug.Log($"[DialogueManager] TutorialDialog로 튜토리얼 인덱스 {choiceLine.TutorialIndex} 전달");
+            currentTutorialDialog.OnChoiceSelectedInTutorial(choiceLine.TutorialIndex);
+        }
+        else
+        {
+            Debug.LogWarning("[DialogueManager] 활성화된 TutorialDialog를 찾을 수 없습니다.");
+        }
+
+        if (choiceLine.TutorialIndex >= 0)
+        {
+            TutorialController controller = FindObjectOfType<TutorialController>();
+            if (controller != null)
+            {
+                controller.SetTutorialByIndex(choiceLine.TutorialIndex);
+            }
+            return;
+        }
     }
 }

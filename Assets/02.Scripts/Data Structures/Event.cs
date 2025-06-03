@@ -17,8 +17,8 @@ public class Event
         EventLine = new List<EventLine>();
     }
 
-    public void AddEventLine(string logic, List<Condition> conditions, List<Result> results)
+    public void AddEventLine(string logic, List<Condition> conditions, List<Result> results, string executionMode)
     {
-        EventLine.Add(new EventLine(logic, conditions, results));
+        EventLine.Add(new EventLine(logic, conditions, results, executionMode));
     }
 }

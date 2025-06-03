@@ -51,6 +51,8 @@ public class UIManager : MonoBehaviour
             Destroy(gameObject);
 
         AddUIGameObjects();
+        SetAllUI(false);
+
     }
 
 

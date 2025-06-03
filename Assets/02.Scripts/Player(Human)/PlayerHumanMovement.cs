@@ -31,16 +31,17 @@ public class PlayerHumanMovement : MonoBehaviour
     private void Update()
     {
         if (IsInputBlocked())
+        {
+            StopMovementAndAnimation(); // ← 다이얼로그 시 정지 처리 추가
             return;
+        }
 
         float horizontalInput = Input.GetAxisRaw("Horizontal");
         if (horizontalInput != 0)
             spriteRenderer.flipX = horizontalInput < 0;
 
-        // 애니메이션 상태 업데이트
         UpdateAnimationState(horizontalInput);
-
-        Crouch();       // 웅크리기 처리
+        Crouch();
     }
 
     void UpdateAnimationState(float horizontalInput)
@@ -69,9 +70,25 @@ public class PlayerHumanMovement : MonoBehaviour
     private void FixedUpdate()
     {
         if (IsInputBlocked())
+        {
+            rb.velocity = Vector2.zero;  // ← 강제 정지
             return;
+        }
 
-        Move();             // 이동
+        Move();
+    }
+
+    // 이동 및 애니메이션 모두 멈추는 메서드
+    private void StopMovementAndAnimation()
+    {
+        rb.velocity = Vector2.zero;
+
+        if (animator != null)
+        {
+            animator.SetBool("Moving", false);
+            animator.SetBool("Dash", false);
+            animator.SetBool("Crouch", false);
+        }
     }
 
     // 다이얼로그 출력 중, 씬 로딩 중이면 입력을 받지 않음.

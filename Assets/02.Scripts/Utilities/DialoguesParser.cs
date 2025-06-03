@@ -5,13 +5,13 @@ using UnityEngine;
 
 public class DialoguesParser
 {
-    // CSV ÆÄÀÏ
+    // CSV ï¿½ï¿½ï¿½ï¿½
     private TextAsset dialoguesCSV = Resources.Load<TextAsset>("Datas/dialogues");
     private TextAsset choicesCSV = Resources.Load<TextAsset>("Datas/choices");
     //private TextAsset imagePathsCSV = Resources.Load<TextAsset>("Datas/image paths");
     //private TextAsset backgroundsCSV = Resources.Load<TextAsset>("Datas/backgrounds");
 
-    // ÀÚ·á ±¸Á¶
+    // ï¿½Ú·ï¿½ ï¿½ï¿½ï¿½ï¿½
     private Dictionary<string, Dialogue> dialogues = new Dictionary<string, Dialogue>();
     private Dictionary<string, Choice> choices = new Dictionary<string, Choice>();
     //private Dictionary<string, ImagePath> imagePaths = new Dictionary<string, ImagePath>();
@@ -21,8 +21,8 @@ public class DialoguesParser
     {
         string modifiedString = originalString.Replace("\\n", "\n");
         modifiedString = modifiedString.Replace("`", ",");
-        // csvÆÄÀÏÀÌ±â ¶§¹®¿¡ ½ºÅ©¸³Æ® ÀÛ¼º ½Ã, ","ÀÌ°Å¸¦ "`"ÀÌ°Å·Î ÀÛ¼º ÈÄ ¸Ş¼Òµå¿¡¼­ Ä¡È¯
-        // ½ºÅ©¸³Æ® Áß "\n"À» "\\n"À¸·Î ½áµĞ °Íµµ °°Àº ÀÌÀ¯. 
+        // csvï¿½ï¿½ï¿½ï¿½ï¿½Ì±ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Å©ï¿½ï¿½Æ® ï¿½Û¼ï¿½ ï¿½ï¿½, ","ï¿½Ì°Å¸ï¿½ "`"ï¿½Ì°Å·ï¿½ ï¿½Û¼ï¿½ ï¿½ï¿½ ï¿½Ş¼Òµå¿¡ï¿½ï¿½ Ä¡È¯
+        // ï¿½ï¿½Å©ï¿½ï¿½Æ® ï¿½ï¿½ "\n"ï¿½ï¿½ "\\n"ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½Íµï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½. 
         modifiedString = modifiedString.Replace("", "");
 
         return modifiedString;
@@ -79,15 +79,30 @@ public class DialoguesParser
             if (string.IsNullOrWhiteSpace(choiceID)) choiceID = lastChoiceID;
             else lastChoiceID = choiceID;
 
-            string script = fields[1].Trim();
+            string script = Escaper(fields[1].Trim());
             string next = fields[2].Trim();
+            
+            // TutorialIndex íŒŒì‹± (ë¹„ì–´ìˆìœ¼ë©´ -1)
+            int tutorialIndex = -1;
+            if (fields.Length > 3 && !string.IsNullOrWhiteSpace(fields[3]))
+            {
+                if (int.TryParse(fields[3].Trim(), out int parsedIndex))
+                {
+                    tutorialIndex = parsedIndex;
+                }
+                else
+                {
+                    Debug.LogWarning($"[DialoguesParser] ì˜ëª»ëœ TutorialIndex í˜•ì‹: {fields[3]} (Choice ID: {choiceID})");
+                }
+            }
 
             if (!choices.ContainsKey(choiceID))
             {
                 choices[choiceID] = new Choice(choiceID);
             }
 
-            choices[choiceID].AddLine(script, next);
+            choices[choiceID].AddLine(script, next, tutorialIndex);
+            //Debug.Log($"[DialoguesParser] Choice ë¡œë“œ: ID={choiceID}, Script={script}, Next={next}, TutorialIndex={tutorialIndex}");
         }
 
         return choices;

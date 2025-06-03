@@ -2,12 +2,14 @@ public class ChoiceLine
 {
     public string Script { get; private set; }
     public string Next { get; private set; }
+    public int TutorialIndex { get; private set; } //  건너뛸 튜토리얼 인덱스 (-1이면 다음 단계)
 
     // initialize function
-    public ChoiceLine(string script, string next)
+    public ChoiceLine(string script, string next, int tutorialIndex = -1)
     {
         Script = script;
         Next = next;
+        TutorialIndex = tutorialIndex;
     }
 
     public string GetScript()
@@ -30,13 +32,11 @@ public class ChoiceLine
             if (textEffect && text[i] == ']')
             {
                 endIndex = i;
-
                 newText = text.Substring(0, startIndex);
                 newText += "<color=red>";
                 newText += text.Substring(startIndex + 1, endIndex - startIndex - 1);
                 newText += "</color>";
                 newText += text.Substring(endIndex + 1);
-
                 text = newText;
             }
         }

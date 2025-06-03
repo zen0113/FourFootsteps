@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine.UI;
 using UnityEngine;
 using TMPro;
 
@@ -17,42 +16,51 @@ public class PlayerName : MonoBehaviour
     public string saveName;
 
     [Header("UI Components")]
-    public Text inputText;
-    public Text loadedName;
+    public TMP_InputField inputField;
+    public TextMeshProUGUI loadedName;
+    public TextMeshProUGUI warningText;
 
     private string variableKey => playerType == PlayerType.Human ? "PlayerName" : "YourCatName";
 
-    // Start is called before the first frame update
     void Start()
     {
         LoadPlayerName();
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        nameOfPlayer = GameManager.Instance.GetVariable(variableKey)?.ToString() ?? "none";
-        if (loadedName != null)
-        {
-            loadedName.text = nameOfPlayer;
-        }
+        if (warningText != null) warningText.text = "";
     }
 
     public void SetName()
     {
-        if (inputText != null)
+        if (inputField == null) return;
+
+        saveName = inputField.text.Trim();
+
+        if (!IsValidName(saveName))
         {
-            saveName = inputText.text;
-            GameManager.Instance.SetVariable(variableKey, saveName);
+            if (warningText != null)
+                warningText.text = "이름은 2~10자 이내로 입력하세요.";
+            return;
         }
+
+        GameManager.Instance.SetVariable(variableKey, saveName);
+        nameOfPlayer = saveName;
+        UpdateLoadedName();
+        if (warningText != null) warningText.text = "";
     }
 
     private void LoadPlayerName()
     {
-        nameOfPlayer = GameManager.Instance.GetVariable(variableKey)?.ToString() ?? "none";
+        nameOfPlayer = GameManager.Instance.GetVariable(variableKey)?.ToString() ?? "";
+        UpdateLoadedName();
+    }
+
+    private void UpdateLoadedName()
+    {
         if (loadedName != null)
-        {
             loadedName.text = nameOfPlayer;
-        }
+    }
+
+    private bool IsValidName(string name)
+    {
+        return name.Length >= 2 && name.Length <= 10;
     }
 }

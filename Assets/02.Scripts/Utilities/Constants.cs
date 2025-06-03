@@ -44,5 +44,31 @@ public static class Constants
         }
     }
 
+    public enum SoundType { BGM, LOOP, SOUND_EFFECT }
+    // 사운드 종류
+    // 1. 배경음
+    public const int
+        BGM_STOP = -1,
+        BGM_TITLE = 0,
+        BGM_PROLOGUE = 1,
+        BGM_STAGE1 = 2,
+        BGM_REMINISCENE1 = 3,
+        BGM_STAGE2 = 4,
+        BGM_REMINISCENE2 = 5;
+
+    // 2. 일반 오브젝트 효과음
+    public const int
+        Sound_WormholeActived = 1;
+
+
+    // 4. 루프 (반복 되어야 하는 것)
+    public const int
+        Sound_FootStep_CAT_VERSION = 0,
+        Sound_FootStep_HUMAN_VERSION = 1;
+
+    // 5. 그 외
+    public const int
+        Sound_Typing = -1,
+        Sound_Click = 0;
 
 }

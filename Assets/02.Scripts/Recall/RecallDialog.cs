@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ReminiDialog : TutorialBase
+public class RecallDialog : TutorialBase
 {
     [Header("대화 ID")]
     public string dialogueID;
@@ -15,7 +15,7 @@ public class ReminiDialog : TutorialBase
     {
         if (string.IsNullOrEmpty(dialogueID))
         {
-            Debug.LogWarning("[ReminiDialog] dialogueID가 비어 있습니다.");
+            Debug.LogWarning("[RecallDialog] dialogueID가 비어 있습니다.");
             return;
         }
 
@@ -54,17 +54,17 @@ public class ReminiDialog : TutorialBase
 
         if (selectedTutorialIndex == -2)
         {
-            Debug.Log("[ReminiDialog] 선택지로 인해 튜토리얼 종료.");
+            Debug.Log("[RecallDialog] 선택지로 인해 튜토리얼 종료.");
             tutorialController?.CompletedAllTutorials();
         }
         else if (selectedTutorialIndex >= 0)
         {
-            Debug.Log($"[ReminiDialog] 선택지 선택됨. 튜토리얼 인덱스 {selectedTutorialIndex}로 점프.");
+            Debug.Log($"[RecallDialog] 선택지 선택됨. 튜토리얼 인덱스 {selectedTutorialIndex}로 점프.");
             tutorialController?.JumpToTutorial(selectedTutorialIndex);
         }
         else
         {
-            Debug.Log("[ReminiDialog] 선택지 선택됨. 다음 튜토리얼로 진행.");
+            Debug.Log("[RecallDialog] 선택지 선택됨. 다음 튜토리얼로 진행.");
             tutorialController?.SetNextTutorial();
         }
     }

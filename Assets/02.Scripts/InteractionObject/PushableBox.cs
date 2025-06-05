@@ -10,8 +10,8 @@ public class PushableBox : MonoBehaviour
     
     [Header("박스 물리 설정")]
     [SerializeField] private float normalDrag = 10f;      // 일반 상태 drag
-    [SerializeField] private float interactingDrag = 3f;  // 상호작용 중 drag
-    [SerializeField] private float boxMass = 5f;          // 박스 질량
+    [SerializeField] private float interactingDrag = 2f;  // 상호작용 중 drag
+    [SerializeField] private float boxMass = 2f;          // 박스 질량
     
     private void Start()
     {

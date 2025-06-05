@@ -71,13 +71,13 @@ public class PosterInteraction : MonoBehaviour
                 ShowInteractionPrompt(true);
                 
                 // 플레이어가 포스터 근처에 왔을 때 API 데이터 요청
-                /*if (!hasRequestedApiData)
+                if (!hasRequestedApiData)
                 {
                     hasRequestedApiData = true;
                     
                     // 0.5초 후에 API 데이터 요청 (플레이어 움직임에 영향 최소화)
                     StartCoroutine(RequestApiWithDelay(0.5f));
-                }*/
+                }
             }
         }
     }

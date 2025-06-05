@@ -30,7 +30,7 @@ public class PlayerHumanMovement : MonoBehaviour
 
     private void Update()
     {
-        if (IsInputBlocked())
+        if (IsInputBlocked() || !(bool)GameManager.Instance.GetVariable("CanMoving"))
         {
             StopMovementAndAnimation(); // ← 다이얼로그 시 정지 처리 추가
             return;
@@ -69,7 +69,7 @@ public class PlayerHumanMovement : MonoBehaviour
     }
     private void FixedUpdate()
     {
-        if (IsInputBlocked())
+        if (IsInputBlocked() || !(bool)GameManager.Instance.GetVariable("CanMoving"))
         {
             rb.velocity = Vector2.zero;  // ← 강제 정지
             return;

@@ -83,7 +83,7 @@ public class PlayerCatMovement : MonoBehaviour
 
     void Update()
     {
-        if (IsInputBlocked())
+        if (IsInputBlocked()|| !(bool)GameManager.Instance.GetVariable("CanMoving"))
             return;
 
         bool prevOnGround = isOnGround;
@@ -188,7 +188,7 @@ public class PlayerCatMovement : MonoBehaviour
     void LateUpdate()
     {
         // 물리 업데이트 후 애니메이션 상태 동기화
-        if (!IsInputBlocked())
+        if (!IsInputBlocked()|| (bool)GameManager.Instance.GetVariable("CanMoving"))
         {
             UpdateAnimationState(Input.GetAxisRaw("Horizontal"));
         }
@@ -196,7 +196,7 @@ public class PlayerCatMovement : MonoBehaviour
 
     void FixedUpdate()
     {
-        if (IsInputBlocked())
+        if (IsInputBlocked() || !(bool)GameManager.Instance.GetVariable("CanMoving"))
             return;
 
         if (!isClimbing)

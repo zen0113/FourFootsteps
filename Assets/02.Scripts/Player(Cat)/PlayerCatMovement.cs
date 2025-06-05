@@ -4,11 +4,14 @@ using UnityEngine;
 
 public class PlayerCatMovement : MonoBehaviour
 {
+    public static PlayerCatMovement Instance { get; private set; }
+
     // 컴포넌트
     Rigidbody2D rb;
     BoxCollider2D boxCollider;
     SpriteRenderer spriteRenderer;
     Animator animator;
+    AudioSource audioSource;
 
     // 이동/점프
     [Header("이동 및 점프")]
@@ -16,6 +19,30 @@ public class PlayerCatMovement : MonoBehaviour
     [SerializeField] private float dashPower = 8f;
     [SerializeField] private float jumpPower = 5f;
     [SerializeField] private float crouchPower = 1f;
+    
+    [Header("파티클 시스템")]
+    [SerializeField] private ParticleSystem dashParticle; // 대시 파티클 시스템
+    [SerializeField] private Vector3 dashParticleOffset = new Vector2(0.5f, 0f); // 파티클 오프셋
+    [SerializeField] private float walkEmissionRate = 3f; // 걷기 시 파티클 발생률
+    [SerializeField] private float runEmissionRate = 6f;  // 달리기 시 파티클 발생률
+    private ParticleSystem.EmissionModule particleEmission;
+
+    [Header("오디오 클립")]
+    [SerializeField] private AudioClip hurtSound; // 다칠 때 소리
+    [SerializeField] private AudioClip walkSound; // 걷기 소리
+    [SerializeField] private AudioClip runSound;  // 달리기 소리
+    [SerializeField] private AudioClip jumpSound; // 점프 소리
+    [SerializeField] private AudioClip crouchSound; // 웅크리기 소리
+    [SerializeField] private AudioClip climbSound; // 사다리 오르기 소리
+    [SerializeField] private float walkSoundInterval = 0.3f; // 걷기 소리 재생 간격
+    [SerializeField] private float runSoundInterval = 0.2f;  // 달리기 소리 재생 간격
+    [SerializeField] private float climbSoundInterval = 0.4f; // 사다리 오르기 소리 재생 간격
+    [SerializeField] private float crouchSoundInterval = 0.5f; // 웅크리기 소리 재생 간격
+    private float lastWalkSoundTime; // 마지막 걷기 소리 재생 시간
+    private float lastRunSoundTime;  // 마지막 달리기 소리 재생 시간
+    private float lastClimbSoundTime; // 마지막 사다리 오르기 소리 재생 시간
+    private float lastCrouchSoundTime; // 마지막 웅크리기 소리 재생 시간
+    private int lastMoveDirection = 0; // 이전 이동 방향 (1: 오른쪽, -1: 왼쪽, 0: 정지)
 
     // 점프 중력 보정
     [Header("점프 중력 보정")]
@@ -42,6 +69,7 @@ public class PlayerCatMovement : MonoBehaviour
     private Sprite originalSprite;
     [SerializeField] private LayerMask obstacleMask;
     private bool isCrouching = false;
+    private bool isCrouchMoving = false;  // 웅크린 상태에서 이동 중인지 여부
     private Vector2 originalColliderSize, originalColliderOffset, crouchColliderSize, crouchColliderOffset;
 
     // 사다리
@@ -59,9 +87,13 @@ public class PlayerCatMovement : MonoBehaviour
     private void Start()
     {
         // 사람 버전 UI 그룹 비활성화
-        UIManager.Instance.SetUI(eUIGameObjectName.HumanVersionUIGroup,false);
-        // 고양이 버전 UI 그룹 활성화
+        UIManager.Instance.SetUI(eUIGameObjectName.HumanVersionUIGroup, false);
         UIManager.Instance.SetUI(eUIGameObjectName.CatVersionUIGroup, true);
+        UIManager.Instance.SetUI(eUIGameObjectName.HeartParent, true);
+        UIManager.Instance.SetUI(eUIGameObjectName.ResponsibilityGroup, true);
+        UIManager.Instance.SetUI(eUIGameObjectName.ResponsibilityGauge, true);
+        UIManager.Instance.SetUI(eUIGameObjectName.PlaceUI, true);
+
 
         rb = GetComponent<Rigidbody2D>();
         boxCollider = GetComponent<BoxCollider2D>();
@@ -69,6 +101,11 @@ public class PlayerCatMovement : MonoBehaviour
         originalSprite = spriteRenderer.sprite;
         boxInteraction = GetComponent<PlayerBoxInteraction>();
         animator = GetComponent<Animator>();
+        audioSource = GetComponent<AudioSource>();
+        if (audioSource == null)
+        {
+            audioSource = gameObject.AddComponent<AudioSource>();
+        }
         boxInteraction = GetComponent<PlayerBoxInteraction>();
         originalSprite = spriteRenderer.sprite;  // 기본 스프라이트 저장
         originalColliderSize = boxCollider.size;
@@ -79,6 +116,18 @@ public class PlayerCatMovement : MonoBehaviour
         rb.freezeRotation = true; // 회전 고정으로 안정성 확보
         rb.interpolation = RigidbodyInterpolation2D.Interpolate; // 부드러운 움직임
         rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous; // 정확한 충돌 감지
+
+        if (dashParticle != null)
+        {
+            particleEmission = dashParticle.emission;
+            particleEmission.rateOverTime = 0f; // 초기에는 파티클 발생 안 함
+        }
+    }
+
+    void Awake()
+    {
+        if (Instance == null) Instance = this;
+        else Destroy(gameObject);
     }
 
     void Update()
@@ -153,16 +202,98 @@ public class PlayerCatMovement : MonoBehaviour
         // 기본 상태 초기화
         animator.SetBool("Moving", false);
         animator.SetBool("Dash", false);
+        animator.SetBool("Crouch", false);
         animator.SetBool("Crouching", false);
         animator.SetBool("Climbing", false);
 
         // 대시 상태 체크
+        bool wasDashing = isDashing;
         isDashing = Input.GetKey(KeyCode.LeftShift) && !isCrouching && !(boxInteraction != null && boxInteraction.IsInteracting) && horizontalInput != 0;
         
-        // 상태 우선순위에 따라 애니메이션 설정
+        // 이동 방향 변경 감지
+        int currentDirection = Mathf.RoundToInt(Mathf.Sign(horizontalInput));
+        bool directionChanged = currentDirection != 0 && currentDirection != lastMoveDirection;
+        lastMoveDirection = currentDirection;
+        
+        // 파티클 및 사운드 처리
+        if (dashParticle != null)
+        {
+            UpdateParticlePosition();
+            
+            if (isDashing)
+            {
+                // 달리기 상태일 때
+                if (!wasDashing || directionChanged)
+                {
+                    dashParticle.Play();
+                    if (runSound != null)
+                    {
+                        audioSource.Stop(); // 현재 재생 중인 사운드 중지
+                        audioSource.PlayOneShot(runSound);
+                        lastRunSoundTime = Time.time;
+                    }
+                }
+                particleEmission.rateOverTime = runEmissionRate;
+                
+                // 달리기 소리 재생
+                if (runSound != null && Time.time - lastRunSoundTime >= runSoundInterval)
+                {
+                    audioSource.PlayOneShot(runSound);
+                    lastRunSoundTime = Time.time;
+                }
+            }
+            else if (horizontalInput != 0 && isOnGround)
+            {
+                // 걷기 상태일 때
+                if (!dashParticle.isPlaying || directionChanged)
+                {
+                    dashParticle.Play();
+                    if (walkSound != null)
+                    {
+                        audioSource.Stop(); // 현재 재생 중인 사운드 중지
+                        audioSource.PlayOneShot(walkSound);
+                        lastWalkSoundTime = Time.time;
+                    }
+                }
+                particleEmission.rateOverTime = walkEmissionRate;
+                
+                // 걷기 소리 재생
+                if (walkSound != null && Time.time - lastWalkSoundTime >= walkSoundInterval)
+                {
+                    audioSource.PlayOneShot(walkSound);
+                    lastWalkSoundTime = Time.time;
+                }
+            }
+            else
+            {
+                // 멈춤 상태일 때는 파티클 발생을 점진적으로 줄임
+                particleEmission.rateOverTime = 0f;
+                if (dashParticle.particleCount == 0)
+                {
+                    dashParticle.Stop();
+                }
+                lastMoveDirection = 0; // 정지 상태로 방향 초기화
+            }
+        }
+        
+        // 웅크리기 상태 체크
         if (isCrouching)
         {
-            animator.SetBool("Crouching", true);
+            // 웅크린 상태에서 이동 중인지 확인
+            isCrouchMoving = horizontalInput != 0;
+
+            if (isCrouchMoving)
+            {
+                // 웅크린 상태에서 이동
+                animator.SetBool("Crouching", true);
+                animator.SetBool("Crouch", false);
+            }
+            else
+            {
+                // 웅크린 상태에서 정지
+                animator.SetBool("Crouch", true);
+                animator.SetBool("Crouching", false);
+            }
         }
         else if (isDashing)
         {
@@ -175,14 +306,9 @@ public class PlayerCatMovement : MonoBehaviour
         else if (isClimbing)
         {
             float verticalInput = Input.GetAxisRaw("Vertical");
-
-            // 오르고 있을 때만 Climbing 애니메이션 재생
             bool isClimbingMoving = Mathf.Abs(verticalInput) > 0.01f;
             animator.SetBool("Climbing", isClimbingMoving);
         }
-
-        // 점프 상태는 별도로 처리 (BetterJump에서 처리)
-        //animator.SetBool("IsJumping", !isOnGround);
     }
 
     void LateUpdate()
@@ -235,15 +361,16 @@ public class PlayerCatMovement : MonoBehaviour
     void HandleCrouch(bool justLanded)
     {
         bool obstacleAbove = IsObstacleDirectlyAbove();
+        float horizontalInput = Input.GetAxisRaw("Horizontal");
 
         // 몸체 충돌 체크
         if (obstacleAbove && !isCrouching && isOnGround)
         {
             // 강제 웅크리기
             isCrouching = true;
+            isCrouchMoving = horizontalInput != 0;  // 현재 이동 상태에 따라 설정
             boxCollider.size = crouchColliderSize;
             boxCollider.offset = crouchColliderOffset;
-            spriteRenderer.sprite = crouchSprite;  // 웅크린 스프라이트로 변경
         }
 
         // S키 입력으로 인한 웅크리기
@@ -251,26 +378,34 @@ public class PlayerCatMovement : MonoBehaviour
         {
             // 웅크리기 시작
             isCrouching = true;
+            isCrouchMoving = horizontalInput != 0;  // 현재 이동 상태에 따라 설정
             boxCollider.size = crouchColliderSize;
             boxCollider.offset = crouchColliderOffset;
-            spriteRenderer.sprite = crouchSprite;  // 웅크린 스프라이트로 변경
         }
         else if (Input.GetKeyUp(KeyCode.S) && !obstacleAbove)
         {
             // 웅크리기 해제 (몸 전체가 장애물에서 벗어났을 때만)
             isCrouching = false;
+            isCrouchMoving = false;
             boxCollider.size = originalColliderSize;
             boxCollider.offset = originalColliderOffset;
-            spriteRenderer.sprite = originalSprite;  // 기본 스프라이트로 복귀
+            //spriteRenderer.sprite = originalSprite;
         }
 
         // 몸 전체가 장애물에서 벗어나고 S키도 누르고 있지 않으면 자동으로 일어나기
         if (!obstacleAbove && isCrouching && !Input.GetKey(KeyCode.S))
         {
             isCrouching = false;
+            isCrouchMoving = false;
             boxCollider.size = originalColliderSize;
             boxCollider.offset = originalColliderOffset;
-            spriteRenderer.sprite = originalSprite;  // 기본 스프라이트로 복귀
+        }
+
+        // 웅크린 상태에서 이동할 때만 효과음 재생
+        if (isCrouching && isCrouchMoving && crouchSound != null && Time.time - lastCrouchSoundTime >= crouchSoundInterval)
+        {
+            audioSource.PlayOneShot(crouchSound);
+            lastCrouchSoundTime = Time.time;
         }
     }
 
@@ -282,6 +417,12 @@ public class PlayerCatMovement : MonoBehaviour
         // 박스 상호작용 상태 확인
         bool isInteractingWithBox = boxInteraction != null && boxInteraction.IsInteracting;
         bool isPullingBox = boxInteraction != null && boxInteraction.IsPulling;
+
+        // 이동 방향이 변경될 때 파티클 위치와 방향 업데이트
+        if (isDashing && dashParticle != null)
+        {
+            UpdateParticlePosition();
+        }
 
         // 박스 상호작용 중이고 E키를 누르고 있을 때
         if (isInteractingWithBox && isBoxInteractionEnabled)
@@ -307,35 +448,11 @@ public class PlayerCatMovement : MonoBehaviour
             currentPower = dashPower;
         }
 
-        // 박스 상호작용 중이고 E키를 누르고 있을 때
-        if (isInteractingWithBox && isBoxInteractionEnabled)
-        {
-            // E키를 누른 상태에서 움직임 제한 (당기기/밀기 속도 조정)
-            currentPower = boxInteractingPower;
-
-            // 당기기 중일 때 플레이어 시선 조정 (박스를 항상 바라보게)
-            if (isPullingBox && boxInteraction.CurrentBox != null)
-            {
-                bool isBoxOnRight = boxInteraction.CurrentBox.transform.position.x > transform.position.x;
-                spriteRenderer.flipX = !isBoxOnRight; // 박스를 바라보는 방향으로 설정
-            }
-        }
-        // 웅크린 상태에서는 이동 속도 감소
-        else if (isCrouching)
-        {
-            currentPower = crouchPower;
-        }
-        else if (isDashing)
-        {
-            currentPower = dashPower;
-        }
-
         // 부드러운 속도 변화를 위한 보간 적용
         float targetVelocityX = horizontalInput * currentPower;
         float smoothedVelocityX = Mathf.Lerp(rb.velocity.x, targetVelocityX, Time.fixedDeltaTime * 10f);
 
         rb.velocity = new Vector2(smoothedVelocityX, rb.velocity.y);
-
     }
 
     void Jump()
@@ -348,6 +465,21 @@ public class PlayerCatMovement : MonoBehaviour
                 rb.AddForce(Vector2.up * jumpPower, ForceMode2D.Impulse);
                 jumpCount++;
                 isOnGround = false;
+
+                // 점프 시 파티클 처리
+                if (dashParticle != null)
+                {
+                    UpdateParticlePosition();
+                    if (!dashParticle.isPlaying)
+                    {
+                        dashParticle.Play();
+                    }
+                    particleEmission.rateOverTime = runEmissionRate; // 점프 시 달리기와 같은 파티클 효과
+                }
+                if (jumpSound != null)
+                {
+                    audioSource.PlayOneShot(jumpSound);
+                }
             }
         }
     }
@@ -379,6 +511,13 @@ public class PlayerCatMovement : MonoBehaviour
         float v = Input.GetAxisRaw("Vertical");
        // float h = Input.GetAxisRaw("Horizontal");
         rb.velocity = new Vector2(0, v * climbSpeed);
+
+        // 사다리 오르기 효과음 재생
+        if (v != 0 && climbSound != null && Time.time - lastClimbSoundTime >= climbSoundInterval)
+        {
+            audioSource.PlayOneShot(climbSound);
+            lastClimbSoundTime = Time.time;
+        }
     }
 
     void StartClimbing()
@@ -467,5 +606,36 @@ public class PlayerCatMovement : MonoBehaviour
             Gizmos.DrawWireSphere(transform.position, 0.5f);
         }
 
+    }
+
+    // 파티클 위치와 방향 업데이트 함수
+    private void UpdateParticlePosition()
+    {
+        if (dashParticle == null) return;
+
+        // 파티클을 플레이어의 자식으로 설정하고 로컬 위치 사용
+        dashParticle.transform.parent = transform;
+
+        // 로컬 위치 설정 (부모 기준 상대 위치)
+        Vector3 localPos = dashParticleOffset;
+        localPos.x = spriteRenderer.flipX ? -dashParticleOffset.x : dashParticleOffset.x;
+        dashParticle.transform.localPosition = localPos;
+
+        // 로컬 회전만 적용 (부모의 스케일/회전에 영향받지 않음)
+        dashParticle.transform.localRotation = spriteRenderer.flipX ? Quaternion.Euler(0, 180, 0) : Quaternion.identity;
+
+        // localScale은 항상 양수로 유지
+        Vector3 scale = dashParticle.transform.localScale;
+        scale.x = Mathf.Abs(scale.x);
+        dashParticle.transform.localScale = scale;
+    }
+
+    // 다칠 때 호출될 함수
+    public void PlayHurtSound()
+    {
+        if (hurtSound != null)
+        {
+            audioSource.PlayOneShot(hurtSound);
+        }
     }
 }

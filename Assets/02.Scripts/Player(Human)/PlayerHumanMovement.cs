@@ -7,6 +7,7 @@ public class PlayerHumanMovement : MonoBehaviour
     Rigidbody2D rb;
     Animator animator;
     SpriteRenderer spriteRenderer;
+    AudioSource audioSource;
 
     [Header("이동")]
     [SerializeField] private float movePower = 2f;       // 기본 이동 속도
@@ -16,16 +17,30 @@ public class PlayerHumanMovement : MonoBehaviour
     [Header("웅크리기")]
     [SerializeField] private bool isCrouching = false;
 
+    [Header("효과음")]
+    [SerializeField] private AudioClip footstepSound;
+    [SerializeField] private float walkSoundInterval = 0.5f;
+    [SerializeField] private float dashSoundInterval = 0.2f;  // 대시할 때 더 빠른 간격
+    private float lastWalkSoundTime;
+
     private void Start()
     {
         // 사람 버전 UI 그룹 활성화
         UIManager.Instance.SetUI(eUIGameObjectName.HumanVersionUIGroup, true);
         // 고양이 버전 UI 그룹 비활성화
         UIManager.Instance.SetUI(eUIGameObjectName.CatVersionUIGroup, false);
+        UIManager.Instance.SetUI(eUIGameObjectName.ResponsibilityGroup, true);
+        UIManager.Instance.SetUI(eUIGameObjectName.ResponsibilityGauge, true);
+        UIManager.Instance.SetUI(eUIGameObjectName.PlaceUI, true);
 
         rb = GetComponent<Rigidbody2D>();
         spriteRenderer = GetComponent<SpriteRenderer>();
         animator = GetComponent<Animator>();
+        audioSource = GetComponent<AudioSource>();
+        if (audioSource == null)
+        {
+            audioSource = gameObject.AddComponent<AudioSource>();
+        }
     }
 
     private void Update()
@@ -57,14 +72,31 @@ public class PlayerHumanMovement : MonoBehaviour
         if (isDashing)
         {
             animator.SetBool("Dash", true);
+            // 대시 효과음 재생 (더 짧은 간격으로)
+            if (Time.time - lastWalkSoundTime >= dashSoundInterval)
+            {
+                audioSource.PlayOneShot(footstepSound);
+                lastWalkSoundTime = Time.time;
+            }
         }
-        else if(isCrouching)
+        else if (isCrouching)
         {
             animator.SetBool("Crouch", true);
+            audioSource.Stop();
         }
         else if (horizontalInput != 0)
         {
             animator.SetBool("Moving", true);
+            // 걷기 효과음 재생
+            if (Time.time - lastWalkSoundTime >= walkSoundInterval)
+            {
+                audioSource.PlayOneShot(footstepSound);
+                lastWalkSoundTime = Time.time;
+            }
+        }
+        else
+        {
+            audioSource.Stop();
         }
     }
     private void FixedUpdate()

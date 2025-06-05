@@ -9,16 +9,29 @@ public class FollowCamera : MonoBehaviour
     public Vector2 offset = new Vector2(0f, 2f); // Y축으로 2만큼 위에 위치
 
     [Header("Camera Bounds Settings")]
-    public LayerMask boundaryLayer = -1;  // 경계 콜라이더 레이어
     public float cameraHalfWidth = 5f;    // 카메라 가로 절반 크기
     public float cameraHalfHeight = 3f;   // 카메라 세로 절반 크기
     public bool showDebugBounds = true;   // 디버그용 카메라 경계 표시
 
     private Camera cam;
+    private LayerMask boundaryLayer;      // CameraLimit 레이어 마스크
 
     private void Start()
     {
         cam = GetComponent<Camera>();
+        
+        // CameraLimit 레이어 마스크 설정
+        int cameraLimitLayer = LayerMask.NameToLayer("CameraLimit");
+        if (cameraLimitLayer == -1)
+        {
+            Debug.LogWarning("CameraLimit 레이어가 존재하지 않습니다. Project Settings > Tags and Layers에서 CameraLimit 레이어를 추가해주세요.");
+            boundaryLayer = 0; // 빈 레이어 마스크
+        }
+        else
+        {
+            boundaryLayer = 1 << cameraLimitLayer;
+            Debug.Log($"CameraLimit 레이어 감지됨. 레이어 번호: {cameraLimitLayer}");
+        }
         
         // 카메라 크기 자동 계산 (Orthographic 카메라인 경우)
         if (cam != null && cam.orthographic)

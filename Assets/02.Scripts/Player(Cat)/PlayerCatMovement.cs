@@ -89,7 +89,6 @@ public class PlayerCatMovement : MonoBehaviour
         // 사람 버전 UI 그룹 비활성화
         UIManager.Instance.SetUI(eUIGameObjectName.HumanVersionUIGroup, false);
         UIManager.Instance.SetUI(eUIGameObjectName.CatVersionUIGroup, true);
-        UIManager.Instance.SetUI(eUIGameObjectName.HeartParent, true);
         UIManager.Instance.SetUI(eUIGameObjectName.ResponsibilityGroup, true);
         UIManager.Instance.SetUI(eUIGameObjectName.ResponsibilityGauge, true);
         UIManager.Instance.SetUI(eUIGameObjectName.PlaceUI, true);

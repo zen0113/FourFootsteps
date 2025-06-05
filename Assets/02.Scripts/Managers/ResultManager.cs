@@ -143,6 +143,12 @@ public class ResultManager : MonoBehaviour
             // 웜홀 최초 등장
             case "Result_FirstWormholeActivation":
                 executableObjects["WormholeActivation"].ExecuteAction();
+                // 아래 코드는 임시!!! 나중에 RecallManager 제대로 만들면 수정될 것
+                if (RecallManager.Instance != null)
+                {
+                    Debug.Log("Recall Manger 호출");
+                    RecallManager.Instance.SetInteractKeyGroup(true);
+                }
                 yield return null;
                 break;
 

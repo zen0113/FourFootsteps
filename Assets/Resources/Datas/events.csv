@@ -15,8 +15,8 @@ EventRecall1_MyRoomDoor,회상 속 방문,방문 일반 조사 스크립트,,C_C
 EventLeo,레오 대화 이벤트,트럭 내부 고양이 레오 조사 시,,,Result_StartDialogueStage04_Leo_001,Instant,
 ,,,,,,,
 ,,,,,,,
-EventRecall1_GoodChoice,회상1 올바른선택지,회상 1에서 올바른 선택지 클릭 시,,,Result_IncrementRoomSofaClick/Result_InverseCanMoving/Result_FastFadeOut/Result_StartDialogueRecall1_004/Result_FastFadeIn/Result_IncrementResponsibilityScore/Result_FirstWormholeActivation/Result_InverseCanMoving/Result_InverseCanInvesigatingRecallObject,Sequential,여기에 Result_IncrementRoomSofaClick 추가해둔거는 Tutorial trigger이 있어서 임시로 추가한 상태
-EventRecall1_BadChoice,회상2 나쁜 선택지,회상 1에서 나쁜 선택지 클릭 시,,,Result_IncrementRoomSofaClick/Result_InverseCanMoving/Result_FastFadeOut/Result_StartDialogueRecall1_005/Result_FastFadeIn/Result_FirstWormholeActivation/Result_InverseCanMoving/Result_InverseCanInvesigatingRecallObject,Sequential,
+EventRecall1_GoodChoice,회상1 올바른선택지,회상 1에서 올바른 선택지 클릭 시,,,Result_IncrementRoomSofaClick/Result_InverseCanInvesigatingRecallObject/Result_InverseCanMoving/Result_FastFadeOut/Result_StartDialogueRecall1_004/Result_FastFadeIn/Result_IncrementResponsibilityScore/Result_FirstWormholeActivation/Result_InverseCanMoving,Sequential,여기에 Result_IncrementRoomSofaClick 추가해둔거는 Tutorial trigger이 있어서 임시로 추가한 상태
+EventRecall1_BadChoice,회상2 나쁜 선택지,회상 1에서 나쁜 선택지 클릭 시,,,Result_IncrementRoomSofaClick/Result_InverseCanInvesigatingRecallObject/Result_InverseCanMoving/Result_FastFadeOut/Result_StartDialogueRecall1_005/Result_FastFadeIn/Result_FirstWormholeActivation/Result_InverseCanMoving,Sequential,
 ,,,,,,,
 EventFirstWormholeActivation,,회상1에서 웜홀 최초 활성화,,,Result_FirstWormholeActivation,,
 ,,,,,,,

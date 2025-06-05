@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using System.Linq;
 
 public class GameManager : MonoBehaviour
 {
@@ -67,7 +68,7 @@ public class GameManager : MonoBehaviour
                 new SceneData("SetCatName"),
                 new SceneData("StageScene1"),
                 new SceneData("RecallScene1", true),
-                //new SceneData("Stage2"),
+                new SceneData("StageScene2"),
                 //new SceneData("RecallScene2", true)
             };
     }
@@ -83,17 +84,35 @@ public class GameManager : MonoBehaviour
     // 씬 상태 업데이트
     public void UpdateSceneProgress(string loadedSceneName)
     {
-        string currentSceneName = loadedSceneName;
-        SetVariable("CurrentSceneName", currentSceneName);
-        int index = sceneOrder.FindIndex(s => s.sceneName == loadedSceneName);
-        if (index >= 0 && index + 1 < sceneOrder.Count)
+        //string currentSceneName = loadedSceneName;
+        //SetVariable("CurrentSceneName", currentSceneName);
+        //int index = sceneOrder.FindIndex(s => s.sceneName == loadedSceneName);
+        //if (index >= 0 && index + 1 < sceneOrder.Count)
+        //{
+        //    string nextSceneName = sceneOrder[index + 1].sceneName;
+        //    SetVariable("NextSceneName", nextSceneName);
+        //}
+        //else
+        //{
+        //    SetVariable("NextSceneName", null); // 마지막 씬일 경우
+        //}
+
+        var currentScene = sceneOrder.FirstOrDefault(s => s.sceneName == loadedSceneName);
+        if (currentScene != null)
         {
-            string nextSceneName = sceneOrder[index + 1].sceneName;
-            SetVariable("NextSceneName", nextSceneName);
-        }
-        else
-        {
-            SetVariable("NextSceneName", null); // 마지막 씬일 경우
+            SetVariable("CurrentSceneName", currentScene.sceneName);
+
+            int index = sceneOrder.IndexOf(currentScene);
+            if (index + 1 < sceneOrder.Count)
+                SetVariable("NextSceneName", sceneOrder[index + 1].sceneName);
+            else
+                SetVariable("NextSceneName", null); // 마지막 씬일 경우
+
+            if (currentScene.isRecall)
+            {
+                SetVariable("isRecalling", true);
+            }else
+                SetVariable("isRecalling", false);
         }
     }
 
@@ -236,6 +255,7 @@ public class GameManager : MonoBehaviour
             "YourCatName",
             "CurrentSceneName",
             "NextSceneName",
+            "CanMoving"
         });
 
         foreach (var item in variables)

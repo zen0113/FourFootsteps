@@ -80,7 +80,8 @@ public class EventManager : MonoBehaviour
                 if (
                     resultIDTrimmed.StartsWith("Result_StartDialogue") ||
                     resultIDTrimmed.StartsWith("Result_Increment") ||
-                    resultIDTrimmed.StartsWith("Result_Decrement"))
+                    resultIDTrimmed.StartsWith("Result_Decrement") ||
+                    resultIDTrimmed.StartsWith("Result_Inverse"))
                 {
                     Result tempResult = new Result(resultIDTrimmed, "", "");
                     results.Add(tempResult);

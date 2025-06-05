@@ -89,7 +89,6 @@ public class PlayerCatMovement : MonoBehaviour
         // 사람 버전 UI 그룹 비활성화
         UIManager.Instance.SetUI(eUIGameObjectName.HumanVersionUIGroup, false);
         UIManager.Instance.SetUI(eUIGameObjectName.CatVersionUIGroup, true);
-        UIManager.Instance.SetUI(eUIGameObjectName.HeartParent, true);
         UIManager.Instance.SetUI(eUIGameObjectName.ResponsibilityGroup, true);
         UIManager.Instance.SetUI(eUIGameObjectName.ResponsibilityGauge, true);
         UIManager.Instance.SetUI(eUIGameObjectName.PlaceUI, true);
@@ -132,7 +131,7 @@ public class PlayerCatMovement : MonoBehaviour
 
     void Update()
     {
-        if (IsInputBlocked())
+        if (IsInputBlocked()|| !(bool)GameManager.Instance.GetVariable("CanMoving"))
             return;
 
         bool prevOnGround = isOnGround;
@@ -314,7 +313,7 @@ public class PlayerCatMovement : MonoBehaviour
     void LateUpdate()
     {
         // 물리 업데이트 후 애니메이션 상태 동기화
-        if (!IsInputBlocked())
+        if (!IsInputBlocked()|| (bool)GameManager.Instance.GetVariable("CanMoving"))
         {
             UpdateAnimationState(Input.GetAxisRaw("Horizontal"));
         }
@@ -322,7 +321,7 @@ public class PlayerCatMovement : MonoBehaviour
 
     void FixedUpdate()
     {
-        if (IsInputBlocked())
+        if (IsInputBlocked() || !(bool)GameManager.Instance.GetVariable("CanMoving"))
             return;
 
         if (!isClimbing)

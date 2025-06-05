@@ -35,7 +35,7 @@ public class PlayerHp : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        heartParent = UIManager.Instance.GetUI(eUIGameObjectName.HeartParent);
+        heartParent = UIManager.Instance.heartParent;
 
         maxHp = (int)GameManager.Instance.GetVariable("MaxHP");
         currentHp = (int)GameManager.Instance.GetVariable("CurrentHP");

@@ -133,9 +133,9 @@ public class ResultManager : MonoBehaviour
                 break;
 
             // 낡은 소파 조사 시, 회상1 씬으로 이동.
-            case "Result_GoToReminiscence1":
+            case "Result_GoToRecall1":
                 InitializeExecutableObjects();
-                //SceneLoader.Instance.LoadScene("Reminiscence1");
+                GameManager.Instance.SetVariable("CanInvesigatingRecallObject", false);
                 SceneLoader.Instance.LoadScene(GameManager.Instance.GetNextSceneData().sceneName);
                 yield return new WaitForSeconds(1f);
                 break;
@@ -143,11 +143,18 @@ public class ResultManager : MonoBehaviour
             // 웜홀 최초 등장
             case "Result_FirstWormholeActivation":
                 executableObjects["WormholeActivation"].ExecuteAction();
+                // 아래 코드는 임시!!! 나중에 RecallManager 제대로 만들면 수정될 것
+                if (RecallManager.Instance != null)
+                {
+                    Debug.Log("Recall Manger 호출");
+                    RecallManager.Instance.SetInteractKeyGroup(true);
+                }
                 yield return null;
                 break;
 
             // 웜홀 사용 시, 다음 씬으로 이동
             case "Result_WormholeNextScene":
+                //Debug.Log("웜홀 사용 ");
                 SceneLoader.Instance.LoadScene(GameManager.Instance.GetNextSceneData().sceneName);
                 yield return new WaitForSeconds(1f);
                 break;

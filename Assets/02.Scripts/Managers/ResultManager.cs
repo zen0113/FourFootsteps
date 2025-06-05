@@ -133,9 +133,9 @@ public class ResultManager : MonoBehaviour
                 break;
 
             // 낡은 소파 조사 시, 회상1 씬으로 이동.
-            case "Result_GoToReminiscence1":
+            case "Result_GoToRecall1":
                 InitializeExecutableObjects();
-                //SceneLoader.Instance.LoadScene("Reminiscence1");
+                GameManager.Instance.SetVariable("CanInvesigatingRecallObject", false);
                 SceneLoader.Instance.LoadScene(GameManager.Instance.GetNextSceneData().sceneName);
                 yield return new WaitForSeconds(1f);
                 break;
@@ -148,6 +148,7 @@ public class ResultManager : MonoBehaviour
 
             // 웜홀 사용 시, 다음 씬으로 이동
             case "Result_WormholeNextScene":
+                //Debug.Log("웜홀 사용 ");
                 SceneLoader.Instance.LoadScene(GameManager.Instance.GetNextSceneData().sceneName);
                 yield return new WaitForSeconds(1f);
                 break;

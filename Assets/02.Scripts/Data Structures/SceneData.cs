@@ -2,13 +2,13 @@
 public class SceneData
 {
     public string sceneName;
-    public bool isReminiscence;
+    public bool isRecall;
     public string backgroundMusic;
 
     public SceneData(string name, bool isReminiscence = false, string bgm = "")
     {
         sceneName = name;
-        this.isReminiscence = isReminiscence;
+        this.isRecall = isReminiscence;
         backgroundMusic = bgm;
     }
 }

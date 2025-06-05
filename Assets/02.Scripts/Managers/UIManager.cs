@@ -10,7 +10,8 @@ public enum eUIGameObjectName
     CatVersionUIGroup,
     HumanVersionUIGroup,
     ResponsibilityGroup,
-    ResponsibilityGauge
+    ResponsibilityGauge,
+    PlaceUI
 }
 
 public class UIManager : MonoBehaviour
@@ -24,6 +25,7 @@ public class UIManager : MonoBehaviour
     public GameObject heartParent;
     public GameObject responsibilityGroup;
     public GameObject responsibilityGauge;
+    public GameObject placeUI;
 
     [HideInInspector] public Slider responsibilitySlider;
 
@@ -76,6 +78,7 @@ public class UIManager : MonoBehaviour
 
         uiGameObjects.Add(eUIGameObjectName.ResponsibilityGroup, responsibilityGroup);
         uiGameObjects.Add(eUIGameObjectName.ResponsibilityGauge, responsibilityGauge);
+        uiGameObjects.Add(eUIGameObjectName.PlaceUI, placeUI);
 
 
         warningVignetteQVignetteSingle = warningVignette.GetComponent<Q_Vignette_Single>();

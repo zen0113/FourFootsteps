@@ -77,7 +77,7 @@ public class PlayerHp : MonoBehaviour
                 heartParent.transform.GetChild(i).GetComponent<Image>().sprite = emptyHeart;
             }
         }
-
+        PlayerCatMovement.Instance.PlayHurtSound();
         // 빨간 비네팅 실행
         Warning();
     }
@@ -142,7 +142,8 @@ public class PlayerHp : MonoBehaviour
     private void Die()
     {
         Debug.Log("플레이어 사망!");
-        // 사망 처리, 애니메이션, 이동 등
+        // 페이드 인 효과와 함께 게임오버 씬 로드
+        SceneLoader.Instance.LoadScene("GameOver");
     }
 
     // 외부 접근용 프로퍼티

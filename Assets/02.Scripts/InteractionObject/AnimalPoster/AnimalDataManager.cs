@@ -47,7 +47,7 @@ public class AnimalDataManager : MonoBehaviour
         isLoading = true;
         Debug.Log("API 데이터 로드 시작...");
         
-        // API 키를 그대로 사용 (인코딩하지 않음)
+        // 성공한 URL 사용
         string requestUrl = $"{baseUrl}/abandonmentPublic_v2" +
                           $"?serviceKey={apiKey}" +
                           $"&numOfRows=5" +
@@ -66,32 +66,18 @@ public class AnimalDataManager : MonoBehaviour
             {
                 string responseText = request.downloadHandler.text;
                 Debug.Log($"API 응답 성공. 길이: {responseText.Length}");
-                Debug.Log($"응답 내용: {responseText}");
                 
-                // XML인지 JSON인지 확인
-                if (responseText.TrimStart().StartsWith("<"))
+                if (!responseText.TrimStart().StartsWith("<"))
                 {
-                    Debug.LogError("XML 응답 받음 - API 키 오류 또는 서비스 문제");
-                    if (responseText.Contains("SERVICE_KEY_IS_NOT_REGISTERED_ERROR"))
-                    {
-                        Debug.LogError("🚨 API 키가 등록되지 않았습니다!");
-                        Debug.LogError("1. 공공데이터포털에서 서비스 승인 상태 확인");
-                        Debug.LogError("2. 올바른 서비스의 인증키인지 확인");
-                        Debug.LogError("3. API 키 전체가 정확히 복사되었는지 확인");
-                    }
-                }
-                else
-                {
-                    // JSON 파싱 시도
                     try
                     {
                         AnimalApiResponse apiResponse = JsonUtility.FromJson<AnimalApiResponse>(responseText);
                         
-                        if (apiResponse?.body?.items?.item != null && apiResponse.body.items.item.Length > 0)
+                        if (apiResponse?.response?.body?.items?.item != null && apiResponse.response.body.items.item.Length > 0)
                         {
                             animalDataPool.Clear();
                             
-                            foreach (var item in apiResponse.body.items.item)
+                            foreach (var item in apiResponse.response.body.items.item)
                             {
                                 animalDataPool.Add(item);
                             }
@@ -107,13 +93,17 @@ public class AnimalDataManager : MonoBehaviour
                     catch (Exception e)
                     {
                         Debug.LogError($"JSON 파싱 오류: {e.Message}");
+                        Debug.LogError($"응답 내용: {responseText}");
                     }
+                }
+                else
+                {
+                    Debug.LogError("XML 응답 - API 오류");
                 }
             }
             else
             {
                 Debug.LogError($"API 요청 실패: {request.error}");
-                Debug.LogError($"Response Code: {request.responseCode}");
             }
         }
         

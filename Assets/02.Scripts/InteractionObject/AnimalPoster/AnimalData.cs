@@ -61,9 +61,15 @@ public class AnimalData
     }
 }
 
-// API 응답 구조 업데이트
+// API 응답 구조 업데이트 (올바른 구조)
 [Serializable]
 public class AnimalApiResponse
+{
+    public ResponseData response;  // 이게 빠져있었음!
+}
+
+[Serializable]
+public class ResponseData
 {
     public ResponseHeader header;
     public ResponseBody body;

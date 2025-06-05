@@ -58,8 +58,8 @@ public class PosterUIController : MonoBehaviour
         ageText.text = $"나이: {animalData.age}";
         processStateText.text = $"상태: {animalData.processState}";
         
-        // 추가 정보 업데이트
-        breedText.text = $"품종: {animalData.kindCd}";
+        // 추가 정보 업데이트 (실제 API 필드명 사용)
+        breedText.text = $"품종: {GetBreedName(animalData)}";
         colorText.text = $"색상: {animalData.colorCd}";
         shelterText.text = $"보호소: {animalData.careNm}";
         locationText.text = $"발견장소: {animalData.happenPlace}";
@@ -112,6 +112,17 @@ public class PosterUIController : MonoBehaviour
                 animalImage.texture = null;
             }
         }
+    }
+    
+    // 품종명 가져오기 (상세명이 있으면 사용, 없으면 기본명)
+    private string GetBreedName(AnimalData data)
+    {
+        if (!string.IsNullOrEmpty(data.kindFullNm))
+            return data.kindFullNm;
+        else if (!string.IsNullOrEmpty(data.kindNm))
+            return data.kindNm;
+        else
+            return data.kindCd;
     }
     
     // 성별 코드 변환

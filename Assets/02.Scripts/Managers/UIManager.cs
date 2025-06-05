@@ -9,7 +9,6 @@ public enum eUIGameObjectName
     WarningVignette,
     CatVersionUIGroup,
     HumanVersionUIGroup,
-    HeartParent,
     ResponsibilityGroup,
     ResponsibilityGauge
 }
@@ -75,7 +74,6 @@ public class UIManager : MonoBehaviour
         uiGameObjects.Add(eUIGameObjectName.CatVersionUIGroup, catVersionUIGroup);
         uiGameObjects.Add(eUIGameObjectName.HumanVersionUIGroup, humanVersionUIGroup);
 
-        uiGameObjects.Add(eUIGameObjectName.HeartParent, heartParent);
         uiGameObjects.Add(eUIGameObjectName.ResponsibilityGroup, responsibilityGroup);
         uiGameObjects.Add(eUIGameObjectName.ResponsibilityGauge, responsibilityGauge);
 

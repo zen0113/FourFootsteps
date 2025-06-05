@@ -19,6 +19,9 @@ public class ResponsibilityManager : MonoBehaviour
         {
             Instance = this;
             DontDestroyOnLoad(gameObject);
+
+            UIManager.Instance.SetUI(eUIGameObjectName.ResponsibilityGroup, true);
+            UIManager.Instance.SetUI(eUIGameObjectName.ResponsibilityGauge, true);
         }
         else
             Destroy(gameObject);

@@ -15,6 +15,8 @@ public class DownObject : MonoBehaviour
     [Header("깨지는 효과 설정")]
     [SerializeField] private AudioClip breakSound; // 깨지는 소리
     [SerializeField] private Sprite brokenSprite; // 깨진 후 스프라이트
+    [Range(0f, 1f)]
+    [SerializeField] private float soundVolume = 0.3f; // 사운드 볼륨 (0~1)
     
     private bool hasTriggered = false;
     private Coroutine dropRoutine;
@@ -70,7 +72,7 @@ public class DownObject : MonoBehaviour
                 }
                 
                 // 깨지는 효과 설정 전달
-                landingHandler.SetBreakEffects(breakSound, brokenSprite);
+                landingHandler.SetBreakEffects(breakSound, brokenSprite, soundVolume);
                 
                 rb.AddForce(dropDirection.normalized * dropForce, ForceMode2D.Impulse);
                 
@@ -139,6 +141,7 @@ public class SimpleGroundLandingHandler : MonoBehaviour
     private AudioClip breakSound;
     private Sprite brokenSprite;
     private Sprite originalSprite; // 원본 스프라이트 보관
+    private float soundVolume = 0.3f; // 사운드 볼륨
     
     private void Awake()
     {
@@ -160,10 +163,11 @@ public class SimpleGroundLandingHandler : MonoBehaviour
         }
     }
     
-    public void SetBreakEffects(AudioClip sound, Sprite broken)
+    public void SetBreakEffects(AudioClip sound, Sprite broken, float volume)
     {
         breakSound = sound;
         brokenSprite = broken;
+        soundVolume = volume;
     }
     
     private void OnCollisionEnter2D(Collision2D collision)
@@ -200,10 +204,10 @@ public class SimpleGroundLandingHandler : MonoBehaviour
     
     private void PlayBreakEffects()
     {
-        // 1. 사운드 재생
+        // 1. 사운드 재생 (볼륨 조절)
         if (breakSound != null && audioSource != null)
         {
-            audioSource.PlayOneShot(breakSound);
+            audioSource.PlayOneShot(breakSound, soundVolume);
         }
         
         // 2. 스프라이트 교체

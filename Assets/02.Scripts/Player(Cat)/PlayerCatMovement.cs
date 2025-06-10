@@ -38,10 +38,12 @@ public class PlayerCatMovement : MonoBehaviour
     [SerializeField] private float runSoundInterval = 0.2f;  // 달리기 소리 재생 간격
     [SerializeField] private float climbSoundInterval = 0.4f; // 사다리 오르기 소리 재생 간격
     [SerializeField] private float crouchSoundInterval = 0.5f; // 웅크리기 소리 재생 간격
+    [SerializeField] private float landingSoundDelay = 0.3f; // 착지 후 소리 재생까지 대기 시간
     private float lastWalkSoundTime; // 마지막 걷기 소리 재생 시간
     private float lastRunSoundTime;  // 마지막 달리기 소리 재생 시간
     private float lastClimbSoundTime; // 마지막 사다리 오르기 소리 재생 시간
     private float lastCrouchSoundTime; // 마지막 웅크리기 소리 재생 시간
+    private float lastLandingTime; // 마지막 착지 시간
     private int lastMoveDirection = 0; // 이전 이동 방향 (1: 오른쪽, -1: 왼쪽, 0: 정지)
 
     // 점프 중력 보정
@@ -157,6 +159,11 @@ public class PlayerCatMovement : MonoBehaviour
         }
 
         bool justLanded = isOnGround && !prevOnGround;
+        if (justLanded)
+        {
+            lastLandingTime = Time.time; // 착지 시간 기록
+        }
+
         if (isOnGround && rb.velocity.y <= 0) jumpCount = 0;
 
         float horizontalInput = Input.GetAxisRaw("Horizontal");
@@ -219,59 +226,82 @@ public class PlayerCatMovement : MonoBehaviour
         {
             UpdateParticlePosition();
             
-            if (isDashing)
+            // 웅크리기나 박스 상호작용 중이 아닐 때만 일반 이동 소리 재생
+            if (!isCrouching && !(boxInteraction != null && boxInteraction.IsInteracting))
             {
-                // 달리기 상태일 때
-                if (!wasDashing || directionChanged)
+                if (isDashing)
                 {
-                    dashParticle.Play();
-                    if (runSound != null)
+                    // 달리기 상태일 때
+                    if (!wasDashing || directionChanged)
                     {
-                        audioSource.Stop(); // 현재 재생 중인 사운드 중지
+                        dashParticle.Play();
+                        if (runSound != null && Time.time - lastLandingTime >= landingSoundDelay)
+                        {
+                            audioSource.Stop(); // 현재 재생 중인 사운드 중지
+                            audioSource.PlayOneShot(runSound);
+                            lastRunSoundTime = Time.time;
+                        }
+                    }
+                    particleEmission.rateOverTime = runEmissionRate;
+                    
+                    // 달리기 소리 재생
+                    if (runSound != null && Time.time - lastRunSoundTime >= runSoundInterval && 
+                        Time.time - lastLandingTime >= landingSoundDelay)
+                    {
                         audioSource.PlayOneShot(runSound);
                         lastRunSoundTime = Time.time;
                     }
                 }
-                particleEmission.rateOverTime = runEmissionRate;
-                
-                // 달리기 소리 재생
-                if (runSound != null && Time.time - lastRunSoundTime >= runSoundInterval)
+                else if (horizontalInput != 0 && isOnGround)
                 {
-                    audioSource.PlayOneShot(runSound);
-                    lastRunSoundTime = Time.time;
-                }
-            }
-            else if (horizontalInput != 0 && isOnGround)
-            {
-                // 걷기 상태일 때
-                if (!dashParticle.isPlaying || directionChanged)
-                {
-                    dashParticle.Play();
-                    if (walkSound != null)
+                    // 걷기 상태일 때
+                    if (!dashParticle.isPlaying || directionChanged)
                     {
-                        audioSource.Stop(); // 현재 재생 중인 사운드 중지
+                        dashParticle.Play();
+                        if (walkSound != null && Time.time - lastLandingTime >= landingSoundDelay)
+                        {
+                            audioSource.Stop(); // 현재 재생 중인 사운드 중지
+                            audioSource.PlayOneShot(walkSound);
+                            lastWalkSoundTime = Time.time;
+                        }
+                    }
+                    particleEmission.rateOverTime = walkEmissionRate;
+                    
+                    // 걷기 소리 재생
+                    if (walkSound != null && Time.time - lastWalkSoundTime >= walkSoundInterval && 
+                        Time.time - lastLandingTime >= landingSoundDelay)
+                    {
                         audioSource.PlayOneShot(walkSound);
                         lastWalkSoundTime = Time.time;
                     }
                 }
-                particleEmission.rateOverTime = walkEmissionRate;
-                
-                // 걷기 소리 재생
-                if (walkSound != null && Time.time - lastWalkSoundTime >= walkSoundInterval)
+                else
                 {
-                    audioSource.PlayOneShot(walkSound);
-                    lastWalkSoundTime = Time.time;
+                    // 멈춤 상태일 때는 파티클 발생을 점진적으로 줄임
+                    particleEmission.rateOverTime = 0f;
+                    if (dashParticle.particleCount == 0)
+                    {
+                        dashParticle.Stop();
+                    }
+                    lastMoveDirection = 0; // 정지 상태로 방향 초기화
                 }
             }
             else
             {
-                // 멈춤 상태일 때는 파티클 발생을 점진적으로 줄임
-                particleEmission.rateOverTime = 0f;
-                if (dashParticle.particleCount == 0)
+                // 웅크리기나 박스 상호작용 중일 때는 파티클만 처리
+                if (horizontalInput != 0)
                 {
-                    dashParticle.Stop();
+                    dashParticle.Play();
+                    particleEmission.rateOverTime = walkEmissionRate;
                 }
-                lastMoveDirection = 0; // 정지 상태로 방향 초기화
+                else
+                {
+                    particleEmission.rateOverTime = 0f;
+                    if (dashParticle.particleCount == 0)
+                    {
+                        dashParticle.Stop();
+                    }
+                }
             }
         }
         
@@ -370,6 +400,9 @@ public class PlayerCatMovement : MonoBehaviour
             isCrouchMoving = horizontalInput != 0;  // 현재 이동 상태에 따라 설정
             boxCollider.size = crouchColliderSize;
             boxCollider.offset = crouchColliderOffset;
+            
+            // 웅크리기 시작할 때 소리 중지
+            audioSource.Stop();
         }
 
         // S키 입력으로 인한 웅크리기
@@ -380,6 +413,9 @@ public class PlayerCatMovement : MonoBehaviour
             isCrouchMoving = horizontalInput != 0;  // 현재 이동 상태에 따라 설정
             boxCollider.size = crouchColliderSize;
             boxCollider.offset = crouchColliderOffset;
+            
+            // 웅크리기 시작할 때 소리 중지
+            audioSource.Stop();
         }
         else if (Input.GetKeyUp(KeyCode.S) && !obstacleAbove)
         {
@@ -388,7 +424,6 @@ public class PlayerCatMovement : MonoBehaviour
             isCrouchMoving = false;
             boxCollider.size = originalColliderSize;
             boxCollider.offset = originalColliderOffset;
-            //spriteRenderer.sprite = originalSprite;
         }
 
         // 몸 전체가 장애물에서 벗어나고 S키도 누르고 있지 않으면 자동으로 일어나기
@@ -400,8 +435,10 @@ public class PlayerCatMovement : MonoBehaviour
             boxCollider.offset = originalColliderOffset;
         }
 
-        // 웅크린 상태에서 이동할 때만 효과음 재생
-        if (isCrouching && isCrouchMoving && crouchSound != null && Time.time - lastCrouchSoundTime >= crouchSoundInterval)
+        // 웅크린 상태에서 이동할 때만 웅크리기 효과음 재생
+        if (isCrouching && isCrouchMoving && crouchSound != null && 
+            Time.time - lastCrouchSoundTime >= crouchSoundInterval && 
+            Time.time - lastLandingTime >= landingSoundDelay)
         {
             audioSource.PlayOneShot(crouchSound);
             lastCrouchSoundTime = Time.time;
@@ -435,6 +472,15 @@ public class PlayerCatMovement : MonoBehaviour
                 bool isBoxOnRight = boxInteraction.CurrentBox.transform.position.x > transform.position.x;
                 spriteRenderer.flipX = !isBoxOnRight; // 박스를 바라보는 방향으로 설정
             }
+
+            // 박스 상호작용 중일 때 웅크리기 소리 재생 (착지 딜레이 적용)
+            if (horizontalInput != 0 && crouchSound != null && 
+                Time.time - lastCrouchSoundTime >= crouchSoundInterval && 
+                Time.time - lastLandingTime >= landingSoundDelay)
+            {
+                audioSource.PlayOneShot(crouchSound);
+                lastCrouchSoundTime = Time.time;
+            }
         }
         // 웅크린 상태에서는 이동 속도 감소
         else if (isCrouching)
@@ -465,7 +511,7 @@ public class PlayerCatMovement : MonoBehaviour
                 jumpCount++;
                 isOnGround = false;
 
-                // 점프 시 파티클 처리
+                // 점프 시 파티클만 처리 (소리는 점프 소리만)
                 if (dashParticle != null)
                 {
                     UpdateParticlePosition();
@@ -475,8 +521,11 @@ public class PlayerCatMovement : MonoBehaviour
                     }
                     particleEmission.rateOverTime = runEmissionRate; // 점프 시 달리기와 같은 파티클 효과
                 }
+                
+                // 점프 소리만 재생
                 if (jumpSound != null)
                 {
+                    audioSource.Stop(); // 현재 재생 중인 모든 소리 중지
                     audioSource.PlayOneShot(jumpSound);
                 }
             }
@@ -565,13 +614,20 @@ public class PlayerCatMovement : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        // 바닥 또는 박스에 닿으면 점프 리셋
-        if (collision.gameObject.CompareTag("Ground") || collision.gameObject.CompareTag("Box"))
+        // 바닥, 박스, 또는 벽에 닿으면 점프 리셋
+        if (collision.gameObject.CompareTag("Ground") || 
+            collision.gameObject.CompareTag("Box") || 
+            collision.gameObject.CompareTag("wall"))
         {
             // 위에서 아래로 충돌했는지 확인 (발이 닿았는지)
             foreach (ContactPoint2D contact in collision.contacts)
             {
-                if (contact.normal.y > 0.5f) // 아래쪽에서 충돌
+                if (contact.normal.y > 0.5f) // 아래쪽에서 충돌 (바닥/박스)
+                {
+                    jumpCount = 0; // 점프 카운트 리셋
+                    break;
+                }
+                else if (Mathf.Abs(contact.normal.x) > 0.5f) // 좌우에서 충돌 (벽)
                 {
                     jumpCount = 0; // 점프 카운트 리셋
                     break;

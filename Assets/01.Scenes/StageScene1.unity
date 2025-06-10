@@ -1369,11 +1369,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7261a341ba5f53f45b24d904d3157b10, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerController: {fileID: 507170960}
-  triggerObject: {fileID: 318836952}
-  uiObject: {fileID: 1716664927}
-  requiredKey: 100
-  checkKeyInput: 1
 --- !u!61 &263682524
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -2146,11 +2141,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7261a341ba5f53f45b24d904d3157b10, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerController: {fileID: 507170960}
-  triggerObject: {fileID: 1963451648}
-  uiObject: {fileID: 1370044581}
-  requiredKey: 32
-  checkKeyInput: 1
 --- !u!50 &471682275
 Rigidbody2D:
   serializedVersion: 4
@@ -2345,6 +2335,7 @@ MonoBehaviour:
   runSoundInterval: 0.5
   climbSoundInterval: 0.4
   crouchSoundInterval: 0.5
+  landingSoundDelay: 0.1
   fallMultiplier: 4.5
   lowJumpMultiplier: 5
   groundCheck: {fileID: 2011628562}
@@ -6956,8 +6947,35 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 4135296550664430820, guid: fcc937e4cda6d8c4d8de70f5c23e9268, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1355391954}
   m_SourcePrefab: {fileID: 100100000, guid: fcc937e4cda6d8c4d8de70f5c23e9268, type: 3}
+--- !u!1 &1355391953 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4135296550664430820, guid: fcc937e4cda6d8c4d8de70f5c23e9268, type: 3}
+  m_PrefabInstance: {fileID: 1355391952}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1355391954
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1355391953}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fdbe5dd65af26754991aa47c527aa042, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sceneDescriptionText: {fileID: 0}
+  sceneTextDataList:
+  - sceneName: RecallScene1
+    sceneDescription: "\uC9D1 \uC548"
+  - sceneName: StageScene1
+    sceneDescription: "\uB4B7\uACE8\uBAA9"
+  defaultText: "\uC7A5\uC18C"
 --- !u!1 &1361556302
 GameObject:
   m_ObjectHideFlags: 0
@@ -13236,8 +13254,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   tutorials:
-  - {fileID: 263682523}
-  - {fileID: 471682274}
+  - {fileID: 0}
+  - {fileID: 0}
   nextSceneName: 
 --- !u!4 &1747640615
 Transform:

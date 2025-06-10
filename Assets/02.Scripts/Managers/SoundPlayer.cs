@@ -11,8 +11,8 @@ public class SoundPlayer : MonoBehaviour
     [Header("Audio Source")]
     [SerializeField] private AudioSource[] bgmPlayers = new AudioSource[4]; // 4개로 증가 (동시 재생용)
     [SerializeField] private AudioSource typingSoundPlayer;
-    [SerializeField] private AudioSource[] UISoundLoopPlayer;
-    [SerializeField] private AudioSource[] UISoundPlayer;
+    [SerializeField] private AudioSource[] UISoundLoopPlayer = new AudioSource[2];
+    [SerializeField] private AudioSource[] UISoundPlayer = new AudioSource[2];
 
     [Header("AudioClip")]
     [SerializeField] private AudioClip[] bgmClip;
@@ -44,6 +44,67 @@ public class SoundPlayer : MonoBehaviour
         public float bgm2Delay = 0f; // BGM2의 시작 지연 시간
     }
 
+    private void InitializeAudioSources()
+    {
+        // BGM 플레이어 초기화
+        if (bgmPlayers == null || bgmPlayers.Length != 4)
+        {
+            bgmPlayers = new AudioSource[4];
+        }
+
+        for (int i = 0; i < 4; i++)
+        {
+            if (bgmPlayers[i] == null)
+            {
+                bgmPlayers[i] = gameObject.AddComponent<AudioSource>();
+            }
+            bgmPlayers[i].playOnAwake = false;
+            bgmPlayers[i].loop = true;
+            bgmPlayers[i].volume = bgmVolume;
+        }
+
+        // UI 사운드 플레이어 초기화
+        if (UISoundPlayer == null || UISoundPlayer.Length != 2)
+        {
+            UISoundPlayer = new AudioSource[2];
+        }
+
+        for (int i = 0; i < 2; i++)
+        {
+            if (UISoundPlayer[i] == null)
+            {
+                UISoundPlayer[i] = gameObject.AddComponent<AudioSource>();
+            }
+            UISoundPlayer[i].playOnAwake = false;
+            UISoundPlayer[i].volume = soundEffectVolume;
+        }
+
+        // UI 루프 사운드 플레이어 초기화
+        if (UISoundLoopPlayer == null || UISoundLoopPlayer.Length != 2)
+        {
+            UISoundLoopPlayer = new AudioSource[2];
+        }
+
+        for (int i = 0; i < 2; i++)
+        {
+            if (UISoundLoopPlayer[i] == null)
+            {
+                UISoundLoopPlayer[i] = gameObject.AddComponent<AudioSource>();
+            }
+            UISoundLoopPlayer[i].playOnAwake = false;
+            UISoundLoopPlayer[i].loop = true;
+            UISoundLoopPlayer[i].volume = soundEffectVolume;
+        }
+
+        // 타이핑 사운드 플레이어 초기화
+        if (typingSoundPlayer == null)
+        {
+            typingSoundPlayer = gameObject.AddComponent<AudioSource>();
+        }
+        typingSoundPlayer.playOnAwake = false;
+        typingSoundPlayer.volume = soundEffectVolume;
+    }
+
     void Awake()
     {
         if (Instance == null)
@@ -51,6 +112,7 @@ public class SoundPlayer : MonoBehaviour
             Instance = this;
             DontDestroyOnLoad(gameObject);
             SceneManager.sceneLoaded += OnSceneLoaded;
+            InitializeAudioSources();
         }
         else
         {
@@ -60,6 +122,8 @@ public class SoundPlayer : MonoBehaviour
 
     void Start()
     {
+        // 시작 시 한 번 더 초기화 확인
+        InitializeAudioSources();
         CheckAndPlaySceneBGM(SceneManager.GetActiveScene().name);
     }
 
@@ -441,4 +505,16 @@ public class SoundPlayer : MonoBehaviour
     public List<int> GetCurrentBGMs() => new List<int>(currentBGMs);
     public bool IsBGMPlaying() => currentBGMs.Count > 0;
     public int GetBGMCount() => currentBGMs.Count;
+
+    // BGM 플레이어 배열 반환
+    public AudioSource[] GetBGMPlayers()
+    {
+        return bgmPlayers;
+    }
+
+    // 현재 BGM 볼륨 반환
+    public float GetBGMVolume()
+    {
+        return bgmVolume;
+    }
 }

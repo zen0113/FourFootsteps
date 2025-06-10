@@ -536,7 +536,6 @@ GameObject:
   m_Component:
   - component: {fileID: 263534161}
   - component: {fileID: 263534160}
-  - component: {fileID: 263534162}
   m_Layer: 0
   m_Name: SceneLoader
   m_TagString: Untagged
@@ -571,25 +570,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &263534162
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 263534159}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fdbe5dd65af26754991aa47c527aa042, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  sceneDescriptionText: {fileID: 305725398}
-  sceneTextDataList:
-  - sceneName: RecallScene1
-    sceneDescription: "\uC9D1 \uC548"
-  - sceneName: StageScene1
-    sceneDescription: "\uB4B7\uACE8\uBAA9"
-  defaultText: "\uB4B7\uACE8\uBAA9"
 --- !u!114 &305725398 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 1962937416038355469, guid: fcc937e4cda6d8c4d8de70f5c23e9268, type: 3}
@@ -765,16 +745,18 @@ MonoBehaviour:
   - {fileID: 856044735}
   typingSoundPlayer: {fileID: 29256698}
   UISoundLoopPlayer:
-  - {fileID: 1785726155}
-  - {fileID: 488560161}
+  - {fileID: 0}
+  - {fileID: 0}
   UISoundPlayer:
-  - {fileID: 1539387632}
-  - {fileID: 186386219}
-  - {fileID: 1033453570}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
   bgmClip:
   - {fileID: 8300000, guid: 57313bff8aa3b2a40b8991cbcc4c8344, type: 3}
   - {fileID: 8300000, guid: a9180e48345989b448d46b628199e6f4, type: 3}
   - {fileID: 8300000, guid: ab5b87ae348791c4fa46e61d3f830ef6, type: 3}
+  - {fileID: 8300000, guid: 57e87a6a225cf4d4daeb1ef3e04cd64e, type: 3}
+  - {fileID: 8300000, guid: 4f19fb89eb3d99141a48c9b614870730, type: 3}
   UISoundClip:
   - {fileID: 8300000, guid: bac8b5e2006d282498f3c5049224c9fd, type: 3}
   - {fileID: 8300000, guid: b29d0aec856b3fb41b7ee6c679460a92, type: 3}
@@ -793,6 +775,14 @@ MonoBehaviour:
     bgmIndex2: 2
     bgm1Volume: 0
     bgm2Volume: 0.692
+    autoPlay: 1
+    syncStart: 1
+    bgm2Delay: 0
+  - sceneName: RecallScene1
+    bgmIndex1: 3
+    bgmIndex2: 4
+    bgm1Volume: 0.4
+    bgm2Volume: 0.2
     autoPlay: 1
     syncStart: 1
     bgm2Delay: 0
@@ -7986,7 +7976,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 4135296550664430820, guid: fcc937e4cda6d8c4d8de70f5c23e9268, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1795491220}
   m_SourcePrefab: {fileID: 100100000, guid: fcc937e4cda6d8c4d8de70f5c23e9268, type: 3}
 --- !u!114 &1795491218 stripped
 MonoBehaviour:
@@ -7999,6 +7992,30 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1 &1795491219 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4135296550664430820, guid: fcc937e4cda6d8c4d8de70f5c23e9268, type: 3}
+  m_PrefabInstance: {fileID: 1795491217}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1795491220
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1795491219}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fdbe5dd65af26754991aa47c527aa042, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sceneDescriptionText: {fileID: 305725398}
+  sceneTextDataList:
+  - sceneName: RecallScene1
+    sceneDescription: "\uC9D1 \uC548"
+  - sceneName: StageScene1
+    sceneDescription: "\uB4B7\uACE8\uBAA9"
+  defaultText: "\uC7A5\uC18C"
 --- !u!1 &1944628075
 GameObject:
   m_ObjectHideFlags: 0

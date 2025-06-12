@@ -25,6 +25,10 @@ public class InputTextTypingPlayer : MonoBehaviour
             {
                 typingSound.pitch = Random.Range(minPitch, maxPitch);
                 typingSound.Play();
+            }else if(currentLength < previousTextLength)
+            {
+                typingSound.pitch = Random.Range(minPitch, maxPitch);
+                typingSound.Play();
             }
 
             previousTextLength = currentLength;

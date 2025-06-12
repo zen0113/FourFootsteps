@@ -83,8 +83,8 @@ public class DialogueManager : MonoBehaviour
         if (!isDialogueActive || choicesContainer[dialogueType.ToInt()].childCount > 0)
             return;
 
-        // 다이얼로그 출력될 때 아무 키보드 키나 누르면 스크립트 넘겨짐
-        if (Input.anyKeyDown)
+        // 다이얼로그 출력될 때 space bar 누르면 스크립트 넘겨짐
+        if (Input.GetKeyDown(KeyCode.Space))
             OnDialoguePanelClick();
     }
 

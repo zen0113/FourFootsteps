@@ -11,6 +11,8 @@ public class InputTextTypingPlayer : MonoBehaviour
     private void Start()
     {
         typingSound = GetComponent<AudioSource>();
+        // 이름 설정씬 들어오자마자 바로 포커스해줌
+        inputField.ActivateInputField();
     }
 
     private int previousTextLength = 0;

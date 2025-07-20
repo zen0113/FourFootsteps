@@ -343,7 +343,7 @@ public class PlayerCatMovement : MonoBehaviour
     void LateUpdate()
     {
         // 물리 업데이트 후 애니메이션 상태 동기화
-        if (!IsInputBlocked()|| (bool)GameManager.Instance.GetVariable("CanMoving"))
+        if (!IsInputBlocked() && (bool)GameManager.Instance.GetVariable("CanMoving"))
         {
             UpdateAnimationState(Input.GetAxisRaw("Horizontal"));
         }
@@ -368,7 +368,7 @@ public class PlayerCatMovement : MonoBehaviour
     // 다이얼로그 출력 중, 씬 로딩 중이면 입력을 받지 않음.
     bool IsInputBlocked()
     {
-        return DialogueManager.Instance.isDialogueActive ||
+        return PauseManager.IsGamePaused || DialogueManager.Instance.isDialogueActive ||
                (GameManager.Instance != null && GameManager.Instance.IsSceneLoading);
     }
 

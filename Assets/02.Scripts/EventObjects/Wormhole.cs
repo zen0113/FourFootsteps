@@ -8,21 +8,17 @@ public class Wormhole : EventObject, IResultExecutable
 
     [SerializeField] private FollowCamera followCamera;
 
+    [Header("웜홀 대사 키")]
+    [SerializeField] private string dialogueKey = "Recall1_008";  // Inspector에서 설정 가능
+
     private float targetValue = 0.125f;
 
     private void Awake()
     {
         followCamera = FindObjectOfType<FollowCamera>();
         ResultManager.Instance.RegisterExecutable("WormholeActivation", this);
-
         gameObject.SetActive(false);
     }
-
-    //private void Start()
-    //{
-    //    ResultManager.Instance.RegisterExecutable("WormholeActivation", this);
-    //}
-
 
     public new void Investigate()
     {
@@ -40,37 +36,28 @@ public class Wormhole : EventObject, IResultExecutable
         StartCoroutine(ActiveWormhole());
     }
 
-    // 카메라 이동+웜홀 활성화(이펙트 재생)+처음 발견 스크립트+카메라 복귀
     private IEnumerator ActiveWormhole()
     {
-
-        // 카메라 속도 값 느리게 하여 카메라 이동 연출
         followCamera.smoothSpeedX = 0.01f;
         followCamera.target = gameObject.transform;
 
         yield return new WaitForSeconds(1.5f);
-        DialogueManager.Instance.StartDialogue("Recall1_006");
-        //StartCoroutine(DialogueManager.Instance.StartDialogue("Recall1_006", 2f));
+
+        // 대사 키를 받아서 시작
+        DialogueManager.Instance.StartDialogue(dialogueKey);
 
         while (DialogueManager.Instance.isDialogueActive)
             yield return null;
 
-        // 카메라 위치 플레이어로 복귀
         followCamera.target = GameObject.FindWithTag("Player").transform;
 
         yield return new WaitForSeconds(3f);
 
-        // 카메라 속도 값 복구
         StartCoroutine(SmoothChangeValueCoroutine());
 
         isShowed = true;
     }
 
-    /*
-     * Smooth Speed X 원래 값은 0.125
-     * 회상 씬에서 저 웜홀 대상으로 카메라 이동할 때만 이동 시키기 전에 잠시 Smooth Speed X 값을 0.01 으로 설정하고
-     * 다시 Human으로 카메라 대상 복귀하면 다 복귀 후 값을 0.125로 바꾸기
-     */
     private IEnumerator SmoothChangeValueCoroutine()
     {
         float duration = 1.5f;
@@ -82,11 +69,9 @@ public class Wormhole : EventObject, IResultExecutable
             elapsedTime += Time.deltaTime;
             float t = elapsedTime / duration;
             followCamera.smoothSpeedX = Mathf.Lerp(startValue, targetValue, t);
-            yield return null; // 다음 프레임까지 기다림
+            yield return null;
         }
 
-        // 정확히 타겟 값으로 보정
         followCamera.smoothSpeedX = targetValue;
-
     }
 }

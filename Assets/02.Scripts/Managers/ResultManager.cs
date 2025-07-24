@@ -159,6 +159,11 @@ public class ResultManager : MonoBehaviour
                 yield return new WaitForSeconds(1f);
                 break;
 
+            case "Result_SetNextTutorial":
+                // 다이얼로그 출력 완료 시 다음 트리거로 이동
+                TutorialController.Instance.SetNextTutorial();
+                yield return null;
+                break;
 
             default:
                 Debug.Log($"Result ID: {resultID} not found!");

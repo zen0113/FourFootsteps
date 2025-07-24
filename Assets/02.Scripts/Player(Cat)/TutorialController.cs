@@ -4,6 +4,8 @@ using UnityEngine.SceneManagement;
 
 public class TutorialController : MonoBehaviour
 {
+    public static TutorialController Instance { get; private set; }
+
     [SerializeField]
     private List<TutorialBase> tutorials;
     [SerializeField]
@@ -11,6 +13,14 @@ public class TutorialController : MonoBehaviour
 
     private TutorialBase currentTutorial = null;
     private int currentIndex = -1;
+
+    void Awake()
+    {
+        if (Instance == null)
+            Instance = this;
+        else
+            Destroy(gameObject);
+    }
 
     private void Start()
     {

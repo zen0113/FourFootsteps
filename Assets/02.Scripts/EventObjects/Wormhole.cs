@@ -49,8 +49,8 @@ public class Wormhole : EventObject, IResultExecutable
         followCamera.target = gameObject.transform;
 
         yield return new WaitForSeconds(1.5f);
-        DialogueManager.Instance.StartDialogue("Recall1_006");
-        //StartCoroutine(DialogueManager.Instance.StartDialogue("Recall1_006", 2f));
+        DialogueManager.Instance.StartDialogue("Recall1_008");
+        //StartCoroutine(DialogueManager.Instance.StartDialogue("Recall1_008", 2f));
 
         while (DialogueManager.Instance.isDialogueActive)
             yield return null;

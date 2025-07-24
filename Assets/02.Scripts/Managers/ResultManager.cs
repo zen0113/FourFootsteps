@@ -74,7 +74,7 @@ public class ResultManager : MonoBehaviour
             case string when resultID.StartsWith("Result_StartDialogue"):  // 대사 시작
                 variableName = resultID["Result_StartDialogue".Length..];
                 DialogueManager.Instance.StartDialogue(variableName);
-
+                //Debug.Log($"다이얼로그 {variableName} 시작");
                 // 비동기 대기 (대사 끝날 때까지)
                 while (DialogueManager.Instance.isDialogueActive)
                     yield return null;
@@ -158,6 +158,13 @@ public class ResultManager : MonoBehaviour
                 SceneLoader.Instance.LoadScene(GameManager.Instance.GetNextSceneData().sceneName);
                 yield return new WaitForSeconds(1f);
                 break;
+
+            case "Result_SetNextTutorial":
+                // 다이얼로그 출력 완료 시 다음 트리거로 이동
+                TutorialController.Instance.SetNextTutorial();
+                yield return null;
+                break;
+
 
 
             default:

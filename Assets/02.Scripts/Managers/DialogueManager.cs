@@ -177,6 +177,10 @@ public class DialogueManager : MonoBehaviour
                     speakerText.text = GameManager.Instance.GetVariable("YourCatName").ToString();
                     break;
 
+                case "InnerThoughts":
+                    speakerText.text = "";
+                    break;
+
                 default:
                     speakerText.text = dialogueLine.SpeakerID;
                     break;
@@ -353,15 +357,13 @@ public class DialogueManager : MonoBehaviour
                 dialogueType = DialogueType.MONOLOG;
                 break;
 
+            case "InnerThoughts":
+                dialogueType = DialogueType.PLAYER_THINKING;
+                break;
+
             default:
                 dialogueType = DialogueType.NPC;
                 break;
-
-            // 생각 중일 때 이걸 보통 speakerID로 식별했는데 똑같이 PlayerName으로 해둬서
-            // 스크립트 내용에 생각 중이 있으면 PlayerName으로만 하는 것 말고 다른 방법 찾기
-            //case "DialogueC_004":
-            //    dialogueType = DialogueType.PLAYER_THINKING;
-            //    break;    
         }
     }
 

@@ -40,24 +40,31 @@ public class DialoguesParser
 
             if ((string.IsNullOrWhiteSpace(lines[i])) || (fields[0] == "" && fields[1] == "")) continue;
 
-            string dialogueID = fields[0].Trim();
-            if (string.IsNullOrWhiteSpace(dialogueID)) dialogueID = lastDialogueID;
-            else lastDialogueID = dialogueID;
-
-            string speakerID = Escaper(fields[1].Trim());
-            string script = Escaper(fields[2].Trim());
-            string textEffect = Escaper(fields[3].Trim());
-            string imageID = fields[4].Trim();
-            string soundID = fields[5].Trim();
-            string next = fields[6].Trim();
-
-            if (!dialogues.ContainsKey(dialogueID))
+            try
             {
-                Dialogue dialogue = new Dialogue(dialogueID);
-                dialogues[dialogueID] = dialogue;
-            }
+                string dialogueID = fields[0].Trim();
+                if (string.IsNullOrWhiteSpace(dialogueID)) dialogueID = lastDialogueID;
+                else lastDialogueID = dialogueID;
 
-            dialogues[dialogueID].AddLine(speakerID, script, textEffect, imageID, soundID, next);
+                string speakerID = Escaper(fields[1].Trim());
+                string script = Escaper(fields[2].Trim());
+                string textEffect = Escaper(fields[3].Trim());
+                string imageID = fields[4].Trim();
+                string soundID = fields[5].Trim();
+                string next = fields[6].Trim();
+
+                if (!dialogues.ContainsKey(dialogueID))
+                {
+                    Dialogue dialogue = new Dialogue(dialogueID);
+                    dialogues[dialogueID] = dialogue;
+                }
+
+                dialogues[dialogueID].AddLine(speakerID, script, textEffect, imageID, soundID, next);
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogError($"CSV 파싱 중 오류 발생 (줄 번호 {i + 1}): {e.Message}\n내용: {lines[i]}");
+            }
         }
 
         return dialogues;

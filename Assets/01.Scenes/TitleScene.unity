@@ -757,6 +757,7 @@ MonoBehaviour:
   - {fileID: 8300000, guid: ab5b87ae348791c4fa46e61d3f830ef6, type: 3}
   - {fileID: 8300000, guid: 57e87a6a225cf4d4daeb1ef3e04cd64e, type: 3}
   - {fileID: 8300000, guid: 4f19fb89eb3d99141a48c9b614870730, type: 3}
+  - {fileID: 8300000, guid: f1dd12a204b5b854190f0f9da49c0f60, type: 3}
   UISoundClip:
   - {fileID: 8300000, guid: bac8b5e2006d282498f3c5049224c9fd, type: 3}
   - {fileID: 8300000, guid: b29d0aec856b3fb41b7ee6c679460a92, type: 3}
@@ -783,6 +784,14 @@ MonoBehaviour:
     bgmIndex2: 4
     bgm1Volume: 0.4
     bgm2Volume: 0.2
+    autoPlay: 1
+    syncStart: 1
+    bgm2Delay: 0
+  - sceneName: SetPlayerName
+    bgmIndex1: 5
+    bgmIndex2: 5
+    bgm1Volume: 0
+    bgm2Volume: 0.82
     autoPlay: 1
     syncStart: 1
     bgm2Delay: 0
@@ -1178,6 +1187,17 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 3748e216849363f48bf06a48de54cf2d, type: 3}
+--- !u!114 &637627050 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1064444641815830669, guid: 3748e216849363f48bf06a48de54cf2d, type: 3}
+  m_PrefabInstance: {fileID: 637627049}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &709835175
 GameObject:
   m_ObjectHideFlags: 0
@@ -7877,6 +7897,10 @@ PrefabInstance:
       propertyPath: coverPanel
       value: 
       objectReference: {fileID: 1795491218}
+    - target: {fileID: 1394963342017423906, guid: fcc937e4cda6d8c4d8de70f5c23e9268, type: 3}
+      propertyPath: dialogueCoverPanel
+      value: 
+      objectReference: {fileID: 637627050}
     - target: {fileID: 1868927578055931920, guid: fcc937e4cda6d8c4d8de70f5c23e9268, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0

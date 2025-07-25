@@ -15,7 +15,7 @@ public class DialogueManager : MonoBehaviour
     public GameObject[] dialogueSet;
     public TextMeshProUGUI[] speakerTexts;
     public TextMeshProUGUI[] scriptText;
-    //public Image[] backgroundImages;
+    public Image[] cutSceneImages;
     public Image[] characterImages;
     public Transform[] choicesContainer;
     public GameObject choicePrefab;
@@ -245,6 +245,21 @@ public class DialogueManager : MonoBehaviour
         return sentence;
     }
 
+    private void UpdateCutScene(DialogueLine dialogueLine)
+    {
+        var cutSceneID = dialogueLine.CutSceneID;
+
+        foreach (var currentCutSceneImage in cutSceneImages)
+            if (string.IsNullOrWhiteSpace(cutSceneID))
+                currentCutSceneImage.color = new Color(1, 1, 1, 0);
+            else
+            {
+                var cutSceneSprite = Resources.Load<Sprite>($"Art/CutScenes/{cutSceneID}");
+                currentCutSceneImage.sprite = cutSceneSprite;
+                currentCutSceneImage.color = new Color(1, 1, 1, 1);
+            }
+    }
+
     private IEnumerator TextShakeEffectCoroutine(int dialogueType)
     {
         //isTextShaking = true;
@@ -336,7 +351,7 @@ public class DialogueManager : MonoBehaviour
         isTyping = true;
         StartCoroutine(TypeSentence(sentence));
 
-        //UpdateBackground(dialogueLine);
+        UpdateCutScene(dialogueLine);
         PlayDialogueSound(dialogueLine);
         UpdateCharacterImages(dialogueLine);
     }

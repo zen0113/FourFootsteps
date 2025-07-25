@@ -132,6 +132,25 @@ public class ResultManager : MonoBehaviour
                 //StartCoroutine(UIManager.Instance.OnFade(null, 1, 0, fadeInTime));
                 break;
 
+            // 다이얼로그 캔버스까지 안 보이게 하는 Fade Out/In
+            case "Result_DialogueFadeOut":  // fade out
+                fadeOutTime = 3f;
+                yield return UIManager.Instance.OnFade(UIManager.Instance.dialogueCoverPanel, 0, 1, fadeOutTime);
+                //StartCoroutine(UIManager.Instance.OnFade(null, 0, 1, fadeOutTime));
+                break;
+
+            case "Result_DialogueFadeIn":  // fade int
+                fadeInTime = 3f;
+                yield return UIManager.Instance.OnFade(UIManager.Instance.dialogueCoverPanel, 1, 0, fadeInTime);
+                //StartCoroutine(UIManager.Instance.OnFade(null, 1, 0, fadeInTime));
+                break;
+
+            // 프롤로그 다음 스텝으로 넘김
+            case "Result_NextPrologueStep":
+                PrologueManager.Instance.ProceedToNextStep();
+                yield return null;
+                break;
+
             // 낡은 소파 조사 시, 회상1 씬으로 이동.
             case "Result_GoToRecall1":
                 InitializeExecutableObjects();

@@ -50,11 +50,12 @@ public static class Constants
     public const int
         BGM_STOP = -1,
         BGM_TITLE = 0,
-        BGM_PROLOGUE = 1,
-        BGM_STAGE1 = 2,
-        BGM_REMINISCENE1 = 3,
-        BGM_STAGE2 = 4,
-        BGM_REMINISCENE2 = 5;
+        BGM_TITLESOUND=1,
+        BGM_PROLOGUE_0 = 2,
+        BGM_STAGE1 = 3,
+        BGM_REMINISCENE1 = 4,
+        BGM_STAGE2 = 5,
+        BGM_REMINISCENE2 = 6;
 
     // 2. 일반 오브젝트 효과음
     public const int

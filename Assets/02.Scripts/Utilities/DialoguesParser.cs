@@ -5,13 +5,13 @@ using UnityEngine;
 
 public class DialoguesParser
 {
-    // CSV ����
+    // CSV files
     private TextAsset dialoguesCSV = Resources.Load<TextAsset>("Datas/dialogues");
     private TextAsset choicesCSV = Resources.Load<TextAsset>("Datas/choices");
     //private TextAsset imagePathsCSV = Resources.Load<TextAsset>("Datas/image paths");
     //private TextAsset backgroundsCSV = Resources.Load<TextAsset>("Datas/backgrounds");
 
-    // �ڷ� ����
+    // Data Structure
     private Dictionary<string, Dialogue> dialogues = new Dictionary<string, Dialogue>();
     private Dictionary<string, Choice> choices = new Dictionary<string, Choice>();
     //private Dictionary<string, ImagePath> imagePaths = new Dictionary<string, ImagePath>();
@@ -21,8 +21,8 @@ public class DialoguesParser
     {
         string modifiedString = originalString.Replace("\\n", "\n");
         modifiedString = modifiedString.Replace("`", ",");
-        // csv�����̱� ������ ��ũ��Ʈ �ۼ� ��, ","�̰Ÿ� "`"�̰ŷ� �ۼ� �� �޼ҵ忡�� ġȯ
-        // ��ũ��Ʈ �� "\n"�� "\\n"���� ��� �͵� ���� ����. 
+        // csv파일이기 때문에 스크립트 작성 시, ","이거를 "`"이거로 작성 후 메소드에서 치환
+        // 스크립트 중 "\n"을 "\\n"으로 써둔 것도 같은 이유. 
         modifiedString = modifiedString.Replace("", "");
 
         return modifiedString;
@@ -51,7 +51,8 @@ public class DialoguesParser
                 string textEffect = Escaper(fields[3].Trim());
                 string imageID = fields[4].Trim();
                 string soundID = fields[5].Trim();
-                string next = fields[6].Trim();
+                string cutSceneID = fields[6].Trim();
+                string next = fields[7].Trim();
 
                 if (!dialogues.ContainsKey(dialogueID))
                 {
@@ -59,7 +60,7 @@ public class DialoguesParser
                     dialogues[dialogueID] = dialogue;
                 }
 
-                dialogues[dialogueID].AddLine(speakerID, script, textEffect, imageID, soundID, next);
+                dialogues[dialogueID].AddLine(speakerID, script, textEffect, imageID, soundID, cutSceneID, next);
             }
             catch (System.Exception e)
             {

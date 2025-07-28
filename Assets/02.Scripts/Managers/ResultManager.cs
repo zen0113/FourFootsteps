@@ -109,13 +109,13 @@ public class ResultManager : MonoBehaviour
                 break;
 
             case "Result_FadeOut":  // fade out
-                float fadeOutTime = 3f;
+                float fadeOutTime = 2f;
                 yield return UIManager.Instance.OnFade(null, 0, 1, fadeOutTime);
                 //StartCoroutine(UIManager.Instance.OnFade(null, 0, 1, fadeOutTime));
                 break;
 
             case "Result_FadeIn":  // fade int
-                float fadeInTime = 3f;
+                float fadeInTime = 2f;
                 yield return UIManager.Instance.OnFade(null, 1, 0, fadeInTime);
                 //StartCoroutine(UIManager.Instance.OnFade(null, 1, 0, fadeInTime));
                 break;
@@ -134,20 +134,23 @@ public class ResultManager : MonoBehaviour
 
             // 다이얼로그 캔버스까지 안 보이게 하는 Fade Out/In
             case "Result_DialogueFadeOut":  // fade out
-                fadeOutTime = 3f;
+                Debug.Log("Result_DialogueFadeOut");
+                fadeOutTime = 2f;
                 yield return UIManager.Instance.OnFade(UIManager.Instance.dialogueCoverPanel, 0, 1, fadeOutTime);
                 //StartCoroutine(UIManager.Instance.OnFade(null, 0, 1, fadeOutTime));
                 break;
 
             case "Result_DialogueFadeIn":  // fade int
-                fadeInTime = 3f;
+                Debug.Log("Result_DialogueFadeIn");
+                fadeInTime = 2f;
                 yield return UIManager.Instance.OnFade(UIManager.Instance.dialogueCoverPanel, 1, 0, fadeInTime);
                 //StartCoroutine(UIManager.Instance.OnFade(null, 1, 0, fadeInTime));
                 break;
 
             // 프롤로그 다음 스텝으로 넘김
             case "Result_NextPrologueStep":
-                PrologueManager.Instance.ProceedToNextStep();
+                Debug.Log("Result_NextPrologueStep");
+                StartCoroutine(PrologueManager.Instance.ProceedToNextStep());
                 yield return null;
                 break;
 

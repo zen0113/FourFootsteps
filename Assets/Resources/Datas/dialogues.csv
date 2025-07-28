@@ -13,34 +13,34 @@ Prologue_002,엄마,{PlayerName}!! 어딨어!!! ,TRUE/SHAKE/FAST,temp_mom,,001_P
 ,엄마,너 그것도 적금 들던 거 무리하게 깨고 냈잖니! \n그리고 지금 엄마는 고양이 털 때문에 두드러기 난 것도 안 보이니?,,temp_mom,,001_Prologue1,,
 ,엄마,너 정말 다른 사람도 생각 안 하고 네 생각만 할거야?,,temp_mom,,001_Prologue1,,
 ,PlayerName,내가 그렇게까지 잘못했어?! 하` 그럼 내가 알아서 책임질게.,SHAKE,temp_playerHUMAN,,001_Prologue1,,
-,엄마,{PlayerName}!!!,TRUE/SHAKE,temp_mom,,001_Prologue1,EventNextPrologueStep,
+,엄마,{PlayerName}!!!,TRUE/SHAKE,temp_mom,,BLACK,EventNextPrologueStep,
 Prologue_003,YourCatName,야옹~,,temp_playerCAT,,002_Prologue2,,주인공의 방
 ,PlayerName,옳지` 여기로 들어가자. 얼른 들어가봐.,,temp_playerHUMAN,,002_Prologue2,,
-,InnerThoughts,(이동장의 지퍼를 잠근다.),,temp_playerHUMAN,,002_Prologue2,EventNextPrologueStep,
-Prologue_004,엄마,{PlayerName}` 너 지금 이 시간에 어딜 가니!,TRUE,temp_mom,,,,거실로 이동
-,PlayerName,…,,temp_playerHUMAN,,,,
-,엄마,{PlayerName}!!,TRUE,temp_mom,,,,
-Prologue_005,InnerThoughts,내가 지금 왜 이러고 있지..?,AUTO,temp_playerHUMAN,,,,집에서 나와서 뒷골목으로 이동
-,InnerThoughts,하지만 이번에는 내가 잘못한 게 아니잖아!,AUTO,temp_playerHUMAN,,,,
-,InnerThoughts,……..,AUTO,temp_playerHUMAN,,,,
-,InnerThoughts,너랑 나는 어쩌면 잘못 만난 것일지도 몰라.,AUTO,temp_playerHUMAN,,,,
-,InnerThoughts,내가 거기서 널 데려오지 않았더라면…,AUTO,temp_playerHUMAN,,,,
-,InnerThoughts,……..,AUTO,temp_playerHUMAN,,,,
+,InnerThoughts,(이동장의 지퍼를 잠근다.),,temp_playerHUMAN,,BLACK,EventNextPrologueStep,
+Prologue_004,엄마,{PlayerName}` 너 지금 이 시간에 어딜 가니!,TRUE/AUTO_DELAYED,temp_mom,,,,거실로 이동
+,PlayerName,…,AUTO_DELAYED,temp_playerHUMAN,,,,
+,엄마,{PlayerName}!!,TRUE/AUTO_DELAYED,temp_mom,,,,
+Prologue_005,InnerThoughts,내가 지금 왜 이러고 있지..?,AUTO_DELAYED,temp_playerHUMAN,,,,집에서 나와서 뒷골목으로 이동
+,InnerThoughts,하지만 이번에는 내가 잘못한 게 아니잖아!,AUTO_DELAYED,temp_playerHUMAN,,,,
+,InnerThoughts,……..,AUTO_DELAYED,temp_playerHUMAN,,,,
+,InnerThoughts,너랑 나는 어쩌면 잘못 만난 것일지도 몰라.,AUTO_DELAYED,temp_playerHUMAN,,,,
+,InnerThoughts,내가 거기서 널 데려오지 않았더라면…,AUTO_DELAYED,temp_playerHUMAN,,,,
+,InnerThoughts,……..,AUTO_DELAYED,temp_playerHUMAN,,,,
 Prologue_006,PlayerName,… 여기다가 널 풀어줄게.,,temp_playerHUMAN,,,,
 ,PlayerName,앞으로 잘 살아라.,,temp_playerHUMAN,,,,
-,YourCatName,야옹..,,temp_playerCAT,,,,
-Prologue_007,PlayerName,뭐... 고양이니까 알아서 잘 살겠지…?,,temp_playerHUMAN,,,,집으로 돌아온 후 침대 위
-,PlayerName,에잇` 잠이나 자자..,,temp_playerHUMAN,,,,
-,InnerThoughts,(평소처럼 배게 옆을 쓰다듬는다.),,temp_playerHUMAN,,,,
-,InnerThoughts,… 아,,temp_playerHUMAN,,,,
-,InnerThoughts,{YourCatName}는 이제 없지.. 나도 참..,TRUE,temp_playerHUMAN,,,,
-,InnerThoughts,… 오늘따라 침대가 좀 넓게 느껴지네..,,temp_playerHUMAN,,,,
-Prologue_008,PlayerName,.. 여긴 어디지? 온통 다 어두컴컴해서 잘 안 보이네...,,temp_playerHUMAN,,,,꿈 속
-,PlayerName,앗` 뭔가가 다가오는데? 저건 또 뭐지?,,temp_playerHUMAN,,,,
-Prologue_009,PlayerName,윽` 뭐야?!!,SHAKE,temp_playerHUMAN,,,,하얀 새가 주인공에게 달려 들고 날아감
-,PlayerName,대체 무슨 일이 일어난 거지..?,,temp_playerHUMAN,,,,
-,InnerThoughts,저 하얀 새…가 나를 공격한 건가?\n도대체 왜..?,,temp_playerHUMAN,,,,
-,InnerThoughts,아.. 점점 눈 앞이 흐려진다…,,temp_playerHUMAN,,,,
+,YourCatName,야옹..,,temp_playerCAT,,,EventNextPrologueStep,
+Prologue_007,PlayerName,뭐... 고양이니까 알아서 잘 살겠지…?,,temp_playerHUMAN,,003_Prologue3,,집으로 돌아온 후 침대 위
+,PlayerName,에잇` 잠이나 자자..,,temp_playerHUMAN,,003_Prologue3,,
+,InnerThoughts,(평소처럼 배게 옆을 쓰다듬는다.),,temp_playerHUMAN,,003_Prologue3,,
+,InnerThoughts,… 아,,temp_playerHUMAN,,003_Prologue3,,
+,InnerThoughts,{YourCatName}는 이제 없지.. 나도 참..,TRUE,temp_playerHUMAN,,003_Prologue3,,
+,InnerThoughts,… 오늘따라 침대가 좀 넓게 느껴지네..,,temp_playerHUMAN,,BLACK,Prologue_008,
+Prologue_008,PlayerName,.. 여긴 어디지? 온통 다 어두컴컴해서 잘 안 보이네...,,temp_playerHUMAN,,004_Prologue4,,꿈 속
+,PlayerName,앗` 뭔가가 다가오는데? 저건 또 뭐지?,,temp_playerHUMAN,,004_Prologue4,Prologue_009,
+Prologue_009,PlayerName,윽` 뭐야?!!,SHAKE,temp_playerHUMAN,,005_Prologue5,,하얀 새가 주인공에게 달려 들고 날아감
+,PlayerName,대체 무슨 일이 일어난 거지..?,,temp_playerHUMAN,,005_Prologue5,,
+,InnerThoughts,저 하얀 새…가 나를 공격한 건가?\n도대체 왜..?,,temp_playerHUMAN,,005_Prologue5,,
+,InnerThoughts,아.. 점점 눈 앞이 흐려진다…,,temp_playerHUMAN,,BLACK,EventNextPrologueStep,
 ,,,,,,,,
 Stage01_001,PlayerName,…여긴…어디지?,,temp_playerCAT,,,,어두운 이동장 속에서 깨어나며
 ,PlayerName,어두워서 잘 보이지도 않네. 일단 밖으로 나가보자.,,temp_playerCAT,,,,이동장 열기 버튼 연타 이전

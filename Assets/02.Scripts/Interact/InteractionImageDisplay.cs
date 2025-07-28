@@ -22,7 +22,7 @@ public class InteractionImageDisplay : MonoBehaviour
     // 이미지 오브젝트
     private GameObject imageObject;
     private SpriteRenderer imageRenderer;
-    private bool isPlayerInArea = false;
+    [SerializeField] private bool isPlayerInArea = false;
     
     void Start()
     {

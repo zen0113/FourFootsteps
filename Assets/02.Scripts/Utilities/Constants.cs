@@ -59,7 +59,10 @@ public static class Constants
 
     // 2. 일반 오브젝트 효과음
     public const int
-        Sound_WormholeActived = 1;
+        Sound_WormholeActived = 1,
+        Sound_FrontDoorOpenAndClose = 2,
+        Sound_RoomDoorOpenAndClose = 3;
+
 
 
     // 4. 루프 (반복 되어야 하는 것)

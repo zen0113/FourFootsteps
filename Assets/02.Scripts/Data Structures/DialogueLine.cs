@@ -5,6 +5,7 @@ public class DialogueLine
     public string TextEffect { get; private set; }
     public string ImageID { get; private set; }
     public string SoundID { get; private set; }
+    public string CutSceneID { get; private set; }
     public string Next { get; private set; }
 
     // initialize function
@@ -14,6 +15,7 @@ public class DialogueLine
         string textEffect,
         string imageID,
         string soundID,
+        string cutSceneID,
         string next)
     {
         SpeakerID = speakerID;
@@ -21,6 +23,7 @@ public class DialogueLine
         TextEffect = textEffect;
         ImageID = imageID;
         SoundID = soundID;
+        CutSceneID = cutSceneID;
         Next = next;
     }
 

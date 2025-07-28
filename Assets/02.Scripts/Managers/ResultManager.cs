@@ -74,7 +74,7 @@ public class ResultManager : MonoBehaviour
             case string when resultID.StartsWith("Result_StartDialogue"):  // 대사 시작
                 variableName = resultID["Result_StartDialogue".Length..];
                 DialogueManager.Instance.StartDialogue(variableName);
-
+                //Debug.Log($"다이얼로그 {variableName} 시작");
                 // 비동기 대기 (대사 끝날 때까지)
                 while (DialogueManager.Instance.isDialogueActive)
                     yield return null;
@@ -109,13 +109,13 @@ public class ResultManager : MonoBehaviour
                 break;
 
             case "Result_FadeOut":  // fade out
-                float fadeOutTime = 3f;
+                float fadeOutTime = 2f;
                 yield return UIManager.Instance.OnFade(null, 0, 1, fadeOutTime);
                 //StartCoroutine(UIManager.Instance.OnFade(null, 0, 1, fadeOutTime));
                 break;
 
             case "Result_FadeIn":  // fade int
-                float fadeInTime = 3f;
+                float fadeInTime = 2f;
                 yield return UIManager.Instance.OnFade(null, 1, 0, fadeInTime);
                 //StartCoroutine(UIManager.Instance.OnFade(null, 1, 0, fadeInTime));
                 break;
@@ -130,6 +130,28 @@ public class ResultManager : MonoBehaviour
                 fadeInTime = 1.5f;
                 yield return UIManager.Instance.OnFade(null, 1, 0, fadeInTime);
                 //StartCoroutine(UIManager.Instance.OnFade(null, 1, 0, fadeInTime));
+                break;
+
+            // 다이얼로그 캔버스까지 안 보이게 하는 Fade Out/In
+            case "Result_DialogueFadeOut":  // fade out
+                Debug.Log("Result_DialogueFadeOut");
+                fadeOutTime = 2f;
+                yield return UIManager.Instance.OnFade(UIManager.Instance.dialogueCoverPanel, 0, 1, fadeOutTime);
+                //StartCoroutine(UIManager.Instance.OnFade(null, 0, 1, fadeOutTime));
+                break;
+
+            case "Result_DialogueFadeIn":  // fade int
+                Debug.Log("Result_DialogueFadeIn");
+                fadeInTime = 2f;
+                yield return UIManager.Instance.OnFade(UIManager.Instance.dialogueCoverPanel, 1, 0, fadeInTime);
+                //StartCoroutine(UIManager.Instance.OnFade(null, 1, 0, fadeInTime));
+                break;
+
+            // 프롤로그 다음 스텝으로 넘김
+            case "Result_NextPrologueStep":
+                Debug.Log("Result_NextPrologueStep");
+                StartCoroutine(PrologueManager.Instance.ProceedToNextStep());
+                yield return null;
                 break;
 
             // 낡은 소파 조사 시, 회상1 씬으로 이동.
@@ -164,6 +186,8 @@ public class ResultManager : MonoBehaviour
                 TutorialController.Instance.SetNextTutorial();
                 yield return null;
                 break;
+
+
 
             default:
                 Debug.Log($"Result ID: {resultID} not found!");

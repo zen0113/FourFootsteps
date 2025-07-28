@@ -18,6 +18,7 @@ public class UIManager : MonoBehaviour
 {
     [Header("Screen Effect")]
     public Image coverPanel;
+    public Image dialogueCoverPanel;
     //[SerializeField] private TextMeshProUGUI coverText;
 
     [Header("UI Game Objects")]
@@ -79,7 +80,6 @@ public class UIManager : MonoBehaviour
         uiGameObjects.Add(eUIGameObjectName.ResponsibilityGroup, responsibilityGroup);
         uiGameObjects.Add(eUIGameObjectName.ResponsibilityGauge, responsibilityGauge);
         uiGameObjects.Add(eUIGameObjectName.PlaceUI, placeUI);
-
 
         warningVignetteQVignetteSingle = warningVignette.GetComponent<Q_Vignette_Single>();
         responsibilitySlider = responsibilityGauge.GetComponent<Slider>();
@@ -146,7 +146,7 @@ public class UIManager : MonoBehaviour
         }
 
         // 투명해졌으면 끈다
-        if (fadeObject == coverPanel && end == 0)
+        if (end == 0)
         {
             fadeObject.gameObject.SetActive(false);
         }

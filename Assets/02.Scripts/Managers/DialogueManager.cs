@@ -15,7 +15,7 @@ public class DialogueManager : MonoBehaviour
     public GameObject[] dialogueSet;
     public TextMeshProUGUI[] speakerTexts;
     public TextMeshProUGUI[] scriptText;
-    //public Image[] backgroundImages;
+    public Image[] cutSceneImages;
     public Image[] characterImages;
     public Transform[] choicesContainer;
     public GameObject choicePrefab;
@@ -44,6 +44,8 @@ public class DialogueManager : MonoBehaviour
     private string fullSentence;
     private bool isAutoDelayed = false; // 2초 지난 후 자동으로 넘겨짐
     private bool isFadeOut = false; // AutoDelayed이랑 주로 같이 쓰이며 글자가 투명하게 사라짐
+    private string previousCutSceneID = "";
+    [SerializeField] private bool isCutsceneFadingToBlack = false;
 
     private float fadeTime = 0.5f;
 
@@ -177,6 +179,10 @@ public class DialogueManager : MonoBehaviour
                     speakerText.text = GameManager.Instance.GetVariable("YourCatName").ToString();
                     break;
 
+                case "InnerThoughts":
+                    speakerText.text = "";
+                    break;
+
                 default:
                     speakerText.text = dialogueLine.SpeakerID;
                     break;
@@ -240,6 +246,60 @@ public class DialogueManager : MonoBehaviour
         }
         return sentence;
     }
+
+    private void UpdateCutScene(DialogueLine dialogueLine)
+    {
+        var cutSceneID = dialogueLine.CutSceneID;
+
+        foreach (var currentCutSceneImage in cutSceneImages)
+        {
+            if (string.IsNullOrWhiteSpace(cutSceneID))
+                currentCutSceneImage.color = new Color(1, 1, 1, 0);
+            else
+            {
+                switch (cutSceneID)
+                {
+                    case "BLACK":
+                        // CutScene Image의 Color 값을 WHITE에서 BLACK으로 서서히 바꿈
+                        StartCoroutine(FadeToBlack(currentCutSceneImage, 2f));
+                        break;
+
+                    case "WHITE":
+                        // CutScene Image의 위에 전체 화면을 덮는 Image 객체 생성(하얀색에 알파값은 0)
+                        // 알파값 0->1되면 Image 객체 삭제
+                        break;
+
+                    default:
+                        var cutSceneSprite = Resources.Load<Sprite>($"Art/CutScenes/{cutSceneID}");
+                        currentCutSceneImage.sprite = cutSceneSprite;
+                        currentCutSceneImage.color = new Color(1, 1, 1, 1);
+                        break;
+                }
+            }
+        }
+
+        previousCutSceneID = cutSceneID;
+    }
+
+    // 컷씬 이미지를 Black으로 바꿈
+    IEnumerator FadeToBlack(Image targetImage, float duration)
+    {
+        isCutsceneFadingToBlack = true;
+        Color startColor = Color.white;
+        Color endColor = Color.black;
+        float elapsed = 0f;
+
+        while (elapsed < duration)
+        {
+            targetImage.color = Color.Lerp(startColor, endColor, elapsed / duration);
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+
+        targetImage.color = endColor; // 보정
+        isCutsceneFadingToBlack = false;
+    }
+
 
     private IEnumerator TextShakeEffectCoroutine(int dialogueType)
     {
@@ -332,7 +392,7 @@ public class DialogueManager : MonoBehaviour
         isTyping = true;
         StartCoroutine(TypeSentence(sentence));
 
-        //UpdateBackground(dialogueLine);
+        UpdateCutScene(dialogueLine);
         PlayDialogueSound(dialogueLine);
         UpdateCharacterImages(dialogueLine);
     }
@@ -353,15 +413,13 @@ public class DialogueManager : MonoBehaviour
                 dialogueType = DialogueType.MONOLOG;
                 break;
 
+            case "InnerThoughts":
+                dialogueType = DialogueType.PLAYER_THINKING;
+                break;
+
             default:
                 dialogueType = DialogueType.NPC;
                 break;
-
-            // 생각 중일 때 이걸 보통 speakerID로 식별했는데 똑같이 PlayerName으로 해둬서
-            // 스크립트 내용에 생각 중이 있으면 PlayerName으로만 하는 것 말고 다른 방법 찾기
-            //case "DialogueC_004":
-            //    dialogueType = DialogueType.PLAYER_THINKING;
-            //    break;    
         }
     }
 
@@ -382,6 +440,8 @@ public class DialogueManager : MonoBehaviour
 
     public void SkipButtonClick()
     {
+        if (isCutsceneFadingToBlack) return;
+
         StopAllCoroutines();
 
         dialogues[currentDialogueID].SetCurrentLineIndex(dialogues[currentDialogueID].Lines.Count - 2);
@@ -513,15 +573,18 @@ public class DialogueManager : MonoBehaviour
             foreach (GameObject skip in skipText) skip.SetActive(true);
 
             // script text 알파값 원상복구
-            scriptText[dialogueType.ToInt()].color = new(1, 1, 1, 1);
+            if(dialogueType== DialogueType.PLAYER_TALKING||dialogueType== DialogueType.NPC)
+                scriptText[dialogueType.ToInt()].color = Color.black;
         }
     }
-
     // 스크립트 Fade In / Out 코루틴
     // start:0, end:1 -> 투명했던 text가 점점 불투명해짐
     // start:1, end:0 -> 불투명했던 text가 점점 투명해짐
     private IEnumerator FadeInOutScriptText(float start, float end)
     {
+        if (dialogueType != DialogueType.MONOLOG)
+            yield break;
+
         float current = 0, percent = 0;
 
         while (percent < 1 && fadeTime != 0)
@@ -538,7 +601,7 @@ public class DialogueManager : MonoBehaviour
 
     public void OnDialoguePanelClick()
     {
-        if (!isDialogueActive || isAuto) return;
+        if (!isDialogueActive || isAuto|| isCutsceneFadingToBlack) return;
 
         if (isTyping)
         {

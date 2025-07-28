@@ -31,6 +31,7 @@ public class RecallManager : MonoBehaviour
         
     }
 
+    // 회상 속에서 선택지 선택 후 행동 전까지는 조사 오브젝트 조사 못하게 제한함.
     public void SetInteractKeyGroup(bool isActive)
     {
         //if((bool)GameManager.Instance.GetVariable("CanInvesigatingRecallObject")

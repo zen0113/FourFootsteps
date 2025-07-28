@@ -63,9 +63,9 @@ public class GameManager : MonoBehaviour
         sceneOrder = new List<SceneData>
             {
                 new SceneData("TitleScene"),
-                //new SceneData("Prologue"),
                 new SceneData("SetPlayerName"),
                 new SceneData("SetCatName"),
+                new SceneData("Prologue"),
                 new SceneData("StageScene1"),
                 new SceneData("RecallScene1", true),
                 new SceneData("StageScene2"),

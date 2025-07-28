@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class RecallDialog : TutorialBase
+public class TutorialDialog : TutorialBase
 {
     [Header("대화 ID")]
     public string dialogueID;

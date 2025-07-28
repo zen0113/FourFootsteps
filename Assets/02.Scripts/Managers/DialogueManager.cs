@@ -628,7 +628,7 @@ public class DialogueManager : MonoBehaviour
         EndDialogue();
 
         // 현재 활성화된 TutorialDialog에게 선택된 튜토리얼 인덱스 전달
-        RecallDialog currentTutorialDialog = FindObjectOfType<RecallDialog>();
+        TutorialDialog currentTutorialDialog = FindObjectOfType<TutorialDialog>();
         if (currentTutorialDialog != null)
         {
             Debug.Log($"[DialogueManager] TutorialDialog로 튜토리얼 인덱스 {choiceLine.TutorialIndex} 전달");

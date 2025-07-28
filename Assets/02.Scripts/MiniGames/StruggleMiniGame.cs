@@ -16,14 +16,14 @@ public class StruggleMiniGame : MonoBehaviour
     [Header("페이드 효과 설정")]
     public float fadeInDuration = 0.5f; // 페이드 인 시간
     public float fadeOutDuration = 0.3f; // 페이드 아웃 시간
-    public AnimationCurve fadeInCurve = AnimationCurve.EaseInOut(0, 0, 1, 1); // 페이드 인 커브
-    public AnimationCurve fadeOutCurve = AnimationCurve.EaseInOut(0, 0, 1, 1); // 페이드 아웃 커브
+    public AnimationCurve fadeInCurve = AnimationCurve.EaseInOut(0, 0, 1, 1); 
+    public AnimationCurve fadeOutCurve = AnimationCurve.EaseInOut(0, 0, 1, 1);
 
-    [Header("설정")]
-    public KeyCode inputKey = KeyCode.D;
-    public float gaugePerPress = 10f;
-    public float gaugeDecreasePerSecond = 20f;
-    public int totalSuccessNeeded = 3;
+    [Header("설정")] 
+    public KeyCode inputKey = KeyCode.D; // 입력 키
+    public float gaugePerPress = 10f; // 키 입력당 게이지 증가량
+    public float gaugeDecreasePerSecond = 20f; // 초당 게이지 감소량
+    public int totalSuccessNeeded = 3; // 필요한 총 성공 횟수
 
     [Header("키 입력 타이밍 설정")]
     public float inactivityTime = 3f; // 비활성 시간 (초)
@@ -31,27 +31,27 @@ public class StruggleMiniGame : MonoBehaviour
 
     [Header("헛딧음 확률")]
     private int[] missChances = new int[] { 20, 15, 10 }; //20, 15, 10
-    private int currentStage = 0;
+    private int currentStage = 0; // 현재 단계
 
-    [Header("연출")]
-    public CameraShake cameraShake;
-    public AudioSource sfxMiss;
-    public AudioSource sfxStep;
-    public AudioSource sfxFinalStep;
+    [Header("연출")] 
+    public CameraShake cameraShake; // 카메라 흔들림
+    public AudioSource sfxMiss; // 헛딧음 효과음
+    public AudioSource sfxStep; // 발걸음 성공 효과음
+    public AudioSource sfxFinalStep; // 최종 성공 효과음
 
-    [Header("UI 연출 설정")]
-    public float keyPromptBlinkSpeed = 2f;
-    public Color normalGaugeColor = Color.green;
-    public Color dangerGaugeColor = Color.red;
+    [Header("UI 연출 설정")] 
+    public float keyPromptBlinkSpeed = 2f; // 키 프롬프트 깜빡임 속도
+    public Color normalGaugeColor = Color.green; // 일반 게이지 색상
+    public Color dangerGaugeColor = Color.red; // 위험 게이지 색상
 
     [Header("캐릭터 이동 설정")]
-    public Transform playerCharacter; // 플레이어 캐릭터 Transform
-    public float stepDistance = 2f; // 한 번에 전진할 거리 (더 크게 설정)
-    public float stepDuration = 0.8f; // 전진 애니메이션 시간 (더 길게 설정)
-    public AnimationCurve stepCurve = AnimationCurve.EaseInOut(0, 0, 1, 1); // 이동 애니메이션 커브
+    public Transform playerCharacter; 
+    public float stepDistance = 2f; 
+    public float stepDuration = 0.8f; 
+    public AnimationCurve stepCurve = AnimationCurve.EaseInOut(0, 0, 1, 1); 
 
     [Header("플레이어 컨트롤러 설정")]
-    public PlayerCatMovement playerMovement; // 플레이어 이동 컨트롤러 참조
+    public PlayerCatMovement playerMovement; 
 
     [Header("다이얼로그 설정")]
     public string[] stageDialogueIDs = new string[] {
@@ -61,18 +61,18 @@ public class StruggleMiniGame : MonoBehaviour
     };
     public string finalDialogueID = "walking_complete"; // 최종 완료 시 다이얼로그
 
-    private float currentGauge = 0f;
-    private bool isActive = false;
-    private int successCount = 0;
-    private Coroutine gaugeCoroutine;
-    private Coroutine uiEffectCoroutine;
-    private Coroutine inactivityCoroutine;
+    private float currentGauge = 0f; // 현재 게이지 값
+    private bool isActive = false; // 미니게임 활성화 여부
+    private int successCount = 0; // 성공 횟수
+    private Coroutine gaugeCoroutine; // 게이지 감소 코루틴
+    private Coroutine uiEffectCoroutine; // UI 효과 코루틴 (깜빡임 등)
+    private Coroutine inactivityCoroutine; // 비활성 타이머 코루틴
     private Coroutine fadeCoroutine; // 페이드 효과 코루틴
     private bool isPlayingDialogue = false; // 다이얼로그 재생 중인지 확인
 
     // 키 입력 추적 변수들
-    private float lastKeyPressTime;
-    private int keyPressCountSinceInactivity = 0;
+    private float lastKeyPressTime; // 마지막 키 입력 시간
+    private int keyPressCountSinceInactivity = 0; // 비활성 상태 이후 키 입력 횟수
     private bool isShowingProgressText = true; // 현재 진행사항을 보여주고 있는지
 
     private void Start()
@@ -109,8 +109,10 @@ public class StruggleMiniGame : MonoBehaviour
 
     void Update()
     {
+        // 미니게임이 활성화되지 않았거나 다이얼로그 재생 중이면 업데이트 중단
         if (!isActive || isPlayingDialogue) return;
 
+        // 입력 키가 눌렸을 때
         if (Input.GetKeyDown(inputKey))
         {
             OnKeyPressed();
@@ -120,17 +122,17 @@ public class StruggleMiniGame : MonoBehaviour
 
     private void OnKeyPressed()
     {
-        lastKeyPressTime = Time.time;
+        lastKeyPressTime = Time.time; // 마지막 키 입력 시간 갱신
 
         // 진행사항이 표시되지 않는 상태에서 키를 눌렀을 때
         if (!isShowingProgressText)
         {
-            keyPressCountSinceInactivity++;
+            keyPressCountSinceInactivity++; // 비활성 후 키 입력 횟수 증가
 
             // 일정 횟수 이상 누르면 진행사항 다시 표시
             if (keyPressCountSinceInactivity >= pressCountToShowProgress)
             {
-                ShowProgressText();
+                ShowProgressText(); // 진행사항 텍스트 표시
             }
         }
 
@@ -140,15 +142,15 @@ public class StruggleMiniGame : MonoBehaviour
 
     private void ShowProgressText()
     {
-        isShowingProgressText = true;
-        keyPressCountSinceInactivity = 0;
-        UpdateKeyPromptText();
+        isShowingProgressText = true; // 진행사항 텍스트 표시 활성화
+        keyPressCountSinceInactivity = 0; // 키 입력 횟수 초기화
+        UpdateKeyPromptText(); // 키 프롬프트 텍스트 업데이트
     }
 
     private void ShowInstructionText()
     {
-        isShowingProgressText = false;
-        keyPromptText.text = "[ D ] 키를 연타하세요!";
+        isShowingProgressText = false; // 진행사항 텍스트 표시 비활성화
+        keyPromptText.text = "[ D ] 키를 연타하세요!"; // 안내 텍스트 설정
     }
 
     private void UpdateKeyPromptText()
@@ -188,21 +190,21 @@ public class StruggleMiniGame : MonoBehaviour
 
     public void StartMiniGame()
     {
-        isActive = true;
-        currentGauge = 0f;
-        successCount = 0;
-        currentStage = 0;
-        isPlayingDialogue = false;
+        isActive = true; // 미니게임 활성화
+        currentGauge = 0f; // 게이지 초기화
+        successCount = 0; // 성공 횟수 초기화
+        currentStage = 0; // 현재 단계 초기화
+        isPlayingDialogue = false; // 다이얼로그 재생 상태 초기화
         // isShowingProgressText = true; // StartGameSequence에서 초기 설정하므로 주석 처리
-        keyPressCountSinceInactivity = 0;
-        lastKeyPressTime = Time.time;
+        keyPressCountSinceInactivity = 0; // 키 입력 횟수 초기화
+        lastKeyPressTime = Time.time; // 마지막 키 입력 시간 초기화
 
         // 플레이어 상태 설정 (강제 웅크리기 및 입력 차단) - 즉시 적용
         if (playerMovement != null)
         {
             Debug.Log("[StruggleMiniGame] 플레이어 강제 웅크리기 활성화");
-            playerMovement.SetMiniGameInputBlocked(true);
-            playerMovement.ForceCrouch = true;
+            playerMovement.SetMiniGameInputBlocked(true); // 미니게임 중 플레이어 입력 차단
+            playerMovement.ForceCrouch = true; // 플레이어 강제 웅크리기
         }
         else
         {
@@ -213,7 +215,7 @@ public class StruggleMiniGame : MonoBehaviour
         miniGameUI.SetActive(true);
         if (miniGameCanvasGroup != null)
         {
-            miniGameCanvasGroup.alpha = 0f;
+            miniGameCanvasGroup.alpha = 0f; // UI를 완전히 투명하게 설정
         }
 
         // UI 페이드 인과 게임 시퀀스를 동시에 시작
@@ -290,14 +292,14 @@ public class StruggleMiniGame : MonoBehaviour
 
     IEnumerator StartGameSequence()
     {
-        gaugeFillImage.fillAmount = 0f;
-        keyPromptText.text = "다리에 힘이 없어..";
+        gaugeFillImage.fillAmount = 0f; // 게이지를 0으로 설정
+        keyPromptText.text = "다리에 힘이 없어.."; // 초기 안내 텍스트
 
         // 페이드 인 완료 후 1.5초 대기
         yield return new WaitForSeconds(1.5f);
 
         // D키 UI 표시
-        keyPromptText.text = "[ D ] 키를 연타하세요!";
+        keyPromptText.text = "[ D ] 키를 연타하세요!"; // 키 입력 안내 텍스트
         isShowingProgressText = false; // 초기에는 안내 텍스트 표시
     }
 
@@ -306,19 +308,19 @@ public class StruggleMiniGame : MonoBehaviour
         // 현재 단계의 헛딧음 확률 체크
         int currentMissChance = missChances[Mathf.Min(currentStage, missChances.Length - 1)];
 
-        if (Random.Range(0, 100) < currentMissChance)
+        if (Random.Range(0, 100) < currentMissChance) // 랜덤 확률로 헛딧음 발생 여부 결정
         {
-            MissStep();
+            MissStep(); // 헛딧음 처리
         }
         else
         {
-            SuccessfulPress();
+            SuccessfulPress(); // 성공적인 키 입력 처리
         }
     }
 
     void SuccessfulPress()
     {
-        currentGauge += gaugePerPress;
+        currentGauge += gaugePerPress; // 게이지 증가
         currentGauge = Mathf.Min(currentGauge, 100f); // 100% 초과 방지
 
         // 게이지 색상 변경 (위험 구간에서는 빨간색)
@@ -331,20 +333,20 @@ public class StruggleMiniGame : MonoBehaviour
             gaugeFillImage.color = normalGaugeColor;
         }
 
-        gaugeFillImage.fillAmount = currentGauge / 100f;
+        gaugeFillImage.fillAmount = currentGauge / 100f; // 게이지 UI 업데이트
 
         // 100% 도달 시 성공 처리
         if (currentGauge >= 100f)
         {
-            OnStepSuccess();
+            OnStepSuccess(); // 발걸음 성공 처리
         }
     }
 
     void MissStep()
     {
-        currentGauge = Mathf.Max(0, currentGauge - 10f);
-        gaugeFillImage.fillAmount = currentGauge / 100f;
-        gaugeFillImage.color = dangerGaugeColor;
+        currentGauge = Mathf.Max(0, currentGauge - 10f); // 게이지 감소
+        gaugeFillImage.fillAmount = currentGauge / 100f; // 게이지 UI 업데이트
+        gaugeFillImage.color = dangerGaugeColor; // 게이지 색상을 위험 색상으로 변경
 
         // 헛딧음 연출
         StartCoroutine(MissStepEffect());
@@ -352,7 +354,7 @@ public class StruggleMiniGame : MonoBehaviour
         // 효과음 재생
         if (sfxMiss != null) sfxMiss.Play();
 
-        // 카메라 흔들림과 블러 효과
+        // 카메라 흔들림 효과
         if (cameraShake != null)
         {
             cameraShake.Shake(0.4f, 0.25f);
@@ -361,14 +363,15 @@ public class StruggleMiniGame : MonoBehaviour
 
     IEnumerator MissStepEffect()
     {
+        // "헛딧음!" 텍스트 프리팹 생성
         TextMeshProUGUI missTextInstance = Instantiate(missTextPrefab, gaugeRectTransform);
         missTextInstance.text = "헛딧음!";
         missTextInstance.color = Color.white;
 
-        float fill = gaugeFillImage.fillAmount; // 0~1 사이의 값
+        float fill = gaugeFillImage.fillAmount; // 0~1 사이의 값 (게이지 채움 비율)
 
-        float angle = -fill * 360f;
-        float radians = (angle + 90f) * Mathf.Deg2Rad;
+        float angle = -fill * 360f; // 게이지 채움 비율에 따른 각도 계산
+        float radians = (angle + 90f) * Mathf.Deg2Rad; // 라디안 값으로 변환
 
         // 반지름 설정
         float radius = gaugeRectTransform.rect.width * 0.8f;
@@ -383,27 +386,27 @@ public class StruggleMiniGame : MonoBehaviour
         );
         Vector2 localPos = center + offset;
 
-        missTextInstance.rectTransform.localPosition = localPos;
+        missTextInstance.rectTransform.localPosition = localPos; // 텍스트 위치 설정
 
-        // 기존 애니메이션 효과
-        float duration = 1.0f;
+        // 기존 애니메이션 효과 (텍스트 위로 이동 및 투명도 감소)
+        float duration = 1.0f; // 애니메이션 지속 시간
         Vector3 startPosition = missTextInstance.rectTransform.position;
-        Vector3 endPosition = startPosition + new Vector3(0, 50f, 0);
+        Vector3 endPosition = startPosition + new Vector3(0, 50f, 0); // 위로 50f 이동
         float timer = 0f;
 
         while (timer < duration)
         {
             timer += Time.deltaTime;
             float progress = timer / duration;
-            missTextInstance.rectTransform.position = Vector3.Lerp(startPosition, endPosition, progress);
+            missTextInstance.rectTransform.position = Vector3.Lerp(startPosition, endPosition, progress); // 위치 보간
             Color currentColor = missTextInstance.color;
-            currentColor.a = Mathf.Lerp(1f, 0f, progress);
+            currentColor.a = Mathf.Lerp(1f, 0f, progress); // 투명도 보간
             missTextInstance.color = currentColor;
             yield return null;
         }
 
-        Destroy(missTextInstance.gameObject);
-        UpdateKeyPromptText();
+        Destroy(missTextInstance.gameObject); // 텍스트 게임 오브젝트 파괴
+        UpdateKeyPromptText(); // 키 프롬프트 텍스트 업데이트
     }
 
 
@@ -411,8 +414,8 @@ public class StruggleMiniGame : MonoBehaviour
     {
         Debug.Log($"[StruggleMiniGame] 단계 성공! 현재 단계: {successCount + 1}/{totalSuccessNeeded}");
 
-        successCount++;
-        currentStage++;
+        successCount++; // 성공 횟수 증가
+        currentStage++; // 현재 단계 증가
 
         // 성공 효과음
         if (sfxStep != null) sfxStep.Play();
@@ -423,7 +426,7 @@ public class StruggleMiniGame : MonoBehaviour
 
     IEnumerator HandleStepSuccessSequence()
     {
-        isPlayingDialogue = true; // 입력 차단
+        isPlayingDialogue = true; // 다이얼로그 재생 중으로 설정하여 입력 차단
 
         // 비활성 타이머 정지 (다이얼로그 중에는 타이머 작동 안함)
         if (inactivityCoroutine != null)
@@ -458,12 +461,12 @@ public class StruggleMiniGame : MonoBehaviour
                 yield return StartCoroutine(WaitForDialogueEnd());
             }
 
-            FinishMiniGame();
+            FinishMiniGame(); // 미니게임 종료
         }
         else
         {
             // 단계별 다이얼로그 재생
-            int dialogueIndex = successCount - 1; // successCount는 1부터 시작하므로
+            int dialogueIndex = successCount - 1; // successCount는 1부터 시작하므로 인덱스는 0부터
             if (dialogueIndex >= 0 && dialogueIndex < stageDialogueIDs.Length &&
                 !string.IsNullOrEmpty(stageDialogueIDs[dialogueIndex]))
             {
@@ -472,9 +475,9 @@ public class StruggleMiniGame : MonoBehaviour
             }
 
             // 다음 단계 준비
-            currentGauge = 0f;
-            gaugeFillImage.fillAmount = 0f;
-            gaugeFillImage.color = normalGaugeColor;
+            currentGauge = 0f; // 게이지 초기화
+            gaugeFillImage.fillAmount = 0f; // 게이지 UI 초기화
+            gaugeFillImage.color = normalGaugeColor; // 게이지 색상 초기화
 
             // 진행 상황 업데이트 (성공 후에는 항상 진행사항 표시)
             isShowingProgressText = true;
@@ -482,7 +485,7 @@ public class StruggleMiniGame : MonoBehaviour
             UpdateKeyPromptText();
         }
 
-        isPlayingDialogue = false; // 입력 재개
+        isPlayingDialogue = false; // 다이얼로그 재생 종료, 입력 재개
         lastKeyPressTime = Time.time; // 시간 갱신
         RestartInactivityTimer(); // 비활성 타이머 재시작
     }
@@ -495,8 +498,8 @@ public class StruggleMiniGame : MonoBehaviour
             yield break;
         }
 
-        Vector3 startPosition = playerCharacter.position;
-        Vector3 targetPosition = startPosition + Vector3.right * stepDistance; // X축 방향으로 이동
+        Vector3 startPosition = playerCharacter.position; // 시작 위치
+        Vector3 targetPosition = startPosition + Vector3.right * stepDistance; // 목표 위치 (X축 방향으로 이동)
 
         // 전진 중 웅크리기 이동 애니메이션 활성화
         if (playerMovement != null)
@@ -510,9 +513,9 @@ public class StruggleMiniGame : MonoBehaviour
         {
             elapsedTime += Time.deltaTime;
             float progress = elapsedTime / stepDuration;
-            float curveValue = stepCurve.Evaluate(progress);
+            float curveValue = stepCurve.Evaluate(progress); // 애니메이션 커브 적용
 
-            Vector3 currentPos = Vector3.Lerp(startPosition, targetPosition, curveValue);
+            Vector3 currentPos = Vector3.Lerp(startPosition, targetPosition, curveValue); // 위치 보간
             playerCharacter.position = currentPos;
 
             // 이동 중임을 지속적으로 알림 (애니메이션 유지를 위해)
@@ -524,7 +527,7 @@ public class StruggleMiniGame : MonoBehaviour
             yield return null;
         }
 
-        playerCharacter.position = targetPosition;
+        playerCharacter.position = targetPosition; // 최종 위치 설정
 
         // 전진 완료 후 웅크리기 이동 애니메이션 중지
         if (playerMovement != null)
@@ -552,10 +555,10 @@ public class StruggleMiniGame : MonoBehaviour
     {
         Debug.Log("[StruggleMiniGame] 미니게임 완료");
 
-        isActive = false;
-        cameraShake.enabled = false;
+        isActive = false; // 미니게임 비활성화
+        cameraShake.enabled = false; // 카메라 쉐이크 비활성화 (필요시)
 
-        keyPromptText.text = "이제 걸을 수 있을 것 같아";
+        keyPromptText.text = "이제 걸을 수 있을 것 같아"; // 최종 안내 텍스트
 
         // 모든 코루틴 정지
         if (gaugeCoroutine != null) StopCoroutine(gaugeCoroutine);
@@ -571,7 +574,7 @@ public class StruggleMiniGame : MonoBehaviour
         // 최종 효과음
         if (sfxFinalStep != null) sfxFinalStep.Play();
 
-        yield return new WaitForSeconds(1f);
+        yield return new WaitForSeconds(1f); // 1초 대기
 
         // UI 페이드 아웃 효과와 함께 비활성화
         yield return StartCoroutine(HideUIWithFadeOut());
@@ -580,9 +583,9 @@ public class StruggleMiniGame : MonoBehaviour
         if (playerMovement != null)
         {
             Debug.Log("[StruggleMiniGame] 플레이어 상태 복원 - 웅크리기 해제");
-            playerMovement.SetMiniGameInputBlocked(false);
-            playerMovement.ForceCrouch = false;
-            playerMovement.SetCrouchMovingState(false);
+            playerMovement.SetMiniGameInputBlocked(false); // 플레이어 입력 차단 해제
+            playerMovement.ForceCrouch = false; // 강제 웅크리기 해제
+            playerMovement.SetCrouchMovingState(false); // 웅크리기 이동 상태 해제
         }
 
         Debug.Log("걷기 해방 완료!");
@@ -603,18 +606,18 @@ public class StruggleMiniGame : MonoBehaviour
     IEnumerator DecreaseGaugeOverTime()
     {
         float interval = 0.1f; // 0.1초마다 실행
-        float decreasePerTick = gaugeDecreasePerSecond * interval;
+        float decreasePerTick = gaugeDecreasePerSecond * interval; // 틱당 감소량
 
-        while (isActive)
+        while (isActive) // 미니게임이 활성화된 동안 계속 실행
         {
             yield return new WaitForSeconds(interval);
 
             if (currentGauge > 0 && !isPlayingDialogue) // 다이얼로그 중에는 게이지 감소 정지
             {
-                currentGauge = Mathf.Max(0f, currentGauge - decreasePerTick);
-                gaugeFillImage.fillAmount = currentGauge / 100f;
+                currentGauge = Mathf.Max(0f, currentGauge - decreasePerTick); // 게이지 감소 (0 미만으로 내려가지 않도록)
+                gaugeFillImage.fillAmount = currentGauge / 100f; // 게이지 UI 업데이트
 
-                // 게이지가 낮을 때 색상 변경
+                // 게이지가 낮을 때 색상 변경 (위험 구간)
                 if (currentGauge < 30f)
                 {
                     gaugeFillImage.color = Color.Lerp(normalGaugeColor, dangerGaugeColor, 1 - (currentGauge / 30f));
@@ -625,12 +628,12 @@ public class StruggleMiniGame : MonoBehaviour
 
     IEnumerator BlinkKeyPrompt()
     {
-        while (isActive)
+        while (isActive) // 미니게임이 활성화된 동안 계속 실행
         {
             if (!isPlayingDialogue) // 다이얼로그 중에는 깜빡임 정지
             {
                 // 깜빡이는 효과
-                float alpha = Mathf.PingPong(Time.time * keyPromptBlinkSpeed, 1f);
+                float alpha = Mathf.PingPong(Time.time * keyPromptBlinkSpeed, 1f); // 알파값 깜빡임 효과
                 Color color = keyPromptText.color;
                 color.a = 0.5f + (alpha * 0.5f); // 0.5 ~ 1.0 사이로 알파값 조정
                 keyPromptText.color = color;
@@ -650,17 +653,18 @@ public class StruggleMiniGame : MonoBehaviour
     {
         Debug.Log("[StruggleMiniGame] 미니게임 강제 종료");
 
-        isActive = false;
-        isPlayingDialogue = false;
+        isActive = false; // 미니게임 비활성화
+        isPlayingDialogue = false; // 다이얼로그 재생 상태 초기화
 
         // 플레이어 상태 복원
         if (playerMovement != null)
         {
-            playerMovement.SetMiniGameInputBlocked(false);
-            playerMovement.ForceCrouch = false;
-            playerMovement.SetCrouchMovingState(false);
+            playerMovement.SetMiniGameInputBlocked(false); // 플레이어 입력 차단 해제
+            playerMovement.ForceCrouch = false; // 강제 웅크리기 해제
+            playerMovement.SetCrouchMovingState(false); // 웅크리기 이동 상태 해제
         }
 
+        // 모든 코루틴 정지
         if (gaugeCoroutine != null) StopCoroutine(gaugeCoroutine);
         if (uiEffectCoroutine != null) StopCoroutine(uiEffectCoroutine);
         if (inactivityCoroutine != null) StopCoroutine(inactivityCoroutine);
@@ -682,17 +686,17 @@ public class StruggleMiniGame : MonoBehaviour
     }
 
     // 단계별 성공 시 호출되는 이벤트 (필요시 사용)
-    public System.Action<int> OnStageComplete;
-    public System.Action OnMiniGameComplete;
+    public System.Action<int> OnStageComplete; // 각 단계 완료 시 호출되는 이벤트
+    public System.Action OnMiniGameComplete; // 미니게임 전체 완료 시 호출되는 이벤트
 
     // 이벤트 호출 메서드들
     private void InvokeStageComplete(int stage)
     {
-        OnStageComplete?.Invoke(stage);
+        OnStageComplete?.Invoke(stage); // OnStageComplete 이벤트 호출
     }
 
     private void InvokeMiniGameComplete()
     {
-        OnMiniGameComplete?.Invoke();
+        OnMiniGameComplete?.Invoke(); // OnMiniGameComplete 이벤트 호출
     }
 }

@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class RiminiTrigger : TutorialBase
+public class DisableTrigger : TutorialBase
 {
     [Header("플레이어 컨트롤러 설정")]
     [SerializeField] private PlayerHumanMovement playerController;

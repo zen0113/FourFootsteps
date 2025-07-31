@@ -29,19 +29,6 @@ public class AudioZoneEffect : MonoBehaviour
     [SerializeField] private float checkInterval = 0.1f;
     [SerializeField] private float transitionDuration = 2f; // Lerp 대신 FadeDuration으로 사용
 
-    [Header("Default Volume Settings (Outside Zones)")]
-    [SerializeField]
-    private BGMVolumeSettings defaultBGM1Settings = new BGMVolumeSettings
-    {
-        volumeMultiplier = 1f
-    };
-
-    [SerializeField]
-    private BGMVolumeSettings defaultBGM2Settings = new BGMVolumeSettings
-    {
-        volumeMultiplier = 0.3f
-    };
-
     [Header("Scene Settings")]
     [SerializeField] private string targetSceneName;
 
@@ -51,6 +38,12 @@ public class AudioZoneEffect : MonoBehaviour
     // 현재 플레이어가 어떤 존에 있는지 추적 (중복 이벤트 발생 방지)
     private AudioZone currentActiveZone = null;
     private List<int> currentPlayingBGMIndexes = new List<int>(); // SoundPlayer에서 현재 재생 중인 BGM 인덱스
+
+    // 씬의 기본 BGM 설정을 저장할 변수
+    private int defaultBGM1Index = -1;
+    private float defaultBGM1Multiplier = 1f;
+    private int defaultBGM2Index = -1;
+    private float defaultBGM2Multiplier = 1f;
 
     private float nextCheckTime;
 
@@ -66,8 +59,44 @@ public class AudioZoneEffect : MonoBehaviour
 
         InitializeComponents();
 
-        // 초기 볼륨 설정 (즉시 적용)
-        ApplyVolumeSettingsToBGMs(defaultBGM1Settings, defaultBGM2Settings);
+        // SoundPlayer에서 현재 씬의 기본 BGM 설정 가져오기
+        if (SoundPlayer.Instance != null)
+        {
+            SoundPlayer.SceneBGMSetting currentSceneSetting = SoundPlayer.Instance.GetSceneBGMSetting(SceneManager.GetActiveScene().name);
+            if (currentSceneSetting != null)
+            {
+                defaultBGM1Index = currentSceneSetting.bgmIndex1;
+                defaultBGM1Multiplier = currentSceneSetting.bgm1VolumeMultiplier;
+                defaultBGM2Index = currentSceneSetting.bgmIndex2;
+                defaultBGM2Multiplier = currentSceneSetting.bgm2VolumeMultiplier;
+
+                Debug.Log($"AudioZoneEffect: Default BGM settings initialized from SoundPlayer for scene {currentSceneSetting.sceneName}. BGM1 Index: {defaultBGM1Index}, Multiplier: {defaultBGM1Multiplier}, BGM2 Index: {defaultBGM2Index}, Multiplier: {defaultBGM2Multiplier}");
+            }
+            else
+            {
+                // SoundPlayer에 씬 설정이 없는 경우, 기본값(1f, 0.3f) 유지 또는 경고
+                Debug.LogWarning("AudioZoneEffect: No specific BGM setting found in SoundPlayer for the current scene. Using hardcoded default values (BGM1: 1f, BGM2: 0.3f).");
+                defaultBGM1Index = -1; // 또는 기본 BGM 인덱스 지정
+                defaultBGM1Multiplier = 1f;
+                defaultBGM2Index = -1; // 또는 기본 BGM 인덱스 지정
+                defaultBGM2Multiplier = 0.3f;
+            }
+        }
+        else
+        {
+            Debug.LogWarning("AudioZoneEffect: SoundPlayer instance not found. Using hardcoded default BGM volumes.");
+            defaultBGM1Index = -1;
+            defaultBGM1Multiplier = 1f;
+            defaultBGM2Index = -1;
+            defaultBGM2Multiplier = 0.3f;
+        }
+
+        // 초기에는 기본 설정에 맞춰 볼륨 조절 (존 바깥이므로)
+        // BGMVolumeSettings 객체를 생성하여 전달
+        BGMVolumeSettings initialBGM1Settings = new BGMVolumeSettings { volumeMultiplier = defaultBGM1Multiplier };
+        BGMVolumeSettings initialBGM2Settings = new BGMVolumeSettings { volumeMultiplier = defaultBGM2Multiplier };
+        ApplyVolumeSettingsToBGMs(initialBGM1Settings, initialBGM2Settings);
+
 
         nextCheckTime = Time.time; // 즉시 첫 체크 실행
     }
@@ -127,7 +156,7 @@ public class AudioZoneEffect : MonoBehaviour
             if (zone.triggerZone.OverlapPoint(playerTransform.position))
             {
                 playerInZone = zone;
-                break; 
+                break;
             }
         }
 
@@ -144,7 +173,10 @@ public class AudioZoneEffect : MonoBehaviour
             else
             {
                 Debug.Log("Player exited all zones, returning to default BGM volume.");
-                ApplyVolumeSettingsToBGMs(defaultBGM1Settings, defaultBGM2Settings);
+                // 존을 벗어났을 때 SoundPlayer에서 가져온 기본 값으로 돌아갑니다.
+                BGMVolumeSettings default1 = new BGMVolumeSettings { volumeMultiplier = defaultBGM1Multiplier };
+                BGMVolumeSettings default2 = new BGMVolumeSettings { volumeMultiplier = defaultBGM2Multiplier };
+                ApplyVolumeSettingsToBGMs(default1, default2);
             }
         }
     }
@@ -176,7 +208,6 @@ public class AudioZoneEffect : MonoBehaviour
             }
             else
             {
-                // 현재 SoundPlayer의 BGM1 플레이어에 재생 중인 BGM이 없는 경우
                 Debug.Log("AudioZoneEffect: BGM1 player is not currently playing any assigned BGM.");
             }
         }
@@ -216,7 +247,7 @@ public class AudioZoneEffect : MonoBehaviour
         };
     }
 
-   
+
     public void SetZoneEffect(int zoneIndex, bool enable)
     {
         if (zoneIndex >= 0 && zoneIndex < audioZones.Length)

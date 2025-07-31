@@ -721,10 +721,11 @@ public class SoundPlayer : MonoBehaviour
     }
 
     /// <summary>
-    /// 씬 BGM 설정을 가져옵니다.
+    /// 현재 씬의 BGM 설정을 반환합니다.
+    /// AudioZoneEffect 스크립트에서 기본 볼륨 설정을 가져올 때 사용됩니다.
     /// </summary>
-    /// <param name="sceneName">대상 씬 이름</param>
-    /// <returns>해당 씬의 BGM 설정, 없으면 null</returns>
+    /// <param name="sceneName">현재 씬 이름</param>
+    /// <returns>씬의 BGM 설정 또는 null</returns>
     public SceneBGMSetting GetSceneBGMSetting(string sceneName)
     {
         foreach (var setting in sceneBGMSettings)

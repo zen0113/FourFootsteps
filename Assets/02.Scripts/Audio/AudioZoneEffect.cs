@@ -188,55 +188,86 @@ public class AudioZoneEffect : MonoBehaviour
     /// <param name="bgm2Settings">두 번째 BGM에 적용할 볼륨 설정</param>
     private void ApplyVolumeSettingsToBGMs(BGMVolumeSettings bgm1Settings, BGMVolumeSettings bgm2Settings)
     {
-        // bgmAudioSources[0]에 해당하는 BGM의 인덱스를 찾아서 볼륨 조절
-        if (SoundPlayer.Instance != null && SoundPlayer.Instance.GetBGMPlayers().Count > 0)
+        // SoundPlayer 인스턴스가 존재하고, defaultBGM1Index가 유효한 경우 (즉, Start에서 설정되었을 경우)
+        if (SoundPlayer.Instance != null && defaultBGM1Index != -1)
         {
-            AudioSource player1Source = SoundPlayer.Instance.GetBGMPlayers()[0];
-            int? bgm1Index = null;
-            foreach (var entry in SoundPlayer.Instance.activeBGMPlayers)
-            {
-                if (entry.Value.source == player1Source)
-                {
-                    bgm1Index = entry.Key;
-                    break;
-                }
-            }
-
-            if (bgm1Index.HasValue)
-            {
-                AudioEventSystem.TriggerBGMVolumeFade(bgm1Index.Value, bgm1Settings.volumeMultiplier, transitionDuration);
-            }
-            else
-            {
-                Debug.Log("AudioZoneEffect: BGM1 player is not currently playing any assigned BGM.");
-            }
+            AudioEventSystem.TriggerBGMVolumeFade(defaultBGM1Index, bgm1Settings.volumeMultiplier, transitionDuration);
+        }
+        else if (SoundPlayer.Instance == null)
+        {
+            Debug.LogWarning("AudioZoneEffect: SoundPlayer instance not found. Cannot apply BGM1 volume settings.");
+        }
+        else // defaultBGM1Index가 -1인 경우 (Start에서 초기화되지 않았거나 기본 BGM이 없는 경우)
+        {
+            Debug.Log("AudioZoneEffect: Default BGM1 index is not set. Skipping BGM1 volume adjustment.");
         }
 
-        // bgmAudioSources[1]에 해당하는 BGM의 인덱스를 찾아서 볼륨 조절
-        if (SoundPlayer.Instance != null && SoundPlayer.Instance.GetBGMPlayers().Count > 1)
-        {
-            AudioSource player2Source = SoundPlayer.Instance.GetBGMPlayers()[1];
-            int? bgm2Index = null;
-            foreach (var entry in SoundPlayer.Instance.activeBGMPlayers)
-            {
-                if (entry.Value.source == player2Source)
-                {
-                    bgm2Index = entry.Key;
-                    break;
-                }
-            }
 
-            if (bgm2Index.HasValue)
-            {
-                AudioEventSystem.TriggerBGMVolumeFade(bgm2Index.Value, bgm2Settings.volumeMultiplier, transitionDuration);
-            }
-            else
-            {
-                // 현재 SoundPlayer의 BGM2 플레이어에 재생 중인 BGM이 없는 경우
-                Debug.Log("AudioZoneEffect: BGM2 player is not currently playing any assigned BGM.");
-            }
+        // SoundPlayer 인스턴스가 존재하고, defaultBGM2Index가 유효한 경우 (즉, Start에서 설정되었을 경우)
+        if (SoundPlayer.Instance != null && defaultBGM2Index != -1)
+        {
+            AudioEventSystem.TriggerBGMVolumeFade(defaultBGM2Index, bgm2Settings.volumeMultiplier, transitionDuration);
+        }
+        else if (SoundPlayer.Instance == null)
+        {
+            Debug.LogWarning("AudioZoneEffect: SoundPlayer instance not found. Cannot apply BGM2 volume settings.");
+        }
+        else // defaultBGM2Index가 -1인 경우 (Start에서 초기화되지 않았거나 기본 BGM이 없는 경우)
+        {
+            Debug.Log("AudioZoneEffect: Default BGM2 index is not set. Skipping BGM2 volume adjustment.");
         }
     }
+    //private void ApplyVolumeSettingsToBGMs(BGMVolumeSettings bgm1Settings, BGMVolumeSettings bgm2Settings)
+    //{
+    //    // bgmAudioSources[0]에 해당하는 BGM의 인덱스를 찾아서 볼륨 조절
+    //    if (SoundPlayer.Instance != null && SoundPlayer.Instance.GetBGMPlayers().Count > 0)
+    //    {
+    //        AudioSource player1Source = SoundPlayer.Instance.GetBGMPlayers()[0];
+    //        int? bgm1Index = null;
+    //        foreach (var entry in SoundPlayer.Instance.activeBGMPlayers) // 여기서 인덱스를 다시 찾음
+    //        {
+    //            if (entry.Value.source == player1Source)
+    //            {
+    //                bgm1Index = entry.Key;
+    //                break;
+    //            }
+    //        }
+
+    //        if (bgm1Index.HasValue)
+    //        {
+    //            AudioEventSystem.TriggerBGMVolumeFade(bgm1Index.Value, bgm1Settings.volumeMultiplier, transitionDuration);
+    //        }
+    //        else
+    //        {
+    //            Debug.Log("AudioZoneEffect: BGM1 player is not currently playing any assigned BGM.");
+    //        }
+    //    }
+
+    //    // bgmAudioSources[1]에 해당하는 BGM의 인덱스를 찾아서 볼륨 조절
+    //    if (SoundPlayer.Instance != null && SoundPlayer.Instance.GetBGMPlayers().Count > 1)
+    //    {
+    //        AudioSource player2Source = SoundPlayer.Instance.GetBGMPlayers()[1];
+    //        int? bgm2Index = null;
+    //        foreach (var entry in SoundPlayer.Instance.activeBGMPlayers) // 여기서 인덱스를 다시 찾음
+    //        {
+    //            if (entry.Value.source == player2Source)
+    //            {
+    //                bgm2Index = entry.Key;
+    //                break;
+    //            }
+    //        }
+
+    //        if (bgm2Index.HasValue)
+    //        {
+    //            AudioEventSystem.TriggerBGMVolumeFade(bgm2Index.Value, bgm2Settings.volumeMultiplier, transitionDuration);
+    //        }
+    //        else
+    //        {
+    //            // 현재 SoundPlayer의 BGM2 플레이어에 재생 중인 BGM이 없는 경우
+    //            Debug.Log("AudioZoneEffect: BGM2 player is not currently playing any assigned BGM.");
+    //        }
+    //    }
+    //}
 
     private BGMVolumeSettings CloneBGMVolumeSettings(BGMVolumeSettings original)
     {

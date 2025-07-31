@@ -76,7 +76,7 @@ public class DialogueManager : MonoBehaviour
         {
             Debug.LogWarning("Index out of range: " + dialogueType.ToInt());
         }
-        
+
     }
 
     private void Update()
@@ -206,7 +206,7 @@ public class DialogueManager : MonoBehaviour
                 switch (effect)
                 {
                     case "RED":
-                    // 문장 전체를 빨갛게 함
+                        // 문장 전체를 빨갛게 함
                         sentence = $"<color=red>{sentence}</color>";
                         break;
                     case "AUTO":
@@ -357,7 +357,7 @@ public class DialogueManager : MonoBehaviour
             return;
         var soundID = "Sound_" + dialogueLine.SoundID;
         var soundNum = (int)typeof(Constants).GetField(soundID).GetValue(null);
-        //SoundPlayer.Instance.UISoundPlay(soundNum);
+        SoundPlayer.Instance.UISoundPlay_LOOP(soundNum, true);
     }
 
     private void UpdateCharacterImages(DialogueLine dialogueLine)
@@ -425,6 +425,9 @@ public class DialogueManager : MonoBehaviour
 
     public void EndDialogue()
     {
+        // 타자 소리 정지
+        SoundPlayer.Instance.UISoundPlay_LOOP(0, false);
+
         isDialogueActive = false;
         dialogueSet[dialogueType.ToInt()].SetActive(false);
         //foreach (Image characterImage in characterImages)
@@ -443,6 +446,9 @@ public class DialogueManager : MonoBehaviour
         if (isCutsceneFadingToBlack) return;
 
         StopAllCoroutines();
+
+        // 타자 소리 정지
+        SoundPlayer.Instance.UISoundPlay_LOOP(0, false);
 
         dialogues[currentDialogueID].SetCurrentLineIndex(dialogues[currentDialogueID].Lines.Count - 2);
         StartCoroutine(SkipDialogue());
@@ -516,6 +522,9 @@ public class DialogueManager : MonoBehaviour
         // FAST 인 경우 두배의 속도로 타이핑
         if (isFast) typeSpeed /= 1.75f;
 
+        // 타자 루프 사운드 시작
+        SoundPlayer.Instance.UISoundPlay_LOOP(0, true);
+
         foreach (char letter in sentence.ToCharArray())
         {
             if (letter == '<')
@@ -538,9 +547,13 @@ public class DialogueManager : MonoBehaviour
             }
 
             scriptText[dialogueType.ToInt()].text += letter;
-            SoundPlayer.Instance.UISoundPlay(Sound_Typing); // 타자 소리 한번씩만
+            SoundPlayer.Instance.UISoundPlay(0);
             yield return new WaitForSeconds(typeSpeed);
         }
+
+        // 타자 루프 사운드 정지
+        SoundPlayer.Instance.UISoundPlay_LOOP(0, false);
+
         isTyping = false;
         //if (teddyBearIcons.Length > dialogueType.ToInt()) teddyBearIcons[dialogueType.ToInt()].SetActive(true);
 
@@ -573,7 +586,7 @@ public class DialogueManager : MonoBehaviour
             foreach (GameObject skip in skipText) skip.SetActive(true);
 
             // script text 알파값 원상복구
-            if(dialogueType== DialogueType.PLAYER_TALKING||dialogueType== DialogueType.NPC)
+            if (dialogueType == DialogueType.PLAYER_TALKING || dialogueType == DialogueType.NPC)
                 scriptText[dialogueType.ToInt()].color = Color.black;
         }
     }
@@ -601,7 +614,7 @@ public class DialogueManager : MonoBehaviour
 
     public void OnDialoguePanelClick()
     {
-        if (!isDialogueActive || isAuto|| isCutsceneFadingToBlack) return;
+        if (!isDialogueActive || isAuto || isCutsceneFadingToBlack) return;
 
         if (isTyping)
         {
@@ -616,6 +629,10 @@ public class DialogueManager : MonoBehaviour
     private void CompleteSentence()
     {
         StopAllCoroutines();
+
+        // 타자 소리 정지
+        SoundPlayer.Instance.UISoundPlay_LOOP(0, false);
+
         scriptText[dialogueType.ToInt()].text = fullSentence;
         isTyping = false;
     }
@@ -680,7 +697,7 @@ public class DialogueManager : MonoBehaviour
     private void OnChoiceSelected(ChoiceLine choiceLine)
     {
         Debug.Log($"[DialogueManager] 선택지 선택됨: Script={choiceLine.GetScript()}, Next={choiceLine.Next}, TutorialIndex={choiceLine.TutorialIndex}");
-        
+
         // 선택지 UI 정리
         foreach (Transform child in choicesContainer[dialogueType.ToInt()])
         {

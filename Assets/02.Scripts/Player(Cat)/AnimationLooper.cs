@@ -31,6 +31,15 @@ public class AnimationLooper : MonoBehaviour
         if (audioSource == null)
         {
             audioSource = gameObject.AddComponent<AudioSource>();
+            // AudioSource 추가 시 기본 설정
+            audioSource.playOnAwake = false; // 시작 시 자동 재생하지 않음
+            audioSource.loop = false; // 루프하지 않음 (PlayOneShot 사용하므로)
+        }
+
+        // loopSound가 할당되어 있다면 AudioSource의 clip으로 설정 (선택 사항)
+        if (loopSound != null)
+        {
+            audioSource.clip = loopSound;
         }
 
         // Animator가 없으면 경고
@@ -101,8 +110,8 @@ public class AnimationLooper : MonoBehaviour
         // 애니메이션 파라미터 해제
         animator.SetBool(animationParameterName, false);
 
-        // 오디오 중지
-        if (audioSource.isPlaying && audioSource.clip == loopSound)
+        // 오디오 중지 (PlayOneShot이므로 재생 중이 아닐 수 있지만 안전을 위해)
+        if (audioSource != null && audioSource.isPlaying)
         {
             audioSource.Stop();
         }
@@ -176,10 +185,19 @@ public class AnimationLooper : MonoBehaviour
 
     private void PlayLoopSound()
     {
-        if (loopSound != null && audioSource != null)
+        if (audioSource == null)
         {
-            audioSource.PlayOneShot(loopSound);
+            Debug.LogWarning("AudioSource가 없습니다. 오디오를 재생할 수 없습니다.");
+            return;
         }
+
+        if (loopSound == null)
+        {
+            Debug.LogWarning("Loop Sound AudioClip이 할당되지 않았습니다. 오디오를 재생할 수 없습니다.");
+            return;
+        }
+
+        audioSource.PlayOneShot(loopSound);
     }
 
     private IEnumerator DelayedLoopCoroutine()
@@ -192,7 +210,7 @@ public class AnimationLooper : MonoBehaviour
             {
                 // 딜레이 후 애니메이션 다시 트리거 (필요한 경우)
                 animator.SetBool(animationParameterName, false);
-                yield return null;
+                yield return null; // 한 프레임 대기하여 애니메이션 파라미터 업데이트 보장
                 animator.SetBool(animationParameterName, true);
             }
         }

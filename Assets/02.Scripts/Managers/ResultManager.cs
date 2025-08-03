@@ -187,6 +187,16 @@ public class ResultManager : MonoBehaviour
                 yield return null;
                 break;
 
+            case string when resultID.StartsWith("Result_JumpToTutorial"):
+                string tutorialIndexStr = resultID["Result_JumpToTutorial".Length..];
+                if (int.TryParse(tutorialIndexStr, out int tutorialIndex))
+                {
+                    Debug.Log($"Result_JumpToTutorial{tutorialIndex}");
+                    TutorialController.Instance.JumpToTutorial(tutorialIndex);
+                }
+                yield return null;
+                break;
+
 
 
             default:

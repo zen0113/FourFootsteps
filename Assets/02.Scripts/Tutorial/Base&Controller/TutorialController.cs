@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -46,7 +47,7 @@ public class TutorialController : MonoBehaviour
         // 마지막 튜토리얼을 진행했다면 CompletedAllTutorials() 메소드 호출
         if (currentIndex >= tutorials.Count - 1)
         {
-            CompletedAllTutorials();
+            StartCoroutine(CompletedAllTutorials());
             return;
         }
 
@@ -71,7 +72,7 @@ public class TutorialController : MonoBehaviour
         if (tutorialIndex < 0 || tutorialIndex >= tutorials.Count)
         {
             Debug.LogError($"[TutorialController] 유효하지 않은 튜토리얼 인덱스: {tutorialIndex}. 튜토리얼을 종료합니다.");
-            CompletedAllTutorials();
+            StartCoroutine(CompletedAllTutorials());
             return;
         }
 
@@ -88,15 +89,15 @@ public class TutorialController : MonoBehaviour
         Debug.Log($"[TutorialController] 튜토리얼 인덱스 {previousIndex}에서 {tutorialIndex}로 건너뛰었습니다.");
     }
 
-    public void CompletedAllTutorials()
+    public IEnumerator CompletedAllTutorials()
     {
         currentTutorial = null;
-        // 행동 양식이 여러 종류가 되었을 때 코드 추가 작성
-        // 현재는 씬 전환
         Debug.Log("Complete All");
-        if (!nextSceneName.Equals(""))
+
+        if (!string.IsNullOrEmpty(nextSceneName))
         {
-            //SceneManager.LoadScene(nextSceneName);
+            SceneLoader.Instance.LoadScene(nextSceneName);
+            yield return new WaitForSeconds(1f);
         }
     }
 
@@ -117,7 +118,7 @@ public class TutorialController : MonoBehaviour
         if (index < 0 || index >= tutorials.Count)
         {
             Debug.LogWarning($"잘못된 튜토리얼 인덱스: {index}");
-            CompletedAllTutorials();
+            StartCoroutine(CompletedAllTutorials());
             return;
         }
 

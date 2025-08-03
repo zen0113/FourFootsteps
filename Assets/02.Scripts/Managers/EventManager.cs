@@ -81,14 +81,26 @@ public class EventManager : MonoBehaviour
                     resultIDTrimmed.StartsWith("Result_StartDialogue") ||
                     resultIDTrimmed.StartsWith("Result_Increment") ||
                     resultIDTrimmed.StartsWith("Result_Decrement") ||
-                    resultIDTrimmed.StartsWith("Result_Inverse"))
+                    resultIDTrimmed.StartsWith("Result_Inverse") ||
+                    resultIDTrimmed.StartsWith("Result_JumpToTutorial")) // 이 줄 추가
                 {
                     Result tempResult = new Result(resultIDTrimmed, "", "");
                     results.Add(tempResult);
                 }
                 else
                 {
-                    results.Add(ResultManager.Instance.results[resultIDTrimmed]);
+                    // 딕셔너리에 키가 존재하는지 확인 후 추가
+                    if (ResultManager.Instance.results.ContainsKey(resultIDTrimmed))
+                    {
+                        results.Add(ResultManager.Instance.results[resultIDTrimmed]);
+                    }
+                    else
+                    {
+                        Debug.LogWarning($"Result ID '{resultIDTrimmed}' not found in ResultManager! Creating temporary result.");
+                        // 임시 Result 객체 생성
+                        Result tempResult = new Result(resultIDTrimmed, "", "");
+                        results.Add(tempResult);
+                    }
                 }
             }
 
@@ -118,7 +130,6 @@ public class EventManager : MonoBehaviour
                 event_.AddEventLine(eventLogic, conditions, results, eventExecutionMode);
                 events[event_.EventID] = event_;
             }
-
         }
     }
 

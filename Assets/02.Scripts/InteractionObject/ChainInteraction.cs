@@ -19,6 +19,8 @@ public class ChainInteraction : MonoBehaviour
     
     // 연결된 오브젝트의 원본 상태
     private PushableBox pushableBoxComponent;                    // 기존 PushableBox 컴포넌트
+    private Rigidbody2D connectedRb;                            // 연결된 오브젝트의 Rigidbody2D
+    private Collider2D connectedCollider;                       // 연결된 오브젝트의 Collider2D
     
     private void Start()
     {
@@ -29,12 +31,14 @@ public class ChainInteraction : MonoBehaviour
             audioSource = gameObject.AddComponent<AudioSource>();
         }
         
-        // 연결된 오브젝트의 PushableBox 컴포넌트 가져오기
+        // 연결된 오브젝트의 컴포넌트들 가져오기
         if (connectedObject != null)
         {
             pushableBoxComponent = connectedObject.GetComponent<PushableBox>();
+            connectedRb = connectedObject.GetComponent<Rigidbody2D>();
+            connectedCollider = connectedObject.GetComponent<Collider2D>();
             
-            // PushableBox 컴포넌트가 없다면 추가하지 말고 경고만 출력
+            // PushableBox 컴포넌트가 없다면 경고
             if (pushableBoxComponent == null)
             {
                 Debug.LogWarning($"{connectedObject.name}에 PushableBox 컴포넌트가 없습니다. 미리 추가해주세요!");
@@ -43,13 +47,29 @@ public class ChainInteraction : MonoBehaviour
             {
                 // 사슬이 연결된 상태에서는 박스를 밀 수 없도록 비활성화
                 pushableBoxComponent.enabled = false;
+                Debug.Log($"{connectedObject.name} PushableBox 비활성화됨");
             }
             
             // Rigidbody2D를 kinematic으로 설정 (움직이지 않도록)
-            Rigidbody2D connectedRb = connectedObject.GetComponent<Rigidbody2D>();
             if (connectedRb != null)
             {
                 connectedRb.isKinematic = true;
+                Debug.Log($"{connectedObject.name} Rigidbody2D kinematic으로 설정됨");
+            }
+            else
+            {
+                Debug.LogError($"{connectedObject.name}에 Rigidbody2D가 없습니다!");
+            }
+            
+            // 콜라이더 비활성화 (플레이어가 통과할 수 있도록)
+            if (connectedCollider != null)
+            {
+                connectedCollider.enabled = false;
+                Debug.Log($"{connectedObject.name} Collider 비활성화됨 - 플레이어가 통과 가능");
+            }
+            else
+            {
+                Debug.LogError($"{connectedObject.name}에 Collider2D가 없습니다!");
             }
         }
     }
@@ -126,23 +146,36 @@ public class ChainInteraction : MonoBehaviour
     {
         if (connectedObject != null)
         {
+            // 콜라이더 활성화 (이제 충돌 가능)
+            if (connectedCollider != null)
+            {
+                connectedCollider.enabled = true;
+                Debug.Log($"{connectedObject.name} Collider 활성화됨 - 이제 충돌 가능");
+            }
+            
             // Rigidbody2D를 Dynamic으로 변경
-            Rigidbody2D connectedRb = connectedObject.GetComponent<Rigidbody2D>();
             if (connectedRb != null)
             {
                 connectedRb.isKinematic = false;
+                Debug.Log($"{connectedObject.name} Rigidbody2D Dynamic으로 변경됨");
             }
             
             // 기존 PushableBox 컴포넌트 활성화 (기존 박스 밀기 시스템 사용)
             if (pushableBoxComponent != null)
             {
                 pushableBoxComponent.enabled = true;
+                Debug.Log($"{connectedObject.name} PushableBox 활성화됨");
             }
             
-            // 연결된 오브젝트에 "Box" 태그 추가 (PlayerBoxInteraction에서 인식하도록)
-            if (!connectedObject.CompareTag("Box"))
+            // "Box" 태그가 이미 설정되어 있는지 확인
+            if (connectedObject.CompareTag("Box"))
+            {
+                Debug.Log($"{connectedObject.name}에 이미 Box 태그가 설정되어 있습니다.");
+            }
+            else
             {
                 connectedObject.tag = "Box";
+                Debug.Log($"{connectedObject.name}에 Box 태그를 추가했습니다.");
             }
             
             Debug.Log($"{connectedObject.name}이(가) 이제 밀 수 있습니다! (기존 박스 시스템 활용)");

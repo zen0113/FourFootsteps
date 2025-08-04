@@ -5106,15 +5106,22 @@ MonoBehaviour:
   tapGoal: 100
   perTapIncrease: 1.5
   tapKey: 32
-  darknessOverlay: {fileID: 985828379}
+  stageImage: {fileID: 985828379}
+  stageSprites:
+  - {fileID: 21300000, guid: e7ee017ea0198ac44819734a85a378e8, type: 3}
+  - {fileID: 21300000, guid: 32d372f2aa4c0064f82b34f46285f852, type: 3}
+  - {fileID: 21300000, guid: c8f7ce2461078dc44b04c72b66ade5c8, type: 3}
+  - {fileID: 21300000, guid: 9b172e255ac9644499c9cf88ed4106f6, type: 3}
+  stageMilestones: 280000003c0000005000000064000000
   instructionText: {fileID: 1625449029}
   gameCanvas: {fileID: 731048450}
   blinkSpeed: 1
   minAlpha: 0.3
   maxAlpha: 1
+  playerController: {fileID: 0}
   audioSource: {fileID: 0}
   tapSound: {fileID: 0}
-  completeSound: {fileID: 0}
+  stageChangeSound: {fileID: 0}
 --- !u!1 &732239771
 GameObject:
   m_ObjectHideFlags: 0
@@ -6842,7 +6849,7 @@ GameObject:
   - component: {fileID: 985828380}
   - component: {fileID: 985828379}
   m_Layer: 5
-  m_Name: DarknessOverlay
+  m_Name: StageImage
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6881,7 +6888,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
   m_Color: {r: 0, g: 0, b: 0, a: 1}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -9816,7 +9823,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 243}
   m_SizeDelta: {x: 664.9331, y: 224.4065}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1625449029

@@ -47,7 +47,7 @@ public class DialoguesParser
                 else lastDialogueID = dialogueID;
 
                 string speakerID = Escaper(fields[1].Trim());
-                bool bubble = (Escaper(fields[2].Trim()) == "TRUE") ? true : false;
+                bool bubbleMode = (Escaper(fields[2].Trim()) == "TRUE") ? true : false;
                 string script = Escaper(fields[3].Trim());
                 string textEffect = Escaper(fields[4].Trim());
                 string imageID = fields[5].Trim();
@@ -61,7 +61,7 @@ public class DialoguesParser
                     dialogues[dialogueID] = dialogue;
                 }
 
-                dialogues[dialogueID].AddLine(speakerID, bubble, script, textEffect, imageID, soundID, cutSceneID, next);
+                dialogues[dialogueID].AddLine(speakerID, bubbleMode, script, textEffect, imageID, soundID, cutSceneID, next);
             }
             catch (System.Exception e)
             {

@@ -157,7 +157,7 @@ public class DialogueManager : MonoBehaviour
 
     private void SetupCanvasAndSpeakerText(DialogueLine dialogueLine)
     {
-        ChangeDialogueCanvas(dialogueLine.SpeakerID, dialogueLine.Bubble);
+        ChangeDialogueCanvas(dialogueLine.SpeakerID, dialogueLine.BubbleMode);
 
         // Deactivate all canvases and then activate the selected one.
         foreach (GameObject canvas in dialogueSet)
@@ -187,7 +187,7 @@ public class DialogueManager : MonoBehaviour
                     speakerText.text = dialogueLine.SpeakerID;
                     break;
             }
-            if(dialogueLine.Bubble)
+            if(dialogueLine.BubbleMode)
                 speakerText.text = "";
         }
     }
@@ -398,12 +398,12 @@ public class DialogueManager : MonoBehaviour
         UpdateCharacterImages(dialogueLine);
     }
 
-    private void ChangeDialogueCanvas(string speaker, bool isBubble)
+    private void ChangeDialogueCanvas(string speaker, bool bubbleMode)
     {
         //if (dialogueType == DialogueType.CENTER)
         //    dialogueType = DialogueType.PLAYER_TALKING;
 
-        if (isBubble)
+        if (bubbleMode)
         {
             // 말풍선 모드
             if (speaker == "PlayerName")

@@ -16,6 +16,7 @@ public class Dialogue
 
     public void AddLine(
         string speakerID,
+        bool bubble,
         string script,
         string textEffect,
         string imageID,
@@ -23,7 +24,7 @@ public class Dialogue
         string cutSceneID,
         string next)
     {
-        Lines.Add(new DialogueLine(speakerID, script, textEffect, imageID, soundID, cutSceneID, next));
+        Lines.Add(new DialogueLine(speakerID, bubble, script, textEffect, imageID, soundID, cutSceneID, next));
     }
 
     public void SetCurrentLineIndex(int currentLineIndex)

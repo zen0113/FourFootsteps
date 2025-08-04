@@ -47,12 +47,13 @@ public class DialoguesParser
                 else lastDialogueID = dialogueID;
 
                 string speakerID = Escaper(fields[1].Trim());
-                string script = Escaper(fields[2].Trim());
-                string textEffect = Escaper(fields[3].Trim());
-                string imageID = fields[4].Trim();
-                string soundID = fields[5].Trim();
-                string cutSceneID = fields[6].Trim();
-                string next = fields[7].Trim();
+                bool bubble = (Escaper(fields[2].Trim()) == "TRUE") ? true : false;
+                string script = Escaper(fields[3].Trim());
+                string textEffect = Escaper(fields[4].Trim());
+                string imageID = fields[5].Trim();
+                string soundID = fields[6].Trim();
+                string cutSceneID = fields[7].Trim();
+                string next = fields[8].Trim();
 
                 if (!dialogues.ContainsKey(dialogueID))
                 {
@@ -60,7 +61,7 @@ public class DialoguesParser
                     dialogues[dialogueID] = dialogue;
                 }
 
-                dialogues[dialogueID].AddLine(speakerID, script, textEffect, imageID, soundID, cutSceneID, next);
+                dialogues[dialogueID].AddLine(speakerID, bubble, script, textEffect, imageID, soundID, cutSceneID, next);
             }
             catch (System.Exception e)
             {

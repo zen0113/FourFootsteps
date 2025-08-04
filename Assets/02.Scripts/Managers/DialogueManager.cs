@@ -44,7 +44,6 @@ public class DialogueManager : MonoBehaviour
     private string fullSentence;
     private bool isAutoDelayed = false; // 2초 지난 후 자동으로 넘겨짐
     private bool isFadeOut = false; // AutoDelayed이랑 주로 같이 쓰이며 글자가 투명하게 사라짐
-    private string previousCutSceneID = "";
     [SerializeField] private bool isCutsceneFadingToBlack = false;
 
     private float fadeTime = 0.5f;
@@ -158,7 +157,7 @@ public class DialogueManager : MonoBehaviour
 
     private void SetupCanvasAndSpeakerText(DialogueLine dialogueLine)
     {
-        ChangeDialogueCanvas(dialogueLine.SpeakerID);
+        ChangeDialogueCanvas(dialogueLine.SpeakerID, dialogueLine.Bubble);
 
         // Deactivate all canvases and then activate the selected one.
         foreach (GameObject canvas in dialogueSet)
@@ -180,7 +179,7 @@ public class DialogueManager : MonoBehaviour
                     break;
 
                 case "InnerThoughts":
-                case "PlayerBubble":
+                //case "PlayerBubble":
                     speakerText.text = "";
                     break;
 
@@ -188,9 +187,9 @@ public class DialogueManager : MonoBehaviour
                     speakerText.text = dialogueLine.SpeakerID;
                     break;
             }
+            if(dialogueLine.Bubble)
+                speakerText.text = "";
         }
-
-
     }
 
     private string ProcessTextEffect(DialogueLine dialogueLine, out bool auto, out bool fast)
@@ -277,9 +276,7 @@ public class DialogueManager : MonoBehaviour
                         break;
                 }
             }
-        }
-
-        previousCutSceneID = cutSceneID;
+        }    
     }
 
     // 컷씬 이미지를 Black으로 바꿈
@@ -401,34 +398,46 @@ public class DialogueManager : MonoBehaviour
         UpdateCharacterImages(dialogueLine);
     }
 
-    private void ChangeDialogueCanvas(string speaker)
+    private void ChangeDialogueCanvas(string speaker, bool isBubble)
     {
         //if (dialogueType == DialogueType.CENTER)
         //    dialogueType = DialogueType.PLAYER_TALKING;
 
-        switch (speaker)
+        if (isBubble)
         {
-            case "PlayerName":
-                dialogueType = DialogueType.PLAYER_TALKING;
-                break;
-
-            // 회상 마지막에 독백
-            case "Monolog":
-                dialogueType = DialogueType.MONOLOG;
-                break;
-
-            case "InnerThoughts":
-                dialogueType = DialogueType.PLAYER_THINKING;
-                break;
-
-            case "PlayerBubble":
+            // 말풍선 모드
+            if (speaker == "PlayerName")
+            {
                 dialogueType = DialogueType.PLAYER_BUBBLE;
-                break;
-
-            default:
-                dialogueType = DialogueType.NPC;
-                break;
+            }
+            else
+            {
+                dialogueType = DialogueType.NPC_BUBBLE;
+            }
         }
+        else
+        {
+            switch (speaker)
+            {
+                case "PlayerName":
+                    dialogueType = DialogueType.PLAYER_TALKING;
+                    break;
+
+                // 회상 마지막에 독백
+                case "Monolog":
+                    dialogueType = DialogueType.MONOLOG;
+                    break;
+
+                case "InnerThoughts":
+                    dialogueType = DialogueType.PLAYER_THINKING;
+                    break;
+
+                default:
+                    dialogueType = DialogueType.NPC;
+                    break;
+            }
+        }
+            
     }
 
     public void EndDialogue()

@@ -15,26 +15,39 @@ public class InputTextTypingPlayer : MonoBehaviour
         inputField.ActivateInputField();
     }
 
-    private int previousTextLength = 0;
+    //private int previousTextLength = 0;
 
-    void Update()
+    //void Update()
+    //{
+    //    if (inputField.isFocused)
+    //    {
+    //        int currentLength = inputField.text.Length;
+
+    //        if (currentLength > previousTextLength)
+    //        {
+    //            typingSound.pitch = Random.Range(minPitch, maxPitch);
+    //            typingSound.Play();
+    //        }
+    //        else if (currentLength < previousTextLength)
+    //        {
+    //            typingSound.pitch = Random.Range(minPitch, maxPitch);
+    //            typingSound.Play();
+    //        }
+
+    //        previousTextLength = currentLength;
+    //    }
+    //}
+
+    void OnGUI()
     {
-        if (inputField.isFocused)
+        Event e = Event.current;
+        if (!inputField.isFocused) return;
+
+        // 한글 IME 입력 포함한 키 입력 감지
+        if (e.type == EventType.KeyDown && !string.IsNullOrEmpty(e.character.ToString().Trim()))
         {
-            int currentLength = inputField.text.Length;
-
-            if (currentLength > previousTextLength)
-            {
-                typingSound.pitch = Random.Range(minPitch, maxPitch);
-                typingSound.Play();
-            }else if(currentLength < previousTextLength)
-            {
-                typingSound.pitch = Random.Range(minPitch, maxPitch);
-                typingSound.Play();
-            }
-
-            previousTextLength = currentLength;
+            typingSound.pitch = Random.Range(minPitch, maxPitch);
+            typingSound.Play();
         }
     }
-
 }

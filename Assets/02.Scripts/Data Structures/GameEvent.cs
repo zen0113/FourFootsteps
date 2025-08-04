@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using Unity.VisualScripting;
 
-public class Event
+public class GameEvent
 {
     public string EventID { get; private set; }
     public string EventName { get; private set; }
@@ -9,7 +9,7 @@ public class Event
     public List<EventLine> EventLine { get; private set; }
 
     // initialize function
-    public Event(string id, string name, string description)
+    public GameEvent(string id, string name, string description)
     {
         EventID = id;
         EventName = name;

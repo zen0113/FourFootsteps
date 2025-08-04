@@ -1,6 +1,7 @@
 public class DialogueLine
 {
     public string SpeakerID { get; private set; }
+    public bool Bubble { get; private set; }
     public string Script { get; private set; }
     public string TextEffect { get; private set; }
     public string ImageID { get; private set; }
@@ -11,6 +12,7 @@ public class DialogueLine
     // initialize function
     public DialogueLine(
         string speakerID,
+        bool bubble,
         string script,
         string textEffect,
         string imageID,
@@ -19,6 +21,7 @@ public class DialogueLine
         string next)
     {
         SpeakerID = speakerID;
+        Bubble = bubble;
         Script = script;
         TextEffect = textEffect;
         ImageID = imageID;

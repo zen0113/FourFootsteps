@@ -180,6 +180,7 @@ public class DialogueManager : MonoBehaviour
                     break;
 
                 case "InnerThoughts":
+                case "PlayerBubble":
                     speakerText.text = "";
                     break;
 
@@ -362,6 +363,9 @@ public class DialogueManager : MonoBehaviour
 
     private void UpdateCharacterImages(DialogueLine dialogueLine)
     {
+        if (dialogueType == DialogueType.PLAYER_BUBBLE || dialogueType == DialogueType.MONOLOG)
+            return;
+
         var imageID = dialogueLine.ImageID;
 
         if (string.IsNullOrWhiteSpace(imageID))
@@ -415,6 +419,10 @@ public class DialogueManager : MonoBehaviour
 
             case "InnerThoughts":
                 dialogueType = DialogueType.PLAYER_THINKING;
+                break;
+
+            case "PlayerBubble":
+                dialogueType = DialogueType.PLAYER_BUBBLE;
                 break;
 
             default:

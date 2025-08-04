@@ -47,6 +47,7 @@ public class PrologueManager : MonoBehaviour
     {
         if (isPrologueFinished) yield return null;
 
+        float waitingTime = 2f;
         switch (currentStep)
         {
             case 0:
@@ -57,6 +58,7 @@ public class PrologueManager : MonoBehaviour
 
             case 1:
                 Debug.Log($"프롤로그 {currentStep}");
+                yield return new WaitForSeconds(waitingTime);  // 2초 대기
                 StartCoroutine(ResultManager.Instance.ExecuteResultCoroutine("Result_DialogueFadeIn"));
                 EventManager.Instance.CallEvent("EventPrologue");
                 break;
@@ -64,6 +66,7 @@ public class PrologueManager : MonoBehaviour
             case 2:
                 Debug.Log($"프롤로그 {currentStep}");
                 SoundPlayer.Instance.UISoundPlay(Constants.Sound_RoomDoorOpenAndClose);
+                yield return new WaitForSeconds(waitingTime);  // 2초 대기
                 StartCoroutine(ResultManager.Instance.ExecuteResultCoroutine("Result_DialogueFadeIn"));
                 // 집안 보임
                 SetPrologueStage(0,true);
@@ -74,6 +77,7 @@ public class PrologueManager : MonoBehaviour
 
             case 3:
                 Debug.Log($"프롤로그 {currentStep}");
+                yield return new WaitForSeconds(waitingTime * 2.5f);  // 5초 대기
                 StartCoroutine(ResultManager.Instance.ExecuteResultCoroutine("Result_DialogueFadeIn"));
                 // 뒷골목에 있는 플레이어
                 // 뒷골목 오른쪽에서 왼쪽으로 자동 이동으로 천천히 걸어감.
@@ -81,7 +85,7 @@ public class PrologueManager : MonoBehaviour
                 SetPrologueStage(1, true);
                 HumanMoverStart(1);
                 //HumanMoverStart(1);
-                humanMovers[1].animator.speed = 0.6f;
+                humanMovers[1].animator.speed = 0.4f;
                 EventManager.Instance.CallEvent("EventPrologue");
                 // 뒷골목 최종 위치 도착 시, 플레이어 무릎 꿇고 이동장 내려놓음.
                 break;
@@ -95,15 +99,31 @@ public class PrologueManager : MonoBehaviour
 
             case 5:
                 Debug.Log($"프롤로그 {currentStep}");
+                yield return new WaitForSeconds(waitingTime);  // 2초 대기
                 StartCoroutine(ResultManager.Instance.ExecuteResultCoroutine("Result_DialogueFadeIn"));
                 SetPrologueStage(1, false);
                 // 침대에 누운 컷씬 재생
-                // Prologue_007,008,009 다이얼로그 재생
+                // Prologue_007 다이얼로그 재생
                 EventManager.Instance.CallEvent("EventPrologue");
-
                 break;
 
             case 6:
+                Debug.Log($"프롤로그 {currentStep}");
+                yield return new WaitForSeconds(waitingTime);  // 2초 대기
+                StartCoroutine(ResultManager.Instance.ExecuteResultCoroutine("Result_DialogueFadeIn"));
+                // Prologue_008 다이얼로그 재생
+                EventManager.Instance.CallEvent("EventPrologue");
+                break;
+
+            case 7:
+                Debug.Log($"프롤로그 {currentStep}");
+                // 눈 깜빡
+                yield return UIManager.Instance.OnFade(UIManager.Instance.dialogueCoverPanel, 0, 1, 1, true, 0.5f, 0);
+                // Prologue_009 다이얼로그 재생
+                EventManager.Instance.CallEvent("EventPrologue");
+                break;
+
+            case 8:
                 Debug.Log($"프롤로그 {currentStep}");
                 // 프롤로그 끝!
                 // 스테이지1로 이동
@@ -130,6 +150,7 @@ public class PrologueManager : MonoBehaviour
         if (currentStep == 3)
         {
             SoundPlayer.Instance.UISoundPlay(Constants.Sound_RoomDoorOpenAndClose);
+            StartCoroutine(ResultManager.Instance.ExecuteResultCoroutine("Result_DialogueFadeOut"));
         }
         else
         {

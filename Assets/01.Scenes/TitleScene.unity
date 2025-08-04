@@ -1314,9 +1314,12 @@ MonoBehaviour:
   - {fileID: 8300000, guid: ab5b87ae348791c4fa46e61d3f830ef6, type: 3}
   - {fileID: 8300000, guid: 4f19fb89eb3d99141a48c9b614870730, type: 3}
   - {fileID: 8300000, guid: e1c71fc22570a54428a3f82b3ffce9c4, type: 3}
+  - {fileID: 8300000, guid: f1dd12a204b5b854190f0f9da49c0f60, type: 3}
   uiSoundClips:
   - {fileID: 8300000, guid: 71fa15381e64e7a468d1698e94c48886, type: 3}
   - {fileID: 8300000, guid: bac8b5e2006d282498f3c5049224c9fd, type: 3}
+  - {fileID: 8300000, guid: 9eb193f06fbd7be40a0096f3c8d7640b, type: 3}
+  - {fileID: 8300000, guid: a2d497e608405fb4ea37efeac2698cf8, type: 3}
   uiSoundLoopClips:
   - {fileID: 8300000, guid: 71a966b9e87626f4eb2e8e2f512cb35d, type: 3}
   sceneBGMSettings:
@@ -1328,11 +1331,11 @@ MonoBehaviour:
     autoPlay: 1
     syncStart: 1
     bgm2Delay: 0
-  - sceneName: SetPlayerName
+  - sceneName: Prologue
     bgmIndex1: 0
-    bgmIndex2: 4
-    bgm1VolumeMultiplier: 1
-    bgm2VolumeMultiplier: 0.27
+    bgmIndex2: 5
+    bgm1VolumeMultiplier: 0
+    bgm2VolumeMultiplier: 0.6
     autoPlay: 1
     syncStart: 1
     bgm2Delay: 0
@@ -1802,6 +1805,30 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 2006070646345370221, guid: 3748e216849363f48bf06a48de54cf2d, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2006070646345370221, guid: 3748e216849363f48bf06a48de54cf2d, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2006070646345370221, guid: 3748e216849363f48bf06a48de54cf2d, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2006070646345370221, guid: 3748e216849363f48bf06a48de54cf2d, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2006070646345370221, guid: 3748e216849363f48bf06a48de54cf2d, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2006070646345370221, guid: 3748e216849363f48bf06a48de54cf2d, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2983405663141639732, guid: 3748e216849363f48bf06a48de54cf2d, type: 3}
       propertyPath: m_Pivot.x
       value: 0
@@ -1880,6 +1907,18 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2983405663141639732, guid: 3748e216849363f48bf06a48de54cf2d, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4439588275177321346, guid: 3748e216849363f48bf06a48de54cf2d, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5413977806078666781, guid: 3748e216849363f48bf06a48de54cf2d, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5413977806078666781, guid: 3748e216849363f48bf06a48de54cf2d, type: 3}
+      propertyPath: m_SizeDelta.y
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5723956519785947959, guid: 3748e216849363f48bf06a48de54cf2d, type: 3}

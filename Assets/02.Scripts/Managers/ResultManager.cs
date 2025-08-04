@@ -108,6 +108,10 @@ public class ResultManager : MonoBehaviour
                 yield return null; // 바로 실행이지만 코루틴 일관성 유지
                 break;
 
+            case "ResultCloseEyes": // 눈 깜빡이는 효과
+                yield return UIManager.Instance.OnFade(null, 0, 1, 1, true, 0.5f, 0);
+                break;
+
             case "Result_FadeOut":  // fade out
                 float fadeOutTime = 2f;
                 yield return UIManager.Instance.OnFade(null, 0, 1, fadeOutTime);

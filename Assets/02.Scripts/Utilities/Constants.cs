@@ -30,7 +30,7 @@ public static class Constants
     //}
 
     // 대화창의 종류
-    public enum DialogueType { PLAYER_TALKING, PLAYER_THINKING, NPC, MONOLOG }
+    public enum DialogueType { PLAYER_TALKING, PLAYER_THINKING, NPC, MONOLOG, PLAYER_BUBBLE }
     public static int ToInt(this DialogueType dialogueType)
     {
         // 다이얼로그 타입에 따라 다른 숫자 반환
@@ -40,6 +40,7 @@ public static class Constants
             case DialogueType.PLAYER_THINKING: return 1;
             case DialogueType.NPC: return 2;
             case DialogueType.MONOLOG: return 3;
+            case DialogueType.PLAYER_BUBBLE: return 4;
             default: return 0;
         }
     }

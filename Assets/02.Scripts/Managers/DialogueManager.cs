@@ -353,11 +353,11 @@ public class DialogueManager : MonoBehaviour
 
     private void PlayDialogueSound(DialogueLine dialogueLine)
     {
-        if (string.IsNullOrWhiteSpace(dialogueLine.SoundID))
-            return;
-        var soundID = "Sound_" + dialogueLine.SoundID;
-        var soundNum = (int)typeof(Constants).GetField(soundID).GetValue(null);
-        SoundPlayer.Instance.UISoundPlay_LOOP(soundNum, true);
+        //if (string.IsNullOrWhiteSpace(dialogueLine.SoundID))
+        //    return;
+        //var soundID = "Sound_" + dialogueLine.SoundID;
+        //var soundNum = (int)typeof(Constants).GetField(soundID).GetValue(null);
+        //SoundPlayer.Instance.UISoundPlay_LOOP(soundNum, true);
     }
 
     private void UpdateCharacterImages(DialogueLine dialogueLine)

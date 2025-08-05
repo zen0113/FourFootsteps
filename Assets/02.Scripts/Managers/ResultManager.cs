@@ -197,7 +197,11 @@ public class ResultManager : MonoBehaviour
                 yield return null;
                 break;
 
-
+            // 같은 씬 내에서 방 간 이동 (페이드 효과와 함께)
+            case string when resultID.StartsWith("Result_MoveToRoom"):
+                string roomName = resultID["Result_MoveToRoom".Length..];
+                yield return StartCoroutine(MoveToRoomCoroutine(roomName));
+                break;
 
             default:
                 Debug.Log($"Result ID: {resultID} not found!");
@@ -206,56 +210,134 @@ public class ResultManager : MonoBehaviour
         }
     }
 
+    private bool _isMovingRoom = false;
+
+    /// <summary>
+    /// 같은 씬 내에서 지정된 방으로 플레이어와 카메라를 이동시키는 코루틴
+    /// </summary>
+    /// <param name="roomName">이동할 방의 이름 (Transform 오브젝트 이름과 일치해야 함)</param>
+    /// <param name="useFade">페이드 효과 사용 여부</param>
+    private IEnumerator MoveToRoomCoroutine(string roomName, bool useFade = true)
+    {
+        if (_isMovingRoom)
+        {
+            Debug.LogWarning($"Already moving to a room! (Requested: {roomName})");
+            yield break;
+        }
+
+        _isMovingRoom = true;
+
+        Debug.Log($"Moving to room: {roomName}");
+
+        GameObject playerSpawnPoint = GameObject.Find($"{roomName}_PlayerSpawn");
+        GameObject cameraTargetPoint = GameObject.Find($"{roomName}_CameraTarget");
+
+        if (playerSpawnPoint == null)
+        {
+            Debug.LogError($"Player spawn point not found: {roomName}_PlayerSpawn");
+            _isMovingRoom = false;
+            yield break;
+        }
+
+        if (cameraTargetPoint == null)
+        {
+            Debug.LogError($"Camera target point not found: {roomName}_CameraTarget");
+            _isMovingRoom = false;
+            yield break;
+        }
+
+        // 페이드 아웃
+        if (useFade)
+        {
+            yield return UIManager.Instance.OnFade(null, 0, 1, 1f);
+        }
+
+        // 플레이어 위치, 회전 이동 (컨트롤러 enable/disable 제거)
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        if (player != null)
+        {
+            player.transform.position = playerSpawnPoint.transform.position;
+            player.transform.rotation = playerSpawnPoint.transform.rotation;
+        }
+        else
+        {
+            Debug.LogError("Player object not found with tag 'Player'");
+        }
+
+        // 카메라 이동
+        Camera mainCamera = Camera.main;
+        if (mainCamera != null)
+        {
+            mainCamera.transform.position = cameraTargetPoint.transform.position;
+            mainCamera.transform.rotation = cameraTargetPoint.transform.rotation;
+        }
+        else
+        {
+            Debug.LogError("Main camera not found");
+        }
+
+        // 짧은 대기
+        yield return new WaitForSeconds(0.1f);
+
+        // 페이드 인
+        if (useFade)
+        {
+            yield return UIManager.Instance.OnFade(null, 1, 0, 1f);
+        }
+
+        Debug.Log($"Successfully moved to room: {roomName}");
+
+        _isMovingRoom = false;
+    }
+}
 
     //public void ExecuteResult(string resultID)
     //{
     //    string variableName;
 
-    //    // ------------------------ 이곳에 모든 동작을 수동으로 추가 ------------------------
-    //    switch (resultID)
-    //    {
-    //        case string when resultID.StartsWith("Result_StartDialogue"):  // 대사 시작
-    //            variableName = resultID["Result_StartDialogue".Length..];
-    //            DialogueManager.Instance.StartDialogue(variableName);
-    //            break;
+//    // ------------------------ 이곳에 모든 동작을 수동으로 추가 ------------------------
+//    switch (resultID)
+//    {
+//        case string when resultID.StartsWith("Result_StartDialogue"):  // 대사 시작
+//            variableName = resultID["Result_StartDialogue".Length..];
+//            DialogueManager.Instance.StartDialogue(variableName);
+//            break;
 
-    //        // GameManager의 해당 변수를 조정 가능(+1 / -1)
-    //        case string when resultID.StartsWith("Result_Increment"):  // 값++
-    //            variableName = resultID["Result_Increment".Length..];
-    //            GameManager.Instance.IncrementVariable(variableName);
+//        // GameManager의 해당 변수를 조정 가능(+1 / -1)
+//        case string when resultID.StartsWith("Result_Increment"):  // 값++
+//            variableName = resultID["Result_Increment".Length..];
+//            GameManager.Instance.IncrementVariable(variableName);
 
-    //            // 증가시킨게 책임감 점수면 ChangeResponsibilityGauge 호출
-    //            if (variableName== "ResponsibilityScore")
-    //            {
-    //                if (ResponsibilityManager.Instance)
-    //                    ResponsibilityManager.Instance.ChangeResponsibilityGauge();
-    //            }    
-    //            break;
+//            // 증가시킨게 책임감 점수면 ChangeResponsibilityGauge 호출
+//            if (variableName== "ResponsibilityScore")
+//            {
+//                if (ResponsibilityManager.Instance)
+//                    ResponsibilityManager.Instance.ChangeResponsibilityGauge();
+//            }    
+//            break;
 
-    //        case string when resultID.StartsWith("Result_Decrement"):  // 값--
-    //            variableName = resultID["Result_Decrement".Length..];
-    //            GameManager.Instance.DecrementVariable(variableName);
-    //            break;
+//        case string when resultID.StartsWith("Result_Decrement"):  // 값--
+//            variableName = resultID["Result_Decrement".Length..];
+//            GameManager.Instance.DecrementVariable(variableName);
+//            break;
 
-    //        case "Result_FadeOut":  // fade out
-    //            float fadeOutTime = 3f;
-    //            StartCoroutine(UIManager.Instance.OnFade(null, 0, 1, fadeOutTime));
-    //            break;
+//        case "Result_FadeOut":  // fade out
+//            float fadeOutTime = 3f;
+//            StartCoroutine(UIManager.Instance.OnFade(null, 0, 1, fadeOutTime));
+//            break;
 
-    //        case "Result_FadeIn":  // fade int
-    //            float fadeInTime = 3f;
-    //            StartCoroutine(UIManager.Instance.OnFade(null, 1, 0, fadeInTime));
-    //            break;
+//        case "Result_FadeIn":  // fade int
+//            float fadeInTime = 3f;
+//            StartCoroutine(UIManager.Instance.OnFade(null, 1, 0, fadeInTime));
+//            break;
 
-    //        // 낡은 소파 조사 시, 회상1 씬으로 이동.
-    //        case "Result_GoToReminiscence1":
-    //            SceneLoader.Instance.LoadScene("Reminiscence1");
-    //            break;
+//        // 낡은 소파 조사 시, 회상1 씬으로 이동.
+//        case "Result_GoToReminiscence1":
+//            SceneLoader.Instance.LoadScene("Reminiscence1");
+//            break;
 
-    //        default:
-    //            Debug.Log($"Result ID: {resultID} not found!");
-    //            break;
-    //    }
-    //}
-
-}
+//        default:
+//            Debug.Log($"Result ID: {resultID} not found!");
+//            break;
+//    }
+//}

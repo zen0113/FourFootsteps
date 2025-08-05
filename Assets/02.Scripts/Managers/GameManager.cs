@@ -255,7 +255,8 @@ public class GameManager : MonoBehaviour
             "YourCatName",
             "CurrentSceneName",
             "NextSceneName",
-            "CanMoving"
+            "CanMoving",
+            "CanInvesigatingRecallObject"
         });
 
         foreach (var item in variables)

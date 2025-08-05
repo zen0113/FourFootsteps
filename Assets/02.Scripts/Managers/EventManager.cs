@@ -76,13 +76,8 @@ public class EventManager : MonoBehaviour
             foreach (string resultID in resultIDs)
             {
                 string resultIDTrimmed = resultID.Trim();
-                // Function-wrapped results
-                if (
-                    resultIDTrimmed.StartsWith("Result_StartDialogue") ||
-                    resultIDTrimmed.StartsWith("Result_Increment") ||
-                    resultIDTrimmed.StartsWith("Result_Decrement") ||
-                    resultIDTrimmed.StartsWith("Result_Inverse") ||
-                    resultIDTrimmed.StartsWith("Result_JumpToTutorial")) // 이 줄 추가
+                // Function-wrapped results (자동으로 임시 Result 객체 생성)
+                if (IsFunctionWrappedResult(resultIDTrimmed))
                 {
                     Result tempResult = new Result(resultIDTrimmed, "", "");
                     results.Add(tempResult);
@@ -131,6 +126,21 @@ public class EventManager : MonoBehaviour
                 events[event_.EventID] = event_;
             }
         }
+    }
+
+    /// <summary>
+    /// Result ID가 함수 형태로 래핑된 결과인지 확인
+    /// </summary>
+    /// <param name="resultID">확인할 Result ID</param>
+    /// <returns>함수 형태의 Result인지 여부</returns>
+    private bool IsFunctionWrappedResult(string resultID)
+    {
+        return resultID.StartsWith("Result_StartDialogue") ||
+               resultID.StartsWith("Result_Increment") ||
+               resultID.StartsWith("Result_Decrement") ||
+               resultID.StartsWith("Result_Inverse") ||
+               resultID.StartsWith("Result_JumpToTutorial") ||
+               resultID.StartsWith("Result_MoveToRoom");
     }
 
     // Event ID를 받아서 전체 조건의 true/false 판단하여 true인 경우 결과 수행

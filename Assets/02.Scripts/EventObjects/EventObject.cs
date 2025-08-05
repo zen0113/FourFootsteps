@@ -5,10 +5,11 @@ public class EventObject : MonoBehaviour
     [SerializeField]
     protected string eventId;
 
-    public bool isInteractable = false;
-
     [SerializeField]
     protected SpriteGlow.SpriteGlowEffect spriteGlowEffect;
+
+    // 플레이어가 오브젝트 범위 내에 있는지 확인하는 변수
+    private bool _isPlayerInRange = false;
 
     protected void Start()
     {
@@ -21,10 +22,6 @@ public class EventObject : MonoBehaviour
 
     protected void Investigate()
     {
-        //if (!string.IsNullOrEmpty(eventId) && EventManager.Instance && isInteractable)
-        //{
-        //    EventManager.Instance.CallEvent(eventId);
-        //}
         EventManager.Instance.CallEvent(eventId);
     }
 
@@ -34,20 +31,33 @@ public class EventObject : MonoBehaviour
         if (DialogueManager.Instance.isDialogueActive)
             return;
 
-        // 플레이어가 범위 내에 있고 E키를 눌렀을 때
-        // 조사 조건
+        // 회상 씬에서 조사 불가능하면 리턴 (추가된 조건)
+        if (!CanInteractInRecallScene())
+            return;
+
+        // 조사 조건: 플레이어가 범위 내에 있고 E키를 눌렀을 때
         if (!string.IsNullOrEmpty(eventId)
-            && EventManager.Instance && isInteractable
+            && EventManager.Instance && _isPlayerInRange // isInteractable 대신 새로운 변수 사용
             && Input.GetKeyDown(KeyCode.E))
         {
             Investigate();
         }
     }
 
-
     public string GetEventId()
     {
         return eventId;
+    }
+
+    // 회상 씬에서 조사 가능한지 확인하는 메서드
+    private bool CanInteractInRecallScene()
+    {
+        // RecallManager가 없으면 일반 씬이므로 조사 가능
+        if (RecallManager.Instance == null)
+            return true;
+
+        // RecallManager가 있으면 회상 씬이므로 CanInvesigatingRecallObject 변수 확인
+        return (bool)GameManager.Instance.GetVariable("CanInvesigatingRecallObject");
     }
 
     // 플레이어가 트리거에 들어왔을 때
@@ -55,49 +65,47 @@ public class EventObject : MonoBehaviour
     {
         if (other.CompareTag("Player"))
         {
-            // 회상 씬이고 일반 오브젝트 조사 가능하지 않으면 조사 불가능하게 함.
-            if ((bool)GameManager.Instance.GetVariable("isRecalling")
-                && !(bool)GameManager.Instance.GetVariable("CanInvesigatingRecallObject"))
+            // 회상 씬에서 조사 불가능하면 리턴
+            if (!CanInteractInRecallScene())
                 return;
 
             if (gameObject.GetComponent<SpriteGlow.SpriteGlowEffect>() != null)
                 spriteGlowEffect.enabled = true;
 
-            isInteractable = true;
+            _isPlayerInRange = true; // 플레이어가 범위에 들어옴
         }
     }
 
-    private void OnTriggerStay(Collider other)
+    private void OnTriggerStay2D(Collider2D other)
     {
         if (other.CompareTag("Player"))
         {
-            // 회상 씬이고 일반 오브젝트 조사 가능하지 않으면 조사 불가능하게 함.
-            if ((bool)GameManager.Instance.GetVariable("isRecalling")
-                && !(bool)GameManager.Instance.GetVariable("CanInvesigatingRecallObject"))
+            // 회상 씬에서 조사 불가능하면 리턴
+            if (!CanInteractInRecallScene())
+            {
+                // 조사 불가능한 상태가 되면 상호작용 해제
+                if (gameObject.GetComponent<SpriteGlow.SpriteGlowEffect>() != null)
+                    spriteGlowEffect.enabled = false;
+                _isPlayerInRange = false;
                 return;
+            }
 
             if (gameObject.GetComponent<SpriteGlow.SpriteGlowEffect>() != null)
                 spriteGlowEffect.enabled = true;
 
-            isInteractable = true;
+            _isPlayerInRange = true;
         }
     }
-
 
     // 플레이어가 트리거에서 나갔을 때
     private void OnTriggerExit2D(Collider2D other)
     {
         if (other.CompareTag("Player"))
         {
-            // 회상 씬이고 일반 오브젝트 조사 가능하지 않으면 조사 불가능하게 함.
-            if ((bool)GameManager.Instance.GetVariable("isRecalling")
-                && !(bool)GameManager.Instance.GetVariable("CanInvesigatingRecallObject"))
-                return;
-
             if (gameObject.GetComponent<SpriteGlow.SpriteGlowEffect>() != null)
                 spriteGlowEffect.enabled = false;
 
-            isInteractable = false;
+            _isPlayerInRange = false; // 플레이어가 범위에서 벗어남
         }
     }
 }

@@ -193,6 +193,14 @@ public class ResultManager : MonoBehaviour
                 {
                     Debug.Log($"Result_JumpToTutorial{tutorialIndex}");
                     TutorialController.Instance.JumpToTutorial(tutorialIndex);
+
+                    // 여기에 튜토리얼 점프 시 호출할 RecallManager 로직 추가
+                    if (RecallManager.Instance != null)
+                    {
+                        Debug.Log("JumpToTutorial에서 RecallManager 호출");
+                        GameManager.Instance.SetVariable("CanInvesigatingRecallObject", true);
+                        RecallManager.Instance.SetInteractKeyGroup(true);
+                    }
                 }
                 yield return null;
                 break;

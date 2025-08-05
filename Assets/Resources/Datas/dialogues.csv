@@ -227,7 +227,7 @@ Recall3_009,PlayerName,잠깐 쉴까?,,temp_playerHUMAN,,,,
 Recall3_010,PlayerName,(소파에 눕는다.) 조금만 쉬자…,,temp_playerHUMAN,,,,
 Recall3_011,InnerThoughts,요즘 자주 잊고 있었지… 밥 주는 것도.,,temp_playerHUMAN,,,,밥그릇
 Recall3_012,InnerThoughts,얼마전에 구매한 스크래처다.,,temp_playerHUMAN,,,,스크래처
-,InnerThoughts,{YourCatName}이가 소파 대신 여기서 발톱을 갈면 좋을텐데…,,temp_playerHUMAN,,,,
+,InnerThoughts,{YourCatName}이가 소파 대신 여기서 발톱을 갈면 좋을텐데…,TRUE,temp_playerHUMAN,,,,
 Recall3_013,InnerThoughts,{YourCatName}이 잘 먹던 사료다.,TRUE,temp_playerHUMAN,,,,고양이 사료
 ,InnerThoughts,간식 더 사서 먹일 걸 그랬나…,,temp_playerHUMAN,,,,
 Recall3_014,InnerThoughts,군데군데 상처 난 소파다.,,temp_playerHUMAN,,,,열려있는 방문
@@ -272,70 +272,65 @@ Stage04_001,PlayerName,윽… 머리야… 정신이 너무 몽롱해…,,temp_p
 ,PlayerName,철장 안…?! 나 아직도 고양이인 거야…?,,temp_playerCAT,,,,
 Stage04_002,트럭 기사,콜록! 콜록콜록!!,,,,,,
 ,트럭 기사,어휴` 고양이 털 때문에 콧물도 계속 나오네… 킁…,,,,,,환풍구 쪽에서 하얀새가 나타나서 주인공의 철장 안에 하얀 퍼즐 조각 떨어뜨리고 감
-Stage04_003,PlayerName,… 이번에도 역시 뭔가가 관련되어 있다는 것인가?,,temp_playerCAT,,,,
-,PlayerName,윽…머리가 제대로 안 돌아가…\n얼른 퍼즐 조각을 조사해서 잠시 인간으로 돌아가기라도 해야 겠어…,,temp_playerCAT,,,,
+Stage04_003,InnerThoughts,퍼즐 조각에 닿으니 졸음이 몰려온다...,,temp_playerCAT,,,,
+,InnerThoughts,여기서...잠 들면...위험할텐데...,,temp_playerCAT,,,,
 ,,,,,,,,
-Recall4_001,PlayerName,휴… 원래의 몸으로 돌아오니까 정신이 몽롱하던 게 나아졌어.,,temp_playerHUMAN,,,,
-,PlayerName,그나저나 이번에도 우리 집이네? 대체 무슨 기준인 걸까…?,,temp_playerHUMAN,,,,
-,PlayerName,아니면...이제 원래의 몸으로 완전히 돌아온 것일까?,,temp_playerHUMAN,,,,
-,엄마,콜록… {PlayerName} 왔니? 여기 와서 앉아봐라.,TRUE,temp_mom,,,Choice_006,
-Recall4_002,PlayerName,엄마…!! 여기 꿈 아니지?? 맞지? 나 너무 무섭고 이상한 꿈 꿨어…,,temp_playerHUMAN,,,,
-,엄마,{PlayerName} 왔니? 여기 와서 앉아봐라. {PlayerName} 왔니? 여기 와서 앉아봐라. {PlayerName} 왔니? 여기 와서 앉아봐라. {PlayerName} 왔니? 여기 와서 앉아봐라. {PlayerName} 왔니? 여기 와서 앉아봐라. {PlayerName} 왔니? 여기 와서 앉아봐라. {PlayerName} 왔니? 여기 와서 앉아봐라. {PlayerName} 왔니? 여기 와서 앉아봐라. {PlayerName} 왔니? 여기 와서 앉아봐라. {PlayerName} 왔니? 여기 와서 앉아봐라. {PlayerName} 왔니? 여기 와서 앉아봐라. {PlayerName} 왔니? 여기 와서 앉아봐라.,TRUE/RED/SHAKE,temp_mom,,,,
-,PlayerName,……아직도 꿈이라고…? 대체 언제쯤이면 이 꿈이 끝나는거지…,,temp_playerHUMAN,,,Choice_007,
-Recall4_003,PlayerName,...응. 무슨 일 있어?,,temp_playerHUMAN,,,,
+Recall4_001,PlayerName,집에 왔는데... 엄마가 뭔가 심각해 보이시네.,,temp_playerHUMAN,,,,
+,엄마,콜록… {PlayerName} 왔니? 여기 와서 앉아봐라.,TRUE,temp_mom,,,,
+Recall4_002,PlayerName,...응. 무슨 일 있어?,,temp_playerHUMAN,,,,
 ,엄마,너도 알겠지만` 엄마가 요새 고양이 알레르기가 생겼어.\n심한 편은 아니지만 조금 힘들네. 이번에 그냥 고양이를… 다른 곳에 보내는 건 어떠니?,,temp_mom,,,Choice_008,
-Recall4_004,PlayerName,엄마` 얘도 생명이고 우리 가족이잖아. 가족을 어떻게 버려…,,temp_playerHUMAN,,,,긍정적 선택지
+Recall4_003,PlayerName,엄마` 얘도 생명이고 우리 가족이잖아. 가족을 어떻게 버려…,,temp_playerHUMAN,,,,긍정적 선택지
 ,PlayerName,엄마 알레르기 때문에 많이 힘들면 이번에 [공기 청정기를 설치]해보자. 내가 살게.,,temp_playerHUMAN,,,,
 ,PlayerName,그리고 청소도 자주 해서 깨끗하게 할게. 엄마 힘들게는 안 할 테니까…응?,,temp_playerHUMAN,,,,
 ,PlayerName,엄마는 고양이 털에 좀 더 민감한 편이니까 내가 열심히 관리해볼게.,,temp_playerHUMAN,,,,
 ,YourCatName,고롱고롱…,,temp_playerCAT,,,,
-Recall4_005,PlayerName,… 알겠어. 내가 어떻게 해볼게.,,temp_playerHUMAN,,,,부정적 선택지
+Recall4_004,PlayerName,… 알겠어. 내가 어떻게 해볼게.,,temp_playerHUMAN,,,,부정적 선택지
 ,PlayerName,너도 들었지? …미안하다. 어쩔 수 없어…,,temp_playerHUMAN,,,,
 ,YourCatName,야옹…,,temp_playerCAT,,,,
-Recall4_006,Monolog,…예전에는 이런 마음을 가졌었지.\n하지만` 난 결국 충동적으로 그 녀석을 버리고…,AUTO_DELAYED/FADE_OUT,,,,,
-Recall4_007,Monolog,내가 잘못 생각했었어… 너무 무책임한 일을 저지른 것 같아.,AUTO_DELAYED/FADE_OUT,,,,,
-Recall4_008,PlayerName,엄마…? 엄마…??,,temp_playerHUMAN,,,,
+Recall4_005,Monolog,…예전에는 이런 마음을 가졌었지.\n하지만` 난 결국 충동적으로 그 녀석을 버리고…,AUTO_DELAYED/FADE_OUT,,,,,
+Recall4_006,Monolog,내가 잘못 생각했었어… 너무 무책임한 일을 저지른 것 같아.,AUTO_DELAYED/FADE_OUT,,,,,
+Recall4_007,PlayerName,엄마…? 엄마…??,,temp_playerHUMAN,,,,
 ,PlayerName,또…그 수의사처럼 엄마도 사라졌어…,,temp_playerHUMAN,,,,
-Recall4_009,PlayerName,또 구멍이 나타났네.,,temp_playerHUMAN,,,,사물 아무거나 하나 조사하여 조사 스크립트 다 보면 포탈이 생김
+Recall4_008,PlayerName,또 구멍이 나타났네.,,temp_playerHUMAN,,,,사물 아무거나 하나 조사하여 조사 스크립트 다 보면 포탈이 생김
 ,PlayerName,이번에도 충분히 조사를 하고 나가보자.,,temp_playerHUMAN,,,,
-Recall4_010,PlayerName,군데군데 상처 난 소파다.\n소파에는 고양이 털도 많이 보인다.,,temp_playerHUMAN,,,,소파
-,PlayerName,…분명 여기에 엄마가 앉아 계셨는데… 온기도 느껴지지 않아.,,temp_playerHUMAN,,,,
-,PlayerName,…어머니도 안 보이고 옆에 있던 {YourCatName}(이)도 사라졌고…,TRUE,temp_playerHUMAN,,,,
-,PlayerName,빨리 이 악몽 같은 게 빨리 끝났으면 좋겠다…,,temp_playerHUMAN,,,,
-Recall4_011,PlayerName,이전의 꿈 속에서 봤던 스크래처가 그대로 있다.,,temp_playerHUMAN,,,,스크래처
+Recall4_009,InnerThoughts,군데군데 상처 난 소파다.\n소파에는 고양이 털도 많이 보인다.,,temp_playerHUMAN,,,,소파
+,PlayerName,...이것 때문에 엄마의 기침이 많이 심해지셨구나.,,temp_playerHUMAN,,,,
+,PlayerName,나...정말 엄마 말씀대로 다른 사람 생각 안 하고 나만 생각했네...,,temp_playerHUMAN,,,,
+Recall4_010,InnerThoughts,이전의 꿈 속에서 봤던 스크래처가 그대로 있다.,,temp_playerHUMAN,,,,스크래처
 ,PlayerName,이번에도 역시 거의 사용이 안 된 것 같네…,,temp_playerHUMAN,,,,
-Recall4_012,PlayerName,(덜컹덜컹),,temp_playerHUMAN,,,,잠겨있는 방문
+Recall4_011,InnerThoughts,(덜컹덜컹),,temp_playerHUMAN,,,,잠겨있는 방문
 ,PlayerName,…분명 이전의 꿈에선 열려 있었는데 이번엔 잠겨서 들어갈 수 없네…,,temp_playerHUMAN,,,,
-Recall4_013,PlayerName,여름이 아니라서 에어컨이 틀어져 있지 않다.,,temp_playerHUMAN,,,,에어컨
+Recall4_012,InnerThoughts,여름이 아니라서 에어컨이 틀어져 있지 않다.,,temp_playerHUMAN,,,,에어컨
 ,PlayerName,에어컨 뒤쪽에도 고양이 털이 잔뜩 있네.\n…청소를 이렇게까지 안 했었나…?,,temp_playerHUMAN,,,,
-Recall4_014,PlayerName,시들어 있는 식물이다.,,temp_playerHUMAN,,,,화분
+Recall4_013,InnerThoughts,시들어 있는 식물이다.,,temp_playerHUMAN,,,,화분
 ,PlayerName,…며칠 전에 시들어 있는 식물 보고 엄마가 놀라셨지.,,temp_playerHUMAN,,,,
 ,PlayerName,그럼 이번 꿈은 비교적 최근에 가까운 건가…?,,temp_playerHUMAN,,,,
-Recall4_015,PlayerName,(호출 버튼을 눌러본다.),,temp_playerHUMAN,,,,초인종
+Recall4_014,InnerThoughts,(호출 버튼을 눌러본다.),,temp_playerHUMAN,,,,초인종
 ,PlayerName,……,,temp_playerHUMAN,,,,
-,PlayerName,... 이번에도 역시 작동하지 않는 것 같다.,,temp_playerHUMAN,,,,
-Recall4_016,PlayerName,(문을 열어보려고 시도한다.),,temp_playerHUMAN,,,,현관문
-,PlayerName,... 잠금장치도 작동하지 않는다.,,temp_playerHUMAN,,,,
-Recall4_017,PlayerName,엄마와 내 신발이 가지런히 놓여 있다.,,temp_playerHUMAN,,,,신발장
-,PlayerName,…엄마 빨리 보고 싶어… 너무 무섭다….,,temp_playerHUMAN,,,,
-Recall4_018,PlayerName,{YourCatName}(이)가 이 자리를 좋아했던 것 같은데...,TRUE,temp_playerHUMAN,,,,거실 책상
-,PlayerName,지난 꿈과는 다르게 고양이 털이 더 많아졌다.,,temp_playerHUMAN,,,,
+,InnerThoughts,... 이번에도 역시 작동하지 않는 것 같다.,,temp_playerHUMAN,,,,
+Recall4_015,InnerThoughts,(문을 열어보려고 시도한다.),,temp_playerHUMAN,,,,현관문
+,InnerThoughts,... 잠금장치도 작동하지 않는다.,,temp_playerHUMAN,,,,
+Recall4_016,InnerThoughts,엄마와 내 신발이 가지런히 놓여 있다.,,temp_playerHUMAN,,,,신발장
+,PlayerName,특별히 중요한 건 안 보이네.,,temp_playerHUMAN,,,,
+Recall4_017,InnerThoughts,{YourCatName}(이)가 이 자리를 좋아했던 것 같은데...,TRUE,temp_playerHUMAN,,,,거실 책상
+,InnerThoughts,지난 꿈과는 다르게 고양이 털이 더 많아졌다.,,temp_playerHUMAN,,,,
 ,,,,,,,,
-Stage04_004,PlayerName,역시 아직도 고양이 몸 그대로네…,,temp_playerCAT,,,,회상에서 나오자마자 바로 재생
-,PlayerName,다행히 이제는 머리가 괜찮아졌어.,,temp_playerCAT,,,,
-,PlayerName,흠… 이 [철장 잠금장치]` 생각보다 헐거운 것 같은데?,,temp_playerCAT,,,,
+Stage04_004,InnerThoughts,(눈을 깜빡거리며 깨어난다.),,temp_playerCAT,,,,회상에서 나오자마자 바로 재생
+,PlayerName,아까 그 꿈...고양이 털 문제 때문에 엄마가 처음으로\n{YourCatName}를 버리자고 했던 때네...,TRUE,temp_playerCAT,,,,
+,PlayerName,...그때 난 {YourCatName}을 책임지는 것을 회피했어...,TRUE,temp_playerCAT,,,,
+Stage04_005,PlayerName,흠… 이 [철장 잠금장치]` 생각보다 헐거운 것 같은데?,,temp_playerCAT,,,,
 ,PlayerName,달리는 트럭 안이라서 자세 잡기 힘들지만…\n[타이밍 잘 맞추면 풀 수 있을지도 몰라!],,temp_playerCAT,,,,철장 탈출 후 트럭 내부 조사 가능
-Stage04_005,PlayerName,내가 들어가 있던 철장 속의 밥그릇이다.,,temp_playerCAT,,,,철장 속 밥그릇
+Stage04_006,PlayerName,내가 들어가 있던 철장 속의 밥그릇이다.,,temp_playerCAT,,,,철장 속 밥그릇
 ,PlayerName,…오래 되었나? 냄새가 그렇게 좋지는 않네.,,temp_playerCAT,,,,
-Stage04_006,PlayerName,노란색의 낡은 담요다.,,temp_playerCAT,,,,담요
+Stage04_007,PlayerName,노란색의 낡은 담요다.,,temp_playerCAT,,,,담요
 ,PlayerName,…이거 때문에 잡혔을 때 눈 앞이 어두워진 것 같네.,,temp_playerCAT,,,,
-Stage04_007,PlayerName,여러 개의 상자가 아슬아슬하게 쌓여 있다.,,temp_playerCAT,,,,쌓여있는 박스
+Stage04_008,PlayerName,여러 개의 상자가 아슬아슬하게 쌓여 있다.,,temp_playerCAT,,,,쌓여있는 박스
 ,PlayerName,맨 밑에 있는 상자는 몰라도 위에 있는 건\n[밀어서 넘어뜨릴 수 있을 것 같네.],,temp_playerCAT,,,,
-Stage04_008,PlayerName,나 말고도 잡혀 온 다른 [유기묘들]이다.,,temp_playerCAT,,,,철장 속 다른 유기묘들
+Stage04_009,PlayerName,나 말고도 잡혀 온 다른 [유기묘들]이다.,,temp_playerCAT,,,,철장 속 다른 유기묘들
 ,PlayerName,… 다들 그렇게 표정이 좋아 보이진 않네.,,temp_playerCAT,,,,
-Stage04_009,PlayerName,트럭 창고 문인 것 같다.,,temp_playerCAT,,,,잠겨 있는 트럭 문
+Stage04_010,PlayerName,트럭 창고 문인 것 같다.,,temp_playerCAT,,,,잠겨 있는 트럭 문
 ,PlayerName,밖에서 단단히 잠겨 있어서 내 힘으론 열 순 없을 것 같다.,,temp_playerCAT,,,,
-Stage04_010,PlayerName,트럭 운전 기사인 것 같다.,,temp_playerCAT,,,,트럭 기사
+Stage04_011,PlayerName,트럭 운전 기사인 것 같다.,,temp_playerCAT,,,,트럭 기사
 ,PlayerName,아까의 기침 소리가 이 사람이 낸 것 같네.,,temp_playerCAT,,,,
 ,PlayerName,…방금 눈 마주친 건 아니겠지??,SHAKE,temp_playerCAT,,,,
 ,,,,,,,,
@@ -479,7 +474,7 @@ Recall5_004,PlayerName,세상에` 고양이 상태가 생각보다 심각한데�
 Recall5_005,PlayerName,…괜히 건드리지 말아야지…,,temp_playerHUMAN,,,,부정적 선택지
 ,PlayerName,가던 곳이나 계속 가자.,,temp_playerHUMAN,,,,
 ,YourCatName,…,,temp_playerCAT,,,,
-Recall5_006,Monolog,설마… 지금 이 고양이가… 내가 주웠던 {YourCatName}…?,AUTO_DELAYED/FADE_OUT,,,,,
+Recall5_006,Monolog,모든 게... 내가 {YourCatName}과/와 함께했던 기억들이었구나...,AUTO_DELAYED/FADE_OUT,,,,,
 Recall5_007,Monolog,그동안 내가 너무 무책임하게 행동해서… 벌을 받는 건가…,AUTO_DELAYED/FADE_OUT,,,,,
 Recall5_008,PlayerName,…이건 내가 {YourCatName} 데려오기 전에 갖고 있던 키링 아니야?,,temp_playerHUMAN,,,,리어뷰 미러에 달린 키링
 ,PlayerName,잃어버린 줄 알았는데..?,,temp_playerHUMAN,,,,
@@ -487,7 +482,8 @@ Recall5_009,PlayerName,내 핸드폰이 여기에 있었네!!,,temp_playerHUMAN,
 ,PlayerName,…근데 이건 바꾸기 전의 핸드폰이잖아?,,temp_playerHUMAN,,,,
 ,,,,,,,,
 HappyEnding_001,PlayerName,헉…헉… 원래대로 돌아왔어…,,temp_playerHUMAN,,,,해피 엔딩+퍼즐이 완성되고 주인공이 인간의 모습으로 돌아오게 됨+침대에서 눈을 뜨며
-,PlayerName,역시 그동안의 꿈들은…과거의 내 기억들이었을지도 몰라.,,temp_playerHUMAN,,,,
+,PlayerName,그동안의 꿈들은…과거의 내 기억들이었어.,,temp_playerHUMAN,,,,
+,PlayerName,이제 정말로... 책임져야 할 때야.,,temp_playerHUMAN,,,,
 ,PlayerName,…{YourCatName}…!!!,TRUE,temp_playerHUMAN,,,,
 ,PlayerName,{YourCatName}(이)는 아직도 뒷골목 근처에 있을까?,TRUE,temp_playerHUMAN,,,,
 ,PlayerName,얼른 데려와야만 해! {YourCatName}에게 해줘야 할 게 많이 생겼단 말이야!,TRUE,temp_playerHUMAN,,,,문과 상호작용 후 밖으로 나가서 뒷골목에 도착

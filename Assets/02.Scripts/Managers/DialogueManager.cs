@@ -51,6 +51,13 @@ public class DialogueManager : MonoBehaviour
     // Dialogue Queue
     private Queue<string> dialogueQueue = new Queue<string>();
 
+    // Bubble Dialogue
+    [Header("Bubble Dialogue Function")]
+    public Transform playerTransform;   // 플레이어 위치
+    public Transform npcTransform;      // npc 위치
+    public Vector3 bubbleOffset = new Vector3(0, 2.0f, 0);
+
+
     void Awake()
     {
         if (Instance == null)
@@ -89,11 +96,31 @@ public class DialogueManager : MonoBehaviour
             OnDialoguePanelClick();
     }
 
+    private void LateUpdate()
+    {
+        // 플레이어 말풍선
+        if(dialogueType== DialogueType.PLAYER_BUBBLE && dialogueSet[dialogueType.ToInt()].activeSelf)
+        {
+            dialogueSet[dialogueType.ToInt()].transform.position = 
+                Camera.main.WorldToScreenPoint(playerTransform.position + bubbleOffset);
+        }
 
-    //private void Start()
-    //{
-    //    Debug.Log(dialogueType.ToInt());
-    //}
+        // NPC 말풍선
+        if (dialogueType == DialogueType.NPC_BUBBLE && dialogueSet[dialogueType.ToInt()].activeSelf)
+        {
+            dialogueSet[dialogueType.ToInt()].transform.position = 
+                Camera.main.WorldToScreenPoint(npcTransform.position + bubbleOffset);
+        }
+
+    }
+
+    Transform FindSpeakerByName(string name)
+    {
+        GameObject speaker = GameObject.Find(name);
+        if (speaker != null) return speaker.transform;
+        Debug.LogWarning("Speaker를 찾을 수 없습니다: " + name);
+        return null;
+    }
 
     // ---------------------------------------------- Dialogue methods ----------------------------------------------
     public void StartDialogue(string dialogueID)
@@ -170,11 +197,11 @@ public class DialogueManager : MonoBehaviour
         {
             switch (dialogueLine.SpeakerID)
             {
-                case "PlayerName":
+                case "Player":
                     speakerText.text = GameManager.Instance.GetVariable("PlayerName").ToString();
                     break;
 
-                case "YourCatName":
+                case "YourCat":
                     speakerText.text = GameManager.Instance.GetVariable("YourCatName").ToString();
                     break;
 
@@ -406,20 +433,22 @@ public class DialogueManager : MonoBehaviour
         if (bubbleMode)
         {
             // 말풍선 모드
-            if (speaker == "PlayerName")
+            if (speaker == "Player")
             {
                 dialogueType = DialogueType.PLAYER_BUBBLE;
+                playerTransform = FindSpeakerByName(speaker);
             }
             else
             {
                 dialogueType = DialogueType.NPC_BUBBLE;
+                npcTransform = FindSpeakerByName(speaker);
             }
         }
         else
         {
             switch (speaker)
             {
-                case "PlayerName":
+                case "Player":
                     dialogueType = DialogueType.PLAYER_TALKING;
                     break;
 

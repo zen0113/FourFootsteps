@@ -7,6 +7,9 @@ public class PosterInteraction : MonoBehaviour
     [SerializeField] private float interactionRange = 2f;
     [SerializeField] private Vector2 interactionCenter = Vector2.zero; // 상호작용 중심점 오프셋
     
+    // Sprite Glow 컴포넌트 참조
+    private SpriteGlow.SpriteGlowEffect spriteGlowEffect;
+    
     private PosterUIController uiController;
     private bool playerInRange = false;
     private bool isUIActive = false;
@@ -34,6 +37,13 @@ public class PosterInteraction : MonoBehaviour
         else
         {
             Debug.LogError("Canvas를 찾을 수 없습니다!");
+        }
+        
+        // Sprite Glow Effect 찾기 및 초기화
+        spriteGlowEffect = GetComponent<SpriteGlow.SpriteGlowEffect>();
+        if (spriteGlowEffect != null)
+        {
+            spriteGlowEffect.enabled = false; // 시작할 때는 비활성화
         }
         
         // 게임 시작시 즉시 API 데이터 요청
@@ -102,6 +112,12 @@ public class PosterInteraction : MonoBehaviour
             {
                 playerInRange = true;
                 ShowInteractionPrompt(true);
+                
+                // Sprite Glow 활성화
+                if (spriteGlowEffect != null)
+                {
+                    spriteGlowEffect.enabled = true;
+                }
             }
         }
     }
@@ -113,6 +129,12 @@ public class PosterInteraction : MonoBehaviour
         {
             playerInRange = false;
             ShowInteractionPrompt(false);
+            
+            // Sprite Glow 비활성화
+            if (spriteGlowEffect != null)
+            {
+                spriteGlowEffect.enabled = false;
+            }
             
             // UI가 열려있으면 닫기
             if (isUIActive)

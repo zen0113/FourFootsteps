@@ -11,6 +11,8 @@ public class TutorialController : MonoBehaviour
     private List<TutorialBase> tutorials;
     [SerializeField]
     private string nextSceneName = "";
+    // [SerializeField] // 이제 인스펙터에서 수동으로 할당할 필요가 없습니다.
+    private GameObject black; // 자동으로 찾을 GameObject
 
     private TutorialBase currentTutorial = null;
     private int currentIndex = -1;
@@ -25,6 +27,39 @@ public class TutorialController : MonoBehaviour
 
     private void Start()
     {
+        // "Black" GameObject를 계층 구조에서 자동으로 찾습니다.
+        // "Player UI Canvas" -> "Black" 경로를 가정합니다.
+        GameObject playerUICanvas = GameObject.Find("Player UI Canvas");
+        if (playerUICanvas != null)
+        {
+            // 수정된 부분: "Player UI Canvas" 바로 아래에서 "Black"을 찾습니다.
+            Transform blackTransform = playerUICanvas.transform.Find("Black");
+            if (blackTransform != null)
+            {
+                black = blackTransform.gameObject;
+                Debug.Log("[TutorialController] 'Black' 오브젝트를 성공적으로 찾았습니다. (Player UI Canvas/Black)");
+            }
+            else
+            {
+                Debug.LogWarning("[TutorialController] 'Player UI Canvas' 아래에서 'Black' 오브젝트를 찾을 수 없습니다.");
+            }
+        }
+        else
+        {
+            Debug.LogWarning("[TutorialController] 'Player UI Canvas' 오브젝트를 찾을 수 없습니다. 'Black' 오브젝트를 자동으로 찾을 수 없습니다.");
+        }
+
+
+        // 'black' 오브젝트가 찾아졌으면 비활성화합니다.
+        if (black != null)
+        {
+            black.SetActive(false);
+        }
+        else
+        {
+            Debug.LogError("[TutorialController] 'Black' 오브젝트를 찾지 못했습니다. Start에서 비활성화할 수 없습니다.");
+        }
+
         SetNextTutorial();
     }
 
@@ -96,7 +131,15 @@ public class TutorialController : MonoBehaviour
 
         if (!string.IsNullOrEmpty(nextSceneName))
         {
-            SceneLoader.Instance.LoadScene(nextSceneName);
+            // SceneLoader.Instance가 있다면 사용, 없다면 Debug.Log만 출력
+            if (SceneLoader.Instance != null)
+            {
+                SceneLoader.Instance.LoadScene(nextSceneName);
+            }
+            else
+            {
+                Debug.LogWarning($"[TutorialController] SceneLoader.Instance를 찾을 수 없습니다. '{nextSceneName}' 씬으로 이동할 수 없습니다.");
+            }
             yield return new WaitForSeconds(1f);
         }
     }
@@ -127,4 +170,3 @@ public class TutorialController : MonoBehaviour
         currentTutorial.Enter();
     }
 }
-

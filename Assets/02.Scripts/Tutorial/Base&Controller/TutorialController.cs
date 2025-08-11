@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -10,6 +11,8 @@ public class TutorialController : MonoBehaviour
     private List<TutorialBase> tutorials;
     [SerializeField]
     private string nextSceneName = "";
+    // [SerializeField] // 이제 인스펙터에서 수동으로 할당할 필요가 없습니다.
+    private GameObject black; // 자동으로 찾을 GameObject
 
     private TutorialBase currentTutorial = null;
     private int currentIndex = -1;
@@ -24,6 +27,39 @@ public class TutorialController : MonoBehaviour
 
     private void Start()
     {
+        // "Black" GameObject를 계층 구조에서 자동으로 찾습니다.
+        // "Player UI Canvas" -> "Black" 경로를 가정합니다.
+        GameObject playerUICanvas = GameObject.Find("Player UI Canvas");
+        if (playerUICanvas != null)
+        {
+            // 수정된 부분: "Player UI Canvas" 바로 아래에서 "Black"을 찾습니다.
+            Transform blackTransform = playerUICanvas.transform.Find("Black");
+            if (blackTransform != null)
+            {
+                black = blackTransform.gameObject;
+                Debug.Log("[TutorialController] 'Black' 오브젝트를 성공적으로 찾았습니다. (Player UI Canvas/Black)");
+            }
+            else
+            {
+                Debug.LogWarning("[TutorialController] 'Player UI Canvas' 아래에서 'Black' 오브젝트를 찾을 수 없습니다.");
+            }
+        }
+        else
+        {
+            Debug.LogWarning("[TutorialController] 'Player UI Canvas' 오브젝트를 찾을 수 없습니다. 'Black' 오브젝트를 자동으로 찾을 수 없습니다.");
+        }
+
+
+        // 'black' 오브젝트가 찾아졌으면 비활성화합니다.
+        if (black != null)
+        {
+            black.SetActive(false);
+        }
+        else
+        {
+            Debug.LogError("[TutorialController] 'Black' 오브젝트를 찾지 못했습니다. Start에서 비활성화할 수 없습니다.");
+        }
+
         SetNextTutorial();
     }
 
@@ -46,7 +82,7 @@ public class TutorialController : MonoBehaviour
         // 마지막 튜토리얼을 진행했다면 CompletedAllTutorials() 메소드 호출
         if (currentIndex >= tutorials.Count - 1)
         {
-            CompletedAllTutorials();
+            StartCoroutine(CompletedAllTutorials());
             return;
         }
 
@@ -71,7 +107,7 @@ public class TutorialController : MonoBehaviour
         if (tutorialIndex < 0 || tutorialIndex >= tutorials.Count)
         {
             Debug.LogError($"[TutorialController] 유효하지 않은 튜토리얼 인덱스: {tutorialIndex}. 튜토리얼을 종료합니다.");
-            CompletedAllTutorials();
+            StartCoroutine(CompletedAllTutorials());
             return;
         }
 
@@ -88,15 +124,23 @@ public class TutorialController : MonoBehaviour
         Debug.Log($"[TutorialController] 튜토리얼 인덱스 {previousIndex}에서 {tutorialIndex}로 건너뛰었습니다.");
     }
 
-    public void CompletedAllTutorials()
+    public IEnumerator CompletedAllTutorials()
     {
         currentTutorial = null;
-        // 행동 양식이 여러 종류가 되었을 때 코드 추가 작성
-        // 현재는 씬 전환
         Debug.Log("Complete All");
-        if (!nextSceneName.Equals(""))
+
+        if (!string.IsNullOrEmpty(nextSceneName))
         {
-            //SceneManager.LoadScene(nextSceneName);
+            // SceneLoader.Instance가 있다면 사용, 없다면 Debug.Log만 출력
+            if (SceneLoader.Instance != null)
+            {
+                SceneLoader.Instance.LoadScene(nextSceneName);
+            }
+            else
+            {
+                Debug.LogWarning($"[TutorialController] SceneLoader.Instance를 찾을 수 없습니다. '{nextSceneName}' 씬으로 이동할 수 없습니다.");
+            }
+            yield return new WaitForSeconds(1f);
         }
     }
 
@@ -117,7 +161,7 @@ public class TutorialController : MonoBehaviour
         if (index < 0 || index >= tutorials.Count)
         {
             Debug.LogWarning($"잘못된 튜토리얼 인덱스: {index}");
-            CompletedAllTutorials();
+            StartCoroutine(CompletedAllTutorials());
             return;
         }
 
@@ -126,4 +170,3 @@ public class TutorialController : MonoBehaviour
         currentTutorial.Enter();
     }
 }
-

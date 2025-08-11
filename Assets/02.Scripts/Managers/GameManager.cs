@@ -38,6 +38,10 @@ public class GameManager : MonoBehaviour
             DontDestroyOnLoad(gameObject);
 
             InitSceneOrderList();
+
+            // 변수 초기화 로직을 Awake로 이동
+            variablesCSV = Resources.Load<TextAsset>("Datas/variables");
+            CreateVariables();
         }
         else
         {
@@ -47,9 +51,6 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
-        variablesCSV = Resources.Load<TextAsset>("Datas/variables");
-        CreateVariables();
-
         // 시작 시 현재 씬 이름 자동 등록
         InitCurrentSceneInfo();
 
@@ -255,7 +256,8 @@ public class GameManager : MonoBehaviour
             "YourCatName",
             "CurrentSceneName",
             "NextSceneName",
-            "CanMoving"
+            "CanMoving",
+            "CanInvesigatingRecallObject"
         });
 
         foreach (var item in variables)

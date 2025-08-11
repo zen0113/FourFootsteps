@@ -8,20 +8,17 @@ public class GuideTutorialStep : TutorialBase
     [TextArea(3, 5)]
     [SerializeField] private string guideDescription;
 
+    [Header("자동 진행 설정")]
+    [SerializeField] private bool autoNextStep = true; // 자동 진행 사용 여부
     [SerializeField] private float delayBeforeNext = 0.8f; // Inspector에서 설정 가능
 
     private bool hasRequestedNext = false;
     private Coroutine autoNextCoroutine;
-
-    // ⭐ Enter 메서드에서 현재 튜토리얼 컨트롤러를 저장할 필드 추가
     private TutorialController currentTutorialController;
 
     public override void Enter()
     {
-
         GuideUIController.Instance?.ShowGuide(guideTitle, guideDescription);
-
-
         hasRequestedNext = false;
 
         if (autoNextCoroutine != null)
@@ -29,14 +26,17 @@ public class GuideTutorialStep : TutorialBase
             StopCoroutine(autoNextCoroutine);
         }
 
-        currentTutorialController = FindObjectOfType<TutorialController>(); // ⭐ 임시적으로 FindObjectOfType 사용
+        currentTutorialController = FindObjectOfType<TutorialController>(); // 임시적으로 FindObjectOfType 사용
 
-        autoNextCoroutine = StartCoroutine(AutoNextStep(delayBeforeNext, currentTutorialController));
+        // autoNextStep이 true일 때만 자동 진행 코루틴 시작
+        if (autoNextStep)
+        {
+            autoNextCoroutine = StartCoroutine(AutoNextStep(delayBeforeNext, currentTutorialController));
+        }
     }
 
     public override void Execute(TutorialController controller)
     {
-
     }
 
     public override void Exit()
@@ -48,7 +48,6 @@ public class GuideTutorialStep : TutorialBase
         }
     }
 
-    // ⭐ AutoNextStep 코루틴이 TutorialController 참조를 매개변수로 받도록 수정
     private IEnumerator AutoNextStep(float delay, TutorialController controllerToUse)
     {
         yield return new WaitForSeconds(delay);
@@ -56,7 +55,7 @@ public class GuideTutorialStep : TutorialBase
         if (!hasRequestedNext)
         {
             hasRequestedNext = true;
-            if (controllerToUse != null) // ⭐ 전달받은 controller 참조를 사용
+            if (controllerToUse != null)
             {
                 controllerToUse.SetNextTutorial();
             }
@@ -65,6 +64,7 @@ public class GuideTutorialStep : TutorialBase
                 Debug.LogWarning("[GuideTutorialStep] 유효한 TutorialController 참조를 찾을 수 없어 다음 튜토리얼 단계로 진행할 수 없습니다.");
             }
         }
+
         autoNextCoroutine = null;
     }
 

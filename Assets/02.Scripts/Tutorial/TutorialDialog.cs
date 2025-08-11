@@ -57,6 +57,11 @@ public class TutorialDialog : TutorialBase
             Debug.Log("[RecallDialog] 선택지로 인해 튜토리얼 종료.");
             tutorialController?.CompletedAllTutorials();
         }
+        else if (selectedTutorialIndex == -3)
+        {
+            Debug.Log("[RecallDialog] 선택지로 인해 튜토리얼 진행 중단. 현재 단계에서 대기.");
+            // 아무 동작도 하지 않음 (튜토리얼 진행하지 않음)
+        }
         else if (selectedTutorialIndex >= 0)
         {
             Debug.Log($"[RecallDialog] 선택지 선택됨. 튜토리얼 인덱스 {selectedTutorialIndex}로 점프.");

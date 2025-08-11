@@ -4,8 +4,8 @@ using UnityEngine.UI;
 using TMPro;
 
 /// <summary>
-/// 어둠을 걷어내는 연타 미니게임 컨트롤러
-/// Space를 반복해서 누르면 화면이 점점 밝아짐
+/// 단계별 이미지 변화가 있는 어둠 걷어내기 연타 미니게임
+/// 40, 60, 80, 100번째에 이미지가 변화하며 플레이어 점프 차단
 /// </summary>
 public class DarknessTapMinigame : MonoBehaviour
 {
@@ -14,8 +14,12 @@ public class DarknessTapMinigame : MonoBehaviour
     [SerializeField] private float perTapIncrease = 1f;      // 한 번 누를 때 증가량 (정확히 1씩)
     [SerializeField] private KeyCode tapKey = KeyCode.Space; // 연타 키
     
+    [Header("단계별 이미지 설정")]
+    [SerializeField] private Image stageImage;               // 단계별로 변화할 이미지
+    [SerializeField] private Sprite[] stageSprites;          // 각 단계별 스프라이트 (4개: 40,60,80,100번용)
+    [SerializeField] private int[] stageMilestones = {40, 60, 80, 100}; // 이미지 변화 시점
+    
     [Header("UI 요소")]
-    [SerializeField] private Image darknessOverlay;          // 어둠 오버레이
     [SerializeField] private TextMeshProUGUI instructionText; // 안내 텍스트
     [SerializeField] private Canvas gameCanvas;              // 게임 캔버스
     
@@ -24,18 +28,25 @@ public class DarknessTapMinigame : MonoBehaviour
     [SerializeField] private float minAlpha = 0.3f;         // 최소 투명도
     [SerializeField] private float maxAlpha = 1f;           // 최대 투명도
     
+    [Header("플레이어 제어")]
+    [SerializeField] private PlayerCatMovement playerController; // 플레이어 컨트롤러 참조
+    
     [Header("사운드 (선택사항)")]
     [SerializeField] private AudioSource audioSource;       // 오디오 소스
     [SerializeField] private AudioClip tapSound;            // 연타 사운드
-    [SerializeField] private AudioClip completeSound;       // 완료 사운드
+    [SerializeField] private AudioClip stageChangeSound;    // 단계 변화 사운드
     
     // 게임 상태
     private float tapProgress = 0f;
     private bool isGameActive = false;
     private bool isGameCompleted = false;
+    private int currentStage = -1; // -1로 시작해서 첫 번째 단계 변경이 가능하도록
     
     // 텍스트 애니메이션
     private Coroutine textBlinkCoroutine;
+    
+    // 플레이어 입력 차단
+    private bool originalCanMoving;
     
     // 이벤트
     public System.Action OnMinigameComplete;
@@ -51,18 +62,17 @@ public class DarknessTapMinigame : MonoBehaviour
     /// </summary>
     private void SetupUI()
     {
-        // 어둠 오버레이 초기화 (완전히 어두운 상태)
-        if (darknessOverlay != null)
-        {
-            Color darkColor = Color.black;
-            darkColor.a = 1f;
-            darknessOverlay.color = darkColor;
-        }
-        
         // 안내 텍스트 설정
         if (instructionText != null)
         {
             instructionText.text = "연타 (Space) 하세요!";
+        }
+        
+        // 첫 번째 단계 이미지 설정 (검은 배경으로 시작)
+        if (stageImage != null)
+        {
+            stageImage.sprite = null; // 처음에는 이미지 없음
+            stageImage.color = Color.black; // 검은색 배경으로 시작
         }
         
         // 오디오 소스 자동 생성
@@ -74,6 +84,12 @@ public class DarknessTapMinigame : MonoBehaviour
                 audioSource = gameObject.AddComponent<AudioSource>();
             }
         }
+        
+        // 플레이어 컨트롤러 자동 찾기
+        if (playerController == null)
+        {
+            playerController = FindObjectOfType<PlayerCatMovement>();
+        }
     }
     
     /// <summary>
@@ -84,6 +100,10 @@ public class DarknessTapMinigame : MonoBehaviour
         isGameActive = true;
         isGameCompleted = false;
         tapProgress = 0f;
+        currentStage = -1; // -1로 시작
+        
+        // 플레이어 이동 차단
+        BlockPlayerInput(true);
         
         // 텍스트 깜빡임 시작
         if (textBlinkCoroutine != null)
@@ -92,14 +112,35 @@ public class DarknessTapMinigame : MonoBehaviour
         }
         textBlinkCoroutine = StartCoroutine(BlinkText());
         
-        Debug.Log("어둠 걷어내기 미니게임 시작!");
+        Debug.Log("단계별 어둠 걷어내기 미니게임 시작!");
+    }
+    
+    /// <summary>
+    /// 플레이어 입력 차단/해제
+    /// </summary>
+    private void BlockPlayerInput(bool block)
+    {
+        if (GameManager.Instance != null)
+        {
+            if (block)
+            {
+                // 현재 CanMoving 상태 저장 후 차단
+                originalCanMoving = (bool)GameManager.Instance.GetVariable("CanMoving");
+                GameManager.Instance.SetVariable("CanMoving", false);
+            }
+            else
+            {
+                // 원래 상태로 복구
+                GameManager.Instance.SetVariable("CanMoving", originalCanMoving);
+            }
+        }
     }
     
     private void Update()
     {
         if (!isGameActive || isGameCompleted) return;
         
-        // Space 키 입력 처리
+        // Space 키 입력 처리 (플레이어 점프는 차단됨)
         if (Input.GetKeyDown(tapKey))
         {
             ProcessTap();
@@ -116,8 +157,14 @@ public class DarknessTapMinigame : MonoBehaviour
         // 사운드 재생
         PlayTapSound();
         
-        // 어둠 알파값 업데이트
-        UpdateDarknessAlpha();
+        // 단계 체크 및 이미지 변경
+        CheckStageChange();
+        
+        // 90번째부터 텍스트 페이드아웃 시작
+        if (tapProgress >= 90f)
+        {
+            UpdateTextFadeOut();
+        }
         
         // 목표 달성 확인
         if (tapProgress >= tapGoal)
@@ -125,35 +172,73 @@ public class DarknessTapMinigame : MonoBehaviour
             CompleteMinigame();
         }
         
-        Debug.Log($"연타 진행도: {tapProgress:F1}/{tapGoal}");
+        Debug.Log($"연타 진행도: {tapProgress:F0}/{tapGoal} - 현재 단계: {currentStage}");
     }
     
     /// <summary>
-    /// 어둠 오버레이 알파값 업데이트 + 텍스트도 함께 페이드아웃
+    /// 단계 변화 체크 및 이미지 변경
     /// </summary>
-    private void UpdateDarknessAlpha()
+    private void CheckStageChange()
     {
-        if (darknessOverlay == null) return;
-        
-        // 진행도에 따라 알파값 계산 (1 -> 0)
-        float progress = tapProgress / tapGoal;
-        float darknessAlpha = Mathf.Lerp(1f, 0f, progress);
-        
-        // 어둠 오버레이 알파값 적용
-        Color currentColor = darknessOverlay.color;
-        currentColor.a = darknessAlpha;
-        darknessOverlay.color = currentColor;
-        
-        // 텍스트도 함께 서서히 사라지게 (진행도 50% 이후부터 사라지기 시작)
-        if (instructionText != null && progress > 0.5f)
+        for (int i = 0; i < stageMilestones.Length; i++)
         {
-            float textProgress = (progress - 0.5f) / 0.5f; // 0.5~1을 0~1로 정규화
-            float textAlpha = Mathf.Lerp(1f, 0f, textProgress);
-            
-            Color textColor = instructionText.color;
-            textColor.a = textAlpha;
-            instructionText.color = textColor;
+            if (tapProgress >= stageMilestones[i] && currentStage < i)
+            {
+                Debug.Log($"단계 변화 감지: {tapProgress}번째, 목표: {stageMilestones[i]}번째");
+                ChangeToStage(i);
+                break;
+            }
         }
+    }
+    
+    /// <summary>
+    /// 특정 단계로 변경
+    /// </summary>
+    private void ChangeToStage(int stage)
+    {
+        if (stage >= stageSprites.Length) 
+        {
+            Debug.LogError($"단계 {stage}이 배열 범위({stageSprites.Length})를 벗어났습니다!");
+            return;
+        }
+        
+        Debug.Log($"단계 변경: {currentStage} → {stage}");
+        currentStage = stage;
+        
+        if (stageImage != null && stageSprites[stage] != null)
+        {
+            stageImage.sprite = stageSprites[stage];
+            stageImage.color = Color.white; // 이미지 보이게 함
+            
+            // 단계 변화 사운드 재생
+            PlayStageChangeSound();
+            
+            Debug.Log($"✅ 단계 {stage + 1} 이미지로 변경 성공! ({stageMilestones[stage]}번째 연타) - 스프라이트: {stageSprites[stage].name}");
+        }
+        else
+        {
+            Debug.LogError($"❌ 단계 변경 실패! StageImage={stageImage != null}, Sprite[{stage}]={stageSprites[stage] != null}");
+            if (stageImage == null) Debug.LogError("StageImage가 null입니다!");
+            if (stageSprites[stage] == null) Debug.LogError($"StageSprites[{stage}]이 null입니다!");
+        }
+    }
+    
+
+    
+    /// <summary>
+    /// 텍스트 페이드아웃 (90번째부터)
+    /// </summary>
+    private void UpdateTextFadeOut()
+    {
+        if (instructionText == null) return;
+        
+        // 90~100 구간을 0~1로 정규화
+        float fadeProgress = (tapProgress - 90f) / 10f;
+        float textAlpha = Mathf.Lerp(1f, 0f, fadeProgress);
+        
+        Color textColor = instructionText.color;
+        textColor.a = textAlpha;
+        instructionText.color = textColor;
     }
     
     /// <summary>
@@ -170,16 +255,10 @@ public class DarknessTapMinigame : MonoBehaviour
             StopCoroutine(textBlinkCoroutine);
         }
         
-        // 완료 사운드 재생
-        PlayCompleteSound();
-        
-        // 텍스트 변경
+        // 텍스트 완전히 숨기기 (완료 메시지 없음)
         if (instructionText != null)
         {
-            instructionText.text = "완료!";
-            Color textColor = instructionText.color;
-            textColor.a = 1f;
-            instructionText.color = textColor;
+            instructionText.gameObject.SetActive(false);
         }
         
         Debug.Log("미니게임 완료!");
@@ -187,28 +266,32 @@ public class DarknessTapMinigame : MonoBehaviour
         // 완료 이벤트 호출
         OnMinigameComplete?.Invoke();
         
-        // 잠시 후 UI 정리
-        StartCoroutine(CleanupAfterCompletion());
+        // 마지막 이미지 2초간 보여주고 정리
+        StartCoroutine(ShowFinalImageAndCleanup());
     }
     
     /// <summary>
-    /// 완료 후 정리 작업
+    /// 마지막 이미지 2초간 보여주고 정리
     /// </summary>
-    private IEnumerator CleanupAfterCompletion()
+    private IEnumerator ShowFinalImageAndCleanup()
     {
+        // 2초 대기
         yield return new WaitForSeconds(2f);
         
-        // UI 숨기기 또는 다음 단계로 진행
+        // 플레이어 입력 복구
+        BlockPlayerInput(false);
+        
+        // UI 완전히 숨기기
         if (gameCanvas != null)
         {
             gameCanvas.gameObject.SetActive(false);
         }
         
-        // 또는 씬 전환, 다른 게임 로직 등...
+        Debug.Log("미니게임 UI 정리 완료!");
     }
     
     /// <summary>
-    /// 텍스트 깜빡임 코루틴 (밝아질수록 깜빡임도 서서히 중지)
+    /// 텍스트 깜빡임 코루틴 (90번 이전까지만)
     /// </summary>
     private IEnumerator BlinkText()
     {
@@ -216,20 +299,14 @@ public class DarknessTapMinigame : MonoBehaviour
         
         Color originalColor = instructionText.color;
         
-        while (isGameActive && !isGameCompleted)
+        while (isGameActive && !isGameCompleted && tapProgress < 90f)
         {
-            // 진행도에 따라 깜빡임 강도 조절 (50% 이후부터는 깜빡임 약해짐)
-            float progress = tapProgress / tapGoal;
-            float blinkIntensity = progress < 0.5f ? 1f : Mathf.Lerp(1f, 0f, (progress - 0.5f) / 0.5f);
-            
-            float currentMinAlpha = Mathf.Lerp(minAlpha, maxAlpha, 1f - blinkIntensity);
-            
             // 어두워지기
             float elapsedTime = 0f;
-            while (elapsedTime < blinkSpeed)
+            while (elapsedTime < blinkSpeed && tapProgress < 90f)
             {
                 elapsedTime += Time.deltaTime;
-                float alpha = Mathf.Lerp(maxAlpha, currentMinAlpha, elapsedTime / blinkSpeed);
+                float alpha = Mathf.Lerp(maxAlpha, minAlpha, elapsedTime / blinkSpeed);
                 
                 Color newColor = originalColor;
                 newColor.a = alpha;
@@ -240,10 +317,10 @@ public class DarknessTapMinigame : MonoBehaviour
             
             // 밝아지기
             elapsedTime = 0f;
-            while (elapsedTime < blinkSpeed)
+            while (elapsedTime < blinkSpeed && tapProgress < 90f)
             {
                 elapsedTime += Time.deltaTime;
-                float alpha = Mathf.Lerp(currentMinAlpha, maxAlpha, elapsedTime / blinkSpeed);
+                float alpha = Mathf.Lerp(minAlpha, maxAlpha, elapsedTime / blinkSpeed);
                 
                 Color newColor = originalColor;
                 newColor.a = alpha;
@@ -261,18 +338,18 @@ public class DarknessTapMinigame : MonoBehaviour
     {
         if (audioSource != null && tapSound != null)
         {
-            audioSource.PlayOneShot(tapSound, 0.5f);
+            audioSource.PlayOneShot(tapSound, 0.3f);
         }
     }
     
     /// <summary>
-    /// 완료 사운드 재생
+    /// 단계 변화 사운드 재생
     /// </summary>
-    private void PlayCompleteSound()
+    private void PlayStageChangeSound()
     {
-        if (audioSource != null && completeSound != null)
+        if (audioSource != null && stageChangeSound != null)
         {
-            audioSource.PlayOneShot(completeSound, 0.8f);
+            audioSource.PlayOneShot(stageChangeSound, 0.7f);
         }
     }
     
@@ -287,6 +364,9 @@ public class DarknessTapMinigame : MonoBehaviour
         {
             StopCoroutine(textBlinkCoroutine);
         }
+        
+        // 플레이어 입력 복구
+        BlockPlayerInput(false);
     }
     
     /// <summary>
@@ -295,8 +375,22 @@ public class DarknessTapMinigame : MonoBehaviour
     public void ResetProgress()
     {
         tapProgress = 0f;
+        currentStage = -1; // -1로 리셋
         isGameCompleted = false;
-        UpdateDarknessAlpha();
+        
+        if (stageImage != null)
+        {
+            stageImage.sprite = null;
+            stageImage.color = Color.black; // 검은색 배경으로 리셋
+        }
+        
+        if (instructionText != null)
+        {
+            instructionText.gameObject.SetActive(true);
+            Color textColor = instructionText.color;
+            textColor.a = 1f;
+            instructionText.color = textColor;
+        }
     }
     
     /// <summary>
@@ -305,6 +399,14 @@ public class DarknessTapMinigame : MonoBehaviour
     public float GetProgress()
     {
         return tapProgress / tapGoal;
+    }
+    
+    /// <summary>
+    /// 현재 단계 반환
+    /// </summary>
+    public int GetCurrentStage()
+    {
+        return currentStage;
     }
     
     /// <summary>

@@ -12,7 +12,6 @@ public class SleepEffectTutorialStep : TutorialBase
     [Header("일렁임 효과 설정")]
     [SerializeField] private float maxWaveStrength = 0.05f;
     [SerializeField] private float waveSpeed = 2f;
-    [SerializeField] private float waveFrequency = 10f;
 
     [Header("페이드 효과 설정")]
     [SerializeField] private Color fadeColor = Color.black;

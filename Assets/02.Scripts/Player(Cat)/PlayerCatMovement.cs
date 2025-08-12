@@ -49,7 +49,6 @@ public class PlayerCatMovement : MonoBehaviour
     // 점프 중력 보정
     [Header("점프 중력 보정")]
     [SerializeField] private float fallMultiplier = 2.5f;
-    [SerializeField] private float lowJumpMultiplier = 2f;
     private int jumpCount = 0;
 
     // 지상 체크

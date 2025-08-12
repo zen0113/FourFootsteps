@@ -1,26 +1,32 @@
 public class DialogueLine
 {
     public string SpeakerID { get; private set; }
+    public bool BubbleMode { get; private set; }
     public string Script { get; private set; }
     public string TextEffect { get; private set; }
     public string ImageID { get; private set; }
     public string SoundID { get; private set; }
+    public string CutSceneID { get; private set; }
     public string Next { get; private set; }
 
     // initialize function
     public DialogueLine(
         string speakerID,
+        bool bubbleMode,
         string script,
         string textEffect,
         string imageID,
         string soundID,
+        string cutSceneID,
         string next)
     {
         SpeakerID = speakerID;
+        BubbleMode = bubbleMode;
         Script = script;
         TextEffect = textEffect;
         ImageID = imageID;
         SoundID = soundID;
+        CutSceneID = cutSceneID;
         Next = next;
     }
 

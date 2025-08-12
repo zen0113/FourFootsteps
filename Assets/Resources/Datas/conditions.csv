@@ -1,5 +1,19 @@
 Condition ID,Condition Description,Variable Name,Logic,value
+C_PrologueStepIs0,프롤로그 step 0인 상태,PrologueStep,==,0
+C_PrologueStepIs1,프롤로그 step 1인 상태,PrologueStep,==,1
+C_PrologueStepIs2,프롤로그 step 2인 상태,PrologueStep,==,2
+C_PrologueStepIs3,프롤로그 step 3인 상태,PrologueStep,==,3
+C_PrologueStepIs4,프롤로그 step 4인 상태,PrologueStep,==,4
+C_PrologueStepIs5,프롤로그 step 5인 상태,PrologueStep,==,5
+C_PrologueStepIs6,프롤로그 step 6인 상태,PrologueStep,==,6
+C_PrologueStepIs7,프롤로그 step 7인 상태,PrologueStep,==,7
+C_isNotPrologueFinished,프롤로그 아직 안 끝난 상태,isPrologueFinished,==,false
+,,,,
 C_RespAbove2,책임 지수 일정 이상,ResponsibilityScore,>,2
 C_RespBelowOrEqual2,책임 지수 일정 이하,ResponsibilityScore,<=,2
 ,,,,
 C_RoomSofaFirstClick,회상씬 속 소파 처음 조사,RoomSofaClick,==,0
+C_RoomSofaManyClick,회상씬 속 소파 여러번 조사,RoomSofaClick,>,0
+,,,,
+,,,,
+C_CanInvesigatingRecall,회상 속 일반 오브젝트 조사 가능한 상태,CanInvesigatingRecallObject,==,true

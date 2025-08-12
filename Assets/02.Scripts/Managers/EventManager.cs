@@ -9,8 +9,8 @@ public class EventManager : MonoBehaviour
 
     private TextAsset eventsCSV;
 
-    // events: dictionary of "Event"s indexed by string "Event ID"
-    public Dictionary<string, Event> events = new Dictionary<string, Event>();
+    // events: dictionary of "GameEvent"s indexed by string "Event ID"
+    public Dictionary<string, GameEvent> events = new Dictionary<string, GameEvent>();
 
 
     void Awake()
@@ -76,18 +76,26 @@ public class EventManager : MonoBehaviour
             foreach (string resultID in resultIDs)
             {
                 string resultIDTrimmed = resultID.Trim();
-                // Function-wrapped results
-                if (
-                    resultIDTrimmed.StartsWith("Result_StartDialogue") ||
-                    resultIDTrimmed.StartsWith("Result_Increment") ||
-                    resultIDTrimmed.StartsWith("Result_Decrement"))
+                // Function-wrapped results (자동으로 임시 Result 객체 생성)
+                if (IsFunctionWrappedResult(resultIDTrimmed))
                 {
                     Result tempResult = new Result(resultIDTrimmed, "", "");
                     results.Add(tempResult);
                 }
                 else
                 {
-                    results.Add(ResultManager.Instance.results[resultIDTrimmed]);
+                    // 딕셔너리에 키가 존재하는지 확인 후 추가
+                    if (ResultManager.Instance.results.ContainsKey(resultIDTrimmed))
+                    {
+                        results.Add(ResultManager.Instance.results[resultIDTrimmed]);
+                    }
+                    else
+                    {
+                        Debug.LogWarning($"Result ID '{resultIDTrimmed}' not found in ResultManager! Creating temporary result.");
+                        // 임시 Result 객체 생성
+                        Result tempResult = new Result(resultIDTrimmed, "", "");
+                        results.Add(tempResult);
+                    }
                 }
             }
 
@@ -109,7 +117,7 @@ public class EventManager : MonoBehaviour
             else // 새로운 event ID인 경우: events에 새로 추가
             {
                 // 예약어 event를 피하기 위해 event_라고 이름 지음
-                Event event_ = new Event(
+                GameEvent event_ = new GameEvent(
                     eventID,
                     eventName,
                     eventDescription
@@ -117,8 +125,22 @@ public class EventManager : MonoBehaviour
                 event_.AddEventLine(eventLogic, conditions, results, eventExecutionMode);
                 events[event_.EventID] = event_;
             }
-
         }
+    }
+
+    /// <summary>
+    /// Result ID가 함수 형태로 래핑된 결과인지 확인
+    /// </summary>
+    /// <param name="resultID">확인할 Result ID</param>
+    /// <returns>함수 형태의 Result인지 여부</returns>
+    private bool IsFunctionWrappedResult(string resultID)
+    {
+        return resultID.StartsWith("Result_StartDialogue") ||
+               resultID.StartsWith("Result_Increment") ||
+               resultID.StartsWith("Result_Decrement") ||
+               resultID.StartsWith("Result_Inverse") ||
+               resultID.StartsWith("Result_JumpToTutorial") ||
+               resultID.StartsWith("Result_MoveToRoom");
     }
 
     // Event ID를 받아서 전체 조건의 true/false 판단하여 true인 경우 결과 수행

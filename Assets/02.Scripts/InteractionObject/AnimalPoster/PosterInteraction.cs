@@ -7,10 +7,12 @@ public class PosterInteraction : MonoBehaviour
     [SerializeField] private float interactionRange = 2f;
     [SerializeField] private Vector2 interactionCenter = Vector2.zero; // 상호작용 중심점 오프셋
     
+    // Sprite Glow 컴포넌트 참조
+    private SpriteGlow.SpriteGlowEffect spriteGlowEffect;
+    
     private PosterUIController uiController;
     private bool playerInRange = false;
     private bool isUIActive = false;
-    private bool hasRequestedApiData = false; // API 데이터 요청 여부 확인
     
     private void Start()
     {
@@ -35,6 +37,47 @@ public class PosterInteraction : MonoBehaviour
         else
         {
             Debug.LogError("Canvas를 찾을 수 없습니다!");
+        }
+        
+        // Sprite Glow Effect 찾기 및 초기화
+        spriteGlowEffect = GetComponent<SpriteGlow.SpriteGlowEffect>();
+        if (spriteGlowEffect != null)
+        {
+            spriteGlowEffect.enabled = false; // 시작할 때는 비활성화
+        }
+        
+        // 게임 시작시 즉시 API 데이터 요청
+        RequestApiDataOnStart();
+    }
+    
+    // 게임 시작시 API 데이터 요청
+    private void RequestApiDataOnStart()
+    {
+        if (AnimalDataManager.Instance != null)
+        {
+            Debug.Log("게임 시작시 API 데이터 요청");
+            AnimalDataManager.Instance.RequestApiDataIfNeeded();
+        }
+        else
+        {
+            // AnimalDataManager가 아직 초기화되지 않았다면 잠시 후 재시도
+            StartCoroutine(RetryApiRequestAfterDelay(0.1f));
+        }
+    }
+    
+    // AnimalDataManager 초기화 대기 후 API 요청
+    private IEnumerator RetryApiRequestAfterDelay(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        
+        if (AnimalDataManager.Instance != null)
+        {
+            Debug.Log("지연 후 API 데이터 요청");
+            AnimalDataManager.Instance.RequestApiDataIfNeeded();
+        }
+        else
+        {
+            Debug.LogWarning("AnimalDataManager.Instance를 찾을 수 없습니다!");
         }
     }
     
@@ -70,27 +113,12 @@ public class PosterInteraction : MonoBehaviour
                 playerInRange = true;
                 ShowInteractionPrompt(true);
                 
-                // 플레이어가 포스터 근처에 왔을 때 API 데이터 요청
-                /*if (!hasRequestedApiData)
+                // Sprite Glow 활성화
+                if (spriteGlowEffect != null)
                 {
-                    hasRequestedApiData = true;
-                    
-                    // 0.5초 후에 API 데이터 요청 (플레이어 움직임에 영향 최소화)
-                    StartCoroutine(RequestApiWithDelay(0.5f));
-                }*/
+                    spriteGlowEffect.enabled = true;
+                }
             }
-        }
-    }
-    
-    // 지연 API 요청
-    private IEnumerator RequestApiWithDelay(float delay)
-    {
-        yield return new WaitForSeconds(delay);
-        
-        if (AnimalDataManager.Instance != null)
-        {
-            Debug.Log("포스터 근처에서 API 데이터 요청");
-            AnimalDataManager.Instance.RequestApiDataIfNeeded();
         }
     }
     
@@ -101,6 +129,12 @@ public class PosterInteraction : MonoBehaviour
         {
             playerInRange = false;
             ShowInteractionPrompt(false);
+            
+            // Sprite Glow 비활성화
+            if (spriteGlowEffect != null)
+            {
+                spriteGlowEffect.enabled = false;
+            }
             
             // UI가 열려있으면 닫기
             if (isUIActive)

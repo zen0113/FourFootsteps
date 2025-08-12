@@ -5,27 +5,30 @@ using UnityEngine;
 public class DownObject : MonoBehaviour
 {
     [Header("드롭 설정")]
-    [SerializeField] private GameObject[] objectsToDrop; // Inspector에서 드롭할 오브젝트들 지정
-    [SerializeField] private float dropDelay = 0.3f;     // 각 오브젝트 사이의 드롭 딜레이
-    [SerializeField] private float dropForce = 5f;       // 오브젝트가 떨어지는 힘
+    [SerializeField] private GameObject[] objectsToDrop;
+    [SerializeField] private float dropDelay = 0.3f;
+    [SerializeField] private float dropForce = 5f;
     
     [Header("드롭 방향")]
-    [SerializeField] private Vector2 dropDirection = Vector2.down; // 기본 방향은 아래쪽
+    [SerializeField] private Vector2 dropDirection = Vector2.down;
+    
+    [Header("깨지는 효과 설정")]
+    [SerializeField] private AudioClip breakSound; // 깨지는 소리
+    [SerializeField] private Sprite brokenSprite; // 깨진 후 스프라이트
+    [Range(0f, 1f)]
+    [SerializeField] private float soundVolume = 0.3f; // 사운드 볼륨 (0~1)
     
     private bool hasTriggered = false;
     private Coroutine dropRoutine;
     
     private void OnTriggerEnter2D(Collider2D other)
     {
-        // 플레이어와 충돌 시에만 작동
         if (other.CompareTag("Player") && !hasTriggered)
         {
             hasTriggered = true;
             
-            // 배열에 오브젝트가 있는지 확인
             if (objectsToDrop.Length > 0)
             {
-                // 드롭 코루틴 시작
                 dropRoutine = StartCoroutine(DropObjectsSequentially());
             }
             else
@@ -37,46 +40,42 @@ public class DownObject : MonoBehaviour
     
     private IEnumerator DropObjectsSequentially()
     {
-        // 배열의 각 오브젝트를 순차적으로 처리
         for (int i = 0; i < objectsToDrop.Length; i++)
         {
             GameObject obj = objectsToDrop[i];
             
             if (obj != null)
             {
-                // 오브젝트에 Rigidbody2D가 있는지 확인
+                // 기존 물리 설정
                 Rigidbody2D rb = obj.GetComponent<Rigidbody2D>();
-                
                 if (rb == null)
                 {
-                    // Rigidbody2D가 없으면 추가
                     rb = obj.AddComponent<Rigidbody2D>();
                 }
                 
-                // 이전에 물리 이동이 제한되어 있었을 경우를 대비해 설정
                 rb.bodyType = RigidbodyType2D.Dynamic;
                 rb.gravityScale = 1f;
-                rb.freezeRotation = true; // 회전 방지
-                rb.constraints = RigidbodyConstraints2D.FreezeRotation; // 회전만 고정
+                rb.freezeRotation = true;
+                rb.constraints = RigidbodyConstraints2D.FreezeRotation;
                 
-                // BoxCollider2D가 없으면 추가
                 BoxCollider2D boxCollider = obj.GetComponent<BoxCollider2D>();
                 if (boxCollider == null)
                 {
                     boxCollider = obj.AddComponent<BoxCollider2D>();
                 }
                 
-                // Ground 감지 컴포넌트 추가
-                GroundLandingHandler landingHandler = obj.GetComponent<GroundLandingHandler>();
+                // 스프라이트 교체 방식 GroundLandingHandler 추가
+                SimpleGroundLandingHandler landingHandler = obj.GetComponent<SimpleGroundLandingHandler>();
                 if (landingHandler == null)
                 {
-                    landingHandler = obj.AddComponent<GroundLandingHandler>();
+                    landingHandler = obj.AddComponent<SimpleGroundLandingHandler>();
                 }
                 
-                // 오브젝트를 떨어뜨리기 위한 힘 적용
+                // 깨지는 효과 설정 전달
+                landingHandler.SetBreakEffects(breakSound, brokenSprite, soundVolume);
+                
                 rb.AddForce(dropDirection.normalized * dropForce, ForceMode2D.Impulse);
                 
-                // 다음 오브젝트가 떨어지기 전에 지정된 시간만큼 대기
                 yield return new WaitForSeconds(dropDelay);
             }
             else
@@ -86,15 +85,13 @@ public class DownObject : MonoBehaviour
         }
     }
     
-    // Unity 에디터에서 시각화
     private void OnDrawGizmos()
     {
         // 트리거 영역 시각화
-        Gizmos.color = new Color(1f, 0.5f, 0f, 0.3f); // 주황색 반투명
+        Gizmos.color = new Color(1f, 0.5f, 0f, 0.3f);
         Collider2D col = GetComponent<Collider2D>();
         if (col != null)
         {
-            // 콜라이더 종류에 따라 다르게 그리기
             if (col is BoxCollider2D)
             {
                 BoxCollider2D boxCollider = col as BoxCollider2D;
@@ -103,7 +100,6 @@ public class DownObject : MonoBehaviour
             }
             else
             {
-                // 다른 형태의 콜라이더일 경우 간단하게 표시
                 Gizmos.DrawWireSphere(transform.position, 0.5f);
             }
         }
@@ -122,7 +118,6 @@ public class DownObject : MonoBehaviour
                 {
                     Gizmos.DrawLine(transform.position, objectsToDrop[i].transform.position);
                     
-                    // 드롭 순서 표시
                     #if UNITY_EDITOR
                     UnityEditor.Handles.color = Color.white;
                     UnityEditor.Handles.Label(objectsToDrop[i].transform.position + Vector3.up * 0.5f, $"{i+1}");
@@ -133,67 +128,119 @@ public class DownObject : MonoBehaviour
     }
 }
 
-// Ground 감지 및 처리를 위한 컴포넌트
-public class GroundLandingHandler : MonoBehaviour
+// 간단한 스프라이트 교체 방식 Ground 착지 처리 컴포넌트
+public class SimpleGroundLandingHandler : MonoBehaviour
 {
     private Rigidbody2D rb;
     private BoxCollider2D boxCollider;
+    private SpriteRenderer spriteRenderer;
+    private AudioSource audioSource;
     private bool hasLanded = false;
+    
+    // 깨지는 효과 설정
+    private AudioClip breakSound;
+    private Sprite brokenSprite;
+    private Sprite originalSprite; // 원본 스프라이트 보관
+    private float soundVolume = 0.3f; // 사운드 볼륨
     
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
         boxCollider = GetComponent<BoxCollider2D>();
+        spriteRenderer = GetComponent<SpriteRenderer>();
+        
+        // 원본 스프라이트 저장
+        if (spriteRenderer != null)
+        {
+            originalSprite = spriteRenderer.sprite;
+        }
+        
+        // AudioSource 추가 (없을 경우)
+        audioSource = GetComponent<AudioSource>();
+        if (audioSource == null)
+        {
+            audioSource = gameObject.AddComponent<AudioSource>();
+        }
+    }
+    
+    public void SetBreakEffects(AudioClip sound, Sprite broken, float volume)
+    {
+        breakSound = sound;
+        brokenSprite = broken;
+        soundVolume = volume;
     }
     
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        // 레이어로 Ground 감지 (레이어가 "Ground"인 경우)
         if (collision.gameObject.layer == LayerMask.NameToLayer("Ground") && !hasLanded)
         {
             hasLanded = true;
             
-            // 충돌 지점 확인
             ContactPoint2D contact = collision.GetContact(0);
             
-            // Ground의 위쪽 표면에 충돌했는지 확인 (y 법선이 위쪽을 향함)
             if (contact.normal.y > 0.5f)
             {
-                // 충돌 위치 계산 - Ground 표면 위에 정확하게 위치시키기
+                // 위치 조정
                 float halfHeight = boxCollider.bounds.extents.y;
                 Vector3 newPosition = new Vector3(
                     transform.position.x, 
                     contact.point.y + halfHeight, 
                     transform.position.z);
                 
-                // 오브젝트 위치 조정
                 transform.position = newPosition;
                 
                 // 물리 이동 중지
                 rb.velocity = Vector2.zero;
-                rb.gravityScale = 0f; // 중력 비활성화
-                
-                // x축 이동만 제한하고 싶다면:
+                rb.gravityScale = 0f;
                 rb.constraints = RigidbodyConstraints2D.FreezePositionX | RigidbodyConstraints2D.FreezeRotation;
                 
-                // 또는 모든 이동 제한:
-                // rb.constraints = RigidbodyConstraints2D.FreezeAll;
+                // 깨지는 효과 실행
+                PlayBreakEffects();
                 
-                Debug.Log($"{gameObject.name}이(가) Ground 위에 착지했습니다.");
+                Debug.Log($"{gameObject.name}이(가) Ground 위에 착지하고 깨졌습니다.");
             }
         }
     }
     
-    // 추가적인 안정성을 위한 지속적인 체크 (선택 사항)
+    private void PlayBreakEffects()
+    {
+        // 1. 사운드 재생 (볼륨 조절)
+        if (breakSound != null && audioSource != null)
+        {
+            audioSource.PlayOneShot(breakSound, soundVolume);
+        }
+        
+        // 2. 스프라이트 교체
+        if (brokenSprite != null && spriteRenderer != null)
+        {
+            spriteRenderer.sprite = brokenSprite;
+            Debug.Log($"{gameObject.name}의 스프라이트가 깨진 모습으로 변경되었습니다.");
+        }
+        else
+        {
+            Debug.LogWarning($"{gameObject.name}: 깨진 스프라이트가 설정되지 않았습니다.");
+        }
+    }
+    
+    // 스프라이트를 원래대로 되돌리는 함수 (필요시 사용)
+    public void RestoreOriginalSprite()
+    {
+        if (originalSprite != null && spriteRenderer != null)
+        {
+            spriteRenderer.sprite = originalSprite;
+            hasLanded = false; // 다시 떨어뜨릴 수 있도록 설정
+            Debug.Log($"{gameObject.name}의 스프라이트가 원래대로 복구되었습니다.");
+        }
+    }
+    
     private void FixedUpdate()
     {
         if (hasLanded)
         {
-            // 이미 착지했으면 추가 처리가 필요 없음
             return;
         }
         
-        // 아래쪽 레이캐스트로 Ground 체크 (선택적)
+        // 레이캐스트로 Ground 체크
         RaycastHit2D hit = Physics2D.Raycast(
             transform.position,
             Vector2.down,
@@ -204,7 +251,6 @@ public class GroundLandingHandler : MonoBehaviour
         {
             hasLanded = true;
             
-            // Ground 위에 위치 조정
             float halfHeight = boxCollider.bounds.extents.y;
             Vector3 newPosition = new Vector3(
                 transform.position.x,
@@ -213,12 +259,14 @@ public class GroundLandingHandler : MonoBehaviour
                 
             transform.position = newPosition;
             
-            // 물리 이동 중지
             rb.velocity = Vector2.zero;
             rb.gravityScale = 0f;
             rb.constraints = RigidbodyConstraints2D.FreezePositionX | RigidbodyConstraints2D.FreezeRotation;
             
-            Debug.Log($"{gameObject.name}이(가) Ground 위에 레이캐스트로 착지했습니다.");
+            // 깨지는 효과 실행
+            PlayBreakEffects();
+            
+            Debug.Log($"{gameObject.name}이(가) Ground 위에 레이캐스트로 착지하고 깨졌습니다.");
         }
     }
 }

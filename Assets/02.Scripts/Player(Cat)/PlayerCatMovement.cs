@@ -19,7 +19,7 @@ public class PlayerCatMovement : MonoBehaviour
     [SerializeField] private float dashPower = 8f;
     [SerializeField] private float jumpPower = 5f;
     [SerializeField] private float crouchPower = 1f;
-    
+
     [Header("파티클 시스템")]
     [SerializeField] private ParticleSystem dashParticle; // 대시 파티클 시스템
     [SerializeField] private Vector3 dashParticleOffset = new Vector2(0.5f, 0f); // 파티클 오프셋
@@ -38,10 +38,12 @@ public class PlayerCatMovement : MonoBehaviour
     [SerializeField] private float runSoundInterval = 0.2f;  // 달리기 소리 재생 간격
     [SerializeField] private float climbSoundInterval = 0.4f; // 사다리 오르기 소리 재생 간격
     [SerializeField] private float crouchSoundInterval = 0.5f; // 웅크리기 소리 재생 간격
+    [SerializeField] private float landingSoundDelay = 0.3f; // 착지 후 소리 재생까지 대기 시간
     private float lastWalkSoundTime; // 마지막 걷기 소리 재생 시간
     private float lastRunSoundTime;  // 마지막 달리기 소리 재생 시간
     private float lastClimbSoundTime; // 마지막 사다리 오르기 소리 재생 시간
     private float lastCrouchSoundTime; // 마지막 웅크리기 소리 재생 시간
+    private float lastLandingTime; // 마지막 착지 시간
     private int lastMoveDirection = 0; // 이전 이동 방향 (1: 오른쪽, -1: 왼쪽, 0: 정지)
 
     // 점프 중력 보정
@@ -71,6 +73,7 @@ public class PlayerCatMovement : MonoBehaviour
     private bool isCrouching = false;
     private bool isCrouchMoving = false;  // 웅크린 상태에서 이동 중인지 여부
     private Vector2 originalColliderSize, originalColliderOffset, crouchColliderSize, crouchColliderOffset;
+    private bool forceCrouch = false; // 외부에서 강제 웅크리기
 
     // 사다리
     [Header("사다리")]
@@ -84,12 +87,16 @@ public class PlayerCatMovement : MonoBehaviour
     private bool isBoxInteractionEnabled = false;
     private bool isDashing = false;
 
+    // 미니게임 입력 차단용 플래그
+    private bool isMiniGameInputBlocked = false;
+
+
+
     private void Start()
     {
         // 사람 버전 UI 그룹 비활성화
         UIManager.Instance.SetUI(eUIGameObjectName.HumanVersionUIGroup, false);
         UIManager.Instance.SetUI(eUIGameObjectName.CatVersionUIGroup, true);
-        UIManager.Instance.SetUI(eUIGameObjectName.HeartParent, true);
         UIManager.Instance.SetUI(eUIGameObjectName.ResponsibilityGroup, true);
         UIManager.Instance.SetUI(eUIGameObjectName.ResponsibilityGauge, true);
         UIManager.Instance.SetUI(eUIGameObjectName.PlaceUI, true);
@@ -132,7 +139,7 @@ public class PlayerCatMovement : MonoBehaviour
 
     void Update()
     {
-        if (IsInputBlocked())
+        if (IsInputBlocked() || !(bool)GameManager.Instance.GetVariable("CanMoving"))
             return;
 
         bool prevOnGround = isOnGround;
@@ -158,6 +165,11 @@ public class PlayerCatMovement : MonoBehaviour
         }
 
         bool justLanded = isOnGround && !prevOnGround;
+        if (justLanded)
+        {
+            lastLandingTime = Time.time; // 착지 시간 기록
+        }
+
         if (isOnGround && rb.velocity.y <= 0) jumpCount = 0;
 
         float horizontalInput = Input.GetAxisRaw("Horizontal");
@@ -209,91 +221,139 @@ public class PlayerCatMovement : MonoBehaviour
         // 대시 상태 체크
         bool wasDashing = isDashing;
         isDashing = Input.GetKey(KeyCode.LeftShift) && !isCrouching && !(boxInteraction != null && boxInteraction.IsInteracting) && horizontalInput != 0;
-        
+
         // 이동 방향 변경 감지
         int currentDirection = Mathf.RoundToInt(Mathf.Sign(horizontalInput));
         bool directionChanged = currentDirection != 0 && currentDirection != lastMoveDirection;
         lastMoveDirection = currentDirection;
-        
+
         // 파티클 및 사운드 처리
         if (dashParticle != null)
         {
             UpdateParticlePosition();
-            
-            if (isDashing)
+
+            // 웅크리기나 박스 상호작용 중이 아닐 때만 일반 이동 소리 재생
+            if (!isCrouching && !forceCrouch && !(boxInteraction != null && boxInteraction.IsInteracting))
             {
-                // 달리기 상태일 때
-                if (!wasDashing || directionChanged)
+                if (isDashing)
                 {
-                    dashParticle.Play();
-                    if (runSound != null)
+                    // 달리기 상태일 때
+                    if (!wasDashing || directionChanged)
                     {
-                        audioSource.Stop(); // 현재 재생 중인 사운드 중지
+                        dashParticle.Play();
+                        if (runSound != null && Time.time - lastLandingTime >= landingSoundDelay)
+                        {
+                            audioSource.Stop(); // 현재 재생 중인 사운드 중지
+                            audioSource.PlayOneShot(runSound);
+                            lastRunSoundTime = Time.time;
+                        }
+                    }
+                    particleEmission.rateOverTime = runEmissionRate;
+
+                    // 달리기 소리 재생
+                    if (runSound != null && Time.time - lastRunSoundTime >= runSoundInterval &&
+                        Time.time - lastLandingTime >= landingSoundDelay)
+                    {
                         audioSource.PlayOneShot(runSound);
                         lastRunSoundTime = Time.time;
                     }
                 }
-                particleEmission.rateOverTime = runEmissionRate;
-                
-                // 달리기 소리 재생
-                if (runSound != null && Time.time - lastRunSoundTime >= runSoundInterval)
+                else if (horizontalInput != 0 && isOnGround)
                 {
-                    audioSource.PlayOneShot(runSound);
-                    lastRunSoundTime = Time.time;
-                }
-            }
-            else if (horizontalInput != 0 && isOnGround)
-            {
-                // 걷기 상태일 때
-                if (!dashParticle.isPlaying || directionChanged)
-                {
-                    dashParticle.Play();
-                    if (walkSound != null)
+                    // 걷기 상태일 때
+                    if (!dashParticle.isPlaying || directionChanged)
                     {
-                        audioSource.Stop(); // 현재 재생 중인 사운드 중지
+                        dashParticle.Play();
+                        if (walkSound != null && Time.time - lastLandingTime >= landingSoundDelay)
+                        {
+                            audioSource.Stop(); // 현재 재생 중인 사운드 중지
+                            audioSource.PlayOneShot(walkSound);
+                            lastWalkSoundTime = Time.time;
+                        }
+                    }
+                    particleEmission.rateOverTime = walkEmissionRate;
+
+                    // 걷기 소리 재생
+                    if (walkSound != null && Time.time - lastWalkSoundTime >= walkSoundInterval &&
+                        Time.time - lastLandingTime >= landingSoundDelay)
+                    {
                         audioSource.PlayOneShot(walkSound);
                         lastWalkSoundTime = Time.time;
                     }
                 }
-                particleEmission.rateOverTime = walkEmissionRate;
-                
-                // 걷기 소리 재생
-                if (walkSound != null && Time.time - lastWalkSoundTime >= walkSoundInterval)
+                else
                 {
-                    audioSource.PlayOneShot(walkSound);
-                    lastWalkSoundTime = Time.time;
+                    // 멈춤 상태일 때는 파티클 발생을 점진적으로 줄임
+                    particleEmission.rateOverTime = 0f;
+                    if (dashParticle.particleCount == 0)
+                    {
+                        dashParticle.Stop();
+                    }
+                    lastMoveDirection = 0; // 정지 상태로 방향 초기화
                 }
             }
             else
             {
-                // 멈춤 상태일 때는 파티클 발생을 점진적으로 줄임
-                particleEmission.rateOverTime = 0f;
-                if (dashParticle.particleCount == 0)
+                // 웅크리기나 박스 상호작용 중일 때는 파티클만 처리
+                if (horizontalInput != 0)
                 {
-                    dashParticle.Stop();
+                    dashParticle.Play();
+                    particleEmission.rateOverTime = walkEmissionRate;
                 }
-                lastMoveDirection = 0; // 정지 상태로 방향 초기화
+                else
+                {
+                    particleEmission.rateOverTime = 0f;
+                    if (dashParticle.particleCount == 0)
+                    {
+                        dashParticle.Stop();
+                    }
+                }
             }
         }
-        
-        // 웅크리기 상태 체크
-        if (isCrouching)
-        {
-            // 웅크린 상태에서 이동 중인지 확인
-            isCrouchMoving = horizontalInput != 0;
 
-            if (isCrouchMoving)
+        // ✅ 웅크리기 상태 체크 (강제 웅크리기 포함) - 수정된 부분
+        if (isCrouching || forceCrouch)
+        {
+            Debug.Log($"[PlayerCatMovement] 웅크리기 상태 감지 - isCrouching: {isCrouching}, forceCrouch: {forceCrouch}");
+
+            // 웅크린 상태에서 이동 중인지 확인
+            bool isMoving = false;
+
+            // 미니게임 중 강제 웅크리기 상태일 때
+            if (forceCrouch && isMiniGameInputBlocked)
+            {
+                // isCrouchMoving 상태를 우선적으로 확인
+                isMoving = isCrouchMoving;
+                Debug.Log($"[PlayerCatMovement] 미니게임 중 - isCrouchMoving: {isCrouchMoving}, 실제속도: {Mathf.Abs(rb.velocity.x)}");
+            }
+            else
+            {
+                // 일반적인 상황에서는 입력 기반 판단
+                isMoving = horizontalInput != 0;
+                Debug.Log($"[PlayerCatMovement] 일반 상황 - horizontalInput: {horizontalInput}");
+            }
+
+            // 웅크리기 애니메이션 설정
+            if (isMoving)
             {
                 // 웅크린 상태에서 이동
                 animator.SetBool("Crouching", true);
                 animator.SetBool("Crouch", false);
+                Debug.Log("[PlayerCatMovement] Crouching 애니메이션 활성화");
             }
             else
             {
                 // 웅크린 상태에서 정지
                 animator.SetBool("Crouch", true);
                 animator.SetBool("Crouching", false);
+                Debug.Log("[PlayerCatMovement] Crouch 애니메이션 활성화");
             }
+        }
+        else if (isClimbing)
+        {
+            float verticalInput = Input.GetAxisRaw("Vertical");
+            bool isClimbingMoving = Mathf.Abs(verticalInput) > 0.01f;
+            animator.SetBool("Climbing", isClimbingMoving);
         }
         else if (isDashing)
         {
@@ -303,18 +363,12 @@ public class PlayerCatMovement : MonoBehaviour
         {
             animator.SetBool("Moving", true);
         }
-        else if (isClimbing)
-        {
-            float verticalInput = Input.GetAxisRaw("Vertical");
-            bool isClimbingMoving = Mathf.Abs(verticalInput) > 0.01f;
-            animator.SetBool("Climbing", isClimbingMoving);
-        }
     }
 
     void LateUpdate()
     {
         // 물리 업데이트 후 애니메이션 상태 동기화
-        if (!IsInputBlocked())
+        if (!IsInputBlocked() && (bool)GameManager.Instance.GetVariable("CanMoving"))
         {
             UpdateAnimationState(Input.GetAxisRaw("Horizontal"));
         }
@@ -322,7 +376,7 @@ public class PlayerCatMovement : MonoBehaviour
 
     void FixedUpdate()
     {
-        if (IsInputBlocked())
+        if (IsInputBlocked() || !(bool)GameManager.Instance.GetVariable("CanMoving"))
             return;
 
         if (!isClimbing)
@@ -336,11 +390,80 @@ public class PlayerCatMovement : MonoBehaviour
         }
     }
 
+    public void SetMiniGameInputBlocked(bool blocked)
+    {
+        isMiniGameInputBlocked = blocked;
+        Debug.Log($"[PlayerCatMovement] 미니게임 입력 차단 설정: {blocked}");
+    }
+
+    public void SetCrouchMovingState(bool moving)
+    {
+        isCrouchMoving = moving;
+        Debug.Log($"[PlayerCatMovement] 웅크리기 이동 상태 설정: {moving}");
+
+        // 상태가 변경되면 즉시 애니메이션 업데이트
+        if (forceCrouch || isCrouching)
+        {
+            if (moving)
+            {
+                animator.SetBool("Crouching", true);
+                animator.SetBool("Crouch", false);
+                Debug.Log("[PlayerCatMovement] 즉시 Crouching 애니메이션 활성화");
+            }
+            else
+            {
+                animator.SetBool("Crouch", true);
+                animator.SetBool("Crouching", false);
+                Debug.Log("[PlayerCatMovement] 즉시 Crouch 애니메이션 활성화");
+            }
+        }
+    }
+
+    // 강제 상태 프로퍼티
+    public bool ForceCrouch
+    {
+        get { return forceCrouch; }
+        set
+        {
+            forceCrouch = value;
+            Debug.Log($"[PlayerCatMovement] 강제 웅크리기 설정: {value}");
+
+            if (forceCrouch)
+            {
+                // 웅크리기 적용
+                isCrouching = true;
+                isCrouchMoving = false;
+                boxCollider.size = crouchColliderSize;
+                boxCollider.offset = crouchColliderOffset;
+
+                // 즉시 애니메이션 적용
+                animator.SetBool("Crouch", true);
+                animator.SetBool("Crouching", false);
+                Debug.Log("[PlayerCatMovement] 강제 웅크리기 - Crouch 애니메이션 즉시 적용");
+            }
+            else
+            {
+                // 웅크리기 해제
+                isCrouching = false;
+                isCrouchMoving = false;
+                boxCollider.size = originalColliderSize;
+                boxCollider.offset = originalColliderOffset;
+
+                // 애니메이션 해제
+                animator.SetBool("Crouch", false);
+                animator.SetBool("Crouching", false);
+                Debug.Log("[PlayerCatMovement] 강제 웅크리기 해제 - 모든 웅크리기 애니메이션 해제");
+            }
+        }
+    }
+
     // 다이얼로그 출력 중, 씬 로딩 중이면 입력을 받지 않음.
     bool IsInputBlocked()
     {
-        return DialogueManager.Instance.isDialogueActive ||
-               (GameManager.Instance != null && GameManager.Instance.IsSceneLoading);
+        return PauseManager.IsGamePaused
+            || DialogueManager.Instance.isDialogueActive
+            || (GameManager.Instance != null && GameManager.Instance.IsSceneLoading)
+            || isMiniGameInputBlocked;  // ← 여기!
     }
 
     void HandleLadderInput()
@@ -371,6 +494,9 @@ public class PlayerCatMovement : MonoBehaviour
             isCrouchMoving = horizontalInput != 0;  // 현재 이동 상태에 따라 설정
             boxCollider.size = crouchColliderSize;
             boxCollider.offset = crouchColliderOffset;
+
+            // 웅크리기 시작할 때 소리 중지
+            audioSource.Stop();
         }
 
         // S키 입력으로 인한 웅크리기
@@ -381,6 +507,9 @@ public class PlayerCatMovement : MonoBehaviour
             isCrouchMoving = horizontalInput != 0;  // 현재 이동 상태에 따라 설정
             boxCollider.size = crouchColliderSize;
             boxCollider.offset = crouchColliderOffset;
+
+            // 웅크리기 시작할 때 소리 중지
+            audioSource.Stop();
         }
         else if (Input.GetKeyUp(KeyCode.S) && !obstacleAbove)
         {
@@ -389,7 +518,6 @@ public class PlayerCatMovement : MonoBehaviour
             isCrouchMoving = false;
             boxCollider.size = originalColliderSize;
             boxCollider.offset = originalColliderOffset;
-            //spriteRenderer.sprite = originalSprite;
         }
 
         // 몸 전체가 장애물에서 벗어나고 S키도 누르고 있지 않으면 자동으로 일어나기
@@ -401,8 +529,10 @@ public class PlayerCatMovement : MonoBehaviour
             boxCollider.offset = originalColliderOffset;
         }
 
-        // 웅크린 상태에서 이동할 때만 효과음 재생
-        if (isCrouching && isCrouchMoving && crouchSound != null && Time.time - lastCrouchSoundTime >= crouchSoundInterval)
+        // 웅크린 상태에서 이동할 때만 웅크리기 효과음 재생
+        if (isCrouching && isCrouchMoving && crouchSound != null &&
+            Time.time - lastCrouchSoundTime >= crouchSoundInterval &&
+            Time.time - lastLandingTime >= landingSoundDelay)
         {
             audioSource.PlayOneShot(crouchSound);
             lastCrouchSoundTime = Time.time;
@@ -436,6 +566,15 @@ public class PlayerCatMovement : MonoBehaviour
                 bool isBoxOnRight = boxInteraction.CurrentBox.transform.position.x > transform.position.x;
                 spriteRenderer.flipX = !isBoxOnRight; // 박스를 바라보는 방향으로 설정
             }
+
+            // 박스 상호작용 중일 때 웅크리기 소리 재생 (착지 딜레이 적용)
+            if (horizontalInput != 0 && crouchSound != null && 
+                Time.time - lastCrouchSoundTime >= crouchSoundInterval && 
+                Time.time - lastLandingTime >= landingSoundDelay)
+            {
+                audioSource.PlayOneShot(crouchSound);
+                lastCrouchSoundTime = Time.time;
+            }
         }
         // 웅크린 상태에서는 이동 속도 감소
         else if (isCrouching)
@@ -466,7 +605,7 @@ public class PlayerCatMovement : MonoBehaviour
                 jumpCount++;
                 isOnGround = false;
 
-                // 점프 시 파티클 처리
+                // 점프 시 파티클만 처리 (소리는 점프 소리만)
                 if (dashParticle != null)
                 {
                     UpdateParticlePosition();
@@ -476,8 +615,11 @@ public class PlayerCatMovement : MonoBehaviour
                     }
                     particleEmission.rateOverTime = runEmissionRate; // 점프 시 달리기와 같은 파티클 효과
                 }
+                
+                // 점프 소리만 재생
                 if (jumpSound != null)
                 {
+                    audioSource.Stop(); // 현재 재생 중인 모든 소리 중지
                     audioSource.PlayOneShot(jumpSound);
                 }
             }
@@ -566,13 +708,20 @@ public class PlayerCatMovement : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        // 바닥 또는 박스에 닿으면 점프 리셋
-        if (collision.gameObject.CompareTag("Ground") || collision.gameObject.CompareTag("Box"))
+        // 바닥, 박스, 또는 벽에 닿으면 점프 리셋
+        if (collision.gameObject.CompareTag("Ground") || 
+            collision.gameObject.CompareTag("Box") || 
+            collision.gameObject.CompareTag("wall"))
         {
             // 위에서 아래로 충돌했는지 확인 (발이 닿았는지)
             foreach (ContactPoint2D contact in collision.contacts)
             {
-                if (contact.normal.y > 0.5f) // 아래쪽에서 충돌
+                if (contact.normal.y > 0.5f) // 아래쪽에서 충돌 (바닥/박스)
+                {
+                    jumpCount = 0; // 점프 카운트 리셋
+                    break;
+                }
+                else if (Mathf.Abs(contact.normal.x) > 0.5f) // 좌우에서 충돌 (벽)
                 {
                     jumpCount = 0; // 점프 카운트 리셋
                     break;

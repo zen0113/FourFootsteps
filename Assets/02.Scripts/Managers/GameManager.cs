@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using System.Linq;
 
 public class GameManager : MonoBehaviour
 {
@@ -37,6 +38,10 @@ public class GameManager : MonoBehaviour
             DontDestroyOnLoad(gameObject);
 
             InitSceneOrderList();
+
+            // 변수 초기화 로직을 Awake로 이동
+            variablesCSV = Resources.Load<TextAsset>("Datas/variables");
+            CreateVariables();
         }
         else
         {
@@ -46,9 +51,6 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
-        variablesCSV = Resources.Load<TextAsset>("Datas/variables");
-        CreateVariables();
-
         // 시작 시 현재 씬 이름 자동 등록
         InitCurrentSceneInfo();
 
@@ -62,12 +64,12 @@ public class GameManager : MonoBehaviour
         sceneOrder = new List<SceneData>
             {
                 new SceneData("TitleScene"),
-                //new SceneData("Prologue"),
                 new SceneData("SetPlayerName"),
                 new SceneData("SetCatName"),
+                new SceneData("Prologue"),
                 new SceneData("StageScene1"),
                 new SceneData("RecallScene1", true),
-                //new SceneData("Stage2"),
+                new SceneData("StageScene2"),
                 //new SceneData("RecallScene2", true)
             };
     }
@@ -83,17 +85,35 @@ public class GameManager : MonoBehaviour
     // 씬 상태 업데이트
     public void UpdateSceneProgress(string loadedSceneName)
     {
-        string currentSceneName = loadedSceneName;
-        SetVariable("CurrentSceneName", currentSceneName);
-        int index = sceneOrder.FindIndex(s => s.sceneName == loadedSceneName);
-        if (index >= 0 && index + 1 < sceneOrder.Count)
+        //string currentSceneName = loadedSceneName;
+        //SetVariable("CurrentSceneName", currentSceneName);
+        //int index = sceneOrder.FindIndex(s => s.sceneName == loadedSceneName);
+        //if (index >= 0 && index + 1 < sceneOrder.Count)
+        //{
+        //    string nextSceneName = sceneOrder[index + 1].sceneName;
+        //    SetVariable("NextSceneName", nextSceneName);
+        //}
+        //else
+        //{
+        //    SetVariable("NextSceneName", null); // 마지막 씬일 경우
+        //}
+
+        var currentScene = sceneOrder.FirstOrDefault(s => s.sceneName == loadedSceneName);
+        if (currentScene != null)
         {
-            string nextSceneName = sceneOrder[index + 1].sceneName;
-            SetVariable("NextSceneName", nextSceneName);
-        }
-        else
-        {
-            SetVariable("NextSceneName", null); // 마지막 씬일 경우
+            SetVariable("CurrentSceneName", currentScene.sceneName);
+
+            int index = sceneOrder.IndexOf(currentScene);
+            if (index + 1 < sceneOrder.Count)
+                SetVariable("NextSceneName", sceneOrder[index + 1].sceneName);
+            else
+                SetVariable("NextSceneName", null); // 마지막 씬일 경우
+
+            if (currentScene.isRecall)
+            {
+                SetVariable("isRecalling", true);
+            }else
+                SetVariable("isRecalling", false);
         }
     }
 
@@ -236,6 +256,8 @@ public class GameManager : MonoBehaviour
             "YourCatName",
             "CurrentSceneName",
             "NextSceneName",
+            "CanMoving",
+            "CanInvesigatingRecallObject"
         });
 
         foreach (var item in variables)

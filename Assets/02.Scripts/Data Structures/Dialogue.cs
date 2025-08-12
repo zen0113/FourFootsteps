@@ -16,13 +16,15 @@ public class Dialogue
 
     public void AddLine(
         string speakerID,
+        bool bubbleMode,
         string script,
         string textEffect,
         string imageID,
         string soundID,
+        string cutSceneID,
         string next)
     {
-        Lines.Add(new DialogueLine(speakerID, script, textEffect, imageID, soundID, next));
+        Lines.Add(new DialogueLine(speakerID, bubbleMode, script, textEffect, imageID, soundID, cutSceneID, next));
     }
 
     public void SetCurrentLineIndex(int currentLineIndex)

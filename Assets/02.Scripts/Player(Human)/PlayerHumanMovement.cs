@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class PlayerHumanMovement : MonoBehaviour
 {
-    Rigidbody2D rb;
     Animator animator;
     SpriteRenderer spriteRenderer;
     AudioSource audioSource;
@@ -31,7 +30,7 @@ public class PlayerHumanMovement : MonoBehaviour
         UIManager.Instance.SetUI(eUIGameObjectName.ResponsibilityGauge, true);
         UIManager.Instance.SetUI(eUIGameObjectName.PlaceUI, true);
 
-        rb = GetComponent<Rigidbody2D>();
+        // rb = GetComponent<Rigidbody2D>(); // Rigidbody2D 관련 코드 제거
         spriteRenderer = GetComponent<SpriteRenderer>();
         animator = GetComponent<Animator>();
         audioSource = GetComponent<AudioSource>();
@@ -49,12 +48,23 @@ public class PlayerHumanMovement : MonoBehaviour
             return;
         }
 
+        // 입력 처리
         float horizontalInput = Input.GetAxisRaw("Horizontal");
         if (horizontalInput != 0)
+        {
             spriteRenderer.flipX = horizontalInput < 0;
+        }
 
-        UpdateAnimationState(horizontalInput);
+        // 상태 및 애니메이션 업데이트
         Crouch();
+        isDashing = Input.GetKey(KeyCode.LeftShift) && !isCrouching && horizontalInput != 0;
+        UpdateAnimationState(horizontalInput);
+
+        // 이동 처리
+        Move(horizontalInput);
+
+        // 오디오 처리
+        UpdateAudioState(horizontalInput);
     }
 
     void UpdateAnimationState(float horizontalInput)
@@ -63,11 +73,24 @@ public class PlayerHumanMovement : MonoBehaviour
         animator.SetBool("Dash", false);
         animator.SetBool("Crouch", false);
 
-        isDashing = Input.GetKey(KeyCode.LeftShift) && !isCrouching && horizontalInput != 0;
-
         if (isDashing)
         {
             animator.SetBool("Dash", true);
+        }
+        else if (isCrouching)
+        {
+            animator.SetBool("Crouch", true);
+        }
+        else if (horizontalInput != 0)
+        {
+            animator.SetBool("Moving", true);
+        }
+    }
+
+    void UpdateAudioState(float horizontalInput)
+    {
+        if (isDashing)
+        {
             if (Time.time - lastWalkSoundTime >= dashSoundInterval)
             {
                 audioSource.PlayOneShot(footstepSound);
@@ -76,12 +99,10 @@ public class PlayerHumanMovement : MonoBehaviour
         }
         else if (isCrouching)
         {
-            animator.SetBool("Crouch", true);
             audioSource.Stop();
         }
         else if (horizontalInput != 0)
         {
-            animator.SetBool("Moving", true);
             if (Time.time - lastWalkSoundTime >= walkSoundInterval)
             {
                 audioSource.PlayOneShot(footstepSound);
@@ -94,21 +115,9 @@ public class PlayerHumanMovement : MonoBehaviour
         }
     }
 
-    private void FixedUpdate()
-    {
-        if (IsInputBlocked() || !(bool)GameManager.Instance.GetVariable("CanMoving"))
-        {
-            rb.velocity = Vector2.zero;
-            return;
-        }
-
-        Move();
-    }
-
     private void StopMovementAndAnimation()
     {
-        rb.velocity = Vector2.zero;
-
+        // 물리 이동이 아니므로 속도를 0으로 설정할 필요 없음
         if (animator != null)
         {
             animator.SetBool("Moving", false);
@@ -119,14 +128,13 @@ public class PlayerHumanMovement : MonoBehaviour
 
     bool IsInputBlocked()
     {
-        return PauseManager.IsGamePaused || // ⬅ 추가된 부분
+        return PauseManager.IsGamePaused ||
                DialogueManager.Instance.isDialogueActive ||
                (GameManager.Instance != null && GameManager.Instance.IsSceneLoading);
     }
 
-    void Move()
+    void Move(float horizontalInput)
     {
-        float horizontalInput = Input.GetAxisRaw("Horizontal");
         float currentPower = movePower;
 
         if (isCrouching)
@@ -138,10 +146,8 @@ public class PlayerHumanMovement : MonoBehaviour
             currentPower = dashPower;
         }
 
-        float targetVelocityX = horizontalInput * currentPower;
-        float smoothSpeed = 0.05f;
-        float newVelocityX = Mathf.Lerp(rb.velocity.x, targetVelocityX, smoothSpeed / Time.deltaTime);
-        rb.velocity = new Vector2(newVelocityX, rb.velocity.y);
+        Vector3 moveDir = new Vector3(horizontalInput, 0, 0);
+        transform.Translate(moveDir * currentPower * Time.deltaTime);
     }
 
     void Crouch()

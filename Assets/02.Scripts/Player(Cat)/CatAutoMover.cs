@@ -71,8 +71,10 @@ public class CatAutoMover : MonoBehaviour
         }
 
         // 방향 반전
-        if (spriteRenderer != null)
-            spriteRenderer.flipX = direction.x < 0;
+        if (direction.x > 0)
+            spriteRenderer.flipX = false; // 오른쪽으로 이동 시 정상
+        else if (direction.x < 0)
+            spriteRenderer.flipX = true;  // 왼쪽으로 이동 시 반전
 
         Vector2 moveDir = direction.normalized;
         transform.Translate(moveDir * moveSpeed * Time.deltaTime);

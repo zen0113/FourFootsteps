@@ -2,9 +2,16 @@ using UnityEngine;
 
 public class TutorialTrigger : TutorialBase
 {
-    [Header("플레이어 컨트롤러 설정")]
+    public enum PlayerControllerType
+    {
+        PlayerCatMovement,
+        PlayerHumanMovement
+    }
+
     [SerializeField]
-    private PlayerCatMovement playerController;
+    private PlayerControllerType playerControllerType = PlayerControllerType.PlayerCatMovement;
+
+    private MonoBehaviour playerController;
 
     [Header("튜토리얼 충돌 오브젝트 및 Ui 오브젝트")]
     [SerializeField]
@@ -21,8 +28,71 @@ public class TutorialTrigger : TutorialBase
     public bool isTrigger { set; get; } = false;
     private bool keyPressed = false;
 
+    private void Awake()
+    {
+        // 자동으로 Player 찾기
+        FindPlayerController();
+    }
+
+    /// <summary>
+    /// Player 태그를 가진 오브젝트에서 선택된 타입의 컴포넌트를 찾아서 할당
+    /// </summary>
+    private void FindPlayerController()
+    {
+        GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
+
+        if (playerObject != null)
+        {
+            switch (playerControllerType)
+            {
+                case PlayerControllerType.PlayerCatMovement:
+                    playerController = playerObject.GetComponent<PlayerCatMovement>();
+                    break;
+                case PlayerControllerType.PlayerHumanMovement:
+                    playerController = playerObject.GetComponent<PlayerHumanMovement>();
+                    break;
+            }
+
+            if (playerController != null)
+            {
+                Debug.Log($"[{gameObject.name}] Player 자동 찾기 성공: {playerObject.name} ({playerControllerType})", gameObject);
+            }
+            else
+            {
+                Debug.LogWarning($"[{gameObject.name}] Player 태그를 가진 오브젝트 '{playerObject.name}'에서 {playerControllerType} 컴포넌트를 찾을 수 없습니다!", gameObject);
+            }
+        }
+        else
+        {
+            Debug.LogWarning($"[{gameObject.name}] 'Player' 태그를 가진 오브젝트를 찾을 수 없습니다!", gameObject);
+        }
+    }
+
+    /// <summary>
+    /// 수동으로 Player를 다시 찾는 메서드 (외부에서 호출 가능)
+    /// </summary>
+    public void RefreshPlayerController()
+    {
+        FindPlayerController();
+    }
+
+    /// <summary>
+    /// 플레이어 컨트롤러 타입을 변경하고 다시 찾기
+    /// </summary>
+    public void SetPlayerControllerType(PlayerControllerType newType)
+    {
+        playerControllerType = newType;
+        FindPlayerController();
+    }
+
     public override void Enter()
     {
+        // playerController가 null이면 다시 찾기 시도
+        if (playerController == null)
+        {
+            FindPlayerController();
+        }
+
         if (triggerObject != null)
         {
             triggerObject.gameObject.SetActive(true);
@@ -40,7 +110,7 @@ public class TutorialTrigger : TutorialBase
     {
         if (playerController == null)
         {
-            Debug.LogError("playerController가 할당되지 않았습니다!", gameObject);
+            Debug.LogError($"playerController가 할당되지 않았습니다! Player 태그를 가진 오브젝트를 찾을 수 없거나 {playerControllerType} 컴포넌트가 없습니다.", gameObject);
             return;
         }
 
@@ -87,7 +157,6 @@ public class TutorialTrigger : TutorialBase
     // 이 스크립트가 붙어있는 오브젝트의 Collider2D가 triggerObject의 Collider2D와 충돌했을 때 호출
     private void OnTriggerEnter2D(Collider2D collision)
     {
-
         if (triggerObject == null)
         {
             Debug.LogError("triggerObject가 할당되지 않아 충돌 비교를 할 수 없습니다!", gameObject);

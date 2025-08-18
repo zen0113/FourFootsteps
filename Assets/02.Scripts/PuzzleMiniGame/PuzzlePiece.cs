@@ -148,7 +148,7 @@ public class PuzzlePiece : MonoBehaviour
         int slots = MAX_ORDER - MIN_ORDER + 1;
         if (count > slots)
         {
-            Debug.LogWarning($"[PuzzlePiece] 조각 수({count})가 정렬 슬롯({slots})보다 큽니다. 초과분은 같은 오더를 가질 수 있어요.");
+            Debug.LogWarning($"[PuzzlePiece] 조각 수({count})가 정렬 슬롯({slots})보다 큽니다.");
         }
         for (int i = 0; i < puzzleList_all.Count; i++)
         {

@@ -78,7 +78,7 @@ public class PlayerName : MonoBehaviour
         CheckName_Panel.SetActive(true);
 
         //“ㅁㅁ”으로 확정하시겠습니까?
-        CheckNameText.text = $"'{nameOfPlayer}'으로 확정하시겠습니까?";
+        CheckNameText.text = $"'{nameOfPlayer}'(으)로 확정하시겠습니까?";
     }
 
     // 이름 체크 패널에서 아니오 버튼 누르면

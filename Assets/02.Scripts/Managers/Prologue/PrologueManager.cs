@@ -100,8 +100,8 @@ public class PrologueManager : MonoBehaviour
             case 5:
                 Debug.Log($"프롤로그 {currentStep}");
                 yield return new WaitForSeconds(waitingTime);  // 2초 대기
-                StartCoroutine(ResultManager.Instance.ExecuteResultCoroutine("Result_DialogueFadeIn"));
                 SetPrologueStage(1, false);
+                StartCoroutine(ResultManager.Instance.ExecuteResultCoroutine("Result_DialogueFadeIn"));
                 // 침대에 누운 컷씬 재생
                 // Prologue_007 다이얼로그 재생
                 EventManager.Instance.CallEvent("EventPrologue");
@@ -118,7 +118,8 @@ public class PrologueManager : MonoBehaviour
             case 7:
                 Debug.Log($"프롤로그 {currentStep}");
                 // 눈 깜빡
-                //yield return UIManager.Instance.OnFade(UIManager.Instance.dialogueCoverPanel, 0, 1, 1, true, 0.25f, 0);
+                yield return UIManager.Instance.OnFade(UIManager.Instance.dialogueCoverPanel, 0, 1, 1, true, 1, 0);
+                    //yield return UIManager.Instance.OnFade(UIManager.Instance.dialogueCoverPanel, 0, 1, 1, true, 0.25f, 0);
                 // Prologue_009 다이얼로그 재생
                 EventManager.Instance.CallEvent("EventPrologue");
                 break;

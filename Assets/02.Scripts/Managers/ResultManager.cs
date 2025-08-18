@@ -109,7 +109,7 @@ public class ResultManager : MonoBehaviour
                 break;
 
             case "ResultCloseEyes": // 눈 깜빡이는 효과
-                yield return UIManager.Instance.OnFade(null, 0, 1, 1, true, 0.5f, 0);
+                yield return UIManager.Instance.OnFade(null, 0, 1, 1, true, 1, 0);
                 break;
 
             case "Result_FadeOut":  // fade out

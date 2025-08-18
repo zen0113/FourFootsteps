@@ -2058,6 +2058,8 @@ MonoBehaviour:
   cameraHalfWidth: 5
   cameraHalfHeight: 3
   showDebugBounds: 1
+  useMinYLimit: 1
+  minY: -5.5
 --- !u!114 &206797096
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2268,8 +2270,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   eventId: EventMemoryPuzzle1
-  isInteractable: 0
   spriteGlowEffect: {fileID: 0}
+  isOneTimeOnly: 0
+  keyImage: {fileID: 0}
 --- !u!212 &217499490
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -3817,7 +3820,6 @@ MonoBehaviour:
   crouchSoundInterval: 0.5
   landingSoundDelay: 0.3
   fallMultiplier: 4.5
-  lowJumpMultiplier: 5
   groundCheck: {fileID: 2011628562}
   groundCheckRadius: 0.2
   groundMask:
@@ -4213,24 +4215,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1082504be5c29374a8ed5026839e8f80, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  bgmPlayers:
-  - {fileID: 0}
-  - {fileID: 0}
+  bgmAudioSources:
   - {fileID: 0}
   - {fileID: 0}
   typingSoundPlayer: {fileID: 76200413}
-  UISoundLoopPlayer:
-  - {fileID: 817797289}
-  - {fileID: 817745074}
-  UISoundPlayer:
-  - {fileID: 1038478367}
-  - {fileID: 1681524549}
-  - {fileID: 1296673120}
-  bgmClip: []
-  UISoundClip:
-  - {fileID: 8300000, guid: bac8b5e2006d282498f3c5049224c9fd, type: 3}
-  - {fileID: 8300000, guid: b29d0aec856b3fb41b7ee6c679460a92, type: 3}
-  UISoundClip_LOOP: []
+  uiSoundLoopPlayers:
+  - {fileID: 0}
+  - {fileID: 0}
+  uiPlayers: []
+  bgmClips: []
+  uiSoundClips: []
+  uiSoundLoopClips: []
   sceneBGMSettings: []
 --- !u!4 &511863539
 Transform:
@@ -5208,8 +5203,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   eventId: EventMemoryPuzzle1
-  isInteractable: 0
   spriteGlowEffect: {fileID: 0}
+  isOneTimeOnly: 0
+  keyImage: {fileID: 0}
 --- !u!212 &774612311
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -15894,12 +15890,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   tutorials:
-  - {fileID: 263682523}
-  - {fileID: 26816742}
-  - {fileID: 471682274}
-  - {fileID: 1354045384}
-  - {fileID: 1442810013}
-  - {fileID: 202783228}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
   nextSceneName: 
 --- !u!4 &1747640615
 Transform:

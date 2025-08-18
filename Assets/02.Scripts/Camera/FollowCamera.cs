@@ -12,6 +12,10 @@ public class FollowCamera : MonoBehaviour
     public float cameraHalfWidth = 5f;    // 카메라 가로 절반 크기
     public float cameraHalfHeight = 3f;   // 카메라 세로 절반 크기
     public bool showDebugBounds = true;   // 디버그용 카메라 경계 표시
+    
+    [Header("Y축 제한")]
+    public bool useMinYLimit = true;      // 최소 Y 제한 사용
+    public float minY = 0f;               // 카메라가 내려갈 수 있는 최소 Y 위치
 
     private Camera cam;
     private LayerMask boundaryLayer;      // CameraLimit 레이어 마스크
@@ -58,6 +62,13 @@ public class FollowCamera : MonoBehaviour
         float smoothedY = Mathf.Lerp(currentPos.y, targetY, smoothSpeedY);
 
         Vector3 desiredPosition = new Vector3(smoothedX, smoothedY, currentZ);
+
+        // Y축 최소값 제한 적용
+        if (useMinYLimit)
+        {
+            float minCameraY = minY + cameraHalfHeight; // 카메라 하단이 minY보다 아래로 가지 못하게
+            desiredPosition.y = Mathf.Max(desiredPosition.y, minCameraY);
+        }
 
         // 경계 제한 적용 - 각 축을 개별적으로 처리
         Vector3 finalPosition = ClampCameraPosition(currentPos, desiredPosition);
@@ -117,6 +128,13 @@ public class FollowCamera : MonoBehaviour
         // 카메라 뷰 영역을 박스로 표시
         Vector3 size = new Vector3(cameraHalfWidth * 2, cameraHalfHeight * 2, 0.1f);
         Gizmos.DrawWireCube(pos, size);
+
+        // Min Y 경계선 표시
+        if (useMinYLimit)
+        {
+            Gizmos.color = Color.red;
+            Gizmos.DrawLine(new Vector3(-50, minY, 0), new Vector3(50, minY, 0));
+        }
 
         // 카메라 모서리 점들 표시
         Gizmos.color = Color.red;

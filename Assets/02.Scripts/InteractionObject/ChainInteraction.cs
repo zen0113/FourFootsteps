@@ -17,6 +17,9 @@ public class ChainInteraction : MonoBehaviour
     private bool playerInRange = false;                          // 플레이어가 범위 내에 있는지
     private AudioSource audioSource;                            // 오디오 소스
     
+    // Sprite Glow 효과
+    private SpriteGlow.SpriteGlowEffect spriteGlowEffect;       // Sprite Glow 컴포넌트
+    
     // 연결된 오브젝트의 원본 상태
     private PushableBox pushableBoxComponent;                    // 기존 PushableBox 컴포넌트
     private Rigidbody2D connectedRb;                            // 연결된 오브젝트의 Rigidbody2D
@@ -29,6 +32,18 @@ public class ChainInteraction : MonoBehaviour
         if (audioSource == null)
         {
             audioSource = gameObject.AddComponent<AudioSource>();
+        }
+        
+        // Sprite Glow 효과 컴포넌트 가져오기
+        spriteGlowEffect = GetComponent<SpriteGlow.SpriteGlowEffect>();
+        if (spriteGlowEffect != null)
+        {
+            spriteGlowEffect.enabled = false; // 처음에는 비활성화
+            Debug.Log("Sprite Glow 효과 초기화됨 (비활성화)");
+        }
+        else
+        {
+            Debug.LogWarning($"{gameObject.name}에 SpriteGlowEffect 컴포넌트가 없습니다. 글로우 효과가 적용되지 않습니다.");
         }
         
         // 연결된 오브젝트의 컴포넌트들 가져오기
@@ -113,6 +128,13 @@ public class ChainInteraction : MonoBehaviour
         
         // 상호작용 UI 숨기기
         ShowInteractionUI(false);
+        
+        // 사슬이 끊어진 후 Sprite Glow 완전히 비활성화
+        if (spriteGlowEffect != null)
+        {
+            spriteGlowEffect.enabled = false;
+            Debug.Log("사슬이 끊어져서 Sprite Glow 영구 비활성화");
+        }
     }
     
     private IEnumerator ChainBreakAnimation()
@@ -204,6 +226,13 @@ public class ChainInteraction : MonoBehaviour
     // TODO: UI 표시 로직 나중에 구현
     private void ShowInteractionUI(bool show)
     {
+        // Sprite Glow 효과 제어
+        if (spriteGlowEffect != null && !isChainBroken)
+        {
+            spriteGlowEffect.enabled = show;
+            Debug.Log(show ? "Sprite Glow 활성화" : "Sprite Glow 비활성화");
+        }
+        
         // 나중에 UI 시스템 연동 예정
         if (show)
         {

@@ -58,7 +58,7 @@ Stage01_004,Player,,이…이게 뭐야!! 내가… [고양이]가 되었잖아?
 ,Player,,으… 느낌이 이상해.. [물 웅덩이는 피해서 주변을 둘러보자.],,temp_playerCAT,,,,
 Stage01_005,Player,,앗` 저건 고양이가 되기 전에 꿈에서 봤던 [하얀 새]…?,,temp_playerCAT,,,,물가 조사 스크립트 이후 주인공 위로 하얀새가 지나감(빠른속도X)
 ,Player,,저 새… 꿈에서 봤어. 분명히 나한테서 뭔가를 가져갔었는데..,,temp_playerCAT,,,,
-,Player,,지금의 상황이랑 연관이 있을지도 몰라. [한번 쫓아가 보자!],,temp_playerCAT,,,,스테이지1의 플랫포머 게임 진행
+,Player,,지금의 상황이랑 연관이 있을지도 몰라. [한번 쫓아가 보자!],,temp_playerCAT,,,EventSetNextTutorial,스테이지1의 플랫포머 게임 진행
 Stage01_006,Player,,어? [낡은 소파에 퍼즐 조각이 있잖아?] 저게 뭐지…?,,temp_playerCAT,,,,소파가 있는 구역에 도달했을 시에 뜨는 대사
 ,Player,,이 쇼파 어디에선가 본 적이 있는것 같아. 뭔가 예전 일들이 자꾸만 떠오르네…,,temp_playerCAT,,,,
 ,InnerThoughts,,눈꺼풀이 무겁다… 너무 피곤한 느낌…,,temp_playerCAT,,,,대사 끝나면 튜토리얼 NextScene을 통해 다음 씬으로 이동
@@ -146,7 +146,7 @@ Recall2_004,의사,,전체적으로 건강상태는 양호해 보이네요. 다�
 ,Player,,생각보다 돈이 많이 드네요...,,temp_playerHUMAN,,,Choice_004,
 Recall2_005,Player,,그래도 이제 우리 가족이 된 {YourCatName}인데…,TRUE,temp_playerHUMAN,,,,긍정적 선택지
 ,Player,,네` 접종이랑 약 다 해주세요. 제대로 키우고 싶어요.,,temp_playerHUMAN,,,,
-,의사,,좋은 선택이에요. 접종부터 시작할게요./n보호자 분은 여기서 잠시 대기해주세요,,,,,,이후 의사와의 상호작용하기
+,의사,,좋은 선택이에요. 접종부터 시작할게요.\n보호자 분은 여기서 잠시 대기해주세요,,,,,,이후 의사와의 상호작용하기
 ,YourCat,,야옹!,,temp_playerCAT,,,EventRecall2_GoodChoice,예방접종 시 아파하는 야옹 소리(평소 보다 높은 톤)
 Recall2_006,Player,,너무 비싸네요... 오늘은 그냥 집에 가서 생각해볼게요.,,temp_playerHUMAN,,,,부정적 선택지
 ,의사,,보호자님 뜻이 그렇다면 어쩔 수 없지만... 길고양이 출신이라 건강상 위험요소가 많을 수 있어요. 가능한 한 빨리 결정하시는 게 좋겠습니다.,,temp_playerHUMAN,,,,병원 나가기
@@ -160,7 +160,7 @@ Recall2_009,의사,,오늘 진료는 여기까지입니다. 대기실에서 잠�
 ,Player,,(마음이 무거워지며) 알겠습니다…,,temp_playerHUMAN,,,,
 Recall2_010,InnerThoughts,,긴장이 풀리니 갑자기 어지러운 것 같아.,SHAKE,temp_playerHUMAN,,,,
 ,InnerThoughts,,좀 쉬어야겠어…,,temp_playerHUMAN,,,,
-,InnerThoughts,,* 병원을 조사한 이후에 의자에서 잠시 쉴 수 있습니다.,,temp_playerHUMAN,,,,
+,InnerThoughts,,* 병원을 조사한 이후에 의자에서 잠시 쉴 수 있습니다.,,temp_playerHUMAN,,,EventSetNextTutorial,
 Recall2_011,InnerThoughts,,잠깐 앉아서 쉴까?,,temp_playerHUMAN,,,,
 ,InnerThoughts,,*잠에 들면 다시 이곳으로 돌아올 수 없습니다.,,temp_playerHUMAN,,,Choice_Bed_001,
 Recall2_012,Player,,(의자에 앉는다.) 하… 잠깐만 눈 좀 붙이자…  ,,temp_playerHUMAN,,,,의자
@@ -170,9 +170,9 @@ Recall2_013,InnerThoughts,,동물 병원에 걸려져 있는 TV다.\nTV 속에�
 ,InnerThoughts,,[유기동물 보호소인 척하는 신종 폣숍]이 늘어나고 있다고…?\n이상한 사람들도 다 있네.. ,,temp_playerHUMAN,,,,
 Recall2_014,InnerThoughts,,고양이용 연어맛 츄르다.,,temp_playerHUMAN,,,,고양이용 츄르
 ,InnerThoughts,,{YourCatName}(은)는 무슨 맛을 좋아했더라…,TRUE,temp_playerHUMAN,,,,
-Recall2_015,InnerThoughts,,겨울철 유기동물 주의…,,temp_playerHUMAN,,,,유기동물 포스터
-,InnerThoughts,,얼마 전까지만 해도 이런 건 눈에 안 들어왔는데.,,temp_playerHUMAN,,,,
-,InnerThoughts,,{YourCatName}(을)를 데려오고 나서야` 이런 게 마음에 걸리네.,TRUE,temp_playerHUMAN,,,,
+Recall2_015,InnerThoughts,,‘사지 말고 입양하세요’라는 문구가 크게 쓰여 있다.  ,,temp_playerHUMAN,,,,유기동물 포스터
+,InnerThoughts,,보호소에서 새로운 가족을 기다리는 고양이와 강아지 사진이 붙어 있다. \n입양 절차와 문의 연락처가 안내돼 있다.,,temp_playerHUMAN,,,,
+,InnerThoughts,,{YourCatName}을(를) 만난 게… 우연이 아니라 꼭 필요한 인연 같아.,TRUE,temp_playerHUMAN,,,,
 Recall2_016,InnerThoughts,,유기동물 구조 기부함이네.,,temp_playerHUMAN,,,,기부함
 ,InnerThoughts,,솔직히` 예전엔 이런 거 그냥 지나쳤는데…,,temp_playerHUMAN,,,,
 Recall2_017,InnerThoughts,,입양 전 꼭 알아야 할 5가지…,,temp_playerHUMAN,,,,입양 안내 책자
@@ -180,6 +180,11 @@ Recall2_017,InnerThoughts,,입양 전 꼭 알아야 할 5가지…,,temp_playerH
 ,InnerThoughts,,그래도… 이제라도 하나씩 배우면 되겠지?,,temp_playerHUMAN,,,,
 Recall2_018,InnerThoughts,,{YourCatName}이(가) 들어 있는 이동장이다.  ,TRUE,temp_playerHUMAN,,,,의자 위 이동장
 ,InnerThoughts,,낯선 환경이 불편한지` 몸을 뒤척일 때마다 이동장이 살짝 흔들린다.,,temp_playerHUMAN,,,,
+Recall2_019,InnerThoughts,,중성화 수술에 대한 안내문이다.  ,,temp_playerHUMAN,,,,유기동물 포스터
+,InnerThoughts,,원치 않는 번식을 막고` 발정기 스트레스와 특정 질병의 위험을 줄여준다고 한다.\n수술 후 관리 방법에 대해서도 설명이 붙어 있다.,,temp_playerHUMAN,,,,
+,InnerThoughts,,솔직히 예전엔 이런 게 왜 필요한지 몰랐는데.,,temp_playerHUMAN,,,,
+Recall2_020,InnerThoughts,,정기 예방접종은 반려묘의 건강을 지키는 첫걸음'… \n고양이 정기 예방접종 안내 포스터다.  ,,temp_playerHUMAN,,,,유기동물 포스터
+,InnerThoughts,,고양이 전염병` 광견병 등 주요 질병을 예방할 수 있다고 적혀 있다. 접종 시기와 종류가 표로 정리돼 있다.,,temp_playerHUMAN,,,,
 Recall2_Good_001,동물 병원 직원,,진료 잘 받으셨어요? {YourCatName}(이)가 길고양이 출신인데도 정말 얌전했어요!,TRUE,,,,,
 ,Player,,그쵸? 처음 데려올 때는 어떻게 될지 몰랐는데` 의외로 순하더라고요.,,temp_playerHUMAN,,,,
 ,InnerThoughts,,길에서 떨고 있던 모습이랑은 정말 다르네. 우리 둘 다 잘해냈어.,,temp_playerHUMAN,,,,
@@ -235,7 +240,8 @@ Recall2_Bad_104,의사,,예방접종과 심장사상충 약은 오늘 생략하�
 ,Player,,네… 감사합니다.,,temp_playerHUMAN,,,,
 ,,,,,,,,,
 Stage02_006,Player,,(깜빡` 눈을 뜬다...),,temp_playerCAT,,,,
-,Player,,지금 꿈을 꾼 건가...? 동물병원에서 {YourCatName}와 함께 있었던 그때를…,TRUE,temp_playerCAT,,,,
+,Player,,방금… {YourCatName}이랑 병원에 왔던 때가 떠올랐어.  ,TRUE,temp_playerCAT,,,,
+,Player,,꿈이었나… 아직도 그 순간이 이렇게 생생하네.,,temp_playerCAT,,,,
 ,Player,,앗` 이제 슬슬 해가 지려고 하네?!,,temp_playerCAT,,,,
 ,Player,,서둘러서 집으로 돌아가는 게 좋겠어. 아파트 공원을 통해서 가자!,,temp_playerCAT,,,,
 ,,,,,,,,,
@@ -324,16 +330,20 @@ Recall3_025,InnerThoughts,,{YourCatName}(이)가 잘 가지고 놀던 장난감�
 Recall3_026,InnerThoughts,,푹신해 보이는 내 침대다.,,temp_playerHUMAN,,,,침대
 ,InnerThoughts,,… {YourCatName}(이)가 유독 내 옆에서 자는 걸 좋아했지….,TRUE,temp_playerHUMAN,,,,
 ,,,,,,,,,
-Stage03_009,Player,,아… 너무 배고파…!,SHAKE,temp_playerCAT,,,,
-,Player,,…자동 급식기라도 사서 {YourCatName} 밥을 챙겨줄 걸 그랬네…,TRUE,temp_playerCAT,,,,
-,Player,,어… 어디선가 맛있는 냄새가 나는 것 같은데?,,temp_playerCAT,,,,
-,Player,,[오른쪽]에서 맛있는 냄새가 난다! 저쪽으로 가보자.,,temp_playerCAT,,,,
-Stage03_010,Player,,아…너무 맛있는 냄새야…,,temp_playerCAT,,,,포획틀 속 고양이 캔 조사+캔 먹는 1인칭 컷씬
-,Player,,그런데… 나 인간인데… 이걸 먹을 수가…있나…?,,temp_playerCAT,,,,
-,Player,,…,,temp_playerCAT,,,,
-,Player,,…에라 모르겠다! 일단 배부터 채우고 보자!,,temp_playerCAT,,,,
-Stage03_011,Player,,엄마야!!! 이거 뭐야!!,SHAKE,temp_playerCAT,,,,
-,Player,,윽` 점점…눈이 감겨… 잠들면 안 되는…데…,,temp_playerCAT,,,,
+Stage03_009,Player,,(몸을 일으킨다…) 아… 너무 배고파…!,SHAKE,temp_playerCAT,,,,
+,Player,,내가 힘들다는 핑계로… 자동 급식기라도 하나 사뒀으면 {YourCatName} 밥을 굶기는 일은 없었을 텐데.,TRUE,temp_playerCAT,,,,
+,,,정작 지금은 내가 이렇게 굶주린 채 있네…   ,,,,,,
+,Player,,…어? 어디선가 냄새가 나는데?  ,,temp_playerCAT,,,,
+,Player,,[오른쪽]에서 고소한 냄새가 풍겨온다… 저쪽인가?,,temp_playerCAT,,,,
+Stage03_010,Player,,아… 냄새만 맡아도 침이 고인다…,,temp_playerCAT,,,,포획틀 속 고양이 캔 조사+캔 먹는 1인칭 컷씬
+,Player,,(앞쪽에 고양이 사료가 있다. 이 아파트에서 몇몇 주민들이 챙겨주는 길고양이용 사료인 것 같다.),,temp_playerCAT,,,,
+,Player,,예전에 {YourCatName} 밥 챙기다가 호기심에 사료를 몇 알 먹어본 적 있었지… 생각보다 괜찮았는데. ,,temp_playerCAT,,,,
+,Player,,…그래` 일단 몇 알만 먹어보자. ,,temp_playerCAT,,,,
+,Player,,(사료를 집어 와구와구 먹는다…) ,,,,,,
+,Player,,후우… 이제야 좀 배가 찼다…  ,,,,,,
+Stage03_011,Player,,으음… 따뜻하고… 포근하다…  ,,temp_playerCAT,,,,
+,Player,, 눈이… 저절로… ,,temp_playerCAT,,,,
+,Player,,(고개를 떨구며 스르륵 잠에 빠져든다),,temp_playerCAT,,,,
 ,,,,,,,,,
 Stage04_001,Player,,윽… 머리야… 정신이 너무 몽롱해…,,temp_playerCAT,,,,
 ,Player,,그 캔… 누가 약이라도 탔나…?,,temp_playerCAT,,,,
@@ -358,35 +368,57 @@ Recall4_004,Player,,… 알겠어. 내가 어떻게 해볼게.,,temp_playerHUMAN
 ,YourCat,,야옹…,,temp_playerCAT,,,,
 Recall4_005,Monolog,,…예전에는 이런 마음을 가졌었지.\n하지만` 난 결국 충동적으로 그 녀석을 버리고…,AUTO_DELAYED/FADE_OUT,,,,,
 Recall4_006,Monolog,,털도 그 아이의 잘못이 아니었어.\n내가 열심히 청소하면 될 문제였는데...,AUTO_DELAYED/FADE_OUT,,,,,
-Recall4_007,Player,,엄마…? 엄마…??,,temp_playerHUMAN,,,,
-,Player,,또…그 수의사처럼 엄마도 사라졌어…,,temp_playerHUMAN,,,,
-Recall4_008,Player,,또 구멍이 나타났네.,,temp_playerHUMAN,,,,사물 아무거나 하나 조사하여 조사 스크립트 다 보면 포탈이 생김
-,Player,,이번에도 충분히 조사를 하고 나가보자.,,temp_playerHUMAN,,,,
-Recall4_009,InnerThoughts,,군데군데 상처 난 소파다.\n소파에는 고양이 털도 많이 보인다.,,temp_playerHUMAN,,,,소파
+Recall4_007,엄마,,그래…엄마도 말이 너무 심했던 것 같아.,,temp_playerHUMAN,,,,
+,엄마,,나중에 공기 청정기 알아볼 때 엄마도 불러주렴.\n엄마도 조금은 보태줄게.,,temp_mom,,,,
+,Player,,응! 그러면 나는 오늘 바로 청소 시작해볼게.,,temp_playerHUMAN,,,,
+Recall4_008,엄마,,…되도록이면 빨리 다른 곳으로 보내렴.,,temp_mom,,,,
+,Player,,응…알았어 엄마..,,temp_playerHUMAN,,,,
+,엄마,,어휴…얘는 언제쯤이면 책임감을 가지게 될까…,,temp_mom,,,,
+Recall4_009,Player,,갑자기 잠이 쏟아지네... 너무 피곤하다.,,temp_playerHUMAN,,,,
+,InnerThoughts,,* 집 안을 조사한 이후에 소파에서 잠을 청할 수 있습니다.,,,,,,
+Recall4_010,Player,,잠깐 쉴까?,,temp_playerHUMAN,,,,
+,InnerThoughts,,*잠에 들면 다시 이곳으로 돌아올 수 없습니다.,,,,,,
+Recall4_011,Player,,(소파에 눕는다.) 조금만 쉬자…,,temp_playerHUMAN,,,,
+,InnerThoughts,,(그 순간 어딘가에서 “야옹” 소리가 들린다.),,,,,,
+,InnerThoughts,,{YourCatName}이 슬며시 소파 위로 올라온다.,TRUE,,,,,
+,InnerThoughts,,(눈이 감긴다...),,,,,,
+Recall4_012,InnerThoughts,,군데군데 상처 난 소파다.\n소파에는 고양이 털도 많이 보인다.,,temp_playerHUMAN,,,,소파
 ,Player,,...이것 때문에 엄마의 기침이 많이 심해지셨구나.,,temp_playerHUMAN,,,,
 ,Player,,소파 청소도 꼬박꼬박 해야겠어.,,temp_playerHUMAN,,,,
-Recall4_010,InnerThoughts,,이전의 꿈 속에서 봤던 스크래처가 그대로 있다.,,temp_playerHUMAN,,,,스크래처
+Recall4_013,InnerThoughts,,이전의 꿈 속에서 봤던 스크래처가 그대로 있다.,,temp_playerHUMAN,,,,스크래처
 ,Player,,이번에도 역시 거의 사용이 안 된 것 같네…,,temp_playerHUMAN,,,,
-Recall4_011,InnerThoughts,,(덜컹덜컹),,temp_playerHUMAN,,,,잠겨있는 방문
+Recall4_014,InnerThoughts,,(덜컹덜컹),,temp_playerHUMAN,,,,잠겨있는 방문
 ,Player,,…분명 이전의 꿈에선 열려 있었는데 이번엔 잠겨서 들어갈 수 없네…,,temp_playerHUMAN,,,,
-Recall4_012,InnerThoughts,,여름이 아니라서 에어컨이 틀어져 있지 않다.,,temp_playerHUMAN,,,,에어컨
+Recall4_015,InnerThoughts,,여름이 아니라서 에어컨이 틀어져 있지 않다.,,temp_playerHUMAN,,,,에어컨
 ,Player,,에어컨 뒤쪽에도 고양이 털이 잔뜩 있네.\n…청소를 이렇게까지 안 했었나…?,,temp_playerHUMAN,,,,
-Recall4_013,InnerThoughts,,시들어 있는 식물이다.,,temp_playerHUMAN,,,,화분
+Recall4_016,InnerThoughts,,시들어 있는 식물이다.,,temp_playerHUMAN,,,,화분
 ,Player,,…며칠 전에 시들어 있는 식물 보고 엄마가 놀라셨지.,,temp_playerHUMAN,,,,
 ,Player,,그럼 이번 꿈은 비교적 최근에 가까운 건가…?,,temp_playerHUMAN,,,,
-Recall4_014,InnerThoughts,,(호출 버튼을 눌러본다.),,temp_playerHUMAN,,,,초인종
+Recall4_017,InnerThoughts,,(호출 버튼을 눌러본다.),,temp_playerHUMAN,,,,초인종
 ,Player,,……,,temp_playerHUMAN,,,,
 ,InnerThoughts,,... 이번에도 역시 작동하지 않는 것 같다.,,temp_playerHUMAN,,,,
-Recall4_015,InnerThoughts,,(문을 열어보려고 시도한다.),,temp_playerHUMAN,,,,현관문
+Recall4_018,InnerThoughts,,(문을 열어보려고 시도한다.),,temp_playerHUMAN,,,,현관문
 ,InnerThoughts,,... 잠금장치도 작동하지 않는다.,,temp_playerHUMAN,,,,
-Recall4_016,InnerThoughts,,엄마와 내 신발이 가지런히 놓여 있다.,,temp_playerHUMAN,,,,신발장
+Recall4_019,InnerThoughts,,엄마와 내 신발이 가지런히 놓여 있다.,,temp_playerHUMAN,,,,신발장
 ,Player,,특별히 중요한 건 안 보이네.,,temp_playerHUMAN,,,,
-Recall4_017,InnerThoughts,,{YourCatName}(이)가 이 자리를 좋아했던 것 같은데...,TRUE,temp_playerHUMAN,,,,거실 책상
+Recall4_020,InnerThoughts,,{YourCatName}(이)가 이 자리를 좋아했던 것 같은데...,TRUE,temp_playerHUMAN,,,,거실 책상
 ,InnerThoughts,,지난 꿈과는 다르게 고양이 털이 더 많아졌다.,,temp_playerHUMAN,,,,
+Recall4_021,Player,,엄마` 청소 시작하면 고양이 털이 더 많이 날릴테니까\n잠시 카페에 가있는거 어때?,,temp_playerHUMAN,,,,공기청정기 선택시 엄마 대사
+,Player,,여기 기프티콘도 줄게. 청소 다 하면 바로 연락 줄게.,,temp_playerHUMAN,,,,
+,엄마,,그래` 알았다. 청소할 때 창문 다 열고 하는 거 잊지 말고!,,temp_mom,,,,
+,엄마,,너도 혹시 모르니까 마스크 끼고 하렴.,,temp_mom,,,,
+,Player,,응` 나만 믿어! 바닥에 광이 날 정도로 깨끗하게 청소할게.,,temp_playerHUMAN,,,,
+Recall4_022,Player,,엄마... 그... 아직 {YourCatName}(이)를 보낼 곳을 찾지 못해서...,TRUE,temp_playerHUMAN,,,,버린다 선택시 엄마 대사
+,Player,,조금만...기다려주면 안 될까...?,,temp_playerHUMAN,,,,
+,엄마,,...그래` 알았다.\n두 달은 줄테니까 그 안에는 해결하렴.,,temp_mom,,,,
+,Player,,응...알았어...,,temp_playerHUMAN,,,,
+,InnerThoughts,,난...정말 어떻게 해야 될까...,,temp_playerHUMAN,,,,
+,,,,,,,,,
 ,,,,,,,,,
 Stage04_004,InnerThoughts,,(눈을 깜빡거리며 깨어난다.),,temp_playerCAT,,,,회상에서 나오자마자 바로 재생
 ,Player,,아까 그 꿈...고양이 털 문제 때문에 엄마가 처음으로\n{YourCatName}를 버리자고 했던 때네...,TRUE,temp_playerCAT,,,,
 ,Player,,...그때 난 {YourCatName}을 책임지는 것을 회피했어...,TRUE,temp_playerCAT,,,,
+,Player,,엄마가 줬던 두 달도 결국...\n아무것도 안하고 시간을 보냈지... ,,temp_playerCAT,,,,
 Stage04_005,Player,,흠… 이 [철장 잠금장치]` 생각보다 헐거운 것 같은데?,,temp_playerCAT,,,,
 ,Player,,달리는 트럭 안이라서 자세 잡기 힘들지만…\n[타이밍 잘 맞추면 풀 수 있을지도 몰라!],,temp_playerCAT,,,,철장 탈출 후 트럭 내부 조사 가능
 Stage04_006,Player,,내가 들어가 있던 철장 속의 밥그릇이다.,,temp_playerCAT,,,,철장 속 밥그릇
@@ -533,57 +565,53 @@ Stage05_003,Player,,아` 안 돼…!! 여기서…끝낼 수는…없어…,,tem
 Stage05_004,Player,,헉` 헉… 드디어 무사히 도착했다...,,temp_playerCAT,,,,안전구역에 도착 후 퍼즐 조각 조사
 ,Player,,어쩌면… 이번 퍼즐 조각이 [마지막]일지도 모르겠어.\n얼른 조사해보자.,,temp_playerCAT,,,,
 ,,,,,,,,,
-Recall5_001,Player,,…이번에는 집 안이 아니라 아까 있던 곳과 똑같은 도로잖아…??,,temp_playerHUMAN,,,,
-,Player,,심지어 난 차 안에 있네?,,temp_playerHUMAN,,,,
-,Player,,…이상하다` 내가 쓰던 차가 맞나…? [차 내부를 조사해보고 나가자.],,temp_playerHUMAN,,,,
-Recall5_002,Player,,…어느 정도 다 조사한 것 같다.\n도로로 나가서 여긴 또 무슨 상황인지 알아봐야겠어.,,temp_playerHUMAN,,,,조사 개수 2개 다 채우면 자동차 밖으로 나가게 됨.
-Recall5_003,Player,,어라` 고양이가 왜 이런 곳에…,,temp_playerHUMAN,,,Choice_009,도로로 나와서 걸을 수 있게 됨.
-Recall5_004,Player,,세상에` 고양이 상태가 생각보다 심각한데…?\n빨리 동물 병원!!,,temp_playerHUMAN,,,,긍정적 선택지
+Recall5_001,Player,,이번에 출장까지 다녀와서 그런지 너무 피곤하네...,,temp_playerHUMAN,,,,
+,Player,,얼른 집에 가서 빨리 쉬어야겠어.,,temp_playerHUMAN,,,,
+,Player,,응? 도로 옆에 뭔가가 있는데...?\n저게 뭐지?,,temp_playerHUMAN,,,,
+Recall5_002,Player,,어라` 고양이가 왜 이런 곳에…?,,temp_playerHUMAN,,,,조사 개수 2개 다 채우면 자동차 밖으로 나가게 됨.
+Recall5_003,Player,,세상에` 고양이 상태가 생각보다 심각한데…?\n빨리 동물 병원에 데려가야겠어!,,temp_playerHUMAN,,,,긍정적 선택지
 ,YourCat,,…야옹,,temp_playerCAT,,,,
-Recall5_005,Player,,…괜히 건드리지 말아야지…,,temp_playerHUMAN,,,,부정적 선택지
-,Player,,가던 곳이나 계속 가자.,,temp_playerHUMAN,,,,
+Recall5_004,Player,,…음...괜히 건드리지 말아야지…,,temp_playerHUMAN,,,,부정적 선택지
+,Player,,집이나 빨리 가서 쉬어야지.,,temp_playerHUMAN,,,,
 ,YourCat,,…,,temp_playerCAT,,,,
-Recall5_006,Monolog,,모든 게... 내가 {YourCatName}과/와 함께했던 기억들이었구나...,AUTO_DELAYED/FADE_OUT,,,,,
-Recall5_007,Monolog,,그동안 내가 너무 무책임하게 행동해서… 벌을 받는 건가…,AUTO_DELAYED/FADE_OUT,,,,,
-Recall5_008,Player,,…이건 내가 {YourCatName} 데려오기 전에 갖고 있던 키링 아니야?,,temp_playerHUMAN,,,,리어뷰 미러에 달린 키링
-,Player,,잃어버린 줄 알았는데..?,,temp_playerHUMAN,,,,
-Recall5_009,Player,,내 핸드폰이 여기에 있었네!!,,temp_playerHUMAN,,,,콘솔박스 위의 핸드폰
-,Player,,…근데 이건 바꾸기 전의 핸드폰이잖아?,,temp_playerHUMAN,,,,
+Recall5_005,Monolog,,모든 게... 내가 {YourCatName}과/와 함께했던 기억들이었구나...\n{YourCatName}은...이런 나와 함께 있으면서 행복했을까?,AUTO_DELAYED/FADE_OUT,,,,,
+Recall5_006,Monolog,,나는 {YourCatName}을 장난처럼 데려와 놓고…\n끝내 책임도 지지 못한 나쁜 주인이었어.,AUTO_DELAYED/FADE_OUT,,,,,
 ,,,,,,,,,
 HappyEnding_001,Player,,헉…헉… 원래대로 돌아왔어…,,temp_playerHUMAN,,,,해피 엔딩+퍼즐이 완성되고 주인공이 인간의 모습으로 돌아오게 됨+침대에서 눈을 뜨며
 ,Player,,그동안의 꿈들은…과거의 내 기억들이었어.,,temp_playerHUMAN,,,,
-,Player,,이제 정말로... 책임져야 할 때야.,,temp_playerHUMAN,,,,
-,Player,,…{YourCatName}…!!!,TRUE,temp_playerHUMAN,,,,
-,Player,,{YourCatName}(이)는 아직도 뒷골목 근처에 있을까?,TRUE,temp_playerHUMAN,,,,
+,Player,,내가 조금이라도 제대로 알았다면…,,temp_playerHUMAN,,,,
+,Player,,{YourCatName}(이)가 무엇을 원하고` 어떻게 같이 살아야 하는지를 알았다면…,TRUE,temp_playerHUMAN,,,,
+,Player,,이렇게 후회로 남진 않았을 텐데...,TRUE,temp_playerHUMAN,,,,
+,Player,,{YourCatName}(이)는 아직 뒷골목 근처에 있을까...?,TRUE,temp_playerHUMAN,,,,
 ,Player,,얼른 데려와야만 해! {YourCatName}에게 해줘야 할 게 많이 생겼단 말이야!,TRUE,temp_playerHUMAN,,,,문과 상호작용 후 밖으로 나가서 뒷골목에 도착
-HappyEnding_002,Player,,{YourCatName}!!,TRUE,temp_playerHUMAN,,,,
-HappyEnding_003,Player,,{YourCatName}아 어디있니!! 내가…정말 미안했어!!,TRUE,temp_playerHUMAN,,,,
-HappyEnding_004,Player,,제발 내게 돌아와주면 안 될까..?,,temp_playerHUMAN,,,,
-HappyEnding_005,Player,,{YourCatName}아..!!,TRUE,temp_playerHUMAN,,,,
-HappyEnding_006,YourCat,,야옹…!,,temp_playerCAT,,,,
-HappyEnding_007,Player,,{YourCatName}아…!! 다행히 여기에 있었구나…!!,TRUE,temp_playerHUMAN,,,,
-,Player,,아…! 정말 다행이야…! 이제 우리 집으로 돌아가자.,,temp_playerHUMAN,,,,
+HappyEnding_002,Player,TRUE,{YourCatName}!!,TRUE,temp_playerHUMAN,,,,
+HappyEnding_003,Player,TRUE,{YourCatName}아 어디있니!! 내가…정말 미안했어!!,TRUE,temp_playerHUMAN,,,,
+HappyEnding_004,Player,TRUE,제발 내게 돌아와주면 안 될까..?,,temp_playerHUMAN,,,,
+HappyEnding_005,Player,TRUE,{YourCatName}아..!!,TRUE,temp_playerHUMAN,,,,
+HappyEnding_006,YourCat,TRUE,야옹…!,,temp_playerCAT,,,,
+HappyEnding_007,Player,TRUE,{YourCatName}아…!! 다행히 여기에 있었구나…!!,TRUE,temp_playerHUMAN,,,,
+,Player,TRUE,아…! 정말 다행이야…! 이제 우리 집으로 돌아가자.,,temp_playerHUMAN,,,,
 HappyEnding_008,Player,,오늘은…이 보호센터에 봉사 신청을 했지.\n얼른 들어가자!,,temp_playerHUMAN,,,,집으로 함께 돌아간 후 보호센터 앞에 선 주인공 컷씬
 HappyEnding_009,Player,,오늘 할 일은…화장실 치워주고 밥 주기구나.,,temp_playerHUMAN,,,,
 HappyEnding_010,Player,,읏챠…! 보호소에 유기묘가 많아서 그런지 양도 어마어마하네…,,temp_playerHUMAN,,,,화장실 상호작용
 HappyEnding_011,Player,,고양이들이 맛있게 잘 먹었으면 좋겠네…,,temp_playerHUMAN,,,,밥 상호작용
 ,Player,,얘들아` 맛있게 많이 먹어라!,,temp_playerHUMAN,,,,
-HappyEnding_012,Monolog,,내가 가벼이 여겼던 생명들… 이제는 내가 지킬 차례야.,AUTO_DELAYED/FADE_OUT,,,,,
+HappyEnding_012,Monolog,,고양이의 작은 습성 하나조차 몰랐던 나였지만…\n이제는 귀 기울이고` 지켜내며` 끝까지 사랑할 거야.,AUTO_DELAYED/FADE_OUT,,,,,
 ,,,,,,,,,
 BadEnding_001,Player,,윽… 여긴… 아까의 그 도로잖아…?,,temp_playerCAT,,,,화이트 아웃 발생 후 그대로 고양이의 모습인 주인공.
 ,Player,,나는… 아직 안 죽은 건가…?,,temp_playerCAT,,,,
 ,Player,,…여전히 고양이의 몸 그대로네…,,temp_playerCAT,,,,
-BadEnding_002,Player,,언제까지…계속 고양이의 몸으로 살아야 하는 걸까…,,temp_playerCAT,,,,조금씩 이동할 때마다 나오는 반성 독백
-BadEnding_003,Player,,어쩌면…나는 계속 이렇게…,,temp_playerCAT,,,,
-BadEnding_004,Player,,…{YourCatName}은 지금 어디에 있을까…,TRUE,temp_playerCAT,,,,
-BadEnding_005,Player,,이상한 곳에 잡힌 거는 아니겠지…?,,temp_playerCAT,,,,
-BadEnding_006,Player,,…나는 결국 집에도 못 돌아가겠구나.,,temp_playerCAT,,,,
-BadEnding_007,Player,,어디로 가야 하는 것일까…,,temp_playerCAT,,,,
-BadEnding_008,Player,,버려진 고양이들도 나처럼 떠돌고 있었을까…,,temp_playerCAT,,,,
-BadEnding_009,Player,,정말 나는 큰 잘못을 저질렀구나…,,temp_playerCAT,,,,
-BadEnding_010,Player,,{YourCatName}…그 아이에게 해선 안 될 짓을 했어…,TRUE,temp_playerCAT,,,,이후 길거리를 떠돌며 유기묘의 삶을 계속하는 컷씬
+BadEnding_002,Player,TRUE,언제까지…계속 고양이의 몸으로 살아야 하는 걸까…,,temp_playerCAT,,,,조금씩 이동할 때마다 나오는 반성 독백
+BadEnding_003,Player,TRUE,어쩌면…나는 계속 이렇게…,,temp_playerCAT,,,,
+BadEnding_004,Player,TRUE,…{YourCatName}은 지금 어디에 있을까…,TRUE,temp_playerCAT,,,,
+BadEnding_005,Player,TRUE,이상한 곳에 잡힌 거는 아니겠지…?,,temp_playerCAT,,,,
+BadEnding_006,Player,TRUE,…나는 결국 집에도 못 돌아가겠구나.,,temp_playerCAT,,,,
+BadEnding_007,Player,TRUE,어디로 가야 하는 것일까…,,temp_playerCAT,,,,
+BadEnding_008,Player,TRUE,버려진 고양이들도 나처럼 떠돌고 있었을까…,,temp_playerCAT,,,,
+BadEnding_009,Player,TRUE,정말 나는 큰 잘못을 저질렀구나…,,temp_playerCAT,,,,
+BadEnding_010,Player,TRUE,{YourCatName}…그 아이에게 해선 안 될 짓을 했어…,TRUE,temp_playerCAT,,,,이후 길거리를 떠돌며 유기묘의 삶을 계속하는 컷씬
 BadEnding_011,Monolog,,앞으로 계속… 이러게 살아가야 하는 걸까…?\n이게 벌이라면… 난 아직 죗값을 다 치르지 못한 걸지도 몰라.,,,,,,
-,Monolog,,{YourCatName}아…정말 미안해…,AUTO_DELAYED/FADE_OUT,,,,,
+,Monolog,,{YourCatName}아…정말 미안해…\n못난 주인은 잊고 너만은 행복하게 살아가렴...,AUTO_DELAYED/FADE_OUT,,,,,
 ,,,,,,,,,
 MiniGame1_001,Player,,윽! 이 타이밍이 아닌가…?,,temp_playerCAT,,,,키홀딩 미니게임 스크립트
 MiniGame1_002,Player,,분명 내 발인데도 왜 어렵지…?,,temp_playerCAT,,,,

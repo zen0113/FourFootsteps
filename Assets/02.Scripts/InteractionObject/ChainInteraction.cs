@@ -120,24 +120,43 @@ public class ChainInteraction : MonoBehaviour
         if (chainVisual != null)
         {
             Vector3 originalScale = chainVisual.transform.localScale;
+            SpriteRenderer spriteRenderer = chainVisual.GetComponent<SpriteRenderer>();
+            Color originalColor = Color.white;
+            
+            // SpriteRenderer가 있으면 원본 색상 저장
+            if (spriteRenderer != null)
+            {
+                originalColor = spriteRenderer.color;
+            }
+            
             float elapsedTime = 0f;
             
-            // 사슬이 작아지면서 사라지는 애니메이션
+            // 사슬이 작아지면서 페이드아웃되며 사라지는 애니메이션
             while (elapsedTime < breakAnimationTime)
             {
                 float progress = elapsedTime / breakAnimationTime;
                 float scale = Mathf.Lerp(1f, 0f, progress);
                 
+                // 크기 변경
                 chainVisual.transform.localScale = originalScale * scale;
                 
-                // 약간의 회전 효과 추가
-                chainVisual.transform.Rotate(0, 0, 360f * Time.deltaTime);
+                // 페이드 아웃 효과
+                if (spriteRenderer != null)
+                {
+                    Color fadeColor = originalColor;
+                    fadeColor.a = Mathf.Lerp(1f, 0f, progress);
+                    spriteRenderer.color = fadeColor;
+                }
                 
                 elapsedTime += Time.deltaTime;
                 yield return null;
             }
             
-            // 애니메이션 완료 후 비활성화
+            // 애니메이션 완료 후 원본 색상 복원 및 비활성화
+            if (spriteRenderer != null)
+            {
+                spriteRenderer.color = originalColor;
+            }
             chainVisual.SetActive(false);
         }
     }

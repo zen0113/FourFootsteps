@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class CameraController : MonoBehaviour
@@ -95,6 +94,9 @@ public class CameraController : MonoBehaviour
         Vector3 startPosition = transform.position;
         Vector3 targetPosition = new Vector3(zone.fixedPosition.x, zone.fixedPosition.y, transform.position.z);
         
+        // MinY 제한 적용
+        targetPosition = ApplyMinYLimit(targetPosition);
+        
         float startZoom = cameraComponent.orthographicSize;
         float targetZoom = zone.changeZoom ? zone.targetZoomSize : originalZoomSize;
         
@@ -117,11 +119,15 @@ public class CameraController : MonoBehaviour
             {
                 float positionT = elapsedTime / positionDuration;
                 float positionCurveT = zone.transitionCurve.Evaluate(positionT);
-                transform.position = Vector3.Lerp(startPosition, targetPosition, positionCurveT);
+                Vector3 lerpedPosition = Vector3.Lerp(startPosition, targetPosition, positionCurveT);
+                
+                // MinY 제한 적용
+                lerpedPosition = ApplyMinYLimit(lerpedPosition);
+                transform.position = lerpedPosition;
             }
             else
             {
-                transform.position = targetPosition;
+                transform.position = ApplyMinYLimit(targetPosition);
             }
             
             // 줌 전환
@@ -131,25 +137,29 @@ public class CameraController : MonoBehaviour
                 float zoomCurveT = zone.transitionCurve.Evaluate(zoomT);
                 cameraComponent.orthographicSize = Mathf.Lerp(startZoom, targetZoom, zoomCurveT);
                 
-                // FollowCamera 크기도 업데이트
+                // FollowCamera 크기 업데이트
                 UpdateFollowCameraSize();
+                
+                // 줌 변경 후 위치 재조정
+                transform.position = ApplyMinYLimit(transform.position);
             }
             else if (zone.changeZoom)
             {
                 cameraComponent.orthographicSize = targetZoom;
                 UpdateFollowCameraSize();
+                transform.position = ApplyMinYLimit(transform.position);
             }
             
             yield return null;
         }
         
         // 최종 값 보정
-        transform.position = targetPosition;
         if (zone.changeZoom)
         {
             cameraComponent.orthographicSize = targetZoom;
             UpdateFollowCameraSize();
         }
+        transform.position = ApplyMinYLimit(targetPosition);
         
         isTransitioning = false;
     }
@@ -200,11 +210,15 @@ public class CameraController : MonoBehaviour
             {
                 float positionT = elapsedTime / positionDuration;
                 float positionCurveT = curve.Evaluate(positionT);
-                transform.position = Vector3.Lerp(startPosition, targetPosition, positionCurveT);
+                Vector3 lerpedPosition = Vector3.Lerp(startPosition, targetPosition, positionCurveT);
+                
+                // MinY 제한 적용
+                lerpedPosition = ApplyMinYLimit(lerpedPosition);
+                transform.position = lerpedPosition;
             }
             else
             {
-                transform.position = targetPosition;
+                transform.position = ApplyMinYLimit(targetPosition);
             }
             
             // 줌 전환
@@ -214,10 +228,16 @@ public class CameraController : MonoBehaviour
                 float zoomT = elapsedTime / zoomDuration;
                 float zoomCurveT = curve.Evaluate(zoomT);
                 cameraComponent.orthographicSize = Mathf.Lerp(startZoom, targetZoom, zoomCurveT);
+                UpdateFollowCameraSize();
+                
+                // 줌 변경 후 위치 재조정
+                transform.position = ApplyMinYLimit(transform.position);
             }
             else if (shouldChangeZoom)
             {
                 cameraComponent.orthographicSize = targetZoom;
+                UpdateFollowCameraSize();
+                transform.position = ApplyMinYLimit(transform.position);
             }
             else if (zone == null) // 기본 상태로 복원
             {
@@ -226,10 +246,16 @@ public class CameraController : MonoBehaviour
                     float zoomT = elapsedTime / zoomDuration;
                     float zoomCurveT = curve.Evaluate(zoomT);
                     cameraComponent.orthographicSize = Mathf.Lerp(startZoom, originalZoomSize, zoomCurveT);
+                    UpdateFollowCameraSize();
+                    
+                    // 줌 변경 후 위치 재조정
+                    transform.position = ApplyMinYLimit(transform.position);
                 }
                 else
                 {
                     cameraComponent.orthographicSize = originalZoomSize;
+                    UpdateFollowCameraSize();
+                    transform.position = ApplyMinYLimit(transform.position);
                 }
             }
             
@@ -247,6 +273,17 @@ public class CameraController : MonoBehaviour
         }
         
         isTransitioning = false;
+    }
+    
+    // FollowCamera의 MinY 제한을 여기서도 적용
+    Vector3 ApplyMinYLimit(Vector3 position)
+    {
+        if (followCamera != null && followCamera.useMinYLimit)
+        {
+            float minCameraY = followCamera.minY + followCamera.cameraHalfHeight;
+            position.y = Mathf.Max(position.y, minCameraY);
+        }
+        return position;
     }
     
     void UpdateFollowCameraSize()
@@ -285,22 +322,18 @@ public class CameraController : MonoBehaviour
             
             cameraComponent.orthographicSize = Mathf.Lerp(startZoom, targetZoom, curveT);
             
-            // FollowCamera 크기도 업데이트
-            if (followCamera != null)
-            {
-                followCamera.cameraHalfHeight = cameraComponent.orthographicSize;
-                followCamera.cameraHalfWidth = cameraComponent.orthographicSize * cameraComponent.aspect;
-            }
+            // FollowCamera 크기 업데이트
+            UpdateFollowCameraSize();
+            
+            // 줌 변경 후 MinY 제한 적용
+            transform.position = ApplyMinYLimit(transform.position);
             
             yield return null;
         }
         
         cameraComponent.orthographicSize = targetZoom;
-        if (followCamera != null)
-        {
-            followCamera.cameraHalfHeight = targetZoom;
-            followCamera.cameraHalfWidth = targetZoom * cameraComponent.aspect;
-        }
+        UpdateFollowCameraSize();
+        transform.position = ApplyMinYLimit(transform.position);
     }
     
     // 현재 상태 확인용

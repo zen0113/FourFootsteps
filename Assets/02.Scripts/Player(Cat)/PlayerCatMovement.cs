@@ -210,6 +210,24 @@ public class PlayerCatMovement : MonoBehaviour
 
     void UpdateAnimationState(float horizontalInput)
     {
+        // 입력이 차단된 상태라면 모든 애니메이션을 정지 상태로 설정
+        if (IsInputBlocked() || !(bool)GameManager.Instance.GetVariable("CanMoving"))
+        {
+            animator.SetBool("Moving", false);
+            animator.SetBool("Dash", false);
+            animator.SetBool("Crouch", forceCrouch); // 강제 웅크리기 상태만 유지
+            animator.SetBool("Crouching", false);
+            animator.SetBool("Climbing", false);
+
+            // 파티클 완전히 정지
+            if (dashParticle != null)
+            {
+                particleEmission.rateOverTime = 0f;
+                dashParticle.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear); // 즉시 모든 파티클 제거
+            }
+            return;
+        }
+
         // 기본 상태 초기화
         animator.SetBool("Moving", false);
         animator.SetBool("Dash", false);
@@ -295,19 +313,37 @@ public class PlayerCatMovement : MonoBehaviour
         }
     }
 
+
     void LateUpdate()
     {
-        // 물리 업데이트 후 애니메이션 상태 동기화
-        if (!IsInputBlocked() && (bool)GameManager.Instance.GetVariable("CanMoving"))
+        // 입력이 차단된 상태에서는 애니메이션 업데이트를 하지 않음
+        if (IsInputBlocked() || !(bool)GameManager.Instance.GetVariable("CanMoving"))
         {
-            UpdateAnimationState(Input.GetAxisRaw("Horizontal"));
+            // 강제 웅크리기 상태만 유지하고 나머지는 정지
+            animator.SetBool("Moving", false);
+            animator.SetBool("Dash", false);
+            animator.SetBool("Crouch", forceCrouch);
+            animator.SetBool("Crouching", false);
+            animator.SetBool("Climbing", false);
+            return;
         }
+
+        // 물리 업데이트 후 애니메이션 상태 동기화
+        UpdateAnimationState(Input.GetAxisRaw("Horizontal"));
     }
 
     void FixedUpdate()
     {
         if (IsInputBlocked() || !(bool)GameManager.Instance.GetVariable("CanMoving"))
+        {
+            // 입력이 차단된 상태에서는 파티클과 사운드도 완전히 정지
+            if (dashParticle != null)
+            {
+                particleEmission.rateOverTime = 0f;
+                dashParticle.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            }
             return;
+        }
 
         if (!isClimbing)
         {

@@ -85,7 +85,8 @@ public class PlayerCatMovement : MonoBehaviour
 
     [Header("카트 상호작용")]
     private bool isOnCart = false; // 카트에 탑승 중인지 여부
-    private Cart currentCart; // 현재 탑승 중인 카트
+    private Transform currentCart; // 현재 탑승 중인 카트 (Transform으로 변경)
+    private float originalGravityScale;
 
     // 박스 상호작용 관련
     private PlayerBoxInteraction boxInteraction;
@@ -136,6 +137,9 @@ public class PlayerCatMovement : MonoBehaviour
     {
         if (Instance == null) Instance = this;
         else Destroy(gameObject);
+
+        rb = GetComponent<Rigidbody2D>(); // rb를 Awake에서 찾아옵니다.
+        originalGravityScale = rb.gravityScale; // 게임 시작 시 원래 중력 값을 저장
     }
 
     void Update()
@@ -191,7 +195,7 @@ public class PlayerCatMovement : MonoBehaviour
                 else
                 {
                     bool isBoxOnRight = boxInteraction.CurrentBox != null &&
-                                             boxInteraction.CurrentBox.transform.position.x > transform.position.x;
+                                          boxInteraction.CurrentBox.transform.position.x > transform.position.x;
                     spriteRenderer.flipX = !isBoxOnRight;
                 }
             }
@@ -202,6 +206,9 @@ public class PlayerCatMovement : MonoBehaviour
         HandleCrouch(justLanded);
     }
 
+    // ######################################################################
+    // ## 여기가 핵심 수정 부분입니다! ##
+    // ######################################################################
     void UpdateAnimationState(float horizontalInput)
     {
         // 입력 차단 상태 (대화, 씬 로딩, 미니게임)
@@ -231,20 +238,10 @@ public class PlayerCatMovement : MonoBehaviour
             animator.SetBool("Crouching", false);
             animator.SetBool("Crouch", false);
 
-            // 사다리와 충돌 중일 때는 항상 Climbing을 true로 유지
-            // 움직이는지 여부에 따라 애니메이션 속도만 조절
             animator.SetBool("Climbing", true);
 
-            // 애니메이션 속도로 움직임 표현 (선택사항)
-            if (isClimbingMoving)
-            {
-                animator.speed = 1f; // 정상 속도
-            }
-            else
-            {
-                animator.speed = 0f; // 애니메이션 일시정지로 정지 상태 표현
-            }
-
+            // 애니메이션 속도로 움직임 표현
+            animator.speed = isClimbingMoving ? 1f : 0f;
             return;
         }
 
@@ -260,12 +257,13 @@ public class PlayerCatMovement : MonoBehaviour
         animator.SetBool("Crouch", false);
         animator.SetBool("Crouching", false);
 
-        bool isActuallyMoving = Mathf.Abs(rb.velocity.x) > 0.01f;
+        // ✨ [수정] 속도(velocity) 대신 실제 키 입력(horizontalInput)을 기준으로 판단
+        bool hasHorizontalInput = Mathf.Abs(horizontalInput) > 0.01f;
 
         // 웅크리기 상태
         if (isCrouching || forceCrouch)
         {
-            if (isActuallyMoving)
+            if (hasHorizontalInput)
             {
                 animator.SetBool("Crouching", true);
             }
@@ -280,21 +278,20 @@ public class PlayerCatMovement : MonoBehaviour
         isDashing = Input.GetKey(KeyCode.LeftShift) && !(boxInteraction != null && boxInteraction.IsInteracting);
         bool isJumping = !isOnGround;
 
-        if (isDashing)
+        if (isDashing && hasHorizontalInput)
         {
             animator.SetBool("Dash", true);
         }
         else if (isJumping)
         {
-            // 점프 중에는 Dash 애니메이션이 아닌 Jump 애니메이션을 사용한다고 가정
-            // animator.SetBool("Jump", true); // 필요하다면 이 부분을 추가하세요.
+            // 점프 애니메이션이 있다면 여기에 로직 추가
+            // 예: animator.SetBool("Jumping", true);
         }
-        else if (isActuallyMoving)
+        else if (hasHorizontalInput)
         {
             animator.SetBool("Moving", true);
         }
     }
-
 
     void LateUpdate()
     {
@@ -306,7 +303,7 @@ public class PlayerCatMovement : MonoBehaviour
     {
         if (IsInputBlocked() || !(bool)GameManager.Instance.GetVariable("CanMoving"))
         {
-            rb.velocity = Vector2.zero;
+            rb.velocity = new Vector2(0, rb.velocity.y); // x축 속도만 0으로 만들어 미끄러짐 방지
             if (dashParticle != null)
             {
                 particleEmission.rateOverTime = 0f;
@@ -315,22 +312,51 @@ public class PlayerCatMovement : MonoBehaviour
             return;
         }
 
-        // 사다리 타는 중에는 Move, BetterJump, HandleSound 호출하지 않음
-        if (!isClimbing)
+        // 카트에 타지 않았을 때만 플레이어의 일반적인 움직임 처리
+        if (!isOnCart)
         {
-            Move();
-            BetterJump();
-            HandleSound();
-            UpdateParticleState(); // 사다리 타지 않을 때만 파티클 업데이트
+            if (!isClimbing)
+            {
+                Move();
+                BetterJump();
+                HandleSound();
+                UpdateParticleState();
+            }
+            else
+            {
+                Climb();
+                if (dashParticle != null)
+                {
+                    particleEmission.rateOverTime = 0f;
+                    dashParticle.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+                }
+            }
+        }
+        // 카트에 탔을 때의 물리 로직 (필요 시 추가)
+        else
+        {
+            // 예: 카트 위에서 좌우로 약간 움직이는 로직
+            // MoveOnCart(); 
+        }
+    }
+
+    // ✨ [추가] 카트 탑승 상태를 외부에서 설정하기 위한 함수
+    public void SetOnCartState(bool onCart, Transform cartTransform = null)
+    {
+        isOnCart = onCart;
+
+        if (onCart)
+        {
+            // 카트에 타면
+            transform.SetParent(cartTransform);
+            rb.gravityScale = 0; // 중력을 0으로 만들어 카트에 완전히 밀착
+            rb.velocity = Vector2.zero; // 탑승 시 속도 초기화
         }
         else
         {
-            Climb();
-            if (dashParticle != null)
-            {
-                particleEmission.rateOverTime = 0f;
-                dashParticle.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
-            }
+            // 카트에서 내리면
+            transform.SetParent(null);
+            rb.gravityScale = originalGravityScale; // 원래 중력 값으로 복원
         }
     }
 
@@ -338,7 +364,6 @@ public class PlayerCatMovement : MonoBehaviour
     {
         if (dashParticle == null) return;
 
-        // 입력이 차단된 상태면 파티클 끔
         if (IsInputBlocked() || !(bool)GameManager.Instance.GetVariable("CanMoving"))
         {
             particleEmission.rateOverTime = 0f;
@@ -349,18 +374,16 @@ public class PlayerCatMovement : MonoBehaviour
             return;
         }
 
-        // 모든 애니메이션이 꺼져있는 상태 체크
         bool isAnyAnimationActive = animator.GetBool("Moving") ||
-                                     animator.GetBool("Dash") ||
-                                     animator.GetBool("Crouching") ||
-                                     animator.GetBool("Climbing") ||
-                                     animator.GetBool("Crouch");
+                                      animator.GetBool("Dash") ||
+                                      animator.GetBool("Crouching") ||
+                                      animator.GetBool("Climbing") ||
+                                      animator.GetBool("Crouch");
 
-        bool isActuallyMoving = Mathf.Abs(rb.velocity.x) > 0.01f;
+        bool hasHorizontalInput = Mathf.Abs(Input.GetAxisRaw("Horizontal")) > 0.01f;
         bool isJumping = !isOnGround;
 
-        // 사다리 타는 중이거나 모든 애니메이션이 꺼져있거나 멈춰있거나 웅크리는 중이면 파티클 끔
-        if (isClimbing || !isAnyAnimationActive || (!isActuallyMoving && !isJumping))
+        if (isClimbing || !isAnyAnimationActive || (!hasHorizontalInput && !isJumping))
         {
             particleEmission.rateOverTime = 0f;
             if (dashParticle.isPlaying)
@@ -392,8 +415,6 @@ public class PlayerCatMovement : MonoBehaviour
     {
         isCrouchMoving = moving;
         Debug.Log($"[PlayerCatMovement] 웅크리기 이동 상태 설정: {moving}");
-        //}
-        // 상태가 변경되면 즉시 애니메이션 업데이트
         if (forceCrouch || isCrouching)
         {
             if (moving)
@@ -411,7 +432,6 @@ public class PlayerCatMovement : MonoBehaviour
         }
     }
 
-    // 강제 상태 프로퍼티
     public bool ForceCrouch
     {
         get { return forceCrouch; }
@@ -437,7 +457,6 @@ public class PlayerCatMovement : MonoBehaviour
         }
     }
 
-    // 다이얼로그 출력 중, 씬 로딩 중이면 입력을 받지 않음.
     bool IsInputBlocked()
     {
         return PauseManager.IsGamePaused
@@ -450,39 +469,31 @@ public class PlayerCatMovement : MonoBehaviour
     {
         float verticalInput = Input.GetAxisRaw("Vertical");
 
-        // 사다리 근처에서 위/아래 키를 누르면 사다리 타기 시작
         if (isNearLadder && !isClimbing && canUseLadder)
         {
-            // 위 키를 눌렀을 때: 사다리 아래쪽이나 중간에서 올라가기
             if (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow))
             {
                 StartClimbing();
             }
-            // 아래 키를 눌렀을 때: 사다리 위쪽에서 내려가기 (지상에서만)
             else if ((Input.GetKeyDown(KeyCode.S) || Input.GetKeyDown(KeyCode.DownArrow)) && isOnGround)
             {
                 StartClimbing();
             }
         }
-        // 플랫폼 위에서 아래 키 + Shift 키로 사다리 타기 (메이플 방식)
         else if (!isClimbing && canUseLadder && isOnGround && isNearLadder)
         {
             if ((Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow)) &&
                 Input.GetKeyDown(KeyCode.LeftShift))
             {
-                // 플랫폼을 무시하고 사다리로 진입
                 StartClimbingFromPlatform();
             }
         }
-        // 사다리 타는 중
         else if (isClimbing)
         {
-            // 점프 키로 사다리에서 뛰어내리기
             if (Input.GetKeyDown(KeyCode.Space))
             {
                 ExitLadder(true);
             }
-            // 좌우 이동키로 사다리에서 내려오기
             else if (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.D) ||
                      Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.RightArrow))
             {
@@ -532,13 +543,9 @@ public class PlayerCatMovement : MonoBehaviour
 
     void Move()
     {
+        // 카트에 타고 있을 때는 이 함수가 호출되지 않으므로, 중복 체크 제거 가능
         float horizontalInput = Input.GetAxisRaw("Horizontal");
         float currentPower = movePower;
-
-        if (isMiniGameInputBlocked || forceCrouch || isOnCart)
-        {
-            horizontalInput = 0;
-        }
 
         bool isInteractingWithBox = boxInteraction != null && boxInteraction.IsInteracting;
         bool isPullingBox = boxInteraction != null && boxInteraction.IsPulling;
@@ -567,9 +574,11 @@ public class PlayerCatMovement : MonoBehaviour
         rb.velocity = new Vector2(smoothedVelocityX, rb.velocity.y);
     }
 
+
     void HandleSound()
     {
-        if (isClimbing || Mathf.Abs(rb.velocity.x) < 0.1f || !isOnGround)
+        // ✨ [수정] 속도(velocity) 대신 키 입력으로 소리 재생 여부 판단
+        if (isClimbing || Mathf.Abs(Input.GetAxisRaw("Horizontal")) < 0.1f || !isOnGround)
         {
             // 움직임이 멈추면 모든 발소리 관련 사운드 정지
             audioSource.Stop();
@@ -581,7 +590,6 @@ public class PlayerCatMovement : MonoBehaviour
             return;
         }
 
-        // 웅크리기 상태일 때
         if (isCrouching)
         {
             if (Time.time - lastCrouchSoundTime >= crouchSoundInterval)
@@ -590,7 +598,6 @@ public class PlayerCatMovement : MonoBehaviour
                 lastCrouchSoundTime = Time.time;
             }
         }
-        // 대시 상태일 때
         else if (isDashing)
         {
             if (Time.time - lastRunSoundTime >= runSoundInterval)
@@ -599,7 +606,6 @@ public class PlayerCatMovement : MonoBehaviour
                 lastRunSoundTime = Time.time;
             }
         }
-        // 일반 이동 상태일 때
         else
         {
             if (Time.time - lastWalkSoundTime >= walkSoundInterval)
@@ -650,41 +656,33 @@ public class PlayerCatMovement : MonoBehaviour
         }
     }
 
-    // Climb 메서드 수정
     void Climb()
     {
         float verticalInput = Input.GetAxisRaw("Vertical");
         float moveY = verticalInput * climbSpeed;
 
-        // 사다리 경계 체크
         if (currentLadder != null)
         {
             float ladderTop = currentLadder.bounds.max.y;
             float ladderBottom = currentLadder.bounds.min.y;
 
-            // 사다리 위쪽에서 더 올라가려고 할 때만 사다리에서 나가기
             if (transform.position.y >= ladderTop - 0.1f && verticalInput > 0)
             {
-                // 사다리 위로 올라가기 (지면으로 이동)
                 Vector3 exitPosition = new Vector3(transform.position.x, ladderTop + 0.5f, transform.position.z);
                 transform.position = exitPosition;
                 ExitLadder(false);
                 return;
             }
 
-            // 사다리 아래쪽에서 더 내려가려고 할 때만 사다리에서 나가기
             if (transform.position.y <= ladderBottom + 0.1f && verticalInput < 0)
             {
                 ExitLadder(false);
                 return;
             }
 
-            // 사다리 경계 내에서는 자유롭게 위아래 이동 가능
-            // Y 위치를 사다리 경계 내로 제한
             float clampedY = Mathf.Clamp(transform.position.y + moveY * Time.fixedDeltaTime,
-                                         ladderBottom + 0.2f, ladderTop - 0.2f);
+                                           ladderBottom + 0.2f, ladderTop - 0.2f);
 
-            // 경계에 도달했을 때는 움직임 제한
             if ((transform.position.y >= ladderTop - 0.2f && verticalInput > 0) ||
                 (transform.position.y <= ladderBottom + 0.2f && verticalInput < 0))
             {
@@ -694,7 +692,6 @@ public class PlayerCatMovement : MonoBehaviour
 
         rb.velocity = new Vector2(0, moveY);
 
-        // 사다리 오르기 효과음 재생
         if (Mathf.Abs(verticalInput) > 0.01f && climbSound != null && Time.time - lastClimbSoundTime >= climbSoundInterval)
         {
             audioSource.PlayOneShot(climbSound);
@@ -702,7 +699,6 @@ public class PlayerCatMovement : MonoBehaviour
         }
     }
 
-    // StartClimbingFromPlatform 메서드 추가 (플랫폼에서 사다리로 진입)
     void StartClimbingFromPlatform()
     {
         if (currentLadder == null) return;
@@ -712,10 +708,9 @@ public class PlayerCatMovement : MonoBehaviour
         rb.velocity = Vector2.zero;
         jumpCount = 0;
 
-        // 사다리 중앙으로 스냅하되, Y축은 약간 아래로 이동
         Vector3 pos = transform.position;
         pos.x = currentLadder.bounds.center.x;
-        pos.y -= 0.3f; // 플랫폼을 관통하여 사다리 안으로 들어가기
+        pos.y -= 0.3f;
         transform.position = pos;
 
         animator.SetBool("Climbing", true);
@@ -723,7 +718,6 @@ public class PlayerCatMovement : MonoBehaviour
         audioSource.Stop();
     }
 
-    // StartClimbing 메서드는 그대로 유지
     void StartClimbing()
     {
         if (currentLadder == null) return;
@@ -733,11 +727,9 @@ public class PlayerCatMovement : MonoBehaviour
         rb.velocity = Vector2.zero;
         jumpCount = 0;
 
-        // 사다리 중앙으로 스냅 (X축 위치 조정)
         Vector3 pos = transform.position;
         float targetX = currentLadder.bounds.center.x;
 
-        // 현재 위치에서 사다리 중앙까지의 거리가 스냅 거리 내에 있으면 스냅
         if (Mathf.Abs(pos.x - targetX) <= ladderSnapDistance)
         {
             pos.x = targetX;
@@ -749,17 +741,14 @@ public class PlayerCatMovement : MonoBehaviour
         audioSource.Stop();
     }
 
-    // ExitLadder 메서드 수정
     void ExitLadder(bool withJump)
     {
         isClimbing = false;
         rb.gravityScale = 1.5f;
         animator.SetBool("Climbing", false);
 
-        // 사다리에서 점프로 벗어날 때
         if (withJump)
         {
-            // 현재 보고 있는 방향으로 점프
             float hForce = spriteRenderer.flipX ? -1f : 1f;
             rb.velocity = new Vector2(hForce * movePower * 0.8f, jumpPower * 0.9f);
             jumpCount = 1;
@@ -769,11 +758,9 @@ public class PlayerCatMovement : MonoBehaviour
             rb.velocity = new Vector2(0, 0);
         }
 
-        // 잠시 사다리 사용 불가능하게 만들기 (연속 입력 방지)
         StartCoroutine(LadderCooldown());
     }
 
-    // 사다리 쿨다운 코루틴 추가
     private System.Collections.IEnumerator LadderCooldown()
     {
         canUseLadder = false;
@@ -781,7 +768,6 @@ public class PlayerCatMovement : MonoBehaviour
         canUseLadder = true;
     }
 
-    // OnTriggerStay2D 수정
     void OnTriggerStay2D(Collider2D col)
     {
         if (col.CompareTag("Ladder"))
@@ -791,12 +777,10 @@ public class PlayerCatMovement : MonoBehaviour
         }
     }
 
-    // OnTriggerExit2D 수정
     void OnTriggerExit2D(Collider2D col)
     {
         if (col.CompareTag("Ladder"))
         {
-            // 사다리에서 일정 거리 이상 벗어났을 때만 상태 해제
             if (currentLadder == col)
             {
                 float distance = Vector2.Distance(transform.position, col.bounds.center);

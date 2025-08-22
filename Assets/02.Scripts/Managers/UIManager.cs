@@ -11,7 +11,8 @@ public enum eUIGameObjectName
     HumanVersionUIGroup,
     ResponsibilityGroup,
     ResponsibilityGauge,
-    PlaceUI
+    PlaceUI,
+    PuzzleBagButton
 }
 
 public class UIManager : MonoBehaviour
@@ -27,6 +28,7 @@ public class UIManager : MonoBehaviour
     public GameObject responsibilityGroup;
     public GameObject responsibilityGauge;
     public GameObject placeUI;
+    public GameObject puzzleBagButton;
 
     [HideInInspector] public Slider responsibilitySlider;
 
@@ -80,6 +82,7 @@ public class UIManager : MonoBehaviour
         uiGameObjects.Add(eUIGameObjectName.ResponsibilityGroup, responsibilityGroup);
         uiGameObjects.Add(eUIGameObjectName.ResponsibilityGauge, responsibilityGauge);
         uiGameObjects.Add(eUIGameObjectName.PlaceUI, placeUI);
+        uiGameObjects.Add(eUIGameObjectName.PuzzleBagButton, puzzleBagButton);
 
         warningVignetteQVignetteSingle = warningVignette.GetComponent<Q_Vignette_Single>();
         responsibilitySlider = responsibilityGauge.GetComponent<Slider>();

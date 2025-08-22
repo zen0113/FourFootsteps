@@ -7,39 +7,71 @@ using UnityEngine.UI;
 [RequireComponent(typeof(Rigidbody2D))]
 public class PuzzlePiece : MonoBehaviour
 {
+    [Header("Refs")]
+    [SerializeField] private SpriteRenderer mainRenderer;   // 본체
+    [SerializeField] private SpriteRenderer shadowRenderer; // 그림자
+
+    [Header("Snap / Rotate")]
     public int id = 0;
     public Transform snapTarget;
     public float snapPosTolerance = 0.35f;
     public float snapAngleTolerance = 10f;
     public float rotateStep = 90f;
-    private float clickedScale = 1.05f;
+
+    [Header("FX")]
     public AudioClip sfxSnap;
+    public AudioClip sfxRotate;
+    private float clickedScale = 1.05f;
+    [SerializeField, Range(0f, 1f)] private float shadowSelectedAlpha = 0.45f;
+    [SerializeField, Range(0f, 1f)] private float shadowIdleAlpha = 0.0f;
+    [SerializeField] private Color shadowColor = Color.black;
 
     private bool placed = false;
     public bool IsPlaced => placed;
+
     private Vector3 grabOffset;
     private Camera cam;
     private SpriteRenderer sr;
     private Rigidbody2D rb;
-    private PuzzlePieceShadow shadow;
 
     // --- Sorting 설정 ---
-    private const int MIN_ORDER = 5;
-    private const int MAX_ORDER = 9; // 총 5단계 (5,6,7,8,9)
+    private const int BASE_ORDER = 10; // 시작값
+    private const int STEP_ORDER = 2;  // 간격 (10,12,14,…)
+    private const int SLOT_COUNT = 5;  // 조각 수
+
     private static readonly List<PuzzlePiece> puzzleList_all = new List<PuzzlePiece>();
 
     // 현재 선택 여부 (A/D 회전용)
     private static PuzzlePiece current;
 
+    #region Unity lifecycle
+
+    private void Reset()
+    {
+        // 에디터에서 컴포넌트 붙일 때 자동 참조 시도
+        if (!mainRenderer) mainRenderer = GetComponent<SpriteRenderer>();
+        if (!shadowRenderer) shadowRenderer = transform.Find("Shadow")?.GetComponent<SpriteRenderer>();
+    }
+
     void Awake()
     {
         cam = Camera.main;
+        if (!mainRenderer) mainRenderer = GetComponent<SpriteRenderer>();
+        if (!shadowRenderer) shadowRenderer = transform.Find("Shadow")?.GetComponent<SpriteRenderer>();
         sr = GetComponent<SpriteRenderer>();
         rb = GetComponent<Rigidbody2D>();
         rb.isKinematic = true;
-        shadow = GetComponent<PuzzlePieceShadow>();
 
         if (!puzzleList_all.Contains(this)) puzzleList_all.Add(this);
+
+        // 그림자 초기 색/알파
+        if (shadowRenderer)
+        {
+            var c = shadowColor; c.a = shadowIdleAlpha;
+            shadowRenderer.color = c;
+            // 항상 본체보다 한 단계 아래
+            shadowRenderer.sortingOrder = (mainRenderer ? mainRenderer.sortingOrder - 1 : BASE_ORDER - 1);
+        }
     }
 
     private void OnDestroy()
@@ -53,10 +85,10 @@ public class PuzzlePiece : MonoBehaviour
         if (placed) return;
 
         // 퍼즐 선택 연출
-        transform.localScale = transform.localScale * clickedScale;
-        shadow.SetSelected(true);
+        transform.localScale *= clickedScale;
+        SetShadowAlpha(shadowSelectedAlpha);
 
-        // 정렬: 이 조각을 맨 위(9)로, 나머지는 한 칸씩 뒤로
+        // 정렬: 이 조각을 맨 위(15)로, 나머지는 한 칸씩 뒤로
         BringToTop(this);
 
         current = this;
@@ -70,6 +102,7 @@ public class PuzzlePiece : MonoBehaviour
     void OnMouseDrag()
     {
         if (placed) return;
+
         var mouseWorld = cam.ScreenToWorldPoint(Input.mousePosition);
         mouseWorld.z = transform.position.z;
         transform.position = mouseWorld + grabOffset;
@@ -80,13 +113,15 @@ public class PuzzlePiece : MonoBehaviour
         if (placed) return;
 
         transform.localScale = new Vector3(1, 1, 1);
-        shadow.SetSelected(false);
+        SetShadowAlpha(shadowIdleAlpha);
+
         TrySnap();
     }
 
     void Update()
     {
         if (placed) return;
+
         if (current == this)
         {
             if (Input.GetKeyDown(KeyCode.A))
@@ -95,9 +130,14 @@ public class PuzzlePiece : MonoBehaviour
                 Rotate(-rotateStep);
         }
     }
+    #endregion
+
+    #region Gameplay
 
     void Rotate(float delta)
     {
+        if (sfxRotate) AudioSource.PlayClipAtPoint(sfxRotate, transform.position, 1f);
+
         var z = Mathf.Round((transform.eulerAngles.z + delta) / 90f) * 90f;
         transform.rotation = Quaternion.Euler(0, 0, z % 360f);
     }
@@ -107,7 +147,7 @@ public class PuzzlePiece : MonoBehaviour
         if (snapTarget == null) return;
 
         float dist = Vector2.Distance(transform.position, snapTarget.position);
-        float angle = AngleDelta(transform.eulerAngles.z, snapTarget.eulerAngles.z);
+        float angle = Mathf.Abs(Mathf.DeltaAngle(transform.eulerAngles.z, snapTarget.eulerAngles.z));
 
         if (dist <= snapPosTolerance && angle <= snapAngleTolerance)
         {
@@ -122,39 +162,98 @@ public class PuzzlePiece : MonoBehaviour
             // 스냅 소리
             if (sfxSnap) AudioSource.PlayClipAtPoint(sfxSnap, transform.position, 0.8f);
 
-            PuzzleManager.Instance.NotifyPlaced(this);
+            if (PuzzleManager.Instance) PuzzleManager.Instance.NotifyPlaced(this);
         }
     }
+    #endregion
 
-    float AngleDelta(float a, float b)
-    {
-        float d = Mathf.Abs(Mathf.DeltaAngle(a, b));
-        return d;
-    }
-
-
-    // 현재 오브젝트가 맨 위(9)가 되도록 재배치
+    #region Sorting (BringToTop + 재배치)
+    // 현재 오브젝트가 맨 위(15)가 되도록 재배치
+    // 그림자 렌더러는 본체보다 항상 -1로
     private static void BringToTop(PuzzlePiece selected)
     {
-        // 1) 현재 리스트를 sortingOrder 기준으로 정렬(낮은→높은)
-        puzzleList_all.Sort((a, b) => a.sr.sortingOrder.CompareTo(b.sr.sortingOrder));
+        // 1) 현재 눈에 보이는 순서를 정렬 기준으로 확정(낮은→높은)
+        SortByCurrentOrder(puzzleList_all);
+
+        var work = new List<PuzzlePiece>(puzzleList_all);
 
         // 2) 선택 항목을 제거 후 맨 뒤로 삽입
-        puzzleList_all.Remove(selected);
-        puzzleList_all.Add(selected);
+        work.Remove(selected);
+        work.Add(selected);
 
-        // 3) 5~9로 일괄 재할당 (리스트 순서대로 5,6,7,8,9)
-        int count = puzzleList_all.Count;
-        int slots = MAX_ORDER - MIN_ORDER + 1;
-        if (count > slots)
+        if (work.Count != SLOT_COUNT)
         {
-            Debug.LogWarning($"[PuzzlePiece] 조각 수({count})가 정렬 슬롯({slots})보다 큽니다.");
+            Debug.LogWarning($"[PuzzlePiece] 슬롯 수({SLOT_COUNT})와 활성 조각 수({work.Count})가 다릅니다!");
         }
-        for (int i = 0; i < puzzleList_all.Count; i++)
+
+        // 3) 슬롯 재할당
+        //    앞에서부터 BASE, BASE+STEP, ... 로 할당.
+        for (int i = 0; i < work.Count; i++)
         {
-            int order = MIN_ORDER + Mathf.Min(i, slots - 1); // 초과 시 MAX_ORDER로 고정
-            puzzleList_all[i].sr.sortingOrder = order;
+            int mainOrder = SlotOrder(i);
+            int shadOrder = mainOrder - 1;
+
+            var p = work[i];
+            if (p.mainRenderer) p.mainRenderer.sortingOrder = mainOrder;
+            if (p.shadowRenderer) p.shadowRenderer.sortingOrder = shadOrder;
         }
     }
+
+    // index(0..N-1) → main sorting order
+    private static int SlotOrder(int index)
+    {
+        // 0→10, 1→12, 2→14, ...
+        return BASE_ORDER + STEP_ORDER * index;
+    }
+
+    // index(0..N-1) → shadow sorting order (항상 main-1)
+    private static int SlotOrderShadow(int index)
+    {
+        return SlotOrder(index) - 1;
+    }
+
+    // 현재 본체 sortingOrder 기준으로 낮은→높은 정렬
+    private static void SortByCurrentOrder(List<PuzzlePiece> list)
+    {
+        list.Sort((a, b) =>
+        {
+            int ao = a.mainRenderer ? a.mainRenderer.sortingOrder : int.MinValue;
+            int bo = b.mainRenderer ? b.mainRenderer.sortingOrder : int.MinValue;
+            return ao.CompareTo(bo);
+        });
+    }
+
+
+    // 에디터 초기화용: 계층 순서대로 10,12,14,16,18 할당
+    [ContextMenu("Normalize Sorting Orders (10,12,14,16,18)")]
+    private void NormalizeSortingOrders()
+    {
+        puzzleList_all.Sort((a, b) => a.transform.GetSiblingIndex().CompareTo(b.transform.GetSiblingIndex()));
+        for (int i = 0; i < puzzleList_all.Count; i++)
+        {
+            int mainOrder = SlotOrder(i);
+            int shadOrder = mainOrder - 1;
+
+            var p = puzzleList_all[i];
+            if (p.mainRenderer) p.mainRenderer.sortingOrder = mainOrder;
+            if (p.shadowRenderer) p.shadowRenderer.sortingOrder = shadOrder;
+        }
+    }
+    #endregion
+
+    #region Shadow helper
+    private void SetShadowAlpha(float a)
+    {
+        if (!shadowRenderer) return;
+        var c = shadowRenderer.color;
+        c.r = shadowColor.r; c.g = shadowColor.g; c.b = shadowColor.b;
+        c.a = Mathf.Clamp01(a);
+        shadowRenderer.color = c;
+
+        // 항상 본체보다 한 단계 아래 유지
+        if (mainRenderer)
+            shadowRenderer.sortingOrder = mainRenderer.sortingOrder - 1;
+    }
+    #endregion
 
 }

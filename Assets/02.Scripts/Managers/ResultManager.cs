@@ -158,6 +158,15 @@ public class ResultManager : MonoBehaviour
                 yield return null;
                 break;
 
+            // 퍼즐 획득 애니메이션 재생 후 회상씬으로 이동
+            case "Result_GetMemoryPuzzle":
+                Debug.Log("Execute [Result_GetMemoryPuzzle]");
+                executableObjects["MemoryPuzzle"].ExecuteAction();
+                // 비동기 대기(애니메이션 끝날 때까지)
+                while ((bool)GameManager.Instance.GetVariable("isPuzzleMoving"))
+                    yield return null;
+                break;
+
             // 낡은 소파 조사 시, 회상1 씬으로 이동.
             case "Result_GoToRecall1":
                 InitializeExecutableObjects();

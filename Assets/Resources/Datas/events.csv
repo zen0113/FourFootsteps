@@ -13,7 +13,7 @@ EventFadeOut&NextPrologueStep,,,,C_isNotPrologueFinished,Result_DialogueFadeOut/
 EventNextPrologueStep,,,,C_isNotPrologueFinished,Result_NextPrologueStep,,
 ,,,,,,,
 EventStage1_Puddle,물웅덩이,물웅덩이 조사,,,Result_StartDialogueStage01_004,Instant,
-EventMemoryPuzzle1,기억 조각 1,소파 옆에 있는 기억 조각 조사,,C_CanInvesigatingRecall,Result_GoToRecall1,Instant,회상씬 1로 로딩
+EventMemoryPuzzle1,기억 조각 1,소파 옆에 있는 기억 조각 조사,,,Result_GetMemoryPuzzle/Result_GoToRecall1,Sequential,회상씬 1로 로딩
 ,,,,,,,
 EventRecall1_Sofa_Test,회상 속 소파,회상에서 할퀴어진 소파 조사,,C_RoomSofaFirstClick,Result_StartDialogueRecall1_002/Result_IncrementRoomSofaClick,Instant,
 EventRecall1_Sofa,회상 속 소파,다음 씬으로 넘어가는 오브젝트,,C_CanInvesigatingRecall,Result_StartDialogueRecall1_008,,

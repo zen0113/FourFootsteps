@@ -99,7 +99,7 @@ public class PlayerCatMovement : MonoBehaviour
         UIManager.Instance.SetUI(eUIGameObjectName.ResponsibilityGroup, true);
         UIManager.Instance.SetUI(eUIGameObjectName.ResponsibilityGauge, true);
         UIManager.Instance.SetUI(eUIGameObjectName.PlaceUI, true);
-
+        UIManager.Instance.SetUI(eUIGameObjectName.PuzzleBagButton, true);
 
         rb = GetComponent<Rigidbody2D>();
         boxCollider = GetComponent<BoxCollider2D>();

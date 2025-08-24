@@ -558,7 +558,7 @@ public class StruggleMiniGame : MonoBehaviour
         isActive = false; // 미니게임 비활성화
         cameraShake.enabled = false; // 카메라 쉐이크 비활성화 (필요시)
 
-        keyPromptText.text = "이제 걸을 수 있을 것 같아"; // 최종 안내 텍스트z
+        keyPromptText.text = "이제 걸을 수 있을 것 같아"; // 최종 안내 텍스트
 
         // 모든 코루틴 정지
         if (gaugeCoroutine != null) StopCoroutine(gaugeCoroutine);

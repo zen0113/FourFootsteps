@@ -10,31 +10,31 @@ using TMPro;
 public class DarknessTapMinigame : MonoBehaviour
 {
     [Header("게임 설정")]
-    [SerializeField] private float tapGoal = 100f;
-    [SerializeField] private float perTapIncrease = 1f;
-    [SerializeField] private KeyCode tapKey = KeyCode.Space;
+    [SerializeField] private float tapGoal = 100f; // 연타 목표치 (100번)
+    [SerializeField] private float perTapIncrease = 1f; // 한 번 누를 때 증가량 (정확히 1씩)
+    [SerializeField] private KeyCode tapKey = KeyCode.Space; // 연타 키
 
     [Header("단계별 이미지 설정")]
-    [SerializeField] private Image stageImage;
-    [SerializeField] private Sprite[] stageSprites;
-    [SerializeField] private int[] stageMilestones = { 40, 60, 80, 100 };
+    [SerializeField] private Image stageImage;// 단계별로 변화할 이미지
+    [SerializeField] private Sprite[] stageSprites; // 각 단계별 스프라이트 (4개: 40,60,80,100번용)
+    [SerializeField] private int[] stageMilestones = { 40, 60, 80, 100 }; // 이미지 변화 시점
 
     [Header("UI 요소")]
-    [SerializeField] private TextMeshProUGUI instructionText;
-    [SerializeField] private Canvas gameCanvas;
+    [SerializeField] private TextMeshProUGUI instructionText;  // 안내 텍스트
+    [SerializeField] private Canvas gameCanvas; // 게임 캔버스
 
     [Header("텍스트 애니메이션")]
-    [SerializeField] private float blinkSpeed = 1f;
-    [SerializeField] private float minAlpha = 0.3f;
-    [SerializeField] private float maxAlpha = 1f;
+    [SerializeField] private float blinkSpeed = 1f;         // 깜빡임 속도
+    [SerializeField] private float minAlpha = 0.3f;         // 최소 투명도
+    [SerializeField] private float maxAlpha = 1f;           // 최대 투명도
 
     [Header("플레이어 제어")]
-    [SerializeField] private PlayerCatMovement playerController;
+    [SerializeField] private PlayerCatMovement playerController;  // 플레이어 컨트롤러 참조
 
     [Header("사운드 (선택사항)")]
-    [SerializeField] private AudioSource audioSource;
-    [SerializeField] private AudioClip tapSound;
-    [SerializeField] private AudioClip stageChangeSound;
+    [SerializeField] private AudioSource audioSource;       // 오디오 소스
+    [SerializeField] private AudioClip tapSound;            // 연타 사운드
+    [SerializeField] private AudioClip stageChangeSound;    // 단계 변화 사운드
 
     [Header("게임 완료 후 상태 설정")]
     [SerializeField] private bool setCrouchAfterComplete = true;
@@ -64,11 +64,13 @@ public class DarknessTapMinigame : MonoBehaviour
 
     private void SetupUI()
     {
+        // 안내 텍스트 설정
         if (instructionText != null)
         {
             instructionText.text = "연타 (Space) 하세요!";
         }
 
+        // 첫 번째 단계 이미지 설정 (검은 배경으로 시작)
         if (stageImage != null)
         {
             stageImage.sprite = null;
@@ -404,7 +406,7 @@ public class DarknessTapMinigame : MonoBehaviour
             StopCoroutine(textBlinkCoroutine);
         }
 
-        // 추가: 텍스트 비활성화
+        // 텍스트 비활성화
         if (instructionText != null)
         {
             instructionText.gameObject.SetActive(false);

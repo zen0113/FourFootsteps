@@ -6,8 +6,11 @@ public class DarknessTapMinigameTutorial : TutorialBase
     [Header("미니게임 설정")]
     [SerializeField] private DarknessTapMinigame miniGame;
 
-    [Header("시작 전 다이얼로그 (선택사항)")]
+    [Header("시작 전 다이얼로그)")]
     [SerializeField] private string startDialogueID = ""; // 미니게임 시작 전 다이얼로그
+
+    [Header("시작 시 UI 설정")]
+    [SerializeField] private GameObject uiToHideOnStart; // 튜토리얼 시작 시 비활성화할 UI
 
     [Header("자동 진행 설정")]
     [SerializeField] private bool autoProgressOnComplete = true; // 완료 시 자동으로 다음 튜토리얼 진행
@@ -20,6 +23,12 @@ public class DarknessTapMinigameTutorial : TutorialBase
     public override void Enter()
     {
         Debug.Log("[DarknessTapMinigameTutorial] 어둠 걷어내기 미니게임 튜토리얼 시작");
+
+        // 튜토리얼 시작 시 지정된 UI가 있다면 비활성화합니다.
+        if (uiToHideOnStart != null)
+        {
+            uiToHideOnStart.SetActive(false);
+        }
 
         tutorialController = FindObjectOfType<TutorialController>();
         miniGameStarted = false;

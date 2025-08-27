@@ -28,15 +28,15 @@ Prologue_005,Player,TRUE,내가 지금 왜 이러고 있지..?,AUTO_DELAYED,temp
 ,Player,TRUE,……..,AUTO_DELAYED,temp_playerHUMAN,,,,
 Prologue_006,Player,TRUE,… 여기다가 널 풀어줄게.,,temp_playerHUMAN,,,,
 ,Player,TRUE,앞으로 잘 살아라.,,temp_playerHUMAN,,,,
-,YourCat,TRUE,야옹..,,temp_playerCAT,,,EventNextPrologueStep,
+,YourCat,TRUE,야옹..,,temp_playerCAT,,,EventFadeOut&NextPrologueStep,
 Prologue_007,Player,,뭐... 고양이니까 알아서 잘 살겠지…?,,temp_playerHUMAN,,003_Prologue3,,집으로 돌아온 후 침대 위
 ,Player,,에잇` 잠이나 자자..,,temp_playerHUMAN,,003_Prologue3,,
 ,InnerThoughts,,(평소처럼 배게 옆을 쓰다듬는다.),,temp_playerHUMAN,,003_Prologue3,,
 ,InnerThoughts,,… 아,,temp_playerHUMAN,,003_Prologue3,,
-,InnerThoughts,,{YourCatName}는 이제 없지.. 나도 참..,TRUE,temp_playerHUMAN,,003_Prologue3,,
-,InnerThoughts,,… 오늘따라 침대가 좀 넓게 느껴지네..,,temp_playerHUMAN,,BLACK,Prologue_008,
+,InnerThoughts,,{YourCatName}은/는 이제 없지.. 나도 참..,TRUE,temp_playerHUMAN,,003_Prologue3,,
+,InnerThoughts,,… 오늘따라 침대가 좀 넓게 느껴지네..,,temp_playerHUMAN,,BLACK,EventFadeOut&NextPrologueStep,
 Prologue_008,Player,,.. 여긴 어디지? 온통 다 어두컴컴해서 잘 안 보이네...,,temp_playerHUMAN,,004_Prologue4,,꿈 속
-,Player,,앗` 뭔가가 다가오는데? 저건 또 뭐지?,,temp_playerHUMAN,,004_Prologue4,Prologue_009,
+,Player,,앗` 뭔가가 다가오는데? 저건 또 뭐지?,,temp_playerHUMAN,,004_Prologue4,EventNextPrologueStep,
 Prologue_009,Player,,윽` 뭐야?!!,SHAKE,temp_playerHUMAN,,005_Prologue5,,하얀 새가 주인공에게 달려 들고 날아감
 ,Player,,대체 무슨 일이 일어난 거지..?,,temp_playerHUMAN,,005_Prologue5,,
 ,InnerThoughts,,저 하얀 새…가 나를 공격한 건가?\n도대체 왜..?,,temp_playerHUMAN,,005_Prologue5,,
@@ -66,14 +66,14 @@ Stage01_006,Player,,어? [낡은 소파에 퍼즐 조각이 있잖아?] 저게 �
 Recall1_001,InnerThoughts,,(거실 쪽에서 사각사각 하는 소리… 익숙한 느낌이다.),,temp_playerHUMAN,,,,
 ,Player,,또 이 시간에? …혹시 {YourCatName}(이)가 또 소파를?,TRUE,temp_playerHUMAN,,,EventSetNextTutorial,
 Recall1_002,Player,,{YourCatName}(이)가 또 소파를 긁고 있잖아? 어휴 이 녀석이 또…,TRUE,temp_playerHUMAN,,,Choice_001,
-Recall1_003,Player,,그래` [스크래쳐라도 놔주자.],,temp_playerHUMAN,,,,긍정적 선택지
-,Player,,앞으로는 여기에서 긁어라.,,temp_playerHUMAN,,,,
-,YourCat,,야옹~,,temp_playerCAT,,,EventRecall1_GoodChoice,
+Recall1_003,Player,TRUE,그래` [스크래쳐라도 놔주자.],,temp_playerHUMAN,,,,긍정적 선택지
+,Player,TRUE,앞으로는 여기에서 긁어라.,,temp_playerHUMAN,,,,
+,YourCat,TRUE,야옹~,,temp_playerCAT,,,EventRecall1_GoodChoice,
 Recall1_004,Player,,너 또 이러면 혼난다고 했지!,SHAKE,temp_playerHUMAN,,,,부정적 선택지
 ,Player,,방으로 들어가!,,temp_playerHUMAN,,,,
 ,YourCat,,야옹…,,temp_playerCAT,,,EventRecall1_BadChoice,
-Recall1_005,Monolog,,스크래쳐를 사주고 나서야 깨달았어. 그 아이는 그냥 본능적으로 행동했을 뿐인데…,AUTO_DELAYED/FADE_OUT,,,,,
-Recall1_006,Monolog,,왜 이런 행동을 하는지는 알아보려 하지도 않았어.\n이 아이도 그냥 자기 나름대로는 이유가 있었을 텐데…,AUTO_DELAYED/FADE_OUT,,,,,
+Recall1_005,Monolog,,스크래쳐를 사주고 나서야 깨달았어. 그 아이는 단지 본능대로 행동했을 뿐인데…,AUTO_DELAYED/FADE_OUT,,,,,
+Recall1_006,Monolog,,왜 이런 행동을 하는지는 알아보려 하지도 않았어.\n그 아이도 자기 나름대로는 이유가 있었을 텐데…,AUTO_DELAYED/FADE_OUT,,,,,
 Recall1_007,Player,,갑자기 잠이 쏟아지네... 너무 피곤하다.,,temp_playerHUMAN,,,,
 ,InnerThoughts,,* 집 안을 조사한 이후에 소파나 침대에서 잠을 청할 수 있습니다.,,temp_playerHUMAN,,,,이미지 없게 설정
 Recall1_008,Player,,잠깐 쉴까?,,temp_playerHUMAN,,,,
@@ -114,10 +114,10 @@ Stage02_002,InnerThoughts,,이 길목… 어딘가 익숙해.,,temp_playerCAT,,,
 ,InnerThoughts,,어…? 저긴 {YourCatName}을/를 데리고 갔던 동물 병원이잖아!,TRUE,temp_playerCAT,,,,
 ,InnerThoughts,,입구만이라도 한번 살펴보자. ,,temp_playerCAT,,,,
 Stage02_003,InnerThoughts,,저기 사람이 나왔다! 얼른 가서 [말 걸어보자!],,temp_playerCAT,,,,병원 정문의 울타리에 닿자마자 병원 직원이 건물에서 나옴.
-Stage02_004,Player,,저기요! 저` {YourCatName} 보호자인데요! 제가 정말 고양이로 보이시나요?!,TRUE/SHAKE,temp_playerCAT,,,,플레이어가 동물 병원 직원에게 상호작용 시
-,동물 병원 직원,,"어머, 길고양이네? 어디서 왔니? 배고프니? 간식 줄까?  ",,,,,,
+Stage02_004,Player,,저기요! 저` {YourCatName} 보호자인데요! 제가 정말 고양이로 보이시나요?!,TRUE/SHAKE,temp_playerCAT,,,,플레이어가 직원A에게 상호작용 시
+,직원A,,"어머, 길고양이네? 어디서 왔니? 배고프니? 간식 줄까?  ",,,,,,
 ,Player,,네…??? 간식이요…? 저 사람이라고요! 제 말 안 들려요?!  ,,temp_playerCAT,,,,
-,동물 병원 직원,,"아이고, 시간이 늦었네. 얼른 들어가야겠다. 잘 있어, 야옹아~  ",,,,,,동물 병원 직원이 병원으로 다시 들어가기 직전
+,직원A,,"아이고, 시간이 늦었네. 얼른 들어가야겠다. 잘 있어, 야옹아~  ",,,,,,직원A이 병원으로 다시 들어가기 직전
 ,Player,,…내 목소리가 전혀 전해지지 않아…  ,,temp_playerCAT,,,,
 ,Player,,정말 이게… 꿈이 아니라 현실이라고? ,,temp_playerCAT,,,,
 ,Player,,내가 왜 이런 모습이 되어버린 거지!!,SHAKE,temp_playerCAT,,,,하얀 새가 날아가면서 울타리 앞에 하얀 퍼즐 조각을 떨어뜨리고 감.
@@ -130,7 +130,7 @@ Stage02_005,Player,,어…? 방금 하얀 새가 뭔가를 떨어뜨리고 간 �
 Recall2_001,Player,,조금 일찍 왔나? 대기실이 아직 한산하네.,,temp_playerHUMAN,,,,
 ,YourCat,,야옹….,,temp_playerCAT,,,,
 ,Player,,{YourCatName}도 긴장한 것 같고…,TRUE,temp_playerHUMAN,,,EventSetNextTutorial,
-Recall2_002,동물 병원 직원,TRUE,{YourCatName} 보호자님~ 진료실로 들어오세요.,TRUE,,,,,
+Recall2_002,직원A,TRUE,{YourCatName} 보호자님~ 진료실로 들어오세요.,TRUE,,,,,
 ,Player,,네` 갑니다!,,temp_playerHUMAN,,,EventSetNextTutorial,
 Recall2_003,의사,,{YourCatName}의 보호자님이시죠?,TRUE,,,,,병원직원이 가리키고 있는 방향의 진료실에 가서 상호작용으로 진료실에 입장
 ,Player,,네…! 맞습니다!,,temp_playerHUMAN,,,,꿈 혼동 제거 필요` 아래 대사도 마찬가지
@@ -185,18 +185,18 @@ Recall2_019,InnerThoughts,,중성화 수술에 대한 안내문이다.  ,,temp_p
 ,InnerThoughts,,솔직히 예전엔 이런 게 왜 필요한지 몰랐는데.,,temp_playerHUMAN,,,,
 Recall2_020,InnerThoughts,,정기 예방접종은 반려묘의 건강을 지키는 첫걸음'… \n고양이 정기 예방접종 안내 포스터다.  ,,temp_playerHUMAN,,,,유기동물 포스터
 ,InnerThoughts,,고양이 전염병` 광견병 등 주요 질병을 예방할 수 있다고 적혀 있다. 접종 시기와 종류가 표로 정리돼 있다.,,temp_playerHUMAN,,,,
-Recall2_Good_001,동물 병원 직원,,진료 잘 받으셨어요? {YourCatName}(이)가 길고양이 출신인데도 정말 얌전했어요!,TRUE,,,,,
+Recall2_Good_001,직원A,,진료 잘 받으셨어요? {YourCatName}(이)가 길고양이 출신인데도 정말 얌전했어요!,TRUE,,,,,
 ,Player,,그쵸? 처음 데려올 때는 어떻게 될지 몰랐는데` 의외로 순하더라고요.,,temp_playerHUMAN,,,,
 ,InnerThoughts,,길에서 떨고 있던 모습이랑은 정말 다르네. 우리 둘 다 잘해냈어.,,temp_playerHUMAN,,,,
-Recall2_Good_002,동물 병원 직원,,심장사상충 약도 잘 받으셨죠? 길고양이 출신이라 더 중요해요. 냉장보관 하시고` 매달 꼭 먹이세요.,,,,,,
+Recall2_Good_002,직원A,,심장사상충 약도 잘 받으셨죠? 길고양이 출신이라 더 중요해요. 냉장보관 하시고` 매달 꼭 먹이세요.,,,,,,
 ,Player,,네` 달력에 표시해두고 알람도 맞춰뒀어요.,,temp_playerHUMAN,,,,
-,동물 병원 직원,,길고양이는 야외 기생충 위험이 높아서 더 신경 써야 하거든요. 잘하고 계세요~,,,,,,
+,직원A,,길고양이는 야외 기생충 위험이 높아서 더 신경 써야 하거든요. 잘하고 계세요~,,,,,,
 ,InnerThoughts,,매달 한 번이면 어려울 것도 없어. 이 정도는 해줄 수 있지.,,temp_playerHUMAN,,,,
-Recall2_Good_003,동물 병원 직원,,다음 2차 접종 일정 꼭 기억해주세요~ 길고양이는 특히 면역력이 중요하거든요.,,,,,,
+Recall2_Good_003,직원A,,다음 2차 접종 일정 꼭 기억해주세요~ 길고양이는 특히 면역력이 중요하거든요.,,,,,,
 ,Player,,네` 캘린더에 미리 적어뒀어요. 절대 놓치지 않을게요.,,temp_playerHUMAN,,,,
 ,InnerThoughts,,다음엔 더 여유롭게 올 수 있을 것 같아. 오늘이 첫 관문이었네.,,temp_playerHUMAN,,,,
-Recall2_Good_004,동물 병원 직원,,길고양이 출신인데도 이렇게 차근차근 챙겨주시니까 {YourCatName}이 정말 운이 좋네요!,TRUE,,,,,
-,동물 병원 직원,,집에 가시면 오늘은 푹 쉬게 해주세요. 접종 받고 나서 좀 피곤할 거예요.,,,,,,
+Recall2_Good_004,직원A,,길고양이 출신인데도 이렇게 차근차근 챙겨주시니까 {YourCatName}이 정말 운이 좋네요!,TRUE,,,,,
+,직원A,,집에 가시면 오늘은 푹 쉬게 해주세요. 접종 받고 나서 좀 피곤할 거예요.,,,,,,
 ,Player,,네` 맛있는 간식도 준비해뒀어요.,,temp_playerHUMAN,,,,
 Recall2_Good_101,의사,,오늘은 접종 받느라 스트레스 받았을 테니 집에서 편하게 쉬게 해주세요.,,,,,,
 ,Player,,네` 조용한 곳에서 하루 종일 푹 쉬게 해줄게요.,,temp_playerHUMAN,,,,
@@ -209,20 +209,20 @@ Recall2_Good_103,의사,,길고양이 처음 키우시는 거치고는 정말 �
 ,Player,,아직 모르는 게 너무 많아서... 앞으로도 많이 도움 받을 것 같아요.,,temp_playerHUMAN,,,,
 Recall2_Good_104,의사,,{YourCatName}(을)를 길에서 구조해서 이렇게 잘 돌봐주시니` 정말 좋은 인연인 것 같네요.,TRUE,,,,,
 ,Player,,저도 그렇게 생각해요. 서로에게 운명이었나 봐요.,,temp_playerHUMAN,,,,
-Recall2_Bad_001,동물 병원 직원,,진료는 잘 받으셨어요? {YourCatName}(이)가 길고양이 출신인데도 생각보다 얌전했더라고요.,TRUE,,,,,
+Recall2_Bad_001,직원A,,진료는 잘 받으셨어요? {YourCatName}(이)가 길고양이 출신인데도 생각보다 얌전했더라고요.,TRUE,,,,,
 ,Player,,아` 네… 다행히 큰 문제는 없다고 해서요.,,temp_playerHUMAN,,,,
 ,InnerThoughts,,문제는 없었는데… 그냥 나온 게 맞았을까. 길에서 온 아이인데…,,temp_playerHUMAN,,,,
-Recall2_Bad_002,동물 병원 직원,,예방접종이나 처방약은 따로 안 하고 가시는 거죠? 혹시 마음 바뀌시면 언제든 말씀해 주세요.,,,,,,
+Recall2_Bad_002,직원A,,예방접종이나 처방약은 따로 안 하고 가시는 거죠? 혹시 마음 바뀌시면 언제든 말씀해 주세요.,,,,,,
 ,Player,,네… 오늘은 그냥 검진만 받고 가려고요.,,temp_playerHUMAN,,,,
-,동물 병원 직원,,아` 네. 길고양이 출신이라 조금 더 신경 쓰셔야 하는데... 뭐` 보호자님 결정이니까요.,,,,,,
+,직원A,,아` 네. 길고양이 출신이라 조금 더 신경 쓰셔야 하는데... 뭐` 보호자님 결정이니까요.,,,,,,
 ,Player,,네…,,temp_playerHUMAN,,,,
 ,InnerThoughts,,직원도 아는데 내가 이러고 있네... 괜히 민망해진다.,,temp_playerHUMAN,,,,
-Recall2_Bad_003,동물 병원 직원,,다음 예방접종 일정도 안내해드릴까요? 길고양이는 특히 빨리 해주시는 게 좋거든요.,,,,,,
+Recall2_Bad_003,직원A,,다음 예방접종 일정도 안내해드릴까요? 길고양이는 특히 빨리 해주시는 게 좋거든요.,,,,,,
 ,Player,,아… 그건 집에 가서 생각해보고 다시 연락드릴게요.,,temp_playerHUMAN,,,,
-,동물 병원 직원,,네` 하지만 너무 오래 미루시면 안 돼요. 어린 고양이라서요.,,,,,,
+,직원A,,네` 하지만 너무 오래 미루시면 안 돼요. 어린 고양이라서요.,,,,,,
 ,Player,,네… 기억해둘게요.,,temp_playerHUMAN,,,,
 ,InnerThoughts,,다음번엔… 꼭 해야겠다. 이렇게 계속 미룰 순 없어.,,temp_playerHUMAN,,,,
-Recall2_Bad_004,동물 병원 직원,,{YourCatName}(이)가 처음 병원 와봤죠? 길에서 온 아이치고는 정말 잘 견뎠어요.,TRUE,,,,,
+Recall2_Bad_004,직원A,,{YourCatName}(이)가 처음 병원 와봤죠? 길에서 온 아이치고는 정말 잘 견뎠어요.,TRUE,,,,,
 ,Player,,그쵸… 생각보다 순해서 놀랐어요.,,temp_playerHUMAN,,,,
 ,InnerThoughts,,이 아이는 이렇게 잘하는데` 정작 나는 뭘 하고 있는 거지…,,temp_playerHUMAN,,,,
 Recall2_Bad_101,의사,,오늘은 기본 검진만 받으셨죠. 다행히 길고양이치고는 건강 상태가 나쁘지 않네요.,,,,,,
@@ -245,24 +245,26 @@ Stage02_006,Player,,(깜빡` 눈을 뜬다...),,temp_playerCAT,,,,
 ,Player,,앗` 이제 슬슬 해가 지려고 하네?!,,temp_playerCAT,,,,
 ,Player,,서둘러서 집으로 돌아가는 게 좋겠어. 아파트 공원을 통해서 가자!,,temp_playerCAT,,,,
 ,,,,,,,,,
-Stage03_001,Player,,드디어 아파트 공원에 도착했어! 어? 근데 아이들이 있네.,,temp_playerCAT,,,,스테이지3 공원 입구에 입성
-Stage03_002,아이A,,야` 이것 봐!! 개미들이 집에 못 들어가서 우왕좌왕하는 거 봐ㅋㅋㅋ,,,,,,개미집 부수고 있는 아이들에게 클로즈업
-,아이B,,헐ㅋㅋㅋ 아예 못 움직이게 돌로 눌러볼까?,,,,,,
-,아이A,,좋아!! 난 더 큰 돌 찾아볼게ㅋㅋ,,,,,,
+Stage03_001,Player,,드디어 아파트 공원에 도착했어!,,temp_playerCAT,,,,스테이지3 공원 입구에 입성
+,Player,,어? 근데 아이들이 있네.,,temp_playerCAT,,,EventSetNextTutorial,
+Stage03_002,아이A,,야` 이것 봐!! 개미들이 집에 못 들어가서 우왕좌왕하는 거 봐ㅋㅋㅋ,,temp_KidA,,,,개미집 부수고 있는 아이들에게 클로즈업
+,아이B,,헐ㅋㅋㅋ 아예 못 움직이게 돌로 눌러볼까?,,temp_KidB,,,,
+,아이A,,좋아!! 난 더 큰 돌 찾아볼게ㅋㅋ,,temp_KidA,,,EventSetNextTutorial,
 Stage03_003,Player,,윽… 그렇게…착하지는 않은 아이들이네…,,temp_playerCAT,,,,
-,Player,,저 아이들한테 걸리면 분명…괴롭혀질 거야…!!,,temp_playerCAT,,,,
+,Player,,저 아이들한테 걸리면 분명…괴롭혀질 거야…!!,SHAKE,temp_playerCAT,,,,
 ,Player,,다행히 이쪽은 안 보고 있네.\n[이쪽을 안 볼 때 몰래 움직여보자!],,temp_playerCAT,,,,
-,Player,,몸을 숨길 만한 곳이 나오면 [E키를 눌러서 숨어보자.],,temp_playerCAT,,,,
-Stage03_004,아이A,,어…? 어!!! 저기 고양이다!!,,,,,,아이들한테 걸림
-,아이B,,헐 어디어디?? 얼른 잡자!!,,,,,,
-,Player,,이런` 들켰어!! 얼른 도망치자!!,,temp_playerCAT,,,,
+,Player,,점프하면 눈에 띌 테니까 조심하자.,,temp_playerCAT,,,,
+,Player,,몸을 숨길 만한 곳이 나오면 [E키를 눌러서 숨어보자.],,temp_playerCAT,,,EventSetNextTutorial,
+Stage03_004,아이A,,어…? 어!!! 저기 고양이다!!,SHAKE,temp_KidA,,,,아이들한테 걸림
+,아이B,,헐 어디어디?? 얼른 잡자!!,SHAKE,temp_KidB,,,,
+,Player,,이런` 들켰다!! 얼른 도망치자!!,SHAKE,temp_playerCAT,,,EventStealthGameEnd,
 Stage03_005,Player,,저건… 하얀 새..?!,,,,,,추격씬에서 하얀새가 보임
 ,Player,,자기를 따라오는 건가??,,temp_playerCAT,,,,
 ,Player,,일단 저 하얀 새를 따라가보자!,,temp_playerCAT,,,,
-Stage03_006,아이B,,아 뭐야!! 힘들게 뛰어왔는데!! 사라졌어!,,,,,,공원 정자 밑에 무사히 몸을 숨김
-,아이A,,에이… 거의 다 잡을 수 있었는데!!,,,,,,
-,아이B,,야` 배고프다. 피시방이나 가서 라면이나 먹자.,,,,,,
-,아이A,,좋아! 이번에는 네가 사는 거다~,,,,,,
+Stage03_006,아이B,,아 뭐야!! 힘들게 뛰어왔는데!! 사라졌어!,,temp_KidB,,,,공원 정자 밑에 무사히 몸을 숨김
+,아이A,,에이… 거의 다 잡을 수 있었는데!!,,temp_KidA,,,,
+,아이B,,야` 배고프다. 피시방이나 가서 라면이나 먹자.,,temp_KidB,,,,
+,아이A,,좋아! 이번에는 네가 사는 거다~,,temp_KidA,,,,
 Stage03_007,Player,,헉… 헉… 숨이 가빠… ,,temp_playerCAT,,,,아이들이 정자 주변에서 사라진 후
 ,Player,,저 아이들은 이제 간 거겠지… 오랜만에 뛰었더니 온몸이 녹초가 됐네. ,,temp_playerCAT,,,,
 ,Player,,아… 너무 배고파… 그러고 보니 고양이 몸이 된 이후로는 아무것도 못 먹었잖아… ,,temp_playerCAT,,,,

@@ -6,8 +6,11 @@ public class WalkingMiniGameTutorial : TutorialBase
     [Header("미니게임 설정")]
     [SerializeField] private StruggleMiniGame miniGame;
 
-    [Header("시작 전 다이얼로그 (선택사항)")]
+    [Header("시작 전 다이얼로그")]
     [SerializeField] private string startDialogueID = ""; // 미니게임 시작 전 다이얼로그
+
+    [Header("완료 후 UI")]
+    [SerializeField] private GameObject uiToShowOnComplete; // 튜토리얼 완료 후 활성화할 UI
 
     [Header("자동 진행 설정")]
     [SerializeField] private bool autoProgressOnComplete = true; // 완료 시 자동으로 다음 튜토리얼 진행
@@ -26,6 +29,12 @@ public class WalkingMiniGameTutorial : TutorialBase
         miniGameStarted = false;
         miniGameCompleted = false;
         hasProgressed = false;
+
+        // 시작 시 완료 UI가 있다면 비활성화
+        if (uiToShowOnComplete != null)
+        {
+            uiToShowOnComplete.SetActive(false);
+        }
 
         if (miniGame == null)
         {
@@ -56,11 +65,11 @@ public class WalkingMiniGameTutorial : TutorialBase
     public override void Execute(TutorialController controller)
     {
         // 미니게임이 완료되었고 자동 진행이 활성화된 경우
-        if (miniGameCompleted && autoProgressOnComplete && !hasProgressed) 
+        if (miniGameCompleted && autoProgressOnComplete && !hasProgressed)
         {
             Debug.Log("[WalkingMiniGameTutorial] 미니게임 완료, 다음 튜토리얼로 진행");
             controller?.SetNextTutorial();
-            hasProgressed = true; 
+            hasProgressed = true;
         }
     }
 
@@ -72,10 +81,20 @@ public class WalkingMiniGameTutorial : TutorialBase
             miniGame.OnMiniGameComplete -= HandleMiniGameComplete;
         }
         StopAllCoroutines();
+
+        // 튜토리얼 완료 후 지정된 UI 활성화
+        if (uiToShowOnComplete != null)
+        {
+            Debug.Log($"[WalkingMiniGameTutorial] 완료 UI '{uiToShowOnComplete.name}'를 활성화합니다.");
+            uiToShowOnComplete.SetActive(true);
+        }
     }
 
     private IEnumerator StartWithDialogue()
     {
+        // 다이얼로그 시작 전 3초 대기
+        yield return new WaitForSeconds(3f);
+
         // 다이얼로그 시작
         DialogueManager.Instance.StartDialogue(startDialogueID);
 
@@ -122,7 +141,7 @@ public class WalkingMiniGameTutorial : TutorialBase
         }
     }
 
-    // 미니게임 강제 종료 (필요시 사용)
+    // 미니게임 강제 종료
     public void ForceEndMiniGame()
     {
         if (miniGame != null)

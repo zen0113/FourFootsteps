@@ -454,40 +454,50 @@ public class StruggleMiniGame : MonoBehaviour
         {
             Debug.Log("[StruggleMiniGame] 모든 단계 완료!");
 
-            // 최종 완료 다이얼로그 재생
+            StartCoroutine(HideUIWithFadeOut());
+
+            // 최종 완료 다이얼로그를 먼저 재생합니다.
             if (!string.IsNullOrEmpty(finalDialogueID))
             {
                 DialogueManager.Instance.StartDialogue(finalDialogueID);
                 yield return StartCoroutine(WaitForDialogueEnd());
             }
 
-            FinishMiniGame(); // 미니게임 종료
+            // 다이얼로그가 끝난 후 미니게임을 종료합니다.
+            FinishMiniGame();
         }
         else
         {
             // 단계별 다이얼로그 재생
-            int dialogueIndex = successCount - 1; // successCount는 1부터 시작하므로 인덱스는 0부터
+            int dialogueIndex = successCount - 1;
             if (dialogueIndex >= 0 && dialogueIndex < stageDialogueIDs.Length &&
                 !string.IsNullOrEmpty(stageDialogueIDs[dialogueIndex]))
             {
-                DialogueManager.Instance.StartDialogue(stageDialogueIDs[dialogueIndex]);
+                string currentDialogueID = stageDialogueIDs[dialogueIndex];
+
+                if (currentDialogueID == "walking_stage3")
+                {
+                    if (gaugeFillImage != null) gaugeFillImage.gameObject.SetActive(false);
+                    if (keyPromptText != null) keyPromptText.gameObject.SetActive(false);
+                }
+
+                DialogueManager.Instance.StartDialogue(currentDialogueID);
                 yield return StartCoroutine(WaitForDialogueEnd());
             }
 
             // 다음 단계 준비
-            currentGauge = 0f; // 게이지 초기화
-            gaugeFillImage.fillAmount = 0f; // 게이지 UI 초기화
-            gaugeFillImage.color = normalGaugeColor; // 게이지 색상 초기화
+            currentGauge = 0f;
+            gaugeFillImage.fillAmount = 0f;
+            gaugeFillImage.color = normalGaugeColor;
 
-            // 진행 상황 업데이트 (성공 후에는 항상 진행사항 표시)
             isShowingProgressText = true;
             keyPressCountSinceInactivity = 0;
             UpdateKeyPromptText();
         }
 
-        isPlayingDialogue = false; // 다이얼로그 재생 종료, 입력 재개
-        lastKeyPressTime = Time.time; // 시간 갱신
-        RestartInactivityTimer(); // 비활성 타이머 재시작
+        isPlayingDialogue = false;
+        lastKeyPressTime = Time.time;
+        RestartInactivityTimer();
     }
 
     IEnumerator MoveCharacterForwardCrouching()
@@ -556,9 +566,6 @@ public class StruggleMiniGame : MonoBehaviour
         Debug.Log("[StruggleMiniGame] 미니게임 완료");
 
         isActive = false; // 미니게임 비활성화
-        cameraShake.enabled = false; // 카메라 쉐이크 비활성화 (필요시)
-
-        keyPromptText.text = "이제 걸을 수 있을 것 같아"; // 최종 안내 텍스트
 
         // 모든 코루틴 정지
         if (gaugeCoroutine != null) StopCoroutine(gaugeCoroutine);
@@ -571,13 +578,18 @@ public class StruggleMiniGame : MonoBehaviour
 
     IEnumerator FinalSuccessSequence()
     {
+        // 이 시점은 마지막 다이얼로그가 끝난 직후이므로, 여기서 비활성화합니다.
+        if (cameraShake != null)
+        {
+            Debug.Log("[StruggleMiniGame] 최종 다이얼로그 종료, 카메라 쉐이크를 비활성화합니다.");
+            cameraShake.enabled = false;
+        }
+
         // 최종 효과음
         if (sfxFinalStep != null) sfxFinalStep.Play();
 
-        yield return new WaitForSeconds(1f); // 1초 대기
+        yield return new WaitForSeconds(0.2f); // 1초 대기
 
-        // UI 페이드 아웃 효과와 함께 비활성화
-        yield return StartCoroutine(HideUIWithFadeOut());
 
         // 플레이어 상태 복원 (미니게임 완전 종료 후)
         if (playerMovement != null)
@@ -593,14 +605,13 @@ public class StruggleMiniGame : MonoBehaviour
         // 미니게임 완료 이벤트 호출
         InvokeMiniGameComplete();
     }
-
     IEnumerator HideUIWithFadeOut()
     {
         // 페이드 아웃 효과
         yield return StartCoroutine(FadeOutUI());
 
         // UI 비활성화
-        miniGameUI.SetActive(false);
+        //miniGameUI.SetActive(false);
     }
 
     IEnumerator DecreaseGaugeOverTime()
@@ -685,7 +696,7 @@ public class StruggleMiniGame : MonoBehaviour
         return (float)successCount / totalSuccessNeeded;
     }
 
-    // 단계별 성공 시 호출되는 이벤트 (필요시 사용)
+    // 단계별 성공 시 호출되는 이벤트 
     public System.Action<int> OnStageComplete; // 각 단계 완료 시 호출되는 이벤트
     public System.Action OnMiniGameComplete; // 미니게임 전체 완료 시 호출되는 이벤트
 

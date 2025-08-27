@@ -17,7 +17,7 @@ public class DarknessTapMinigame : MonoBehaviour
     [Header("단계별 이미지 설정")]
     [SerializeField] private Image stageImage;// 단계별로 변화할 이미지
     [SerializeField] private Sprite[] stageSprites; // 각 단계별 스프라이트 (4개: 40,60,80,100번용)
-    [SerializeField] private int[] stageMilestones = { 40, 60, 80, 100 }; // 이미지 변화 시점
+    [SerializeField] private int[] stageMilestones = { 20, 30, 40, 50 }; // 이미지 변화 시점
 
     [Header("UI 요소")]
     [SerializeField] private TextMeshProUGUI instructionText;  // 안내 텍스트

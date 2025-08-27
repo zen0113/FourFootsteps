@@ -381,7 +381,6 @@ public class PlayerCatMovement : MonoBehaviour
                 }
             }
         }
-        // 카트에 탔을 때의 물리 로직은 필요시 여기에 추가
     }
 
     /// <summary>
@@ -646,6 +645,11 @@ public class PlayerCatMovement : MonoBehaviour
         // 박스와 상호작용 중인지 확인
         bool isInteractingWithBox = boxInteraction != null && boxInteraction.IsInteracting;
         bool isPullingBox = boxInteraction != null && boxInteraction.IsPulling;
+
+        if (isMiniGameInputBlocked || forceCrouch)
+        {
+            horizontalInput = 0;
+        }
 
         // 상황에 따른 이동 속도 결정
         if (isInteractingWithBox && isBoxInteractionEnabled)

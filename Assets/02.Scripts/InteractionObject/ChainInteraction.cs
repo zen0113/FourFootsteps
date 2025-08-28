@@ -12,6 +12,13 @@ public class ChainInteraction : MonoBehaviour
     [Header("이펙트 설정")]
     [SerializeField] private ParticleSystem breakEffect;        // 사슬 끊어지는 파티클 (선택사항)
     [SerializeField] private float breakAnimationTime = 0.5f;   // 끊어지는 애니메이션 시간
+    [SerializeField] private Transform chainFallPoint;          // 사슬이 떨어질 목표 지점
+    [SerializeField] private float chainFallTime = 1.5f;        // 사슬이 떨어지는 시간
+    [SerializeField] private float chainWaitTime = 4f;          // 사슬이 땅에 있는 시간
+    [SerializeField] private float chainFadeTime = 2f;          // 사슬이 사라지는 페이드 시간
+    
+    [Header("연결된 플랫폼 트리거")]
+    [SerializeField] private PlatformActivationTrigger linkedPlatformTrigger; // 연결된 PlatformActivationTrigger
     
     private bool isChainBroken = false;                          // 사슬이 끊어졌는지 여부
     private bool playerInRange = false;                          // 플레이어가 범위 내에 있는지
@@ -24,10 +31,6 @@ public class ChainInteraction : MonoBehaviour
     private PushableBox pushableBoxComponent;                    // 기존 PushableBox 컴포넌트
     private Rigidbody2D connectedRb;                            // 연결된 오브젝트의 Rigidbody2D
     private Collider2D connectedCollider;                       // 연결된 오브젝트의 Collider2D
-    
-    // PlatformActivationTrigger 컴포넌트 (사슬이 풀린 후 활성화)
-    [Header("연결된 플랫폼 트리거")]
-    [SerializeField] private PlatformActivationTrigger linkedPlatformTrigger; // 연결된 PlatformActivationTrigger
     
     private void Start()
     {
@@ -157,6 +160,7 @@ public class ChainInteraction : MonoBehaviour
         if (chainVisual != null)
         {
             Vector3 originalScale = chainVisual.transform.localScale;
+            Vector3 originalPosition = chainVisual.transform.position;
             SpriteRenderer spriteRenderer = chainVisual.GetComponent<SpriteRenderer>();
             Color originalColor = Color.white;
             
@@ -166,16 +170,46 @@ public class ChainInteraction : MonoBehaviour
                 originalColor = spriteRenderer.color;
             }
             
+            // 목표 지점 설정 (chainFallPoint가 없으면 아래쪽으로 기본 설정)
+            Vector3 targetPosition;
+            if (chainFallPoint != null)
+            {
+                targetPosition = chainFallPoint.position;
+            }
+            else
+            {
+                // 기본값: 현재 위치에서 아래로 3만큼 떨어뜨리기
+                targetPosition = originalPosition + Vector3.down * 3f;
+            }
+            
+            // 1단계: 사슬이 부드럽게 떨어지는 애니메이션 (Lerp 사용)
             float elapsedTime = 0f;
             
-            // 사슬이 작아지면서 페이드아웃되며 사라지는 애니메이션
-            while (elapsedTime < breakAnimationTime)
+            while (elapsedTime < chainFallTime)
             {
-                float progress = elapsedTime / breakAnimationTime;
-                float scale = Mathf.Lerp(1f, 0f, progress);
+                float progress = elapsedTime / chainFallTime;
                 
-                // 크기 변경
-                chainVisual.transform.localScale = originalScale * scale;
+                // 부드러운 곡선 이동 (EaseOut 효과)
+                float easedProgress = 1f - (1f - progress) * (1f - progress);
+                Vector3 currentPosition = Vector3.Lerp(originalPosition, targetPosition, easedProgress);
+                chainVisual.transform.position = currentPosition;
+                
+                elapsedTime += Time.deltaTime;
+                yield return null;
+            }
+            
+            // 정확히 목표 지점에 배치
+            chainVisual.transform.position = targetPosition;
+            
+            // 2단계: 땅에 떨어진 후 대기 시간
+            yield return new WaitForSeconds(chainWaitTime);
+            
+            // 3단계: 페이드아웃되며 사라지는 애니메이션
+            elapsedTime = 0f;
+            
+            while (elapsedTime < chainFadeTime)
+            {
+                float progress = elapsedTime / chainFadeTime;
                 
                 // 페이드 아웃 효과
                 if (spriteRenderer != null)
@@ -317,6 +351,25 @@ public class ChainInteraction : MonoBehaviour
                 // 연결선 표시
                 Gizmos.color = Color.magenta;
                 Gizmos.DrawLine(transform.position, linkedPlatformTrigger.transform.position);
+            }
+        }
+        
+        // 사슬 떨어뜨릴 지점 시각화
+        if (chainFallPoint != null)
+        {
+            Gizmos.color = new Color(1f, 0.5f, 0f, 0.8f); // 주황색
+            Gizmos.DrawWireSphere(chainFallPoint.position, 0.3f);
+            
+            // 사슬에서 떨어뜨릴 지점까지의 경로 표시
+            if (chainVisual != null)
+            {
+                Gizmos.color = new Color(1f, 0.5f, 0f, 0.5f);
+                Gizmos.DrawLine(chainVisual.transform.position, chainFallPoint.position);
+                
+                // 화살표 방향 표시
+                Vector3 direction = (chainFallPoint.position - chainVisual.transform.position).normalized;
+                Vector3 arrowPos = chainVisual.transform.position + direction * 0.8f;
+                Gizmos.DrawRay(arrowPos, direction * 0.3f);
             }
         }
     }

@@ -25,6 +25,10 @@ public class ChainInteraction : MonoBehaviour
     private Rigidbody2D connectedRb;                            // 연결된 오브젝트의 Rigidbody2D
     private Collider2D connectedCollider;                       // 연결된 오브젝트의 Collider2D
     
+    // PlatformActivationTrigger 컴포넌트 (사슬이 풀린 후 활성화)
+    [Header("연결된 플랫폼 트리거")]
+    [SerializeField] private PlatformActivationTrigger linkedPlatformTrigger; // 연결된 PlatformActivationTrigger
+    
     private void Start()
     {
         // 오디오 소스 설정
@@ -52,6 +56,17 @@ public class ChainInteraction : MonoBehaviour
             pushableBoxComponent = connectedObject.GetComponent<PushableBox>();
             connectedRb = connectedObject.GetComponent<Rigidbody2D>();
             connectedCollider = connectedObject.GetComponent<Collider2D>();
+            
+            // 연결된 PlatformActivationTrigger 찾기 및 비활성화
+            if (linkedPlatformTrigger != null)
+            {
+                linkedPlatformTrigger.DeactivateTrigger(); // 비활성화 메서드 호출
+                Debug.Log($"연결된 PlatformActivationTrigger를 비활성화했습니다.");
+            }
+            else
+            {
+                Debug.LogWarning("LinkedPlatformTrigger가 설정되지 않았습니다. Inspector에서 연결해주세요.");
+            }
             
             // PushableBox 컴포넌트가 없다면 경고
             if (pushableBoxComponent == null)
@@ -219,6 +234,17 @@ public class ChainInteraction : MonoBehaviour
                 Debug.Log($"{connectedObject.name}에 Box 태그를 추가했습니다.");
             }
             
+            // ★ 핵심: 연결된 PlatformActivationTrigger 활성화 (이제 플레이어가 트리거 영역에 들어가면 작동)
+            if (linkedPlatformTrigger != null)
+            {
+                linkedPlatformTrigger.ActivateTrigger(); // 활성화 메서드 호출
+                Debug.Log($"연결된 PlatformActivationTrigger가 활성화되었습니다! 이제 플레이어가 트리거 영역에 들어가면 플랫폼이 활성화됩니다.");
+            }
+            else
+            {
+                Debug.Log("연결된 PlatformActivationTrigger가 없습니다. 필요하다면 Inspector에서 설정해주세요.");
+            }
+            
             Debug.Log($"{connectedObject.name}이(가) 이제 밀 수 있습니다! (기존 박스 시스템 활용)");
         }
     }
@@ -280,6 +306,18 @@ public class ChainInteraction : MonoBehaviour
         {
             Gizmos.color = isChainBroken ? Color.red : Color.green;
             Gizmos.DrawLine(transform.position, connectedObject.transform.position);
+            
+            // 연결된 PlatformActivationTrigger 상태 시각화
+            if (linkedPlatformTrigger != null)
+            {
+                // IsActivated 프로퍼티 사용
+                Gizmos.color = linkedPlatformTrigger.IsActivated ? Color.cyan : Color.gray;
+                Gizmos.DrawWireCube(linkedPlatformTrigger.transform.position, Vector3.one * 0.8f);
+                
+                // 연결선 표시
+                Gizmos.color = Color.magenta;
+                Gizmos.DrawLine(transform.position, linkedPlatformTrigger.transform.position);
+            }
         }
     }
 }

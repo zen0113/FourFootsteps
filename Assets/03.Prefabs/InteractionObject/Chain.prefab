@@ -1,5 +1,36 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &1107091037306003399
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4810767868315011043}
+  m_Layer: 0
+  m_Name: Chain Fall Point
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4810767868315011043
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1107091037306003399}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -3.45, y: -6.49, z: -0.16148578}
+  m_LocalScale: {x: 1.2551618, y: 1.2551618, z: 1.2551618}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 8854939053311323476}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1491363777802010813
 GameObject:
   m_ObjectHideFlags: 0
@@ -328,6 +359,7 @@ Transform:
   - {fileID: 6698871305968996112}
   - {fileID: 1710691072972716547}
   - {fileID: 6660570363745915219}
+  - {fileID: 4810767868315011043}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &7697869643846546249
@@ -563,3 +595,8 @@ MonoBehaviour:
   chainBreakSound: {fileID: 8300000, guid: a2d497e608405fb4ea37efeac2698cf8, type: 3}
   breakEffect: {fileID: 0}
   breakAnimationTime: 0.5
+  chainFallPoint: {fileID: 0}
+  chainFallTime: 1.5
+  chainWaitTime: 4
+  chainFadeTime: 2
+  linkedPlatformTrigger: {fileID: 0}

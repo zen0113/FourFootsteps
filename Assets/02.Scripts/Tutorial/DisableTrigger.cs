@@ -5,7 +5,7 @@ using UnityEngine;
 public class DisableTrigger : TutorialBase
 {
     [Header("플레이어 컨트롤러 설정")]
-    [SerializeField] private PlayerHumanMovement playerController;
+    [SerializeField] private GameObject playerController;
 
     [Header("튜토리얼 충돌 오브젝트 및 UI 오브젝트")]
     [SerializeField] private Transform triggerObject;

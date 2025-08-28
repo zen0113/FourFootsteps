@@ -35,6 +35,7 @@ public class EventObject : MonoBehaviour
     protected void Investigate()
     {
         EventManager.Instance.CallEvent(eventId);
+        Debug.Log($"{eventId} 호출");
 
         // 한번만 조사 가능한 설정이면 조사 완료 상태로 변경
         if (isOneTimeOnly)

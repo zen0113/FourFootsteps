@@ -12,7 +12,7 @@ public class CSVDownloaderEditor : EditorWindow
         {"events", "615325743"},
         {"conditions", "1296282168"},
         {"results", "1774091709"},
-        {"dialogues", "184365766"},
+        {"dialogues", "1081818437"},
         {"choices", "1314559638"},
         {"variables", "1868321381"}
     };

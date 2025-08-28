@@ -29,6 +29,7 @@ public class PlayerHumanMovement : MonoBehaviour
         UIManager.Instance.SetUI(eUIGameObjectName.ResponsibilityGroup, true);
         UIManager.Instance.SetUI(eUIGameObjectName.ResponsibilityGauge, true);
         UIManager.Instance.SetUI(eUIGameObjectName.PlaceUI, true);
+        UIManager.Instance.SetUI(eUIGameObjectName.PuzzleBagButton, false);
 
         // rb = GetComponent<Rigidbody2D>(); // Rigidbody2D 관련 코드 제거
         spriteRenderer = GetComponent<SpriteRenderer>();

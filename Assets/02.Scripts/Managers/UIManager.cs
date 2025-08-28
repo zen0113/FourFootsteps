@@ -7,11 +7,13 @@ using TMPro;
 public enum eUIGameObjectName
 {
     WarningVignette,
+    HidingVignette,
     CatVersionUIGroup,
     HumanVersionUIGroup,
     ResponsibilityGroup,
     ResponsibilityGauge,
-    PlaceUI
+    PlaceUI,
+    PuzzleBagButton
 }
 
 public class UIManager : MonoBehaviour
@@ -23,10 +25,12 @@ public class UIManager : MonoBehaviour
 
     [Header("UI Game Objects")]
     public GameObject warningVignette;
+    public GameObject hidingVignette;
     public GameObject heartParent;
     public GameObject responsibilityGroup;
     public GameObject responsibilityGauge;
     public GameObject placeUI;
+    public GameObject puzzleBagButton;
 
     [HideInInspector] public Slider responsibilitySlider;
 
@@ -39,8 +43,12 @@ public class UIManager : MonoBehaviour
 
     private readonly Dictionary<eUIGameObjectName, GameObject> uiGameObjects = new();
     private Q_Vignette_Single warningVignetteQVignetteSingle;
+    private Q_Vignette_Single hidingVignetteQVignetteSingle;
 
     public static UIManager Instance { get; private set; }
+
+    // 은신 비네팅 깜빡임 효과 활성화 변수
+    private bool isBlinkHidingActive = false;
 
     private void Awake()
     {
@@ -57,22 +65,10 @@ public class UIManager : MonoBehaviour
 
     }
 
-
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
     private void AddUIGameObjects()
     {
         uiGameObjects.Add(eUIGameObjectName.WarningVignette, warningVignette);
+        uiGameObjects.Add(eUIGameObjectName.HidingVignette, hidingVignette);
 
         uiGameObjects.Add(eUIGameObjectName.CatVersionUIGroup, catVersionUIGroup);
         uiGameObjects.Add(eUIGameObjectName.HumanVersionUIGroup, humanVersionUIGroup);
@@ -80,8 +76,10 @@ public class UIManager : MonoBehaviour
         uiGameObjects.Add(eUIGameObjectName.ResponsibilityGroup, responsibilityGroup);
         uiGameObjects.Add(eUIGameObjectName.ResponsibilityGauge, responsibilityGauge);
         uiGameObjects.Add(eUIGameObjectName.PlaceUI, placeUI);
+        uiGameObjects.Add(eUIGameObjectName.PuzzleBagButton, puzzleBagButton);
 
         warningVignetteQVignetteSingle = warningVignette.GetComponent<Q_Vignette_Single>();
+        hidingVignetteQVignetteSingle = hidingVignette.GetComponent<Q_Vignette_Single>();
         responsibilitySlider = responsibilityGauge.GetComponent<Slider>();
     }
 
@@ -190,5 +188,69 @@ public class UIManager : MonoBehaviour
         }
 
         warningVignette.SetActive(false); // 경고 표시 비활성화
+    }
+
+    // 스테이지3 은신 미니게임에서 은신했을 경우 VFX 비네팅 효과
+    public IEnumerator HidingCoroutine( bool isHiding, float fadeInDuration = 1f)
+    {
+        float startAlpha, endAlpha;
+        if (isHiding)
+        {
+            startAlpha = 0f; 
+            endAlpha = 1f;
+        }
+        else
+        {
+            startAlpha = 1f;
+            endAlpha = 0f;
+        }
+
+        hidingVignette.SetActive(true); // 은신 비네팅 활성화
+
+        float timeAccumulated = 0;
+        while (timeAccumulated < fadeInDuration)
+        {
+            timeAccumulated += Time.deltaTime;
+            hidingVignetteQVignetteSingle.mainColor.a = Mathf.Lerp(startAlpha,
+                endAlpha,
+                timeAccumulated / fadeInDuration); // WarningVignette 투명도를 0에서 1로 선형 보간(Lerp)
+
+            yield return null;
+        }
+
+        if(!isHiding)
+            hidingVignette.SetActive(false); // 은신 비네팅 비활성화
+    }
+
+    // 은신 비네팅 깜빡임 효과 코루틴
+    private IEnumerator BlinkHidingCoroutine(float blinkHidingSpeed =2f)
+    {
+        while (isBlinkHidingActive)
+        {
+            // 깜빡이는 효과
+            float alpha = Mathf.PingPong(Time.time * blinkHidingSpeed, 1f); // 알파값 깜빡임 효과
+            hidingVignetteQVignetteSingle.mainColor.a = 0.5f + (alpha * 0.5f); // 0.5 ~ 1.0 사이로 알파값 조정
+
+            yield return null;
+        }
+
+        // 종료 시 원래 색상으로 복원
+        Color finalColor = hidingVignetteQVignetteSingle.mainColor;
+        finalColor.a = 1f;
+        hidingVignetteQVignetteSingle.mainColor = finalColor;
+    }
+
+    public void SetBlinkHidingCoroutine(bool isActive)
+    {
+        if (isActive)
+        {
+            isBlinkHidingActive = true;
+            StartCoroutine(BlinkHidingCoroutine());
+        }
+        else
+        {
+            StopCoroutine(BlinkHidingCoroutine());
+            isBlinkHidingActive = false;
+        }
     }
 }

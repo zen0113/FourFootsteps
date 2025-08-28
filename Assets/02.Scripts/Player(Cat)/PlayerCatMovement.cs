@@ -23,6 +23,13 @@ public class PlayerCatMovement : MonoBehaviour
     [SerializeField] private float dashPower = 8f;      // 대시 이동 속도
     [SerializeField] private float jumpPower = 5f;      // 점프 힘
     [SerializeField] private float crouchPower = 1f;    // 웅크린 상태 이동 속도
+    // 특정 상황 시, 점프 불가능
+    [SerializeField] private bool isJumpingBlocked = false;
+    public bool IsJumpingBlocked
+    {
+        get => isJumpingBlocked;
+        set => isJumpingBlocked = value;
+    }
 
     // 파티클 시스템 (발자국 효과)
     [Header("파티클 시스템")]
@@ -122,8 +129,9 @@ public class PlayerCatMovement : MonoBehaviour
         UIManager.Instance.SetUI(eUIGameObjectName.ResponsibilityGroup, true);
         UIManager.Instance.SetUI(eUIGameObjectName.ResponsibilityGauge, true);
         UIManager.Instance.SetUI(eUIGameObjectName.PlaceUI, true);
-
         // 필요한 컴포넌트들 가져오기
+        UIManager.Instance.SetUI(eUIGameObjectName.PuzzleBagButton, true);
+
         rb = GetComponent<Rigidbody2D>();
         boxCollider = GetComponent<BoxCollider2D>();
         spriteRenderer = GetComponent<SpriteRenderer>();
@@ -736,6 +744,8 @@ public class PlayerCatMovement : MonoBehaviour
     /// </summary>
     void Jump()
     {
+        if (isJumpingBlocked) return;
+
         if (Input.GetKeyDown(KeyCode.Space) && !isCrouching && !isClimbing)
         {
             // 지상에 있거나 더블 점프 가능한 상태에서만 점프
@@ -1053,5 +1063,23 @@ public class PlayerCatMovement : MonoBehaviour
         {
             audioSource.PlayOneShot(hurtSound);
         }
+    }
+
+    public void StopDashParticle()
+    {
+        particleEmission.rateOverTime = 0f;
+        if (dashParticle.particleCount == 0)
+        {
+            dashParticle.Stop();
+        }
+    }
+
+    public void UpdateAnimationCrouch()
+    {
+        // 숨는 중/락 중에는 이동/대시 꺼두고, 쭈그림/기어감만 유지
+        animator.SetBool("Moving", false);
+        animator.SetBool("Dash", false);
+        animator.SetBool("Crouch", ForceCrouch);
+        StopDashParticle();
     }
 }

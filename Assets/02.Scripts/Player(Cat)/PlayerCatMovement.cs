@@ -19,6 +19,13 @@ public class PlayerCatMovement : MonoBehaviour
     [SerializeField] private float dashPower = 8f;
     [SerializeField] private float jumpPower = 5f;
     [SerializeField] private float crouchPower = 1f;
+    // 특정 상황 시, 점프 불가능
+    [SerializeField] private bool isJumpingBlocked = false;
+    public bool IsJumpingBlocked
+    {
+        get => isJumpingBlocked;
+        set => isJumpingBlocked = value;
+    }
 
     [Header("파티클 시스템")]
     [SerializeField] private ParticleSystem dashParticle; // 대시 파티클 시스템
@@ -595,6 +602,8 @@ public class PlayerCatMovement : MonoBehaviour
 
     void Jump()
     {
+        if (isJumpingBlocked) return;
+
         if (Input.GetKeyDown(KeyCode.Space) && !isCrouching && !isClimbing)
         {
             if (isOnGround || jumpCount < 2)
@@ -785,5 +794,23 @@ public class PlayerCatMovement : MonoBehaviour
         {
             audioSource.PlayOneShot(hurtSound);
         }
+    }
+
+    public void StopDashParticle()
+    {
+        particleEmission.rateOverTime = 0f;
+        if (dashParticle.particleCount == 0)
+        {
+            dashParticle.Stop();
+        }
+    }
+
+    public void UpdateAnimationCrouch()
+    {
+        // 숨는 중/락 중에는 이동/대시 꺼두고, 쭈그림/기어감만 유지
+        animator.SetBool("Moving", false);
+        animator.SetBool("Dash", false);
+        animator.SetBool("Crouch", ForceCrouch);
+        StopDashParticle();
     }
 }

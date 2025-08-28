@@ -520,6 +520,7 @@ public class DialogueManager : MonoBehaviour
     // ---------------------------------------------- Script methods ----------------------------------------------
     private void ProceedToNext()
     {
+        StopAllCoroutines();
         int currentDialogueLineIndex = dialogues[currentDialogueID].CurrentLineIndex;
         string next = dialogues[currentDialogueID].Lines[currentDialogueLineIndex].Next;
 

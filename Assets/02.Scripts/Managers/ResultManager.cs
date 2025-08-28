@@ -224,6 +224,18 @@ public class ResultManager : MonoBehaviour
                 yield return StartCoroutine(MoveToRoomCoroutine(roomName));
                 break;
 
+            case "Result_StartChaseGameIntro":
+                // 다이얼로그 진행 후
+                GameObject player = GameObject.FindWithTag("Player");
+                player.GetComponent<PlayerCatMovement>().ForceCrouch = false;
+                player.GetComponent<PlayerCatMovement>().IsJumpingBlocked = false;
+                // 플레이어 오른쪽으로 강제 대쉬 이동시켜서 시야에서 벗어난 후
+                player.GetComponent<CatAutoMover>().enabled = true;
+                player.GetComponent<CatAutoMover>().StartMoving(player.GetComponent<CatAutoMover>().targetPoint);
+                // 화면 어두워짐+ 다음 추격 미니게임 시작
+                yield return UIManager.Instance.OnFade(null, 0, 1, 1.5f);
+                break;
+
             default:
                 Debug.Log($"Result ID: {resultID} not found!");
                 yield return null;

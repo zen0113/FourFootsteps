@@ -60,7 +60,7 @@ public class StealthSFX : MonoBehaviour
         if (!isShowedGuide)
         {
             isActive = true;
-            guideText.gameObject.SetActive(true);
+            guideText?.gameObject.SetActive(true);
             guideText.text = "E 키로 숨기";
             StartCoroutine(BlinkTextPrompt());
         }
@@ -71,7 +71,7 @@ public class StealthSFX : MonoBehaviour
         if (!isShowedGuide)
         {
             isActive = false;
-            guideText.gameObject.SetActive(false);
+            guideText?.gameObject.SetActive(false);
         }
     }
 
@@ -162,10 +162,12 @@ public class StealthSFX : MonoBehaviour
         {
             elapsedTime += Time.deltaTime;
             mainCamera.orthographicSize = Mathf.Lerp(startValue, finalValue, (elapsedTime / duration));
+            mainCamera.GetComponent<FollowCamera>().UpdateCameraHalfSize();
             yield return null;
         }
 
         mainCamera.orthographicSize = finalValue;
+        mainCamera.GetComponent<FollowCamera>().UpdateCameraHalfSize();
     }
 
     // 심장 효과음 페이드 재생 코루틴
@@ -209,5 +211,31 @@ public class StealthSFX : MonoBehaviour
         // 완전 무음이면 정지 (다음에 다시 Play로 시작)
         if (Mathf.Approximately(targetVolume, 0f))
             audioSource.Stop();
+    }
+
+    public void PlayEnterSFX(float camSize, float targetVolume = 0.8f, float fadeDur = 1f, float delay = 0f)
+    {
+        if (sfxCo != null) StopCoroutine(sfxCo);
+        sfxCo = StartCoroutine(FadeSFXCoroutine(0f, targetVolume, fadeDur, delay));
+
+        if (camCo != null) StopCoroutine(camCo);
+        camCo = StartCoroutine(ChangeCameraSize(camSize));
+
+        if (uiCo != null) StopCoroutine(uiCo);
+        if (UIManager.Instance != null)
+        {
+            uiCo = StartCoroutine(UIManager.Instance.HidingCoroutine(true));
+            UIManager.Instance.SetBlinkHidingCoroutine(true);
+        }
+    }
+
+    public void StopEnterSFX()
+    {
+        if (sfxCo != null) StopCoroutine(sfxCo);
+        sfxCo = StartCoroutine(FadeSFXCoroutine(0.8f, 0f, 1f, 0f));
+
+        if (uiCo != null) StopCoroutine(uiCo);
+        UIManager.Instance.SetBlinkHidingCoroutine(false);
+        uiCo = StartCoroutine(UIManager.Instance.HidingCoroutine(false));
     }
 }

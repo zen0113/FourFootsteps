@@ -45,6 +45,8 @@ public class CatStealthController : MonoBehaviour
     // 최종 목적지인 벤치 밑에 숨었을 경우, ForceNotHiding true면 E키가 안 눌리게 함.
     private bool ForceNotHiding = false;
 
+    public bool isPlaying = true;
+
     void Awake()
     {
         if (Instance == null) Instance = this;
@@ -62,6 +64,8 @@ public class CatStealthController : MonoBehaviour
 
     void Update()
     {
+        if (!isPlaying) return;
+
         // E키 입력 시, Hide Object에 은신
         if (Input.GetKeyDown(settings.toggleKey) && !ForceNotHiding && Time.time >= nextToggleAllowedTime)
         {
@@ -93,7 +97,7 @@ public class CatStealthController : MonoBehaviour
             overlaps.Add(ho);
             UpdateCurrentHideObj();
             ho.SetEffect(true);
-            OnEnterArea?.Invoke(ho);
+            if (isPlaying) OnEnterArea?.Invoke(ho);
         }
     }
     void OnTriggerExit2D(Collider2D other)
@@ -103,7 +107,7 @@ public class CatStealthController : MonoBehaviour
         {
             overlaps.Remove(ho);
             ho.SetEffect(false);
-            OnExitArea?.Invoke(ho);
+            if (isPlaying) OnExitArea?.Invoke(ho);
             UpdateCurrentHideObj();
         }
     }
@@ -181,7 +185,7 @@ public class CatStealthController : MonoBehaviour
         movement.UpdateAnimationCrouch();
 
         ho.SetEffect(false); // 하이라이트 제거
-        OnHideStart?.Invoke(ho);
+        if(isPlaying) OnHideStart?.Invoke(ho);
 
         // 은신 오브젝트 안쪽으로 이동
         yield return MoveToX(ho.AnchorX);
@@ -284,5 +288,25 @@ public class CatStealthController : MonoBehaviour
         float pad = settings.pushOutsidePadding + Mathf.Abs(transform.localScale.x) * 1.0f;
 
         return facingRight ? (b.max.x + pad) : (b.min.x - pad);
+    }
+
+    public void Chase_StartEnter(HideObject ho)
+    {
+        PlayerCatMovement.Instance.enabled = true;
+
+        if (!overlaps.Contains(ho)) overlaps.Add(ho);
+        currentHideObj = ho;
+
+        if (exitCo != null) { StopCoroutine(exitCo); exitCo = null; }
+        if (exitFxCo != null) { StopCoroutine(exitFxCo); exitFxCo = null; }
+
+        enterCo = StartCoroutine(EnterFlow(ho));
+    }
+
+    public void Chase_Courching()
+    {
+        // 원복
+        movement.SetMiniGameInputBlocked(false);
+        isHiding = false;
     }
 }

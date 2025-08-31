@@ -265,8 +265,20 @@ public class PlayerCatMovement : MonoBehaviour
         {
             animator.SetBool("Moving", false);
             animator.SetBool("Dash", false);
-            animator.SetBool("Crouching", false);
             animator.SetBool("Climbing", false);
+
+            // 입력 차단 중에도, 강제/수동 웅크림이면 상태를 유지
+            if (isCrouching || forceCrouch)
+            {
+                animator.SetBool("Crouching", isCrouchMoving);
+                animator.SetBool("Crouch", !isCrouchMoving);
+            }
+            else
+            {
+                animator.SetBool("Crouching", false);
+                animator.SetBool("Crouch", false);
+            }
+
             if (dashParticle != null)
             {
                 particleEmission.rateOverTime = 0f;
@@ -1079,7 +1091,16 @@ public class PlayerCatMovement : MonoBehaviour
         // 숨는 중/락 중에는 이동/대시 꺼두고, 쭈그림/기어감만 유지
         animator.SetBool("Moving", false);
         animator.SetBool("Dash", false);
-        animator.SetBool("Crouch", ForceCrouch);
+        if (isCrouchMoving)
+        {
+            animator.SetBool("Crouching", true);
+            animator.SetBool("Crouch", false);
+        }
+        else
+        {
+            animator.SetBool("Crouch", ForceCrouch);
+            animator.SetBool("Crouching", false);
+        }
         StopDashParticle();
     }
 }

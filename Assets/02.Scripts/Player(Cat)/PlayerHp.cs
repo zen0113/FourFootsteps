@@ -77,7 +77,26 @@ public class PlayerHp : MonoBehaviour
                 heartParent.transform.GetChild(i).GetComponent<Image>().sprite = emptyHeart;
             }
         }
-        PlayerCatMovement.Instance.PlayHurtSound();
+
+        var catMovement = gameObject.GetComponent<PlayerCatMovement>();
+
+        if (catMovement != null && catMovement.enabled)
+        {
+            catMovement.PlayHurtSound();
+        }
+        else
+        {
+            var autoRunner = gameObject.GetComponent<PlayerAutoRunner>();
+            if (autoRunner != null)
+            {
+                autoRunner.PlayHurtSound();
+            }
+            else
+            {
+                Debug.LogWarning("Neither PlayerCatMovement nor PlayerAutoRunner is active!");
+            }
+        }
+
         // 빨간 비네팅 실행
         Warning();
     }

@@ -22,6 +22,7 @@ public class StartStealthGame : TutorialBase
         StealthCanvas.SetActive(true);
         KidWatcher.Instance.StartStealthGame();
         PlayerCatMovement.Instance.SetMiniGameInputBlocked(false);
+        CatStealthController.Instance.isPlaying = true;
     }
 
     public override void Execute(TutorialController controller)

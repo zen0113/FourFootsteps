@@ -45,6 +45,16 @@ public class FollowCamera : MonoBehaviour
         }
     }
 
+    public void UpdateCameraHalfSize()
+    {
+        if (cam != null && cam.orthographic)
+        {
+            cameraHalfHeight = cam.orthographicSize;
+            cameraHalfWidth = cameraHalfHeight * cam.aspect;
+        }
+    }
+
+
     private void LateUpdate()
     {
         if (target == null) return;

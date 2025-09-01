@@ -51,16 +51,16 @@ public class PlayerAutoRunner : MonoBehaviour
     [SerializeField] private float xDampOnStop = 40f; // 정지 시 X속도 빠르게 0으로
     private bool stopAnimPlayed = false;
 
-    private bool sTriggeredOnce = false;
+    public bool sTriggeredOnce = false;
+    public bool IsHiding => sTriggeredOnce;
     private bool atHide = false;        // HideObject에 도착
+    public bool  AtHide => atHide;
     public bool chaseFinished = false; // S로 마무리했는지
     private HideObject lastHide;
 
     // 내부
     Rigidbody2D rb;
-    BoxCollider2D col;
     Animator animator;
-    SpriteRenderer sr;
     AudioSource audioSrc;
 
     float targetOffset;         // 입력으로 가고 싶은 목표 오프셋
@@ -89,9 +89,7 @@ public class PlayerAutoRunner : MonoBehaviour
         catStealth = GetComponent<CatStealthController>();
 
         rb = GetComponent<Rigidbody2D>();
-        col = GetComponent<BoxCollider2D>();
         animator = GetComponent<Animator>();
-        sr = GetComponent<SpriteRenderer>();
         audioSrc = GetComponent<AudioSource>();
 
         // Rigidbody2D 권장 설정

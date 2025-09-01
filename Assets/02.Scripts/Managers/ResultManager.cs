@@ -248,6 +248,11 @@ public class ResultManager : MonoBehaviour
 
                 break;
 
+            case "Result_MiniGameFailed":
+                // 페이드 인 효과와 함께 게임오버 씬 로드
+                SceneLoader.Instance.LoadScene("GameOver");
+                yield return null;
+                break;
 
             default:
                 Debug.Log($"Result ID: {resultID} not found!");

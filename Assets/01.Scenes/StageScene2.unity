@@ -1447,9 +1447,7 @@ Transform:
   m_LocalPosition: {x: 201.71, y: 17.68, z: 0}
   m_LocalScale: {x: 0.6, y: 0.6, z: 0.6}
   m_ConstrainProportionsScale: 1
-  m_Children:
-  - {fileID: 1263300713}
-  - {fileID: 1820983800}
+  m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &169008341
@@ -11845,9 +11843,9 @@ GameObject:
   - component: {fileID: 1263300715}
   - component: {fileID: 1263300714}
   - component: {fileID: 1263300716}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: PlatformA
-  m_TagString: Untagged
+  m_TagString: wall
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -11860,13 +11858,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1263300712}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 10.33, y: -5.76, z: -3}
-  m_LocalScale: {x: 5.636, y: 1, z: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 207.908, y: 14.224, z: -1.8000001}
+  m_LocalScale: {x: 3.3816001, y: 0.6, z: 0.6}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2004173513}
-  m_Father: {fileID: 169008340}
+  m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!61 &1263300714
 BoxCollider2D:
@@ -21891,9 +21889,9 @@ GameObject:
   - component: {fileID: 1820983802}
   - component: {fileID: 1820983801}
   - component: {fileID: 1820983803}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: PlatformB
-  m_TagString: Untagged
+  m_TagString: wall
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -21906,13 +21904,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1820983799}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 16.62, y: -5.76, z: -3}
-  m_LocalScale: {x: 5.636, y: 1, z: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 211.682, y: 14.224, z: -1.8000001}
+  m_LocalScale: {x: 3.3816001, y: 0.6, z: 0.6}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1885515629}
-  m_Father: {fileID: 169008340}
+  m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!61 &1820983801
 BoxCollider2D:
@@ -22704,7 +22702,7 @@ GameObject:
   - component: {fileID: 1885515629}
   - component: {fileID: 1885515631}
   - component: {fileID: 1885515630}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: DetectionTrigger
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -23653,7 +23651,7 @@ GameObject:
   - component: {fileID: 2004173513}
   - component: {fileID: 2004173515}
   - component: {fileID: 2004173514}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: DetectionTrigger
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -25226,6 +25224,8 @@ SceneRoots:
   - {fileID: 2019918115}
   - {fileID: 1520395573}
   - {fileID: 2041770210}
+  - {fileID: 1820983800}
+  - {fileID: 1263300713}
   - {fileID: 169008340}
   - {fileID: 264763003}
   - {fileID: 481750108}

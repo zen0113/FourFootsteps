@@ -1,9 +1,8 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// 도르레 시스템 전체를 관리하는 메인 컴포넌트
+/// 현실적인 도르레 시스템 - 실제 물리 법칙을 따름
+/// 핵심 원리: 무게 차이에 따라 한쪽은 최대한 내려가고, 다른쪽은 최대한 올라감
 /// </summary>
 public class PulleySystem : MonoBehaviour
 {
@@ -11,8 +10,10 @@ public class PulleySystem : MonoBehaviour
     [SerializeField] private PulleyPlatform platformA;
     [SerializeField] private PulleyPlatform platformB;
     
-    [Header("시스템 설정")]
-    [SerializeField] private float weightThreshold = 0.1f;  // 무게 차이 임계값
+    [Header("도르레 물리 설정")]
+    [SerializeField] private float maxHeight = 4f;      // 최대 올라갈 수 있는 높이
+    [SerializeField] private float minHeight = -4f;     // 최대 내려갈 수 있는 높이
+    [SerializeField] private float weightThreshold = 0.1f; // 무게 차이 임계값
     [SerializeField] private bool enableDebugLogs = true;
     
     [Header("상태 모니터링 (읽기 전용)")]
@@ -21,21 +22,24 @@ public class PulleySystem : MonoBehaviour
     [SerializeField] private float platformA_Weight = 0f;
     [SerializeField] private float platformB_Weight = 0f;
     [SerializeField] private string currentState = "Idle";
+    [SerializeField] private string lastAction = "None";
     
     private void Start()
     {
-        // 플랫폼 컴포넌트 자동 찾기 (설정되지 않은 경우)
+        // 플랫폼 자동 찾기
         if (platformA == null || platformB == null)
         {
             AutoFindPlatforms();
         }
         
-        // 플랫폼 유효성 검증
         if (platformA == null || platformB == null)
         {
             Debug.LogError("PulleySystem: 플랫폼 A 또는 B가 설정되지 않았습니다!");
             return;
         }
+        
+        // 초기 위치 설정 (둘 다 중간 높이에서 시작)
+        SetupInitialPositions();
         
         // 이벤트 연결
         platformA.OnPriorityChanged += OnPlatformAChanged;
@@ -44,11 +48,21 @@ public class PulleySystem : MonoBehaviour
         platformA.OnMoveComplete += OnPlatformMoveComplete;
         platformB.OnMoveComplete += OnPlatformMoveComplete;
         
-        // 초기 상태 설정
+        // 초기 상태 평가
         EvaluateSystemState();
         
         if (enableDebugLogs)
-            Debug.Log("PulleySystem 초기화 완료");
+            Debug.Log("현실적인 PulleySystem 초기화 완료");
+    }
+    
+    private void SetupInitialPositions()
+    {
+        // 두 플랫폼을 중간 높이(0)에서 시작
+        platformA.SetInitialHeight(0f);
+        platformB.SetInitialHeight(0f);
+        
+        if (enableDebugLogs)
+            Debug.Log("초기 위치 설정: 두 플랫폼 모두 높이 0에서 시작");
     }
     
     private void AutoFindPlatforms()
@@ -73,7 +87,6 @@ public class PulleySystem : MonoBehaviour
     {
         platformA_Priority = priority;
         platformA_Weight = weight;
-        
         EvaluateSystemState();
     }
     
@@ -81,14 +94,13 @@ public class PulleySystem : MonoBehaviour
     {
         platformB_Priority = priority;
         platformB_Weight = weight;
-        
         EvaluateSystemState();
     }
     
     private void OnPlatformMoveComplete(PulleyPlatform platform)
     {
         if (enableDebugLogs)
-            Debug.Log($"플랫폼 이동 완료: {platform.name}");
+            Debug.Log($"플랫폼 이동 완료: {platform.name} (높이: {platform.CurrentHeight:F1})");
     }
     
     private void EvaluateSystemState()
@@ -100,89 +112,126 @@ public class PulleySystem : MonoBehaviour
             return;
         }
         
-        // 우선순위 비교
-        if (platformA_Priority > platformB_Priority)
-        {
-            // 플랫폼 A가 우선순위가 높음 -> A가 내려가고 B가 올라감
-            MovePlatforms(platformA, platformB, "A has higher priority");
-        }
-        else if (platformB_Priority > platformA_Priority)
-        {
-            // 플랫폼 B가 우선순위가 높음 -> B가 내려가고 A가 올라감
-            MovePlatforms(platformB, platformA, "B has higher priority");
-        }
-        else if (platformA_Priority == platformB_Priority)
-        {
-            // 같은 우선순위일 때 처리
-            HandleSamePriority();
-        }
+        // 현실적인 도르레 물리 법칙 적용
+        ApplyRealisticPulleyPhysics();
     }
     
-    private void HandleSamePriority()
+    private void ApplyRealisticPulleyPhysics()
     {
-        switch (platformA_Priority)
-        {
-            case ObjectType.Empty:
-                // 둘 다 비어있음 -> 현재 상태 유지
-                currentState = "Both Empty - Maintain";
-                break;
-                
-            case ObjectType.Player:
-                // 둘 다 플레이어 -> 현재 상태 유지
-                currentState = "Both Players - Maintain";
-                break;
-                
-            case ObjectType.PhysicsObject:
-                // 둘 다 물리 오브젝트 -> 무게 비교
-                HandleWeightComparison();
-                break;
-        }
-    }
-    
-    private void HandleWeightComparison()
-    {
-        float weightDifference = Mathf.Abs(platformA_Weight - platformB_Weight);
+        bool hasWeightA = platformA_Priority != ObjectType.Empty;
+        bool hasWeightB = platformB_Priority != ObjectType.Empty;
         
-        if (weightDifference < weightThreshold)
+        if (!hasWeightA && !hasWeightB)
         {
-            // 무게 차이가 임계값보다 작음 -> 현재 상태 유지
-            currentState = "Weight Balanced - Maintain";
-        }
-        else if (platformA_Weight > platformB_Weight)
-        {
-            // A가 더 무거움 -> A가 내려가고 B가 올라감
-            MovePlatforms(platformA, platformB, "A is heavier");
-        }
-        else
-        {
-            // B가 더 무거움 -> B가 내려가고 A가 올라감
-            MovePlatforms(platformB, platformA, "B is heavier");
-        }
-    }
-    
-    private void MovePlatforms(PulleyPlatform downPlatform, PulleyPlatform upPlatform, string reason)
-    {
-        // 이미 올바른 위치에 있는지 확인
-        if (downPlatform.IsAtStartPoint && !upPlatform.IsAtStartPoint)
-        {
-            currentState = $"Correct Position - {reason}";
+            // 둘 다 비어있음 → 현재 위치 유지 (관성의 법칙)
+            currentState = "Both Empty - Maintaining Current Position";
+            lastAction = "No movement (inertia)";
             return;
         }
         
-        // 플랫폼 이동 실행
-        downPlatform.MoveToStartPoint();  // 무거운/우선순위 높은 플랫폼이 아래로
-        upPlatform.MoveToEndPoint();      // 가벼운/우선순위 낮은 플랫폼이 위로
-        
-        currentState = $"Moving - {reason}";
-        
-        if (enableDebugLogs)
+        if (hasWeightA && !hasWeightB)
         {
-            Debug.Log($"도르레 이동: {downPlatform.name}(하강), {upPlatform.name}(상승) - {reason}");
-            Debug.Log($"무게: A={platformA_Weight:F1}, B={platformB_Weight:F1}");
+            // A에만 무게 → A는 바닥으로, B는 최대 높이로
+            MovePlatformsToExtremes(minHeight, maxHeight, "Only A has weight");
+        }
+        else if (!hasWeightA && hasWeightB)
+        {
+            // B에만 무게 → B는 바닥으로, A는 최대 높이로  
+            MovePlatformsToExtremes(maxHeight, minHeight, "Only B has weight");
+        }
+        else
+        {
+            // 둘 다 무게가 있음 → 무게 비교
+            CompareWeightsAndMove();
         }
     }
     
-    // 외부에서 시스템 상태를 확인할 수 있는 메서드들
+    private void CompareWeightsAndMove()
+    {
+        // 우선순위 비교 (PhysicsObject > Player)
+        if (platformA_Priority > platformB_Priority)
+        {
+            // A의 우선순위가 높음 (예: A에 박스, B에 플레이어)
+            MovePlatformsToExtremes(minHeight, maxHeight, "A has higher priority");
+        }
+        else if (platformB_Priority > platformA_Priority)
+        {
+            // B의 우선순위가 높음
+            MovePlatformsToExtremes(maxHeight, minHeight, "B has higher priority");
+        }
+        else
+        {
+            // 같은 우선순위 → 무게 비교
+            HandleSameTypeComparison();
+        }
+    }
+    
+    private void HandleSameTypeComparison()
+    {
+        float weightDifference = platformA_Weight - platformB_Weight;
+        
+        if (Mathf.Abs(weightDifference) <= weightThreshold)
+        {
+            // 무게 차이가 임계값 이하 → 현재 위치 유지
+            currentState = "Weights are balanced - Maintaining position";
+            lastAction = "No movement (balanced)";
+            
+            if (enableDebugLogs)
+                Debug.Log($"균형 상태: A무게={platformA_Weight:F1}, B무게={platformB_Weight:F1}, 차이={Mathf.Abs(weightDifference):F1}");
+        }
+        else if (weightDifference > 0)
+        {
+            // A가 더 무거움 → A는 바닥으로, B는 최대 높이로
+            MovePlatformsToExtremes(minHeight, maxHeight, $"A is heavier ({platformA_Weight:F1} vs {platformB_Weight:F1})");
+        }
+        else
+        {
+            // B가 더 무거움 → B는 바닥으로, A는 최대 높이로
+            MovePlatformsToExtremes(maxHeight, minHeight, $"B is heavier ({platformB_Weight:F1} vs {platformA_Weight:F1})");
+        }
+    }
+    
+    private void MovePlatformsToExtremes(float targetHeightA, float targetHeightB, string reason)
+    {
+        // 현재 위치와 목표 위치가 거의 같으면 이동하지 않음
+        if (Mathf.Abs(platformA.CurrentHeight - targetHeightA) < 0.1f && 
+            Mathf.Abs(platformB.CurrentHeight - targetHeightB) < 0.1f)
+        {
+            currentState = $"Already in correct position - {reason}";
+            return;
+        }
+        
+        // 도르레 제약 조건 확인: A + B = 일정값 (0으로 설정)
+        float totalHeight = targetHeightA + targetHeightB;
+        if (Mathf.Abs(totalHeight) > 0.1f)
+        {
+            // 높이 합이 0이 되도록 조정
+            float adjustment = -totalHeight / 2f;
+            targetHeightA += adjustment;
+            targetHeightB += adjustment;
+        }
+        
+        // 범위 제한
+        targetHeightA = Mathf.Clamp(targetHeightA, minHeight, maxHeight);
+        targetHeightB = Mathf.Clamp(targetHeightB, minHeight, maxHeight);
+        
+        // 플랫폼 이동 실행
+        platformA.MoveToHeight(targetHeightA);
+        platformB.MoveToHeight(targetHeightB);
+        
+        currentState = $"Moving to extremes - {reason}";
+        lastAction = $"A→{targetHeightA:F1}, B→{targetHeightB:F1}";
+        
+        if (enableDebugLogs)
+        {
+            Debug.Log($"도르레 극한 이동: {reason}");
+            Debug.Log($"  A: {platformA.CurrentHeight:F1} → {targetHeightA:F1}");
+            Debug.Log($"  B: {platformB.CurrentHeight:F1} → {targetHeightB:F1}");
+            Debug.Log($"  우선순위: A={platformA_Priority}({platformA_Weight:F1}), B={platformB_Priority}({platformB_Weight:F1})");
+        }
+    }
+    
+    // 외부 제어 메서드들
     public bool IsSystemMoving()
     {
         return platformA.IsMoving || platformB.IsMoving;
@@ -195,43 +244,74 @@ public class PulleySystem : MonoBehaviour
         currentState = "Force Stopped";
     }
     
-    public void ManualEvaluation()
+    public void ResetToCenter()
+    {
+        platformA.MoveToHeight(0f);
+        platformB.MoveToHeight(0f);
+        currentState = "Resetting to Center";
+    }
+    
+    [ContextMenu("Force Re-evaluate")]
+    public void ForceReevaluate()
     {
         EvaluateSystemState();
     }
     
-    // 디버그 정보 출력
     [ContextMenu("Print System Status")]
     public void PrintSystemStatus()
     {
-        Debug.Log($"=== Pulley System Status ===");
-        Debug.Log($"Platform A: Priority={platformA_Priority}, Weight={platformA_Weight:F1}, AtStart={platformA.IsAtStartPoint}, Moving={platformA.IsMoving}");
-        Debug.Log($"Platform B: Priority={platformB_Priority}, Weight={platformB_Weight:F1}, AtStart={platformB.IsAtStartPoint}, Moving={platformB.IsMoving}");
+        Debug.Log($"=== Realistic Pulley System Status ===");
+        Debug.Log($"Platform A: Priority={platformA_Priority}, Weight={platformA_Weight:F1}, Height={platformA.CurrentHeight:F1}");
+        Debug.Log($"Platform B: Priority={platformB_Priority}, Weight={platformB_Weight:F1}, Height={platformB.CurrentHeight:F1}");
         Debug.Log($"Current State: {currentState}");
+        Debug.Log($"Last Action: {lastAction}");
         Debug.Log($"System Moving: {IsSystemMoving()}");
+        Debug.Log($"Height Range: {minHeight} to {maxHeight}");
     }
     
     private void OnDrawGizmos()
     {
-        // 시스템 중앙점 표시
+        // 도르레 중심점
         Gizmos.color = Color.white;
-        Gizmos.DrawWireSphere(transform.position, 0.2f);
+        Gizmos.DrawWireSphere(transform.position, 0.3f);
         
-        // 플랫폼 간 연결선
         if (platformA != null && platformB != null)
         {
-            Gizmos.color = IsSystemMoving() ? Color.yellow : Color.white;
-            Gizmos.DrawLine(platformA.transform.position, platformB.transform.position);
+            // 밧줄 시각화
+            Gizmos.color = IsSystemMoving() ? Color.red : Color.cyan;
+            Gizmos.DrawLine(platformA.transform.position, transform.position);
+            Gizmos.DrawLine(transform.position, platformB.transform.position);
             
-            // 도르레 중심점 표시
-            Vector3 center = (platformA.transform.position + platformB.transform.position) / 2f;
-            Gizmos.DrawWireSphere(center, 0.1f);
+            // 도르레 휠
+            Gizmos.color = Color.yellow;
+            Gizmos.DrawWireSphere(transform.position, 0.5f);
+            
+            // 이동 범위 표시
+            Gizmos.color = new Color(0, 1, 0, 0.3f);
+            
+            // A 플랫폼 범위
+            Vector3 aBase = platformA.transform.position - Vector3.up * platformA.CurrentHeight;
+            Gizmos.DrawLine(aBase + Vector3.up * maxHeight, aBase + Vector3.up * minHeight);
+            Gizmos.DrawWireCube(aBase + Vector3.up * maxHeight, new Vector3(1, 0.1f, 1));
+            Gizmos.DrawWireCube(aBase + Vector3.up * minHeight, new Vector3(1, 0.1f, 1));
+            
+            // B 플랫폼 범위
+            Vector3 bBase = platformB.transform.position - Vector3.up * platformB.CurrentHeight;
+            Gizmos.DrawLine(bBase + Vector3.up * maxHeight, bBase + Vector3.up * minHeight);
+            Gizmos.DrawWireCube(bBase + Vector3.up * maxHeight, new Vector3(1, 0.1f, 1));
+            Gizmos.DrawWireCube(bBase + Vector3.up * minHeight, new Vector3(1, 0.1f, 1));
         }
+        
+        // 상태 표시
+        #if UNITY_EDITOR
+        UnityEditor.Handles.color = Color.white;
+        UnityEditor.Handles.Label(transform.position + Vector3.up * 1.5f, 
+            $"Pulley System\n{currentState}\n{lastAction}");
+        #endif
     }
     
     private void OnDestroy()
     {
-        // 이벤트 해제
         if (platformA != null)
         {
             platformA.OnPriorityChanged -= OnPlatformAChanged;

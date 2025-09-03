@@ -5,8 +5,8 @@ using UnityEngine;
 public class Elevator : MonoBehaviour
 {
     [Header("엘리베이터 위치 설정")]
-    [SerializeField] private Transform startPoint;
-    [SerializeField] private Transform endPoint;
+    [SerializeField] private Vector3 startPosition;  // Transform 대신 Vector3 사용
+    [SerializeField] private Vector3 endPosition;    // Transform 대신 Vector3 사용
     
     [Header("엘리베이터 이동 설정")]
     [SerializeField] private float speed = 2f;
@@ -35,6 +35,12 @@ public class Elevator : MonoBehaviour
     
     private void Awake()
     {
+        // 초기 위치 설정 (시작 시에만)
+        if (startPosition == Vector3.zero)
+        {
+            startPosition = transform.position;
+        }
+        
         // Rigidbody2D 설정
         rb = GetComponent<Rigidbody2D>();
         if (rb == null)
@@ -96,15 +102,8 @@ public class Elevator : MonoBehaviour
     private void Start()
     {
         // 시작 위치로 이동
-        if (startPoint != null)
-        {
-            transform.position = startPoint.position;
-            lastElevatorPosition = transform.position;
-        }
-        else
-        {
-            Debug.LogError("StartPoint가 설정되지 않았습니다.");
-        }
+        transform.position = startPosition;
+        lastElevatorPosition = transform.position;
     }
     
     private void Update()
@@ -234,14 +233,8 @@ public class Elevator : MonoBehaviour
     
     private IEnumerator MoveToEnd()
     {
-        if (endPoint == null)
-        {
-            Debug.LogError("EndPoint가 설정되지 않았습니다.");
-            yield break;
-        }
-        
         currentState = ElevatorState.MovingUp;
-        Vector3 targetPosition = endPoint.position;
+        Vector3 targetPosition = endPosition;
         Debug.Log("엘리베이터가 올라가기 시작합니다.");
         
         while (Vector3.Distance(transform.position, targetPosition) > 0.01f)
@@ -279,14 +272,8 @@ public class Elevator : MonoBehaviour
     
     private IEnumerator MoveToStart()
     {
-        if (startPoint == null)
-        {
-            Debug.LogError("StartPoint가 설정되지 않았습니다.");
-            yield break;
-        }
-        
         currentState = ElevatorState.MovingDown;
-        Vector3 targetPosition = startPoint.position;
+        Vector3 targetPosition = startPosition;
         Debug.Log("엘리베이터가 아래로 내려갑니다.");
         
         while (Vector3.Distance(transform.position, targetPosition) > 0.01f)
@@ -308,27 +295,15 @@ public class Elevator : MonoBehaviour
     [ContextMenu("현재 위치를 시작점으로 설정")]
     private void SetCurrentPositionAsStart()
     {
-        if (startPoint == null)
-        {
-            GameObject startObj = new GameObject("StartPoint");
-            startPoint = startObj.transform;
-            startPoint.SetParent(transform.parent);
-        }
-        startPoint.position = transform.position;
-        Debug.Log("시작점이 설정되었습니다.");
+        startPosition = transform.position;
+        Debug.Log($"시작점이 설정되었습니다: {startPosition}");
     }
     
     [ContextMenu("현재 위치를 끝점으로 설정")]
     private void SetCurrentPositionAsEnd()
     {
-        if (endPoint == null)
-        {
-            GameObject endObj = new GameObject("EndPoint");
-            endPoint = endObj.transform;
-            endPoint.SetParent(transform.parent);
-        }
-        endPoint.position = transform.position;
-        Debug.Log("끝점이 설정되었습니다.");
+        endPosition = transform.position;
+        Debug.Log($"끝점이 설정되었습니다: {endPosition}");
     }
     
     [ContextMenu("엘리베이터 구조 재설정")]
@@ -341,37 +316,28 @@ public class Elevator : MonoBehaviour
     private void OnDrawGizmos()
     {
         // 시작점 표시
-        if (startPoint != null)
-        {
-            Gizmos.color = Color.green;
-            Gizmos.DrawWireCube(startPoint.position, Vector3.one * 0.5f);
-            Gizmos.DrawLine(transform.position, startPoint.position);
-            
+        Gizmos.color = Color.green;
+        Gizmos.DrawWireCube(startPosition, Vector3.one * 0.5f);
+        Gizmos.DrawLine(transform.position, startPosition);
+        
 #if UNITY_EDITOR
-            UnityEditor.Handles.color = Color.green;
-            UnityEditor.Handles.Label(startPoint.position + Vector3.up * 0.7f, "Start");
+        UnityEditor.Handles.color = Color.green;
+        UnityEditor.Handles.Label(startPosition + Vector3.up * 0.7f, "Start");
 #endif
-        }
         
         // 끝점 표시
-        if (endPoint != null)
-        {
-            Gizmos.color = Color.red;
-            Gizmos.DrawWireCube(endPoint.position, Vector3.one * 0.5f);
-            Gizmos.DrawLine(transform.position, endPoint.position);
-            
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireCube(endPosition, Vector3.one * 0.5f);
+        Gizmos.DrawLine(transform.position, endPosition);
+        
 #if UNITY_EDITOR
-            UnityEditor.Handles.color = Color.red;
-            UnityEditor.Handles.Label(endPoint.position + Vector3.up * 0.7f, "End");
+        UnityEditor.Handles.color = Color.red;
+        UnityEditor.Handles.Label(endPosition + Vector3.up * 0.7f, "End");
 #endif
-        }
         
         // 이동 경로 표시
-        if (startPoint != null && endPoint != null)
-        {
-            Gizmos.color = Color.yellow;
-            Gizmos.DrawLine(startPoint.position, endPoint.position);
-        }
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawLine(startPosition, endPosition);
         
         // 플랫폼 콜라이더 표시 (파란색)
         Collider2D[] colliders = GetComponents<Collider2D>();
@@ -431,4 +397,17 @@ public class Elevator : MonoBehaviour
     public ElevatorState CurrentState => currentState;
     public bool PlayerOnElevator => playerOnElevator;
     public int PlayerCount => playersOnElevator.Count;
+    
+    // 인스펙터에서 위치를 직접 설정할 수 있도록 하는 프로퍼티
+    public Vector3 StartPosition 
+    { 
+        get => startPosition; 
+        set => startPosition = value; 
+    }
+    
+    public Vector3 EndPosition 
+    { 
+        get => endPosition; 
+        set => endPosition = value; 
+    }
 }

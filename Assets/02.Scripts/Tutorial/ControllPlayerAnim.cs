@@ -15,7 +15,8 @@ public class ControllPlayerAnim : TutorialBase
         Crouch,
         CrouchIdle,
         Dash,
-        Moving
+        Moving,
+        Jump
     }
 
     [SerializeField]
@@ -100,6 +101,7 @@ public class ControllPlayerAnim : TutorialBase
         animator.SetBool("Moving", false);
         animator.SetBool("Dash", false);
         animator.SetBool("Crouch", false);
+        animator.SetBool("Jump", false);
 
         // Cat 전용
         if (playerControllerType == PlayerControllerType.PlayerCatMovement)

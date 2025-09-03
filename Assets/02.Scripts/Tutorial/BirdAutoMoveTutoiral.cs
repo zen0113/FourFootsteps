@@ -5,6 +5,7 @@ public class BirdAutoMoveTutorial : TutorialBase
     [Header("이동 대상 설정")]
     [SerializeField] private BirdAutoMover birdMover;
     [SerializeField] private Transform destinationPoint;
+    [SerializeField] private bool IsInfiniteFlying = false;
 
     public override void Enter()
     {
@@ -12,6 +13,7 @@ public class BirdAutoMoveTutorial : TutorialBase
         {
             birdMover.OnMovementStarted += HandleMovementStart; // 이동 시작 이벤트 등록
             birdMover.StartMoving(destinationPoint);
+            birdMover.isInfiniteFlying = IsInfiniteFlying;
         }
         else
         {

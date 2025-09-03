@@ -11,8 +11,8 @@ public class CameraMoveTutorial : TutorialBase
     // 해당 튜토리얼 과정을 시작할 때 1회 호출
     public override void Enter()
     {
-        StartCoroutine(SmoothChangeValueCoroutine(targetValue));
         followCamera = FindObjectOfType<FollowCamera>();
+        StartCoroutine(SmoothChangeValueCoroutine(targetValue));
         followCamera.target = target;
 
         // 카메라 이동 동안 플레이어 입력 차단
@@ -40,7 +40,10 @@ public class CameraMoveTutorial : TutorialBase
 
         yield return new WaitForSeconds(duration);
 
-        TutorialController controller = FindObjectOfType<TutorialController>();
-        controller?.SetNextTutorial();
+        Debug.Log("Camera Move end");
+        Debug.Log("SetNextTutorial() Executed");
+        //  플레이어 입력 차단 해제
+        PlayerCatMovement.Instance.SetMiniGameInputBlocked(false);
+        TutorialController.Instance.SetNextTutorial();
     }
 }

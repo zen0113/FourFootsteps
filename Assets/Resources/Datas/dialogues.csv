@@ -113,7 +113,7 @@ Stage02_001,InnerThoughts,,헉…! 덩치 큰 개가 길을 막고 서 있다…
 Stage02_002,InnerThoughts,,이 길목… 어딘가 익숙해.,,temp_playerCAT,,,,병원 방향으로 시선 유도 시
 ,InnerThoughts,,어…? 저긴 {YourCatName}을/를 데리고 갔던 동물 병원이잖아!,TRUE,temp_playerCAT,,,,
 ,InnerThoughts,,입구만이라도 한번 살펴보자. ,,temp_playerCAT,,,EventSetNextTutorial,
-Stage02_003,InnerThoughts,,저기 사람이 나왔다! 얼른 가서 [말 걸어보자!],,temp_playerCAT,,,EventSetNextTutorial,병원 정문의 울타리에 닿자마자 병원 직원이 건물에서 나옴.
+Stage02_003,InnerThoughts,TRUE,저기 사람이 나왔다! 얼른 가서 [말 걸어보자!],,temp_playerCAT,,,EventSetNextTutorial,병원 정문의 울타리에 닿자마자 병원 직원이 건물에서 나옴.
 Stage02_004,Player,,저기요! 제 말 안 들리세요? 저 [YourCatName] 보호자라고요! 왜... 왜 다들 나를 못 알아보는 거야!,TRUE/SHAKE,temp_playerCAT,,,,플레이어가 직원A에게 상호작용 시
 ,직원A,,"어머, 길고양이네? 어디서 왔니? 배고프니? 간식 줄까?  ",,,,,,
 ,Player,,네…??? 간식이요…? 저 사람이라고요! 제 말 안 들려요?!  ,,temp_playerCAT,,,,
@@ -178,7 +178,8 @@ Recall2_016,InnerThoughts,,유기동물 구조 기부함이네.,,temp_playerHUMA
 Recall2_017,InnerThoughts,,입양 전 꼭 알아야 할 5가지…,,temp_playerHUMAN,,,,입양 안내 책자
 ,InnerThoughts,,솔직히 하나도 준비 안 된 상태로 데려왔는데…,,temp_playerHUMAN,,,,
 ,InnerThoughts,,그래도… 이제라도 하나씩 배우면 되겠지?,,temp_playerHUMAN,,,,
-Recall2_018,InnerThoughts,,{YourCatName}이(가) 들어 있는 이동장이다.  ,TRUE,temp_playerHUMAN,,,,의자 위 이동장
+Recall2_018,YourCat,TRUE,야옹..,,temp_playerCAT,,,,
+,InnerThoughts,,{YourCatName}이(가) 들어 있는 이동장이다.  ,TRUE,temp_playerHUMAN,,,,의자 위 이동장
 ,InnerThoughts,,낯선 환경이 불편한지` 몸을 뒤척일 때마다 이동장이 살짝 흔들린다.,,temp_playerHUMAN,,,,
 Recall2_019,InnerThoughts,,중성화 수술에 대한 안내문이다.  ,,temp_playerHUMAN,,,,유기동물 포스터
 ,InnerThoughts,,원치 않는 번식을 막고` 발정기 스트레스와 특정 질병의 위험을 줄여준다고 한다.\n수술 후 관리 방법에 대해서도 설명이 붙어 있다.,,temp_playerHUMAN,,,,
@@ -264,19 +265,19 @@ Stage03_003,Player,,윽… 그렇게…착하지는 않은 아이들이네…,,t
 Stage03_004,아이A,,어…? 어!!! 저기 고양이다!!,SHAKE,temp_KidA,,,,아이들한테 걸림
 ,아이B,,헐 어디어디?? 얼른 잡자!!,SHAKE,temp_KidB,,,,
 ,Player,,이런` 들켰다!! 얼른 도망치자!!,SHAKE,temp_playerCAT,,,EventStealthGameEnd,
-Stage03_005,Player,,저건… 하얀 새..?!,,,,,,추격씬에서 하얀새가 보임
-,Player,,자기를 따라오는 건가??,,temp_playerCAT,,,,
-,Player,,일단 저 하얀 새를 따라가보자!,,temp_playerCAT,,,,
-Stage03_006,아이B,,아 뭐야!! 힘들게 뛰어왔는데!! 사라졌어!,,temp_KidB,,,,공원 정자 밑에 무사히 몸을 숨김
+Stage03_005,Player,,저건… 하얀 새..?!,AUTO_DELAYED,temp_playerCAT,,,,추격씬에서 하얀새가 보임
+,Player,,자기를 따라오는 건가??,AUTO_DELAYED,temp_playerCAT,,,,
+,Player,,일단 저 하얀 새를 따라가보자!,AUTO_DELAYED,temp_playerCAT,,,EventSetNextTutorial,
+Stage03_006,아이B,,아 뭐야!! 힘들게 뛰어왔는데!! 놓쳤어!,,temp_KidB,,,,공원 정자 밑에 무사히 몸을 숨김
 ,아이A,,에이… 거의 다 잡을 수 있었는데!!,,temp_KidA,,,,
-,아이B,,야` 배고프다. 피시방이나 가서 라면이나 먹자.,,temp_KidB,,,,
-,아이A,,좋아! 이번에는 네가 사는 거다~,,temp_KidA,,,,
+,아이B,,야` 배고프다. 편의점에 가서 라면이나 먹자.,,temp_KidB,,,,
+,아이A,,좋아! 이번에는 네가 사는 거다~,,temp_KidA,,,EventSetNextTutorial,
 Stage03_007,Player,,헉… 헉… 숨이 가빠… ,,temp_playerCAT,,,,아이들이 정자 주변에서 사라진 후
 ,Player,,저 아이들은 이제 간 거겠지… 오랜만에 뛰었더니 온몸이 녹초가 됐네. ,,temp_playerCAT,,,,
-,Player,,온몸에 힘이 하나도 없어. 그러고 보니 고양이가 된 뒤로 물 한 모금 마시지 못했잖아. 너무 배고프다...,,temp_playerCAT,,,,
-,Player,,왜 나한테 이런 일이 일어나는 걸까… 정말 지친다… ,,temp_playerCAT,,,,
+,Player,,온몸에 힘이 하나도 없어.\n그러고 보니 고양이가 된 뒤로 물 한 모금 마시지 못했잖아. 너무 배고프다...,,temp_playerCAT,,,,
+,Player,,왜 나한테 이런 일이 일어나는 걸까… 정말 지친다… ,,temp_playerCAT,,,EventSetNextTutorial,
 Stage03_008,Player,,…어라? 저기… 또 뭔가 반짝이고 있어.,,temp_playerCAT,,,,퍼즐 조각이 떨어졌을 시 바로 자동 재생
-,Player,,저건… 전에 하얀 새가 떨구고 간 퍼즐 조각이랑 같은 건가?,,temp_playerCAT,,,,
+,Player,,저건… 전에 하얀 새가 떨구고 간 퍼즐 조각이랑 같은 건가?,,temp_playerCAT,,,EventSetNextTutorial,
 Stage03_009,Player,,"(손끝이 스치자, 어렴풋이 기억이 번져온다)  ",,temp_playerCAT,,,,
 ,Player,,옆에서 들리던 {YourCatName}의 작은 울음소리… ,TRUE,temp_playerCAT,,,,
 ,Player,,…아… 이건… ,,temp_playerCAT,,,,

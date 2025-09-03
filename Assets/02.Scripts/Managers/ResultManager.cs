@@ -226,6 +226,7 @@ public class ResultManager : MonoBehaviour
 
             // 은신 게임: 들켰을 때 연출
             case "Result_StartChaseGameIntro":
+                fadeOutTime = 1.5f;
                 // 다이얼로그 진행 후
                 GameObject player = GameObject.FindWithTag("Player");
                 player.GetComponent<PlayerCatMovement>().ForceCrouch = false;
@@ -234,18 +235,13 @@ public class ResultManager : MonoBehaviour
                 player.GetComponent<CatAutoMover>().enabled = true;
                 player.GetComponent<CatAutoMover>().StartMoving(player.GetComponent<CatAutoMover>().targetPoint);
                 // 화면 어두워짐+ 다음 추격 미니게임 시작
-                yield return UIManager.Instance.OnFade(null, 0, 1, 1.5f, true, 2, 1.5f);
-                break;
-
-            case "Result_ChaseGameClosingDirection":
-                // 은신 효과 해제
-                StealthSFX.Instance.StopEnterSFX();
-                CatStealthController.Instance.Chase_Courching();
-                Debug.Log("Result_ChaseGameClosingDirection : 은신 효과 해제");
-                break;
-
-            case "Result_StartStage3Investigating":
-
+                yield return UIManager.Instance.OnFade(null, 0, 1, fadeOutTime);
+                FollowCamera followCamera = Camera.main.GetComponent<FollowCamera>();
+                followCamera.enabled = true;
+                yield return new WaitWhile(() => player.GetComponent<CatAutoMover>().IsMoving);
+                fadeOutTime = 1f;
+                yield return UIManager.Instance.OnFade(null, 1, 0, fadeOutTime);
+                TutorialController.Instance.SetNextTutorial();
                 break;
 
             case "Result_MiniGameFailed":

@@ -21,7 +21,7 @@ public class PlayerHp : MonoBehaviour
 
     [Header("플레이어 무적상태")]
     [SerializeField] private float invincibilityDuration = 1.5f; // 무적 시간 (초)
-    private bool isInvincible = false;
+    public bool isInvincible = false;
 
 
     private void Awake()

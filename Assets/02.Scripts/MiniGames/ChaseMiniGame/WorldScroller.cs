@@ -43,7 +43,7 @@ public class WorldScroller : MonoBehaviour
     [Tooltip("스케일 타임 사용(일시정지에 연동). 끄면 실시간 진행")]
     public bool useScaledTime = true;
     [SerializeField, Tooltip("수동 일시정지")]
-    private bool paused = false;
+    public bool paused = true;
 
     [Header("카메라")]
     [Tooltip("뷰 경계를 계산할 카메라. 비우면 Camera.main")]

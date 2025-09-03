@@ -31,11 +31,17 @@ public class CatAutoMover : MonoBehaviour
     private Animator animator;
     private AudioSource audioSource; // AudioSource 추가
     private bool isMoving = false;
+    public bool IsMoving => isMoving;
 
     private float currentSpeed; // 가변 속도(보간 대상)
 
     private enum MoveState { Idle, Walking, Dashing }
     private MoveState state = MoveState.Idle;
+
+    int _hIsGrounded = Animator.StringToHash("IsGrounded");
+    int _hSpeed = Animator.StringToHash("Speed");
+    int _hShift = Animator.StringToHash("Shift");
+    int _hJump = Animator.StringToHash("Jump");
 
     private void Awake()
     {
@@ -198,6 +204,9 @@ public class CatAutoMover : MonoBehaviour
             SetAnim(moving: true, dashing: false);
         }
 
+        // 상태 결정 이후(Translate 전에) 파라미터 싱크
+        SyncAnimatorParams();
+
         // 목표 속도 & 가감속
         float targetSpeed = (state == MoveState.Dashing) ? dashSpeed : moveSpeed;
         float a = (Mathf.Abs(targetSpeed) > Mathf.Abs(currentSpeed)) ? accel : decel;
@@ -208,6 +217,25 @@ public class CatAutoMover : MonoBehaviour
 
         // 발소리
         PlayFootstepIfDue(false);
+    }
+
+    void SyncAnimatorParams()
+    {
+        if (animator == null) return;
+
+        bool grounded = true;
+        float speedParam =
+            (state == MoveState.Dashing) ? 1.0f :
+            (state == MoveState.Walking) ? 0.5f : 0f;
+
+        animator.SetBool(_hIsGrounded, grounded);
+        animator.SetFloat(_hSpeed, speedParam);
+        animator.SetBool(_hShift, state == MoveState.Dashing);
+        animator.SetBool(_hJump, false); // 오토무브 구간에서는 점프 안씀
+
+        // 아래 두 줄은 “보조용” (그래프가 Dash/Moving 불리언을 보지 않는다면 없어도 됨)
+        animator.SetBool("Dash", state == MoveState.Dashing);
+        animator.SetBool("Moving", state != MoveState.Idle);
     }
 
     private void Translate(float speed, Vector2 toTarget)

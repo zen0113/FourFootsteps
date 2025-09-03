@@ -237,5 +237,7 @@ public class StealthSFX : MonoBehaviour
         if (uiCo != null) StopCoroutine(uiCo);
         UIManager.Instance.SetBlinkHidingCoroutine(false);
         uiCo = StartCoroutine(UIManager.Instance.HidingCoroutine(false));
+
+        this.enabled = false;
     }
 }

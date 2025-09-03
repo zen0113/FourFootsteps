@@ -5,9 +5,17 @@ using UnityEngine.Events;
 
 public class PlayerAutoRunner : MonoBehaviour
 {
+    private bool isChasePlaying = false;
+    public bool IsChasePlaying => isChasePlaying;
+
+    [Header("Refs")]
     [SerializeField] private Camera mainCamera;
+    [SerializeField] private PlayerHp playerHp;
     [SerializeField] private StealthSFX SFX;
     [SerializeField] private CatStealthController catStealth;
+    [SerializeField] private ChaserFollower kidsFollower;
+    [SerializeField] private GameObject Chase_Goal_Block;
+    [SerializeField] private GameObject Bird;
 
     [Header("센터 기준")]
     [Tooltip("플레이어가 '정위치'로 간주할 앵커(대개 메인카메라 중앙의 월드좌표 또는 빈 오브젝트). 비우면 시작 시 자신의 위치를 앵커로 사용.")]
@@ -31,7 +39,7 @@ public class PlayerAutoRunner : MonoBehaviour
     [SerializeField] private Transform groundCheck;
     [SerializeField] private float groundCheckRadius = 0.2f;
     [SerializeField] private LayerMask groundMask;
-    private bool isOnGround;
+    [SerializeField] private bool isOnGround;
 
     [Header("애니/사운드")]
     [SerializeField] private AudioClip hurtSound;       // 피해를 받았을 때 소리
@@ -58,10 +66,14 @@ public class PlayerAutoRunner : MonoBehaviour
     public bool chaseFinished = false; // S로 마무리했는지
     private HideObject lastHide;
 
+    private ChaserFollower.Phase prevPhase;
+    private bool turnedOffOnce = false;
+
     // 내부
     Rigidbody2D rb;
     Animator animator;
     AudioSource audioSrc;
+    SpriteRenderer sprite;
 
     float targetOffset;         // 입력으로 가고 싶은 목표 오프셋
     float currentOffset;        // 현재 오프셋
@@ -69,28 +81,27 @@ public class PlayerAutoRunner : MonoBehaviour
     float lastFootstepTime;
     Vector2 startAnchor;        // centerAnchor 없을 때 시작 위치
 
-    private string FinishChaseEventID = "EventChaseGameEnd";
+    static readonly int H_IsGrounded = Animator.StringToHash("IsGrounded");
+    static readonly int H_Speed = Animator.StringToHash("Speed");
+    static readonly int H_Shift = Animator.StringToHash("Shift");
+    static readonly int H_Jump = Animator.StringToHash("Jump");
 
     void Awake()
     {
-        // UI 상태 설정 (고양이 버전 UI 활성화, 사람 버전 UI 비활성화)
-        UIManager.Instance.SetUI(eUIGameObjectName.HumanVersionUIGroup, false);
-        UIManager.Instance.SetUI(eUIGameObjectName.CatVersionUIGroup, true);
-        UIManager.Instance.SetUI(eUIGameObjectName.ResponsibilityGroup, true);
-        UIManager.Instance.SetUI(eUIGameObjectName.ResponsibilityGauge, true);
-        UIManager.Instance.SetUI(eUIGameObjectName.PlaceUI, true);
-        // 필요한 컴포넌트들 가져오기
-        UIManager.Instance.SetUI(eUIGameObjectName.PuzzleBagButton, true);
-        //================================
-
-        mainCamera = Camera.main;
-
-        SFX = GameObject.FindObjectOfType<StealthSFX>().GetComponent<StealthSFX>();
-        catStealth = GetComponent<CatStealthController>();
+        if (mainCamera == null) mainCamera = Camera.main;
+        if (playerHp == null) playerHp = GetComponent<PlayerHp>();
+        if (SFX == null) SFX = FindObjectOfType<StealthSFX>();
+        if (catStealth == null) catStealth = GetComponent<CatStealthController>();
+        if (kidsFollower == null) kidsFollower = GameObject.Find("chasingKids")?.GetComponent<ChaserFollower>();
+        if (kidsFollower != null) kidsFollower.gameObject.SetActive(false);
+        if (Chase_Goal_Block == null) Chase_Goal_Block = GameObject.Find("Chase_Goal_Block");
+        if (Chase_Goal_Block != null) Chase_Goal_Block.SetActive(false);
+        if (scroller == null) scroller = FindObjectOfType<WorldScroller>();
 
         rb = GetComponent<Rigidbody2D>();
         animator = GetComponent<Animator>();
         audioSrc = GetComponent<AudioSource>();
+        sprite = GetComponent<SpriteRenderer>();
 
         // Rigidbody2D 권장 설정
         rb.gravityScale = 1.5f; // 프로젝트 감에 맞게
@@ -100,44 +111,92 @@ public class PlayerAutoRunner : MonoBehaviour
 
         if (centerAnchor == null)
             startAnchor = rb.position;
+
+        prevPhase = kidsFollower.phase; // 시작 페이즈 기록
+        this.enabled = false;
     }
 
-    private void Start()
+    public void StartRunning()
     {
+        GetComponent<CatAutoMover>().enabled = false;
+        catStealth.enabled = false;
+        kidsFollower.gameObject.SetActive(true);
+        Bird.SetActive(true);
+        scroller.paused = false;
+        sprite.flipX = false;
+        isChasePlaying = true;
+
+        mainCamera.GetComponent<FollowCamera>().target = centerAnchor;
         StartCoroutine(ChangeCameraSize(7f));
         mainCamera.GetComponent<FollowCamera>().smoothSpeedX = 0.05f;
+
+        lastFootstepTime = Time.time - footstepInterval;
     }
 
     void Update()
-    {
+    {        
         // 지상 체크
         bool prevOnGround = isOnGround;
         isOnGround = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundMask);
 
-        if (isOnGround && rb.velocity.y <= 0.01f)
+        if (!isChasePlaying) return;
+
+        // 착지 프레임 탐지 → 점프 애니메이션 종료
+        bool justLanded = isOnGround && !prevOnGround;
+        if (isOnGround)
+        {
+            animator.SetBool("Jump", false);
             jumpCount = 0;
+        }
+
+        //if (isOnGround && rb.velocity.y <= 0.01f)
+        //    jumpCount = 0;
 
         if (atHide)
         {
             // S키로 마무리
-            if (!chaseFinished && !sTriggeredOnce && Input.GetKeyDown(KeyCode.S))
+            if (!kidsFollower.IsGameOverTriggered && !chaseFinished && !sTriggeredOnce 
+                && Input.GetKeyDown(KeyCode.S))
             {
-                //FinishChase();
                 StartCoroutine(FinishChase());
             }
+            if (kidsFollower.IsGameOverTriggered)
+            {
+                lastHide.SetEffect(false);
+            }
             return;
+        }
+
+        var curr = kidsFollower.phase;
+
+        if (curr != prevPhase)
+        {
+            // Bird에 '진입'하는 순간: 무적 ON (한 번만)
+            if (prevPhase != ChaserFollower.Phase.Bird && curr == ChaserFollower.Phase.Bird)
+            {
+                if (!playerHp.isInvincible)
+                    playerHp.isInvincible = true;
+                return;
+            }
+
+            // Bird에서 '이탈'하는 순간: 무적 OFF (한 번만)
+            if (!turnedOffOnce && prevPhase == ChaserFollower.Phase.Bird && curr != ChaserFollower.Phase.Bird)
+            {
+                if (playerHp.isInvincible)
+                    playerHp.isInvincible = false;
+
+                turnedOffOnce = true;
+            }
+
+            prevPhase = curr;
         }
 
         // 입력 → 목표 오프셋
         float h = Input.GetAxisRaw("Horizontal"); // A/D or ←/→
         if (Mathf.Abs(h) > 0.01f)
-        {
             targetOffset = Mathf.Sign(h) * maxOffsetX; // 끝까지(‘살짝’의 최대치) 밀고
-        }
         else
-        {
             targetOffset = 0f; // 손 떼면 센터 복귀
-        }
 
         // 부드러운 오프셋 업데이트 (가속/감속)
         float approachSpeed = (Mathf.Abs(targetOffset - currentOffset) > 0.01f)
@@ -148,16 +207,39 @@ public class PlayerAutoRunner : MonoBehaviour
 
         // 애니메이션: 항상 '달리기' 연출(대시는 애니로만)
         animator.SetBool("Dash", true);
-        animator.SetBool("Moving", Mathf.Abs(currentOffset) > 0.01f || !isOnGround); // 살짝 움직일 땐 Moving도 true 가능
+
+        bool scrollerMoving = (scroller != null && !scroller.paused);
+        bool movingAnim = (Mathf.Abs(currentOffset) > 0.01f || !isOnGround || scrollerMoving);
+        animator.SetBool("Moving", movingAnim);
+
         animator.SetBool("Crouch", false);
         animator.SetBool("Crouching", false);
         animator.SetBool("Climbing", false);
 
+        if (animator.GetBool("Jump"))
+            animator.SetBool("Moving", false);
+
         // 점프 입력
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            TryJump();
-        }
+        if (Input.GetKeyDown(KeyCode.Space)) TryJump();
+
+        SyncAnimatorParams();
+    }
+
+    // 속도 파라미터 계산: 오프셋 입력 기반(간단/안정)
+    float ComputeSpeedParam()
+    {
+        // 이동 입력을 했거나, X 보정이 활발하면 1로 본다
+        bool scrollerMoving = (scroller != null && !scroller.paused);
+        return (Mathf.Abs(currentOffset) > 0.01f || scrollerMoving) ? 1f : 0f;
+    }
+
+    // Update() 마지막에 호출
+    void SyncAnimatorParams()
+    {
+        animator.SetBool(H_IsGrounded, isOnGround);
+        animator.SetFloat(H_Speed, ComputeSpeedParam());
+        animator.SetBool(H_Shift, true);    // 오토런 구간은 항상 대시 연출이라면 true
+                                            // Jump는 TryJump/착지에서만 On/Off (지금처럼 이벤트 기반 유지)
     }
 
     void FixedUpdate()
@@ -187,8 +269,14 @@ public class PlayerAutoRunner : MonoBehaviour
         if (rb.velocity.y < 0f)
             rb.velocity += Vector2.up * Physics2D.gravity.y * (fallMultiplier - 1f) * Time.fixedDeltaTime;
 
-        // 4) 발소리 등 부가 로직
-        if (isOnGround && Mathf.Abs(currentOffset) > 0.02f && runLoopOrStep != null&& !sTriggeredOnce)
+        // === 발소리 트리거 ===
+        bool scrollerMoving = (scroller != null && !scroller.paused);         // 오토런 중
+        bool lateralMoving = Mathf.Abs(currentOffset) > 0.02f
+                              || Mathf.Abs(rb.velocity.x) > 0.02f;             // 좌/우 살짝 이동 또는 실제 속도
+        bool shouldStep = isOnGround && (scrollerMoving || lateralMoving)
+                          && runLoopOrStep != null && !sTriggeredOnce;
+
+        if (shouldStep)
         {
             if (Time.time - lastFootstepTime >= footstepInterval)
             {
@@ -209,11 +297,8 @@ public class PlayerAutoRunner : MonoBehaviour
         chaseFinished = true;
 
         yield return new WaitForSeconds(3f);
-        //EventManager.Instance.CallEvent(FinishChaseEventID);
 
-        // Tutorial Manager 진행 가능하게
-
-
+        Chase_Goal_Block.SetActive(true);
         this.enabled = false;
     }
 
@@ -226,6 +311,11 @@ public class PlayerAutoRunner : MonoBehaviour
         rb.velocity = new Vector2(rb.velocity.x, 0f);
         rb.AddForce(Vector2.up * jumpPower, ForceMode2D.Impulse);
         jumpCount++;
+
+        if (jumpCount == 1)
+        {
+            animator.SetBool("Jump", true);
+        }
 
         if (jumpSound != null) audioSrc.PlayOneShot(jumpSound);
     }
@@ -247,6 +337,9 @@ public class PlayerAutoRunner : MonoBehaviour
                         anchor + Vector3.left * maxOffsetX + Vector3.up * 0.5f);
         Gizmos.DrawLine(anchor + Vector3.right * maxOffsetX + Vector3.down * 0.5f,
                         anchor + Vector3.right * maxOffsetX + Vector3.up * 0.5f);
+        if (!groundCheck) return;
+        Gizmos.color = Color.green;
+        Gizmos.DrawWireSphere(groundCheck.position, groundCheckRadius);
     }
 
     IEnumerator ChangeCameraSize(float finalValue)
@@ -269,6 +362,7 @@ public class PlayerAutoRunner : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D other)
     {
+        if (!kidsFollower.isStartChasing) return;
         if (!other || !other.CompareTag(hideTag)) return;
 
         lastHide = other.GetComponent<HideObject>();
@@ -295,6 +389,7 @@ public class PlayerAutoRunner : MonoBehaviour
             animator.SetBool("Moving", false);
             animator.SetBool("Crouch", false);
             animator.SetBool("Crouching", false);
+            animator.SetBool("Jump", false);
             stopAnimPlayed = true;
         }
 
@@ -304,11 +399,11 @@ public class PlayerAutoRunner : MonoBehaviour
         catStealth.enabled = true;
         catStealth.isPlaying = false;
         PlayerCatMovement.Instance.enabled = true;
+        PlayerCatMovement.Instance.SetMiniGameInputBlocked(true);
 
         mainCamera.GetComponent<FollowCamera>().target = this.transform;
         mainCamera.GetComponent<CameraController>().playerTransform = this.transform;
         mainCamera.GetComponent<CameraShake>().target = this.transform;
     }
 
-   
 }

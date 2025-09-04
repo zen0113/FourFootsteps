@@ -2392,6 +2392,7 @@ MonoBehaviour:
   fullHeart: {fileID: 21300000, guid: 924157d2f219e1f4cbd0fdf931841daf, type: 3}
   emptyHeart: {fileID: 21300000, guid: 5f3e307b094ac694f8556e699d5a5e4e, type: 3}
   invincibilityDuration: 1.5
+  isInvincible: 0
 --- !u!114 &229199801
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2431,6 +2432,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   boxInteractingPower: 1.2
+  passableTag: Passable
   headCheck: {fileID: 393582561}
   tailCheck: {fileID: 357089001}
   headCheckLength: 1.5
@@ -2439,6 +2441,7 @@ MonoBehaviour:
   obstacleMask:
     serializedVersion: 2
     m_Bits: 64
+  forceCrouch: 0
   climbSpeed: 2
   ladderSnapDistance: 0.3
 --- !u!61 &229199802
@@ -24822,8 +24825,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   target: {fileID: 229199795}
-  smoothSpeedX: 0.125
-  smoothSpeedY: 0.05
+  smoothSpeedX: 4
+  smoothSpeedY: 10
   offset: {x: 0, y: 2}
   cameraHalfWidth: 5
   cameraHalfHeight: 3

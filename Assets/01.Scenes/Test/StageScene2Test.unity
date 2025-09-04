@@ -4532,6 +4532,22 @@ PrefabInstance:
       propertyPath: m_LocalPosition.y
       value: -2.01
       objectReference: {fileID: 0}
+    - target: {fileID: 6100623184381448495, guid: 206ac7699d7847545aacfc4a9d929d33, type: 3}
+      propertyPath: endPosition.x
+      value: 76.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6100623184381448495, guid: 206ac7699d7847545aacfc4a9d929d33, type: 3}
+      propertyPath: endPosition.y
+      value: 10.3
+      objectReference: {fileID: 0}
+    - target: {fileID: 6100623184381448495, guid: 206ac7699d7847545aacfc4a9d929d33, type: 3}
+      propertyPath: startPosition.x
+      value: 76.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6100623184381448495, guid: 206ac7699d7847545aacfc4a9d929d33, type: 3}
+      propertyPath: startPosition.y
+      value: -2.08
+      objectReference: {fileID: 0}
     - target: {fileID: 6938753622673966810, guid: 206ac7699d7847545aacfc4a9d929d33, type: 3}
       propertyPath: m_UsedByComposite
       value: 1
@@ -5257,6 +5273,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   birdMover: {fileID: 842761059}
   destinationPoint: {fileID: 1708363676}
+  IsInfiniteFlying: 0
 --- !u!50 &331307255
 Rigidbody2D:
   serializedVersion: 4
@@ -5857,6 +5874,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   birdMover: {fileID: 842761059}
   destinationPoint: {fileID: 906581541}
+  IsInfiniteFlying: 0
 --- !u!50 &371843886
 Rigidbody2D:
   serializedVersion: 4
@@ -16647,6 +16665,7 @@ MonoBehaviour:
   fullHeart: {fileID: 21300000, guid: 924157d2f219e1f4cbd0fdf931841daf, type: 3}
   emptyHeart: {fileID: 21300000, guid: 5f3e307b094ac694f8556e699d5a5e4e, type: 3}
   invincibilityDuration: 1.5
+  isInvincible: 0
 --- !u!114 &785937245
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -16695,6 +16714,7 @@ MonoBehaviour:
   obstacleMask:
     serializedVersion: 2
     m_Bits: 64
+  forceCrouch: 0
   climbSpeed: 2
   ladderSnapDistance: 0.3
 --- !u!61 &785937246
@@ -17373,6 +17393,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   birdMover: {fileID: 842761059}
   destinationPoint: {fileID: 906581541}
+  IsInfiniteFlying: 0
 --- !u!50 &803058017
 Rigidbody2D:
   serializedVersion: 4
@@ -17840,6 +17861,7 @@ MonoBehaviour:
   targetPoint: {fileID: 0}
   moveSpeed: 4
   stopDistance: 0.05
+  isInfiniteFlying: 0
   flySound: {fileID: 0}
   flySoundInterval: 0.3
 --- !u!95 &842761060
@@ -30082,6 +30104,7 @@ MonoBehaviour:
   fullHeart: {fileID: 21300000, guid: 924157d2f219e1f4cbd0fdf931841daf, type: 3}
   emptyHeart: {fileID: 21300000, guid: 5f3e307b094ac694f8556e699d5a5e4e, type: 3}
   invincibilityDuration: 1.5
+  isInvincible: 0
 --- !u!114 &1556289787
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -30130,6 +30153,7 @@ MonoBehaviour:
   obstacleMask:
     serializedVersion: 2
     m_Bits: 64
+  forceCrouch: 0
   climbSpeed: 2
   ladderSnapDistance: 0.3
 --- !u!61 &1556289788
@@ -41131,6 +41155,22 @@ PrefabInstance:
       propertyPath: m_LocalPosition.y
       value: -2.01
       objectReference: {fileID: 0}
+    - target: {fileID: 6100623184381448495, guid: 206ac7699d7847545aacfc4a9d929d33, type: 3}
+      propertyPath: endPosition.x
+      value: 183.01
+      objectReference: {fileID: 0}
+    - target: {fileID: 6100623184381448495, guid: 206ac7699d7847545aacfc4a9d929d33, type: 3}
+      propertyPath: endPosition.y
+      value: 9.31
+      objectReference: {fileID: 0}
+    - target: {fileID: 6100623184381448495, guid: 206ac7699d7847545aacfc4a9d929d33, type: 3}
+      propertyPath: startPosition.x
+      value: 183.01
+      objectReference: {fileID: 0}
+    - target: {fileID: 6100623184381448495, guid: 206ac7699d7847545aacfc4a9d929d33, type: 3}
+      propertyPath: startPosition.y
+      value: -2.46
+      objectReference: {fileID: 0}
     - target: {fileID: 6938753622673966810, guid: 206ac7699d7847545aacfc4a9d929d33, type: 3}
       propertyPath: m_UsedByComposite
       value: 1
@@ -45096,6 +45136,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   birdMover: {fileID: 842761059}
   destinationPoint: {fileID: 222605275}
+  IsInfiniteFlying: 0
 --- !u!50 &2133851566
 Rigidbody2D:
   serializedVersion: 4

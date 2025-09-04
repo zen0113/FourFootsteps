@@ -159,18 +159,6 @@ MonoBehaviour:
     unityEvent:
       m_PersistentCalls:
         m_Calls:
-        - m_Target: {fileID: 899541821}
-          m_TargetAssemblyTypeName: UnityEngine.Behaviour, UnityEngine
-          m_MethodName: set_enabled
-          m_Mode: 6
-          m_Arguments:
-            m_ObjectArgument: {fileID: 0}
-            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 0
-            m_FloatArgument: 0
-            m_StringArgument: 
-            m_BoolArgument: 1
-          m_CallState: 2
         - m_Target: {fileID: 899541820}
           m_TargetAssemblyTypeName: UnityEngine.Behaviour, UnityEngine
           m_MethodName: set_enabled
@@ -196,6 +184,18 @@ MonoBehaviour:
             m_BoolArgument: 0
           m_CallState: 2
         - m_Target: {fileID: 899541821}
+          m_TargetAssemblyTypeName: UnityEngine.Behaviour, UnityEngine
+          m_MethodName: set_enabled
+          m_Mode: 6
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 1
+          m_CallState: 2
+        - m_Target: {fileID: 899541821}
           m_TargetAssemblyTypeName: PlayerAutoRunner, Assembly-CSharp
           m_MethodName: StartRunning
           m_Mode: 1
@@ -205,7 +205,7 @@ MonoBehaviour:
             m_IntArgument: 0
             m_FloatArgument: 0
             m_StringArgument: 
-            m_BoolArgument: 0
+            m_BoolArgument: 1
           m_CallState: 2
 --- !u!50 &35754579
 Rigidbody2D:
@@ -1915,7 +1915,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   target: {fileID: 899541809}
   followCamera: {fileID: 939193460}
-  targetValue: 0.01
+  targetValue: 0.1
 --- !u!1 &159928519 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1105887977952814037, guid: c691f90496e6c4c46b5e9e52248dee85, type: 3}
@@ -5413,7 +5413,7 @@ Rigidbody2D:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 514016402}
-  m_BodyType: 0
+  m_BodyType: 1
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
@@ -6093,7 +6093,7 @@ Rigidbody2D:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 618790201}
-  m_BodyType: 0
+  m_BodyType: 1
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
@@ -8348,6 +8348,9 @@ MonoBehaviour:
   walkSoundInterval: 0.3
   runSound: {fileID: 8300000, guid: 8969461346db03a4d887de7f8e7e8e2d, type: 3}
   runSoundInterval: 0.5
+  arriveSnapDistance: 0.02
+  useRigidbodyMotion: 1
+  isMoving: 0
 --- !u!114 &899541821
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8612,7 +8615,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   target: {fileID: 2099263543}
   followCamera: {fileID: 939193460}
-  targetValue: 0.01
+  targetValue: 0.1
 --- !u!1 &939193458
 GameObject:
   m_ObjectHideFlags: 0

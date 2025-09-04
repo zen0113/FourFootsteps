@@ -154,6 +154,7 @@ public class PlayerAutoRunner : MonoBehaviour
 
         if (atHide)
         {
+            kidsFollower.InvokeOnCatchMode();
             // S키로 마무리
             if (!kidsFollower.IsGameOverTriggered && !chaseFinished && !sTriggeredOnce 
                 && Input.GetKeyDown(KeyCode.S))

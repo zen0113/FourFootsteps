@@ -25,12 +25,18 @@ public class CatAutoMover : MonoBehaviour
     [SerializeField] private float runSoundInterval = 0.5f;
     private float lastWalkSoundTime; // 마지막 걷기 소리 재생 시간
 
+    [Header("도착 처리(클린업)")]
+    [SerializeField] private float arriveSnapDistance = 0.02f; // 최종 스냅 임계값
+    [SerializeField] private bool useRigidbodyMotion = true;   // RB2D가 있으면 MovePosition 사용
+    private Rigidbody2D rb;
+    private bool arrivingLock = false; // 도착 분기 진입하면 이 안에서만 처리
+
     public Action OnArrived; // 도착 콜백
 
     private SpriteRenderer spriteRenderer;
     private Animator animator;
     private AudioSource audioSource; // AudioSource 추가
-    private bool isMoving = false;
+    [SerializeField] private bool isMoving = false;
     public bool IsMoving => isMoving;
 
     private float currentSpeed; // 가변 속도(보간 대상)
@@ -52,6 +58,8 @@ public class CatAutoMover : MonoBehaviour
         {
             audioSource = gameObject.AddComponent<AudioSource>();
         }
+
+        rb = GetComponent<Rigidbody2D>();
     }
 
     private void OnDisable()
@@ -157,27 +165,33 @@ public class CatAutoMover : MonoBehaviour
             return;
         }
 
-        Vector2 toTarget = targetPoint.position - transform.position;
+        Vector2 toTarget = (Vector2)(targetPoint.position - transform.position);
         float distance = toTarget.magnitude;
 
-        if (distance <= stopDistance)
+        if (arrivingLock || distance <= stopDistance)
         {
-            // 부드러운 감속
-            if (Mathf.Abs(currentSpeed) > 0.01f)
-            {
-                currentSpeed = Mathf.MoveTowards(currentSpeed, 0f, decel * Time.deltaTime);
-                Translate(currentSpeed, toTarget);
-                return;
-            }
-
-            // 완전 정지
-            isMoving = false;
-            state = MoveState.Idle;
-            audioSource.Stop();
-            SetAnim(false, false);
-            OnArrived?.Invoke();
+            ArriveStep(toTarget, distance);
             return;
         }
+
+        //if (distance <= stopDistance)
+        //{
+        //    // 부드러운 감속
+        //    if (Mathf.Abs(currentSpeed) > 0.01f)
+        //    {
+        //        currentSpeed = Mathf.MoveTowards(currentSpeed, 0f, decel * Time.deltaTime);
+        //        Translate(currentSpeed, toTarget);
+        //        return;
+        //    }
+
+        //    // 완전 정지
+        //    isMoving = false;
+        //    state = MoveState.Idle;
+        //    audioSource.Stop();
+        //    SetAnim(false, false);
+        //    OnArrived?.Invoke();
+        //    return;
+        //}
 
         // 방향 전환
         if (toTarget.x > 0) spriteRenderer.flipX = false;
@@ -213,7 +227,8 @@ public class CatAutoMover : MonoBehaviour
         currentSpeed = Mathf.MoveTowards(currentSpeed, targetSpeed, a * Time.deltaTime);
 
         // 실제 이동
-        Translate(currentSpeed, toTarget);
+        //Translate(currentSpeed, toTarget);
+        MoveBy(toTarget.normalized * (currentSpeed * Time.deltaTime));
 
         // 발소리
         PlayFootstepIfDue(false);
@@ -236,6 +251,51 @@ public class CatAutoMover : MonoBehaviour
         // 아래 두 줄은 “보조용” (그래프가 Dash/Moving 불리언을 보지 않는다면 없어도 됨)
         animator.SetBool("Dash", state == MoveState.Dashing);
         animator.SetBool("Moving", state != MoveState.Idle);
+    }
+
+
+    // 오버슈트 방지 + 감속 + 스냅 + 완료 처리
+    private void ArriveStep(Vector2 toTarget, float distance)
+    {
+        arrivingLock = true;
+
+        // 감속
+        currentSpeed = Mathf.MoveTowards(currentSpeed, 0f, decel * Time.deltaTime);
+
+        // 이번 프레임 이동량(오버슈트 방지)
+        float step = currentSpeed * Time.deltaTime;
+        float travel = Mathf.Min(step, distance); // 목표를 넘지 않도록 clamp
+
+        // 이동
+        if (travel > 0f)
+            MoveBy(toTarget.normalized * travel);
+
+        // 스냅 & 종료 조건
+        if (currentSpeed <= 0.01f || distance <= arriveSnapDistance)
+        {
+            // 스냅(정확히 고정)
+            Vector3 snap = targetPoint.position;
+            if (useRigidbodyMotion && rb != null) rb.MovePosition(snap);
+            else transform.position = snap;
+
+            // 완료
+            isMoving = false;
+            state = MoveState.Idle;
+            arrivingLock = false;
+
+            audioSource.Stop();
+            SetAnim(false, false);
+            OnArrived?.Invoke();
+        }
+    }
+
+    // Transform 대신 RB2D.MovePosition 우선 사용(있으면)
+    private void MoveBy(Vector2 delta)
+    {
+        if (useRigidbodyMotion && rb != null)
+            rb.MovePosition(rb.position + delta);
+        else
+            transform.Translate(delta, Space.World);
     }
 
     private void Translate(float speed, Vector2 toTarget)

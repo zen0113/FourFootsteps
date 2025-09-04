@@ -100,6 +100,10 @@ public class ChaserFollower : MonoBehaviour
     public event System.Action OnSurge;       // 돌진 시작(투척 중단)
     public event System.Action OnLurk;        // 대기 전환(투척 재개)
     public event System.Action OnCatchMode;   // 잡으러 가기(정자 도달 but 숨지 않음)
+    public void InvokeOnCatchMode()
+    {
+        OnCatchMode?.Invoke();
+    }
 
     void SwitchToLurk() { state = State.Lurk; OnLurk?.Invoke(); }
     // Lurk 인 동안에는 투척O
@@ -292,7 +296,7 @@ public class ChaserFollower : MonoBehaviour
 
     private void UpdateCatchChase()
     {
-
+        OnCatchMode?.Invoke();
 
         Vector2 dir = (playerRunner.transform.position - transform.position).normalized;
         rb.velocity = dir * catchSpeed;

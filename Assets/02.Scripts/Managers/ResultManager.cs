@@ -175,6 +175,22 @@ public class ResultManager : MonoBehaviour
                 yield return new WaitForSeconds(1f);
                 break;
 
+            // 동물 병원 앞 퍼즐 조사 시, 회상2 씬으로 이동.
+            case "Result_GoToRecall2":
+                InitializeExecutableObjects();
+                GameManager.Instance.SetVariable("CanInvesigatingRecallObject", false);
+                SceneLoader.Instance.LoadScene(GameManager.Instance.GetNextSceneData().sceneName);
+                yield return new WaitForSeconds(1f);
+                break;
+
+            // 정자 밑 퍼즐 조사 시, 회상3 씬으로 이동.
+            case "Result_GoToRecall3":
+                InitializeExecutableObjects();
+                GameManager.Instance.SetVariable("CanInvesigatingRecallObject", false);
+                SceneLoader.Instance.LoadScene(GameManager.Instance.GetNextSceneData().sceneName);
+                yield return new WaitForSeconds(1f);
+                break;
+
             // 웜홀 최초 등장
             case "Result_FirstWormholeActivation":
                 executableObjects["WormholeActivation"].ExecuteAction();

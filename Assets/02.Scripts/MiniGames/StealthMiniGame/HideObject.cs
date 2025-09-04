@@ -31,7 +31,9 @@ public class HideObject : MonoBehaviour
             var t = transform.Find("Key Icon");
             if (t) keyPrompt = t.gameObject;
         }
-
+    }
+    private void Start()
+    {
         // 시작 시 이펙트/프롬프트 off
         if (spriteGlowEffect) spriteGlowEffect.enabled = false;
         if (keyPrompt) keyPrompt.SetActive(false);

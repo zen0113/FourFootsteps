@@ -175,6 +175,22 @@ public class ResultManager : MonoBehaviour
                 yield return new WaitForSeconds(1f);
                 break;
 
+            // 동물 병원 앞 퍼즐 조사 시, 회상2 씬으로 이동.
+            case "Result_GoToRecall2":
+                InitializeExecutableObjects();
+                GameManager.Instance.SetVariable("CanInvesigatingRecallObject", false);
+                SceneLoader.Instance.LoadScene(GameManager.Instance.GetNextSceneData().sceneName);
+                yield return new WaitForSeconds(1f);
+                break;
+
+            // 정자 밑 퍼즐 조사 시, 회상3 씬으로 이동.
+            case "Result_GoToRecall3":
+                InitializeExecutableObjects();
+                GameManager.Instance.SetVariable("CanInvesigatingRecallObject", false);
+                SceneLoader.Instance.LoadScene(GameManager.Instance.GetNextSceneData().sceneName);
+                yield return new WaitForSeconds(1f);
+                break;
+
             // 웜홀 최초 등장
             case "Result_FirstWormholeActivation":
                 executableObjects["WormholeActivation"].ExecuteAction();
@@ -224,7 +240,9 @@ public class ResultManager : MonoBehaviour
                 yield return StartCoroutine(MoveToRoomCoroutine(roomName));
                 break;
 
+            // 은신 게임: 들켰을 때 연출
             case "Result_StartChaseGameIntro":
+                fadeOutTime = 1.5f;
                 // 다이얼로그 진행 후
                 GameObject player = GameObject.FindWithTag("Player");
                 player.GetComponent<PlayerCatMovement>().ForceCrouch = false;
@@ -233,7 +251,19 @@ public class ResultManager : MonoBehaviour
                 player.GetComponent<CatAutoMover>().enabled = true;
                 player.GetComponent<CatAutoMover>().StartMoving(player.GetComponent<CatAutoMover>().targetPoint);
                 // 화면 어두워짐+ 다음 추격 미니게임 시작
-                yield return UIManager.Instance.OnFade(null, 0, 1, 1.5f);
+                yield return UIManager.Instance.OnFade(null, 0, 1, fadeOutTime);
+                FollowCamera followCamera = Camera.main.GetComponent<FollowCamera>();
+                followCamera.enabled = true;
+                yield return new WaitWhile(() => player.GetComponent<CatAutoMover>().IsMoving);
+                fadeOutTime = 1f;
+                yield return UIManager.Instance.OnFade(null, 1, 0, fadeOutTime);
+                TutorialController.Instance.SetNextTutorial();
+                break;
+
+            case "Result_MiniGameFailed":
+                // 페이드 인 효과와 함께 게임오버 씬 로드
+                SceneLoader.Instance.LoadScene("GameOver");
+                yield return null;
                 break;
 
             default:

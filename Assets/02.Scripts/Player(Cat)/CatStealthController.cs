@@ -14,11 +14,22 @@ public class CatStealthController : MonoBehaviour
     [SerializeField] private SpriteRenderer spriteRenderer;    // 방향 판단용
     [SerializeField] private Rigidbody2D rb;
     [SerializeField] private float toggleCooldown = 1.5f;
+    [SerializeField] private Animator animator;
 
     [Header("Runtime (ReadOnly)")]
     [SerializeField] private HideObject currentHideObj;
     [SerializeField] private bool isHiding;
     [SerializeField] private float lastEnterTime;
+
+    static readonly int H_IsGrounded = Animator.StringToHash("IsGrounded");
+    static readonly int H_Speed = Animator.StringToHash("Speed");
+    static readonly int H_Shift = Animator.StringToHash("Shift");
+    static readonly int H_Climbing = Animator.StringToHash("Climbing");
+    static readonly int H_Crouch = Animator.StringToHash("Crouch");
+    static readonly int H_Crouching = Animator.StringToHash("Crouching");
+    static readonly int H_Jump = Animator.StringToHash("Jump");
+    static readonly int H_Moving = Animator.StringToHash("Moving");
+    static readonly int H_Dash = Animator.StringToHash("Dash");
 
     // 근접 판정: 트리거 안의 HideObject 집합
     private readonly HashSet<HideObject> overlaps = new();
@@ -44,6 +55,7 @@ public class CatStealthController : MonoBehaviour
     public bool IsNearHide => currentHideObj != null;
     // 최종 목적지인 벤치 밑에 숨었을 경우, ForceNotHiding true면 E키가 안 눌리게 함.
     private bool ForceNotHiding = false;
+    public bool isPlaying = true;
 
     void Awake()
     {
@@ -53,6 +65,8 @@ public class CatStealthController : MonoBehaviour
         if (!movement) movement = PlayerCatMovement.Instance;
         if (!spriteRenderer) spriteRenderer = GetComponent<SpriteRenderer>();
         if (!rb) rb = GetComponent<Rigidbody2D>();
+        if (!animator) animator = GetComponent<Animator>();
+
         if (!settings)
         {
             Debug.LogWarning("[CatStealthController] StealthSettings가 지정되지 않았습니다. 기본값으로 동작합니다.");
@@ -62,6 +76,8 @@ public class CatStealthController : MonoBehaviour
 
     void Update()
     {
+        if (!isPlaying) return;
+
         // E키 입력 시, Hide Object에 은신
         if (Input.GetKeyDown(settings.toggleKey) && !ForceNotHiding && Time.time >= nextToggleAllowedTime)
         {
@@ -93,7 +109,7 @@ public class CatStealthController : MonoBehaviour
             overlaps.Add(ho);
             UpdateCurrentHideObj();
             ho.SetEffect(true);
-            OnEnterArea?.Invoke(ho);
+            if (isPlaying) OnEnterArea?.Invoke(ho);
         }
     }
     void OnTriggerExit2D(Collider2D other)
@@ -103,7 +119,7 @@ public class CatStealthController : MonoBehaviour
         {
             overlaps.Remove(ho);
             ho.SetEffect(false);
-            OnExitArea?.Invoke(ho);
+            if (isPlaying) OnExitArea?.Invoke(ho);
             UpdateCurrentHideObj();
         }
     }
@@ -147,10 +163,12 @@ public class CatStealthController : MonoBehaviour
     {
         state = StealthState.Entering;
 
-        // 바로 잠금 & 관성 제거 (버퍼보다 먼저)
+        // 바로 잠금 & 관성 제거
         movement.SetMiniGameInputBlocked(true);
         movement.ForceCrouch = true;
-        movement.SetCrouchMovingState(true);
+
+        movement.SetCrouchMovingState(true); // 내부 플래그
+        ApplyCrouchAnim(true);               // 애니 파라미터 즉시 반영
 
         if (rb)
         {
@@ -172,16 +190,15 @@ public class CatStealthController : MonoBehaviour
             movement.SetCrouchMovingState(false);
             movement.ForceCrouch = false;
             movement.SetMiniGameInputBlocked(false);
+            ClearCrouchAnim();
             state = IsNearHide ? StealthState.Near : StealthState.Idle;
             yield break;
         }
 
         isHiding = true;
-        // 컨트롤/애니 준비
-        movement.UpdateAnimationCrouch();
 
-        ho.SetEffect(false); // 하이라이트 제거
-        OnHideStart?.Invoke(ho);
+        ho.SetEffect(false);// 하이라이트 및 아이콘 끄기
+        if (isPlaying) OnHideStart?.Invoke(ho);
 
         // 은신 오브젝트 안쪽으로 이동
         yield return MoveToX(ho.AnchorX);
@@ -193,7 +210,10 @@ public class CatStealthController : MonoBehaviour
         // 물리 복원
         if (rb) rb.bodyType = prevBody;
 
+        // 도착 후 정지 crouch 포즈로 전환
         movement.SetCrouchMovingState(false);
+        ApplyCrouchAnim(false);
+
         state = StealthState.Hiding;
         nextToggleAllowedTime = Time.time + toggleCooldown;
         enterCo = null;
@@ -216,11 +236,10 @@ public class CatStealthController : MonoBehaviour
         yield return new WaitForSeconds(settings.enterExitBuffer);
 
         movement.SetCrouchMovingState(true);
+        ApplyCrouchAnim(true);
 
         // 바깥 X 계산
         float targetX = ComputeOutsideX(ho);
-
-        // 이동
         yield return MoveToX(targetX);
 
         // 원복
@@ -229,6 +248,9 @@ public class CatStealthController : MonoBehaviour
 
         isHiding = false;
         OnHideEnd?.Invoke(ho);
+
+        // 웅크림 애니메이션 해제
+        ClearCrouchAnim();
 
         // 현재 근처 여부 갱신
         UpdateCurrentHideObj();
@@ -284,5 +306,57 @@ public class CatStealthController : MonoBehaviour
         float pad = settings.pushOutsidePadding + Mathf.Abs(transform.localScale.x) * 1.0f;
 
         return facingRight ? (b.max.x + pad) : (b.min.x - pad);
+    }
+
+    // 웅크림 애니메이션 즉시 적용
+    void ApplyCrouchAnim(bool moving)
+    {
+        if (!animator) return;
+
+        // 다른 상태는 끄고
+        animator.SetBool(H_Moving, false);
+        animator.SetBool(H_Dash, false);
+        animator.SetBool(H_Climbing, false);
+        animator.SetBool(H_Jump, false);
+
+        // 웅크림만 켠다 (이동/정지 상호배타)
+        animator.SetBool(H_Crouching, moving);
+        animator.SetBool(H_Crouch, !moving);
+    }
+
+    // 웅크림 종료 시 깔끔히 정리
+    void ClearCrouchAnim()
+    {
+        if (!animator) return;
+        animator.SetBool(H_Crouching, false);
+        animator.SetBool(H_Crouch, false);
+    }
+
+    public void Chase_StartEnter(HideObject ho)
+    {
+        PlayerCatMovement.Instance.enabled = true;
+
+        if (!overlaps.Contains(ho)) overlaps.Add(ho);
+        currentHideObj = ho;
+
+        if (exitCo != null) { StopCoroutine(exitCo); exitCo = null; }
+        if (exitFxCo != null) { StopCoroutine(exitFxCo); exitFxCo = null; }
+
+        enterCo = StartCoroutine(EnterFlow(ho));
+    }
+
+    public void Chase_GameOver()
+    {
+        StopAllCoroutines();
+        movement.SetCrouchMovingState(false);
+        this.enabled = false;
+    }
+
+    public void Chase_CourchingDisabled()
+    {
+        // 원복
+        movement.SetMiniGameInputBlocked(false);
+        isHiding = false;
+        this.enabled = false;
     }
 }

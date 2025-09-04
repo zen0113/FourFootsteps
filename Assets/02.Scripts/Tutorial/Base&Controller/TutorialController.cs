@@ -16,6 +16,7 @@ public class TutorialController : MonoBehaviour
 
     private TutorialBase currentTutorial = null;
     private int currentIndex = -1;
+    public int CurrentIndex => currentIndex;
 
     void Awake()
     {

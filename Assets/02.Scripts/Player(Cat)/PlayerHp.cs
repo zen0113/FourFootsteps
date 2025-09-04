@@ -21,7 +21,7 @@ public class PlayerHp : MonoBehaviour
 
     [Header("플레이어 무적상태")]
     [SerializeField] private float invincibilityDuration = 1.5f; // 무적 시간 (초)
-    private bool isInvincible = false;
+    public bool isInvincible = false;
 
 
     private void Awake()
@@ -77,7 +77,26 @@ public class PlayerHp : MonoBehaviour
                 heartParent.transform.GetChild(i).GetComponent<Image>().sprite = emptyHeart;
             }
         }
-        PlayerCatMovement.Instance.PlayHurtSound();
+
+        var catMovement = gameObject.GetComponent<PlayerCatMovement>();
+
+        if (catMovement != null && catMovement.enabled)
+        {
+            catMovement.PlayHurtSound();
+        }
+        else
+        {
+            var autoRunner = gameObject.GetComponent<PlayerAutoRunner>();
+            if (autoRunner != null)
+            {
+                autoRunner.PlayHurtSound();
+            }
+            else
+            {
+                Debug.LogWarning("Neither PlayerCatMovement nor PlayerAutoRunner is active!");
+            }
+        }
+
         // 빨간 비네팅 실행
         Warning();
     }

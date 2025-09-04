@@ -93,7 +93,7 @@ public class PlayerCatMovement : MonoBehaviour
     // 콜라이더 크기 관련 (웅크리기 시 콜라이더 크기 변경용)
     private Vector2 originalColliderSize, originalColliderOffset;   // 원본 콜라이더 크기와 오프셋
     private Vector2 crouchColliderSize, crouchColliderOffset;       // 웅크린 상태 콜라이더 크기와 오프셋
-    private bool forceCrouch = false;                               // 외부에서 강제로 웅크리기 상태로 만들기
+    [SerializeField] private bool forceCrouch = false;                               // 외부에서 강제로 웅크리기 상태로 만들기
 
     // 사다리 시스템
     [Header("사다리")]
@@ -222,6 +222,7 @@ public class PlayerCatMovement : MonoBehaviour
         if (justLanded)
         {
             lastLandingTime = Time.time;
+            animator.SetBool("Jump", false);
         }
 
         // 지상에 있고 떨어지는 중이면 점프 카운트 리셋
@@ -266,8 +267,21 @@ public class PlayerCatMovement : MonoBehaviour
         {
             animator.SetBool("Moving", false);
             animator.SetBool("Dash", false);
-            animator.SetBool("Crouching", false);
             animator.SetBool("Climbing", false);
+            //animator.SetBool("Jump", false);
+
+            // 입력 차단 중에도, 강제/수동 웅크림이면 상태를 유지
+            if (isCrouching || forceCrouch)
+            {
+                animator.SetBool("Crouching", isCrouchMoving);
+                animator.SetBool("Crouch", !isCrouchMoving);
+            }
+            else
+            {
+                animator.SetBool("Crouching", false);
+                animator.SetBool("Crouch", false);
+            }
+
             if (dashParticle != null)
             {
                 particleEmission.rateOverTime = 0f;
@@ -287,6 +301,7 @@ public class PlayerCatMovement : MonoBehaviour
             animator.SetBool("Dash", false);
             animator.SetBool("Crouching", false);
             animator.SetBool("Crouch", false);
+            animator.SetBool("Jump", false);
 
             animator.SetBool("Climbing", true);
 
@@ -306,9 +321,14 @@ public class PlayerCatMovement : MonoBehaviour
         animator.SetBool("Dash", false);
         animator.SetBool("Crouch", false);
         animator.SetBool("Crouching", false);
+        //animator.SetBool("Jump", false);
 
         // 실제 키 입력이 있는지 확인 (물리적 속도가 아닌 입력 기준으로 판단)
         bool hasHorizontalInput = Mathf.Abs(horizontalInput) > 0.01f;
+
+        // 점프 중이면 다른 상태 끔
+        if (animator.GetBool("Jump"))
+            return;
 
         // 웅크리기 상태 처리
         if (isCrouching || forceCrouch)
@@ -335,12 +355,76 @@ public class PlayerCatMovement : MonoBehaviour
         else if (isJumping)
         {
             // 점프 애니메이션 (필요시 추가)
-            // 예: animator.SetBool("Jumping", true);
+            //animator.SetBool("Jump", true);
         }
         else if (hasHorizontalInput)
         {
             animator.SetBool("Moving", true);       // 일반 이동 애니메이션
         }
+    }
+
+    // 애니메이션 파라미터 해쉬화
+    int _hashIsGrounded = Animator.StringToHash("IsGrounded");
+    int _hashSpeed = Animator.StringToHash("Speed");
+    int _hashShift = Animator.StringToHash("Shift");
+    int _hashIsClimbing = Animator.StringToHash("Climbing");
+    int _hashIsCrouch = Animator.StringToHash("Crouch");
+    int _hashIsCrouching = Animator.StringToHash("Crouching");
+    int _hashJump = Animator.StringToHash("Jump");
+
+    // 애니메이션 파라미터 동기화
+    void SyncAnimatorParams()
+    {
+        // 입력 차단/미니게임 때는 깔끔하게 0/false로
+        bool blocked = IsInputBlocked() || !(bool)GameManager.Instance.GetVariable("CanMoving");
+
+        // --- 입력 차단 중 처리: 웅크림만 유지하고 즉시 반환 ---
+        if (blocked)
+        {
+            animator.SetBool(_hashIsGrounded, false);
+            animator.SetFloat(_hashSpeed, 0f);
+            animator.SetBool(_hashShift, false);
+            animator.SetBool(_hashIsClimbing, false);
+
+            // 강제/수동 웅크림 유지: isCrouchMoving에 따라 Crouching/Crouch 상호배타
+            bool crouchAny = (isCrouching || forceCrouch);
+            animator.SetBool(_hashIsCrouching, crouchAny && isCrouchMoving);
+            animator.SetBool(_hashIsCrouch, crouchAny && !isCrouchMoving);
+            return;
+        }
+
+        // 대시 키: Shift (박스 상호작용/웅크림/사다리 중엔 false)
+        bool shiftDown = Input.GetKey(KeyCode.LeftShift)
+                         && !isCrouching
+                         && !isClimbing
+                         && !blocked;
+
+        // 속도: 입력 기반이 전이 안정적 (물리 미끄러짐 영향 적음)
+        float hInput = blocked ? 0f : Mathf.Abs(Input.GetAxisRaw("Horizontal"));
+        float speedParam = hInput;
+
+        // 공통 파라미터
+        animator.SetBool(_hashIsGrounded, isOnGround && !blocked);
+        animator.SetFloat(_hashSpeed, speedParam);
+        animator.SetBool(_hashShift, shiftDown);
+        animator.SetBool(_hashIsClimbing, isClimbing && !blocked);
+
+        // 웅크림 상태 계산
+        bool jumpAnim = animator.GetBool(_hashJump);
+        bool inCrouchMode =
+            (isCrouching || forceCrouch) &&
+            isOnGround &&
+            !isClimbing &&
+            !blocked &&
+            !jumpAnim;
+
+        bool crouchMoving = inCrouchMode && (speedParam > 0.01f);
+        bool crouchIdle = inCrouchMode && !crouchMoving;
+
+        animator.SetBool(_hashIsCrouching, crouchMoving);
+        animator.SetBool(_hashIsCrouch, crouchIdle);
+
+        isCrouchMoving = crouchMoving;
     }
 
     /// <summary>
@@ -350,7 +434,12 @@ public class PlayerCatMovement : MonoBehaviour
     void LateUpdate()
     {
         UpdateAnimationState(Input.GetAxisRaw("Horizontal"));
+
+        // 애니메이션 파라미터 동기화
+        SyncAnimatorParams();
     }
+
+
 
     /// <summary>
     /// 물리 업데이트 - 실제 이동, 점프, 사운드 처리 등을 수행
@@ -440,7 +529,8 @@ public class PlayerCatMovement : MonoBehaviour
                                       animator.GetBool("Dash") ||
                                       animator.GetBool("Crouching") ||
                                       animator.GetBool("Climbing") ||
-                                      animator.GetBool("Crouch");
+                                      animator.GetBool("Crouch") ||
+                                      animator.GetBool("Jump");
 
         bool hasHorizontalInput = Mathf.Abs(Input.GetAxisRaw("Horizontal")) > 0.01f;
         bool isJumping = !isOnGround;
@@ -773,6 +863,11 @@ public class PlayerCatMovement : MonoBehaviour
                 jumpCount++;
                 isOnGround = false;
 
+                if (jumpCount == 1)
+                {
+                    animator.SetBool("Jump", true);
+                }
+
                 // 점프 시 파티클 효과
                 if (dashParticle != null)
                 {
@@ -928,6 +1023,8 @@ public class PlayerCatMovement : MonoBehaviour
             float hForce = spriteRenderer.flipX ? -1f : 1f;
             rb.velocity = new Vector2(hForce * movePower * 0.8f, jumpPower * 0.9f);
             jumpCount = 1;
+
+            animator.SetBool("Jump", true);
         }
         else
         {
@@ -1096,7 +1193,16 @@ public class PlayerCatMovement : MonoBehaviour
         // 숨는 중/락 중에는 이동/대시 꺼두고, 쭈그림/기어감만 유지
         animator.SetBool("Moving", false);
         animator.SetBool("Dash", false);
-        animator.SetBool("Crouch", ForceCrouch);
+        if (isCrouchMoving)
+        {
+            animator.SetBool("Crouching", true);
+            animator.SetBool("Crouch", false);
+        }
+        else
+        {
+            animator.SetBool("Crouch", ForceCrouch);
+            animator.SetBool("Crouching", false);
+        }
         StopDashParticle();
     }
 }

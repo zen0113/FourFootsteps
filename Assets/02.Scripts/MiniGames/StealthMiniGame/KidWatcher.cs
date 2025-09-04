@@ -18,6 +18,7 @@ public class KidWatcher : MonoBehaviour
     public Sprite watchingSprite;
     public SuspicionMeter meter;
     [SerializeField] private CameraShake cameraShake;
+    [SerializeField] private GameObject StageBlockingWall;
 
     public bool isWatching { get; private set; }
 
@@ -140,6 +141,7 @@ public class KidWatcher : MonoBehaviour
     {
         Debug.Log("[Stealth] Caught by Kid!");
 
+        StageBlockingWall.SetActive(false);
         PlayerCatMovement.Instance.SetMiniGameInputBlocked(true);
         StopAllCoroutines();
         SetWatching(true);

@@ -206,7 +206,8 @@ public class DialogueManager : MonoBehaviour
                     break;
 
                 case "InnerThoughts":
-                //case "PlayerBubble":
+                case "Monolog":
+                case "PlayerBubble":
                     speakerText.text = "";
                     break;
 
@@ -388,7 +389,10 @@ public class DialogueManager : MonoBehaviour
     private void UpdateCharacterImages(DialogueLine dialogueLine)
     {
         if (dialogueType == DialogueType.PLAYER_BUBBLE || dialogueType == DialogueType.MONOLOG)
+        {
+            characterImages[dialogueType.ToInt()].gameObject.SetActive(false);
             return;
+        }
 
         var imageID = dialogueLine.ImageID;
 

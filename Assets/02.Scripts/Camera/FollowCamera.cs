@@ -58,8 +58,8 @@ public class FollowCamera : MonoBehaviour
         float currentZ = currentPos.z;
 
         // 부드러운 이동 계산
-        float smoothedX = Mathf.Lerp(currentPos.x, targetX, smoothSpeedX);
-        float smoothedY = Mathf.Lerp(currentPos.y, targetY, smoothSpeedY);
+        float smoothedX = Mathf.Lerp(currentPos.x, targetX, smoothSpeedX * Time.deltaTime);
+        float smoothedY = Mathf.Lerp(currentPos.y, targetY, smoothSpeedY * Time.deltaTime);
 
         Vector3 desiredPosition = new Vector3(smoothedX, smoothedY, currentZ);
 
@@ -72,7 +72,7 @@ public class FollowCamera : MonoBehaviour
 
         // 경계 제한 적용 - 각 축을 개별적으로 처리
         Vector3 finalPosition = ClampCameraPosition(currentPos, desiredPosition);
-        
+
         // 카메라 위치를 이동
         transform.position = finalPosition;
     }

@@ -79,6 +79,7 @@ public class PlayerCatMovement : MonoBehaviour
 
     // 웅크리기 시스템
     [Header("웅크리기")]
+    [SerializeField] private string passableTag = "Passable";
     [SerializeField] private Transform headCheck;           // 머리 위 장애물 체크 포인트
     [SerializeField] private Transform tailCheck;           // 꼬리 위 장애물 체크 포인트
     [SerializeField] private float headCheckLength;         // 머리 체크 거리
@@ -596,8 +597,24 @@ public class PlayerCatMovement : MonoBehaviour
     /// </summary>
     bool IsObstacleDirectlyAbove()
     {
-        return Physics2D.Raycast(headCheck.position, Vector2.up, headCheckLength, obstacleMask) ||
-               Physics2D.Raycast(tailCheck.position, Vector2.up, tailCheckLength, obstacleMask);
+        // Raycast로 머리와 꼬리 위를 각각 체크
+        RaycastHit2D headHit = Physics2D.Raycast(headCheck.position, Vector2.up, headCheckLength, obstacleMask);
+        RaycastHit2D tailHit = Physics2D.Raycast(tailCheck.position, Vector2.up, tailCheckLength, obstacleMask);
+
+        // 머리 위에 무언가 감지되었고, 그것이 '통과 가능' 태그가 아닐 경우 => 장애물임
+        if (headHit.collider != null && !headHit.collider.CompareTag(passableTag))
+        {
+            return true;
+        }
+
+        // 꼬리 위에 무언가 감지되었고, 그것이 '통과 가능' 태그가 아닐 경우 => 장애물임
+        if (tailHit.collider != null && !tailHit.collider.CompareTag(passableTag))
+        {
+            return true;
+        }
+
+        // 위 두 경우에 해당하지 않으면 (아무것도 없거나, '통과 가능' 태그만 있을 경우) => 장애물이 아님
+        return false;
     }
 
     /// <summary>

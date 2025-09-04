@@ -12,7 +12,7 @@ public class StartStealthGame : TutorialBase
     [Header("UI")]
     [SerializeField] private GameObject StealthCanvas;
 
-    private float originalXValue = 0.125f;
+    private float originalXValue = 4f;
 
     public override void Enter()
     {

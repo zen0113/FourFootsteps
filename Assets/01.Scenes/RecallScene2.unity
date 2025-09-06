@@ -1285,8 +1285,44 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 4135296550664430820, guid: fcc937e4cda6d8c4d8de70f5c23e9268, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 121090439}
   m_SourcePrefab: {fileID: 100100000, guid: fcc937e4cda6d8c4d8de70f5c23e9268, type: 3}
+--- !u!1 &121090437 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4135296550664430820, guid: fcc937e4cda6d8c4d8de70f5c23e9268, type: 3}
+  m_PrefabInstance: {fileID: 121090436}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &121090438 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1962937416038355469, guid: fcc937e4cda6d8c4d8de70f5c23e9268, type: 3}
+  m_PrefabInstance: {fileID: 121090436}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &121090439
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 121090437}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fdbe5dd65af26754991aa47c527aa042, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sceneDescriptionText: {fileID: 121090438}
+  sceneTextDataList:
+  - sceneName: RecallScene2
+    sceneDescription: "\uB3D9\uBB3C\uBCD1\uC6D0"
+  defaultText: "\uD604\uC7AC \uC52C\uC5D0 \uB300\uD55C \uC124\uBA85\uC774 \uC5C6\uC2B5\uB2C8\uB2E4."
 --- !u!1001 &143213732
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -7943,6 +7979,83 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!1 &957999751
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 957999753}
+  - component: {fileID: 957999752}
+  m_Layer: 0
+  m_Name: GameObject
+  m_TagString: MusicZone
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!61 &957999752
+BoxCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 957999751}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: 20.638638, y: 3.761981}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0, y: 0}
+    oldSize: {x: 0, y: 0}
+    newSize: {x: 0, y: 0}
+    adaptiveTilingThreshold: 0
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  serializedVersion: 2
+  m_Size: {x: 55.931084, y: 10.469011}
+  m_EdgeRadius: 0
+--- !u!4 &957999753
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 957999751}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -84.2, y: -3.34, z: 0.21391447}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1031666757}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1021726776
 GameObject:
   m_ObjectHideFlags: 0
@@ -8109,6 +8222,62 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 5, y: 9.5}
   m_EdgeRadius: 0
+--- !u!1 &1031666755
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1031666757}
+  - component: {fileID: 1031666756}
+  m_Layer: 0
+  m_Name: AudioZoneManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1031666756
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1031666755}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 56937da032f3aa44da3da85e60900abb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  audioZones:
+  - zoneName: OutSide
+    triggerZone: {fileID: 957999752}
+    bgm1Settings:
+      volumeMultiplier: 0.5
+    bgm2Settings:
+      volumeMultiplier: 1
+  checkInterval: 0.1
+  transitionDuration: 2
+  targetSceneName: RecallScene2
+  playerTransform: {fileID: 350621505}
+--- !u!4 &1031666757
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1031666755}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 957999753}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1040922742
 GameObject:
   m_ObjectHideFlags: 0
@@ -8492,6 +8661,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1755199200538765275, guid: 66542d5616022d34f9417133611193b8, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4899268205265596455, guid: 66542d5616022d34f9417133611193b8, type: 3}
+      propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5543039565309483218, guid: 66542d5616022d34f9417133611193b8, type: 3}
@@ -10282,7 +10455,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   sceneOrder: []
   variablesText: {fileID: 376917131}
-  isDebug: 1
+  isDebug: 0
 --- !u!4 &1392665971
 Transform:
   m_ObjectHideFlags: 0
@@ -10392,6 +10565,7 @@ MonoBehaviour:
   - {fileID: 8300000, guid: ab5b87ae348791c4fa46e61d3f830ef6, type: 3}
   - {fileID: 8300000, guid: 4f19fb89eb3d99141a48c9b614870730, type: 3}
   - {fileID: 8300000, guid: e1c71fc22570a54428a3f82b3ffce9c4, type: 3}
+  - {fileID: 8300000, guid: 0e0c27e5a5f420f448cb17459e7d47b2, type: 3}
   uiSoundClips:
   - {fileID: 8300000, guid: 71fa15381e64e7a468d1698e94c48886, type: 3}
   - {fileID: 8300000, guid: bac8b5e2006d282498f3c5049224c9fd, type: 3}
@@ -10430,11 +10604,11 @@ MonoBehaviour:
     autoPlay: 1
     syncStart: 1
     bgm2Delay: 0
-  - sceneName: RecallScene3
+  - sceneName: RecallScene2
     bgmIndex1: 3
-    bgmIndex2: 4
-    bgm1VolumeMultiplier: 0.253
-    bgm2VolumeMultiplier: 0.247
+    bgmIndex2: 5
+    bgm1VolumeMultiplier: 1
+    bgm2VolumeMultiplier: 0.1
     autoPlay: 1
     syncStart: 1
     bgm2Delay: 0
@@ -15646,6 +15820,7 @@ SceneRoots:
   - {fileID: 701790905}
   - {fileID: 286548037}
   - {fileID: 643554057}
+  - {fileID: 1031666757}
   - {fileID: 48661845}
   - {fileID: 1976451404}
   - {fileID: 121090436}

@@ -53,7 +53,7 @@ Stage01_003,Player,,…여긴 진짜 어디야? 뭔가 익숙하긴 한데…,,t
 ,Player,,그것보다 몸이 너무 이상해… 시야도 낮고… 걸음걸이도 완전히 달라…,,temp_playerCAT,,,,
 ,Player,,내 몸이… 털로 덮여 있어…?,,temp_playerCAT,,,,
 ,Player,,물 웅덩이에 가까이 가서 내 모습을 [확인]해보자.,,temp_playerCAT,,,,
-Stage01_004,Player,,"말도 안 돼... 이건 꿈일 거야. 웅덩이에 비친 모습... \n 털로 뒤덮인 손... 이건 내 고양이, [YourCatName]의 모습이잖아?",SHAKE/TRUE,temp_playerCAT,,,,플레이어가 몸을 확인할 때 (물가에서 상호작용 키 입력 시)
+Stage01_004,Player,,"말도 안 돼... 이건 꿈일 거야. 웅덩이에 비친 모습... \n 털로 뒤덮인 손... 이건 내 고양이, {YourCatName}의 모습이잖아?",SHAKE/TRUE,temp_playerCAT,,,,플레이어가 몸을 확인할 때 (물가에서 상호작용 키 입력 시)
 ,Player,,그보다 나… 분명 수영 좋아하는데 왜 이렇게 물이 싫지??,,temp_playerCAT,,,,
 ,Player,,으… 느낌이 이상해.. [물 웅덩이는 피해야겠어.],,temp_playerCAT,,,,
 Stage01_005,Player,TRUE,앗` 저건 고양이가 되기 전에 꿈에서 봤던 [하얀 새]…?,,temp_playerCAT,,,,물가 조사 스크립트 이후 주인공 위로 하얀새가 지나감(빠른속도X)
@@ -64,7 +64,7 @@ Stage01_006,Player,,어? [낡은 소파에 퍼즐 조각이 있잖아?] 저게 �
 ,InnerThoughts,,눈꺼풀이 무겁다… 너무 피곤한 느낌…,,temp_playerCAT,,,,대사 끝나면 튜토리얼 NextScene을 통해 다음 씬으로 이동
 ,,,,,,,,,
 Recall1_001,InnerThoughts,,(거실 쪽에서 사각사각 하는 소리… 익숙한 느낌이다.),,temp_playerHUMAN,,,,
-,Player,,또 이 시간에? …혹시 {YourCatName}(이)가 또 소파를?,TRUE,temp_playerHUMAN,,,EventSetNextTutorial,
+,Player,TRUE,또 이 시간에? …혹시 {YourCatName}(이)가 또 소파를?,TRUE,temp_playerHUMAN,,,EventSetNextTutorial,
 Recall1_002,Player,,{YourCatName}(이)가 또 소파를 긁고 있잖아? 어휴 이 녀석이 또…,TRUE,temp_playerHUMAN,,,Choice_001,
 Recall1_003,Player,TRUE,그래` [스크래쳐라도 놔주자.],,temp_playerHUMAN,,,,긍정적 선택지
 ,Player,TRUE,여기라면 마음껏 긁어도 돼. 이건 네 거야.,,temp_playerHUMAN,,,,
@@ -73,7 +73,7 @@ Recall1_004,Player,,너 또 이러면 혼난다고 했지!,SHAKE,temp_playerHUMA
 ,Player,,이제 그만하고 들어가!,,temp_playerHUMAN,,,,
 ,YourCat,,야옹…,,temp_playerCAT,,,EventRecall1_BadChoice,
 Recall1_005,Monolog,,스크래쳐를 사주고 나서야 깨달았어. 그 아이는 단지 본능대로 행동했을 뿐인데…,AUTO_DELAYED/FADE_OUT,,,,,
-Recall1_006,Monolog,,그 아이의 행동에는 다 이유가 있었을 텐데... 그때는 그저 내 물건이 망가지는 게 싫어서 화부터 냈어.\n그 아이도 자기 나름대로는 이유가 있었을 텐데…,AUTO_DELAYED/FADE_OUT,,,,,
+Recall1_006,Monolog,,그 아이의 행동에는 다 이유가 있었을 텐데... \n그때는 그저 내 물건이 망가지는 게 싫어서 화부터 냈어.\n그 아이도 자기 나름대로는 이유가 있었을 텐데…,AUTO_DELAYED/FADE_OUT,,,,,
 Recall1_007,Player,,갑자기 잠이 쏟아지네... 너무 피곤하다.,,temp_playerHUMAN,,,,
 ,InnerThoughts,,* 집 안을 조사한 이후에 소파나 침대에서 잠을 청할 수 있습니다.,,temp_playerHUMAN,,,,이미지 없게 설정
 Recall1_008,Player,,잠깐 쉴까?,,temp_playerHUMAN,,,,
@@ -288,10 +288,10 @@ Recall3_001,Player,,하… 오늘 야근도 있었고 몸이 천근만근이네.
 Recall3_002,Player,,(발치에서 무언가 툭—) …응? 밥그릇?,,temp_playerHUMAN,,,,주인공 앞에 고양이가 밥그릇을 가져온다.
 ,Player,,설마 아무도 밥 안 챙겨줬던 거야?,,temp_playerHUMAN,,,,
 ,YourCat,,야옹~,,temp_playerCAT,,,Choice_005,
-Recall3_003,Player,,그래도 [밥은 줘야지.] 많이 배고팠지?,,temp_playerHUMAN,,,,긍정적 선택지
-,Player,,오늘 야근까지 했지만 너도 배고팠을 테니까.,,temp_playerHUMAN,,,,
-,Player,,기다렸지? 이제 밥 먹자.,,temp_playerHUMAN,,,,
-,YourCat,,야옹~,,temp_playerCAT,,,EventRecall3_GoodChoice,
+Recall3_003,Player,TRUE,그래도 [밥은 줘야지.] 많이 배고팠지?,,temp_playerHUMAN,,,,긍정적 선택지
+,Player,TRUE,오늘 야근까지 했지만 너도 배고팠을 테니까.,,temp_playerHUMAN,,,,
+,Player,TRUE,기다렸지? 이제 밥 먹자.,,temp_playerHUMAN,,,,
+,YourCat,TRUE,야옹~,,temp_playerCAT,,,EventRecall3_GoodChoice,
 Recall3_004,Player,,하... 나도 오늘 너무 힘들었어.,,temp_playerHUMAN,,,,부정적 선택지
 ,Player,,미안.. 내일 아침에 일어나자마자 꼭 챙겨줄게. 조금만 참아줘.,,temp_playerHUMAN,,,,
 ,YourCat,,야옹…,,temp_playerCAT,,,EventRecall3_BadChoice,

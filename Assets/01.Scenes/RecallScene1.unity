@@ -451,6 +451,34 @@ MonoBehaviour:
   spriteGlowEffect: {fileID: 0}
   isOneTimeOnly: 0
   keyImage: {fileID: 0}
+--- !u!1 &37538892 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4135296550664430820, guid: fcc937e4cda6d8c4d8de70f5c23e9268, type: 3}
+  m_PrefabInstance: {fileID: 428481945}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &37538893
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 37538892}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fdbe5dd65af26754991aa47c527aa042, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sceneDescriptionText: {fileID: 369274109}
+  sceneTextDataList:
+  - sceneName: RecallScene1
+    sceneDescription: "\uC9D1 \uC548"
+  - sceneName: StageScene1
+    sceneDescription: "\uB4B7\uACE8\uBAA9"
+  - sceneName: RecallScene3
+    sceneDescription: "\uC9D1 \uC548"
+  - sceneName: RecallScene2
+    sceneDescription: "\uB3D9\uBB3C\uBCD1\uC6D0"
+  defaultText: "\uC7A5\uC18C"
 --- !u!1001 &39582829
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -850,7 +878,7 @@ Transform:
   m_GameObject: {fileID: 190147188}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 13.540001, y: -4.2523212, z: 0.05719095}
+  m_LocalPosition: {x: 13.540001, y: -4.2523212, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -941,7 +969,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 2
+  m_SortingOrder: 1
   m_Sprite: {fileID: 21300000, guid: 527e0fae04ce8dd429e902f25610f888, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -1710,7 +1738,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 2
+  m_SortingOrder: 3
   m_Sprite: {fileID: 21300000, guid: 50df7fef8def5af41863855159fe6c90, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -1939,6 +1967,17 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 1958815240789535501, guid: 1da32e186052b2546bdf2d0a6f06e658, type: 3}
   m_PrefabInstance: {fileID: 369179737}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &369274109 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1962937416038355469, guid: fcc937e4cda6d8c4d8de70f5c23e9268, type: 3}
+  m_PrefabInstance: {fileID: 428481945}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &406106216
 GameObject:
   m_ObjectHideFlags: 0
@@ -2236,7 +2275,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 4135296550664430820, guid: fcc937e4cda6d8c4d8de70f5c23e9268, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 37538893}
   m_SourcePrefab: {fileID: 100100000, guid: fcc937e4cda6d8c4d8de70f5c23e9268, type: 3}
 --- !u!1 &450614239
 GameObject:
@@ -5460,7 +5502,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   targetPoint: {fileID: 0}
-  moveSpeed: 2
+  moveSpeed: 3.5
   stopDistance: 1.3
   enableDash: 0
   dashAllTheWay: 0
@@ -5472,6 +5514,9 @@ MonoBehaviour:
   walkSoundInterval: 0.5
   runSound: {fileID: 0}
   runSoundInterval: 0.5
+  arriveSnapDistance: 0.02
+  useRigidbodyMotion: 1
+  isMoving: 0
 --- !u!1 &1280714200 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8283907320249898956, guid: 436f0b291bf251d42ad5dfabcdcd5c40, type: 3}

@@ -57,7 +57,8 @@ public class PlayerAutoRunner : MonoBehaviour
     [Header("HideObject Stop")]
     [SerializeField] private string hideTag = "HideObject";
     [SerializeField] private float xDampOnStop = 40f; // 정지 시 X속도 빠르게 0으로
-    private bool stopAnimPlayed = false;
+
+    bool wasAtHide = false;
 
     public bool sTriggeredOnce = false;
     public bool IsHiding => sTriggeredOnce;
@@ -128,9 +129,12 @@ public class PlayerAutoRunner : MonoBehaviour
 
         mainCamera.GetComponent<FollowCamera>().target = centerAnchor;
         StartCoroutine(ChangeCameraSize(7f));
-        mainCamera.GetComponent<FollowCamera>().smoothSpeedX = 0.05f;
+        mainCamera.GetComponent<FollowCamera>().smoothSpeedX = 4f;
 
         lastFootstepTime = Time.time - footstepInterval;
+
+        CameraShake cameraShake = Camera.main.GetComponent<CameraShake>();
+        cameraShake.target = centerAnchor;
     }
 
     void Update()
@@ -142,22 +146,49 @@ public class PlayerAutoRunner : MonoBehaviour
         if (!isChasePlaying) return;
 
         // 착지 프레임 탐지 → 점프 애니메이션 종료
-        bool justLanded = isOnGround && !prevOnGround;
-        if (isOnGround)
+        if (isOnGround && rb.velocity.y <= 0.01f)
         {
             animator.SetBool("Jump", false);
             jumpCount = 0;
         }
 
-        //if (isOnGround && rb.velocity.y <= 0.01f)
-        //    jumpCount = 0;
-
         if (atHide)
         {
             kidsFollower.InvokeOnCatchMode();
+
+            // 1) atHide "진입" 순간에 한 번만 하드 리셋
+            if (!wasAtHide)
+            {
+                // 점프/대시/이동 등 이전 프레임 잔상 깔끔히 제거
+                animator.SetBool("Dash", false);
+                animator.SetBool("Moving", false);
+                animator.SetBool("Jump", false);
+
+                // atHide 동안 기본 자세를 강제 (웅크린 이동)
+                animator.SetBool("Crouch", false);
+                animator.SetBool("Crouching", true); // 기어가기 상태를 메인으로 쓸거라면 true
+                animator.SetBool("Climbing", false);
+
+                // 바닥 상태 싱크
+                animator.SetBool("IsGrounded", isOnGround);
+
+                // 물리 잔상도 한 번 정리
+                rb.velocity = new Vector2(rb.velocity.x, Mathf.Min(0f, rb.velocity.y));
+            }
+
+            // 2) atHide 유지 동안에는 "최소만" 갱신
+            bool movingAnim_ = (Mathf.Abs(currentOffset) > 0.01f || !isOnGround);
+            animator.SetBool("Moving", movingAnim_);
+            animator.SetBool("IsGrounded", isOnGround);
+
+            // 점프 플래그가 혹시라도 켜졌다면 즉시 끄기(안전망)
+            if (animator.GetBool("Jump")) animator.SetBool("Jump", false);
+
+            SyncAnimatorParams();
+
             // S키로 마무리
             if (!kidsFollower.IsGameOverTriggered && !chaseFinished && !sTriggeredOnce 
-                && Input.GetKeyDown(KeyCode.S))
+                && Input.GetKeyDown(KeyCode.S)&& isOnGround)
             {
                 StartCoroutine(FinishChase());
             }
@@ -165,8 +196,10 @@ public class PlayerAutoRunner : MonoBehaviour
             {
                 lastHide.SetEffect(false);
             }
+            wasAtHide = true;
             return;
         }
+        else wasAtHide = false; // atHide를 빠져나오면 플래그 해제
 
         var curr = kidsFollower.phase;
 
@@ -359,6 +392,7 @@ public class PlayerAutoRunner : MonoBehaviour
 
         mainCamera.orthographicSize = finalValue;
         mainCamera.GetComponent<FollowCamera>().UpdateCameraHalfSize();
+
     }
 
     void OnTriggerEnter2D(Collider2D other)
@@ -383,18 +417,7 @@ public class PlayerAutoRunner : MonoBehaviour
         targetOffset = currentOffset;
         offsetVelocity = 0f;
 
-        // 3) 애니메이션: 대시/이동 끄고 '정지' 상태
-        if (!stopAnimPlayed)
-        {
-            animator.SetBool("Dash", false);
-            animator.SetBool("Moving", false);
-            animator.SetBool("Crouch", false);
-            animator.SetBool("Crouching", false);
-            animator.SetBool("Jump", false);
-            stopAnimPlayed = true;
-        }
-
-        // 4) X 속도 즉시 0에 가깝게
+        // 3) X 속도 즉시 0에 가깝게
         rb.velocity = new Vector2(0f, rb.velocity.y);
 
         catStealth.enabled = true;

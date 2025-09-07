@@ -198,6 +198,12 @@ public class CatStealthController : MonoBehaviour
         isHiding = true;
 
         ho.SetEffect(false);// 하이라이트 및 아이콘 끄기
+        if (isPlaying&& !currentHideObj.isGoalObject) 
+        {
+            ho.SetHidingAlpha(true);    // 오브젝트 알파값 조절
+            SetHidingAlpha(true);
+        } 
+
         if (isPlaying) OnHideStart?.Invoke(ho);
 
         // 은신 오브젝트 안쪽으로 이동
@@ -238,6 +244,12 @@ public class CatStealthController : MonoBehaviour
         movement.SetCrouchMovingState(true);
         ApplyCrouchAnim(true);
 
+        if (isPlaying && !currentHideObj.isGoalObject)
+        {
+            ho.SetHidingAlpha(false);    // 오브젝트 알파값 조절
+            SetHidingAlpha(false);
+        }
+        
         // 바깥 X 계산
         float targetX = ComputeOutsideX(ho);
         yield return MoveToX(targetX);
@@ -290,6 +302,41 @@ public class CatStealthController : MonoBehaviour
         if (rb) rb.MovePosition(snap);
         else transform.position = snap;
     }
+
+    /// <summary>
+    /// 플레이어 알파값 조절 메소드. 코루틴 호출.
+    /// <param name="isActive"> true일 시, 0.8f로 변경.</param>
+    /// <param name="isActive"> false일 시, 원래 1로 돌아옴</param>
+    /// </summary>
+    /// 
+    public void SetHidingAlpha(bool isActive)
+    {
+        if (isActive)
+            StartCoroutine(ChangeAlphaValue(settings.HidingAlphaValue));
+        else
+            StartCoroutine(ChangeAlphaValue(1f));
+    }
+
+    private IEnumerator ChangeAlphaValue(float finalValue)
+    {
+        float elapsedTime = 0f;
+        float duration = 1f;
+
+        Color currentColor = spriteRenderer.color;
+        float startValue = spriteRenderer.color.a;
+
+        while (elapsedTime < duration)
+        {
+            elapsedTime += Time.deltaTime;
+            currentColor.a = Mathf.Lerp(startValue, finalValue, (elapsedTime / duration));
+            spriteRenderer.color = currentColor;
+            yield return null;
+        }
+
+        currentColor.a = finalValue;
+        spriteRenderer.color = currentColor;
+    }
+
 
     private float ComputeOutsideX(HideObject ho)
     {

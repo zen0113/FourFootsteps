@@ -989,6 +989,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Hiding Vignette
       objectReference: {fileID: 0}
+    - target: {fileID: 1962937416038355469, guid: fcc937e4cda6d8c4d8de70f5c23e9268, type: 3}
+      propertyPath: m_text
+      value: "\uC7A5\uC18C"
+      objectReference: {fileID: 0}
     - target: {fileID: 2176935556791448408, guid: fcc937e4cda6d8c4d8de70f5c23e9268, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -1112,7 +1116,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 4135296550664430820, guid: fcc937e4cda6d8c4d8de70f5c23e9268, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 667775836}
   m_SourcePrefab: {fileID: 100100000, guid: fcc937e4cda6d8c4d8de70f5c23e9268, type: 3}
 --- !u!1 &165503958
 GameObject:
@@ -2711,9 +2718,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f2c7b9e2e4de1a42b9630974cdc9b46, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  settings: {fileID: 0}
   anchor: {fileID: 417531158}
   spriteGlowEffect: {fileID: 417531159}
   keyPrompt: {fileID: 1706591338}
+  renderer: {fileID: 417531162}
   areaCollider: {fileID: 417531161}
   isGoalObject: 0
 --- !u!61 &417531161
@@ -3350,9 +3359,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f2c7b9e2e4de1a42b9630974cdc9b46, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  settings: {fileID: 11400000, guid: 8cfe21657cd263c428ed018f786bb1af, type: 2}
   anchor: {fileID: 0}
   spriteGlowEffect: {fileID: 468992717}
   keyPrompt: {fileID: 1962088083}
+  renderer: {fileID: 468992719}
   areaCollider: {fileID: 468992718}
   isGoalObject: 0
 --- !u!114 &468992717
@@ -6309,6 +6320,28 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!1 &667775830 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4135296550664430820, guid: fcc937e4cda6d8c4d8de70f5c23e9268, type: 3}
+  m_PrefabInstance: {fileID: 155384817}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &667775836
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 667775830}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fdbe5dd65af26754991aa47c527aa042, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sceneDescriptionText: {fileID: 1732627315}
+  sceneTextDataList:
+  - sceneName: StageScene3_IncludeMiniGame
+    sceneDescription: "\uACF5\uC6D0"
+  defaultText: "\uD604\uC7AC \uC52C\uC5D0 \uB300\uD55C \uC124\uBA85\uC774 \uC5C6\uC2B5\uB2C8\uB2E4."
 --- !u!1 &692475827
 GameObject:
   m_ObjectHideFlags: 0
@@ -7049,9 +7082,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f2c7b9e2e4de1a42b9630974cdc9b46, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  settings: {fileID: 11400000, guid: 8cfe21657cd263c428ed018f786bb1af, type: 2}
   anchor: {fileID: 0}
   spriteGlowEffect: {fileID: 742785370}
   keyPrompt: {fileID: 124103043}
+  renderer: {fileID: 742785372}
   areaCollider: {fileID: 742785371}
   isGoalObject: 0
 --- !u!114 &742785370
@@ -7609,9 +7644,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f2c7b9e2e4de1a42b9630974cdc9b46, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  settings: {fileID: 11400000, guid: 8cfe21657cd263c428ed018f786bb1af, type: 2}
   anchor: {fileID: 0}
   spriteGlowEffect: {fileID: 794595143}
   keyPrompt: {fileID: 578676334}
+  renderer: {fileID: 794595145}
   areaCollider: {fileID: 794595144}
   isGoalObject: 0
 --- !u!114 &794595143
@@ -8551,9 +8588,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f2c7b9e2e4de1a42b9630974cdc9b46, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  settings: {fileID: 11400000, guid: 8cfe21657cd263c428ed018f786bb1af, type: 2}
   anchor: {fileID: 0}
   spriteGlowEffect: {fileID: 909760885}
   keyPrompt: {fileID: 390430849}
+  renderer: {fileID: 909760887}
   areaCollider: {fileID: 909760886}
   isGoalObject: 1
 --- !u!114 &909760885
@@ -12597,9 +12636,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f2c7b9e2e4de1a42b9630974cdc9b46, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  settings: {fileID: 11400000, guid: 8cfe21657cd263c428ed018f786bb1af, type: 2}
   anchor: {fileID: 0}
   spriteGlowEffect: {fileID: 1343871074}
   keyPrompt: {fileID: 963690727}
+  renderer: {fileID: 1343871076}
   areaCollider: {fileID: 1343871075}
   isGoalObject: 0
 --- !u!114 &1343871074
@@ -13250,9 +13291,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f2c7b9e2e4de1a42b9630974cdc9b46, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  settings: {fileID: 11400000, guid: 8cfe21657cd263c428ed018f786bb1af, type: 2}
   anchor: {fileID: 0}
   spriteGlowEffect: {fileID: 1413867410}
   keyPrompt: {fileID: 1014898531}
+  renderer: {fileID: 1413867412}
   areaCollider: {fileID: 1413867411}
   isGoalObject: 0
 --- !u!114 &1413867410
@@ -13845,7 +13888,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   target: {fileID: 1769747958}
   followCamera: {fileID: 0}
-  targetValue: 0.125
+  targetValue: 4
 --- !u!4 &1501167966
 Transform:
   m_ObjectHideFlags: 0
@@ -15272,9 +15315,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f2c7b9e2e4de1a42b9630974cdc9b46, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  settings: {fileID: 11400000, guid: 8cfe21657cd263c428ed018f786bb1af, type: 2}
   anchor: {fileID: 0}
   spriteGlowEffect: {fileID: 1618389207}
   keyPrompt: {fileID: 943363042}
+  renderer: {fileID: 1618389209}
   areaCollider: {fileID: 1618389208}
   isGoalObject: 0
 --- !u!114 &1618389207
@@ -15627,7 +15672,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   target: {fileID: 460847304}
   followCamera: {fileID: 0}
-  targetValue: 0.01
+  targetValue: 2
 --- !u!4 &1653912650
 Transform:
   m_ObjectHideFlags: 0
@@ -16367,6 +16412,17 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!114 &1732627315 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1962937416038355469, guid: fcc937e4cda6d8c4d8de70f5c23e9268, type: 3}
+  m_PrefabInstance: {fileID: 155384817}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1733026069
 GameObject:
   m_ObjectHideFlags: 0
@@ -16991,6 +17047,7 @@ MonoBehaviour:
   emptyHeart: {fileID: 21300000, guid: c0ce4c2df7693f04ebf9c5d5d00383e6, type: 3}
   invincibilityDuration: 1.5
   isInvincible: 0
+  cameraShake: {fileID: 0}
 --- !u!82 &1769747964
 AudioSource:
   m_ObjectHideFlags: 0
@@ -24220,9 +24277,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f2c7b9e2e4de1a42b9630974cdc9b46, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  settings: {fileID: 11400000, guid: 8cfe21657cd263c428ed018f786bb1af, type: 2}
   anchor: {fileID: 0}
   spriteGlowEffect: {fileID: 2040736774}
   keyPrompt: {fileID: 1806470944}
+  renderer: {fileID: 2040736776}
   areaCollider: {fileID: 2040736775}
   isGoalObject: 0
 --- !u!114 &2040736774
@@ -24388,9 +24447,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f2c7b9e2e4de1a42b9630974cdc9b46, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  settings: {fileID: 11400000, guid: 8cfe21657cd263c428ed018f786bb1af, type: 2}
   anchor: {fileID: 0}
   spriteGlowEffect: {fileID: 2044766334}
   keyPrompt: {fileID: 55033233}
+  renderer: {fileID: 2044766336}
   areaCollider: {fileID: 2044766335}
   isGoalObject: 0
 --- !u!114 &2044766334
@@ -25276,8 +25337,8 @@ SceneRoots:
   - {fileID: 2048116370}
   - {fileID: 1748864739}
   - {fileID: 964312689}
-  - {fileID: 1840444612}
   - {fileID: 315378611}
+  - {fileID: 1840444612}
   - {fileID: 496497289}
   - {fileID: 1198964519}
   - {fileID: 155384817}

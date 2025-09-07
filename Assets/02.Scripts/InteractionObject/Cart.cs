@@ -204,6 +204,7 @@ public class Cart : MonoBehaviour
         // 플레이어의 부모 관계 해제
         if (playerTransform != null)
         {
+            playerTransform.SetParent(null);
             playerTransform = null;
             playerRigidbody = null;
         }

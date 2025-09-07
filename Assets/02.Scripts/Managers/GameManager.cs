@@ -71,7 +71,7 @@ public class GameManager : MonoBehaviour
                 new SceneData("RecallScene1", true),
                 new SceneData("StageScene2"),
                 new SceneData("RecallScene2", true),
-                new SceneData("StageScene3"),
+                new SceneData("StageScene3_IncludeMiniGame"),
                 new SceneData("RecallScene3", true)
             };
     }

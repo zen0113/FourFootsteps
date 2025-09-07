@@ -23,6 +23,10 @@ public class PlayerHp : MonoBehaviour
     [SerializeField] private float invincibilityDuration = 1.5f; // 무적 시간 (초)
     public bool isInvincible = false;
 
+    [Header("Camera Shake Effect")]
+    [SerializeField] private CameraShake cameraShake;
+
+    private bool isGameOverLoading = false;
 
     private void Awake()
     {
@@ -35,6 +39,7 @@ public class PlayerHp : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        cameraShake = Camera.main.GetComponent<CameraShake>();
         heartParent = UIManager.Instance.heartParent;
 
         maxHp = (int)GameManager.Instance.GetVariable("MaxHP");
@@ -99,6 +104,9 @@ public class PlayerHp : MonoBehaviour
 
         // 빨간 비네팅 실행
         Warning();
+        // 카메라 흔들림 효과
+        cameraShake.enabled = true;
+        cameraShake.ShakeAndDisable(0.5f, 0.25f);
     }
 
     protected void Warning()
@@ -108,7 +116,7 @@ public class PlayerHp : MonoBehaviour
 
     public void TakeDamage(int damage)
     {
-        if (isInvincible) return; // 무적 상태면 데미지 무시
+        if (isInvincible || isGameOverLoading) return; // 무적 상태면 데미지 무시
 
         currentHp -= damage;
         currentHp = Mathf.Clamp(currentHp, 0, maxHp);
@@ -160,6 +168,8 @@ public class PlayerHp : MonoBehaviour
 
     private void Die()
     {
+        isGameOverLoading = true;
+
         Debug.Log("플레이어 사망!");
         // 페이드 인 효과와 함께 게임오버 씬 로드
         SceneLoader.Instance.LoadScene("GameOver");

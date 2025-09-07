@@ -1,8 +1,12 @@
+using System.Collections;
 using UnityEngine;
 
 [RequireComponent(typeof(Collider2D))]
 public class HideObject : MonoBehaviour
 {
+    [Header("Refs")]
+    [SerializeField] private StealthSettingsSO settings;
+
     [Header("Anchor (optional)")]
     [Tooltip("플레이어를 정렬할 기준점 (미지정 시 자기 Transform 사용)")]
     public Transform anchor;
@@ -12,6 +16,7 @@ public class HideObject : MonoBehaviour
     [SerializeField] private GameObject keyPrompt; // 'Key Icon' 등 프롬프트 오브젝트
 
     // 내부 캐시
+    [SerializeField] private SpriteRenderer renderer;
     [SerializeField] private Collider2D areaCollider;
     public Collider2D AreaCollider => areaCollider ? areaCollider : (areaCollider = GetComponent<Collider2D>());
 
@@ -20,11 +25,15 @@ public class HideObject : MonoBehaviour
 
     public bool isGoalObject = false;
 
+    private float HidingAlphaValue = 0.8f;
+
     void Awake()
     {
         // 컴포넌트/자식 자동 캐시
         if (!spriteGlowEffect)
             spriteGlowEffect = GetComponent<SpriteGlow.SpriteGlowEffect>();
+        if (!renderer)
+            renderer = GetComponent<SpriteRenderer>();
 
         if (!keyPrompt)
         {
@@ -47,6 +56,7 @@ public class HideObject : MonoBehaviour
     {
         if (!areaCollider) areaCollider = GetComponent<Collider2D>();
         if (!spriteGlowEffect) spriteGlowEffect = GetComponent<SpriteGlow.SpriteGlowEffect>();
+        if (!renderer) renderer = GetComponent<SpriteRenderer>();
 
         // 에디터에서 자식 자동 검색(있으면)
         if (!keyPrompt)
@@ -65,4 +75,39 @@ public class HideObject : MonoBehaviour
         if (spriteGlowEffect) spriteGlowEffect.enabled = isActive;
         if (keyPrompt) keyPrompt.SetActive(isActive);
     }
+
+    /// <summary>
+    /// 컨트롤러(플레이어)가 호출: 오브젝트 알파값 조절
+    /// <param name="isActive"> true일 시, 0.8f로 변경.</param>
+    /// <param name="isActive"> false일 시, 원래 1로 돌아옴</param>
+    /// </summary>
+    /// 
+    public void SetHidingAlpha(bool isActive)
+    {
+        if (isActive)
+            StartCoroutine(ChangeAlphaValue(settings.HidingAlphaValue));
+        else
+            StartCoroutine(ChangeAlphaValue(1f));
+    }
+
+    private IEnumerator ChangeAlphaValue(float finalValue)
+    {
+        float elapsedTime = 0f;
+        float duration = 1f;
+
+        Color currentColor = renderer.color;
+        float startValue = renderer.color.a;
+
+        while (elapsedTime < duration)
+        {
+            elapsedTime += Time.deltaTime;
+            currentColor.a = Mathf.Lerp(startValue, finalValue, (elapsedTime / duration));
+            renderer.color = currentColor;
+            yield return null;
+        }
+
+        currentColor.a = finalValue;
+        renderer.color = currentColor;
+    }
+
 }

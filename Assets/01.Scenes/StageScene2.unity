@@ -6153,6 +6153,7 @@ GameObject:
   - component: {fileID: 606848013}
   - component: {fileID: 606848016}
   - component: {fileID: 606848015}
+  - component: {fileID: 606848017}
   m_Layer: 0
   m_Name: Square
   m_TagString: Box
@@ -6286,8 +6287,8 @@ Rigidbody2D:
   m_UseAutoMass: 0
   m_Mass: 1
   m_LinearDrag: 0
-  m_AngularDrag: 0.05
-  m_GravityScale: 1
+  m_AngularDrag: 0
+  m_GravityScale: 0.5
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
@@ -6299,6 +6300,36 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 0
+--- !u!114 &606848017
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 606848012}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9e6208fb0f464c04a821619118f21ddf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  normalDrag: 0.5
+  interactingDrag: 0.2
+  boxMass: 1
+  fallGravityScale: 3
+  normalGravityScale: 0.5
+  maxPushSpeed: 8
+  groundFriction: 0.1
+  enableReturnToOrigin: 1
+  returnDelay: 5
+  minDistanceFromOrigin: 3
+  customReturnPosition: {x: 0, y: 0, z: 0}
+  useCustomReturnPosition: 0
+  holeDetectionDistance: 0.2
+  fastFallGravity: 8
+  normalFallCheckTime: 0.3
+  groundLayerMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
 --- !u!1001 &616912071
 PrefabInstance:
   m_ObjectHideFlags: 0

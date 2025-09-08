@@ -6287,8 +6287,8 @@ Rigidbody2D:
   m_UseAutoMass: 0
   m_Mass: 1
   m_LinearDrag: 0
-  m_AngularDrag: 0
-  m_GravityScale: 0.5
+  m_AngularDrag: 0.05
+  m_GravityScale: 1
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
@@ -6314,18 +6314,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   normalDrag: 0.5
   interactingDrag: 0.2
-  boxMass: 1
-  fallGravityScale: 3
-  normalGravityScale: 0.5
+  boxMass: 2
+  normalGravityScale: 1
   maxPushSpeed: 8
   groundFriction: 0.1
+  normalFallSpeed: 50
+  holeFallSpeed: 80
+  useCustomFallSpeed: 1
   enableReturnToOrigin: 1
   returnDelay: 5
   minDistanceFromOrigin: 3
   customReturnPosition: {x: 0, y: 0, z: 0}
   useCustomReturnPosition: 0
   holeDetectionDistance: 0.2
-  fastFallGravity: 8
   normalFallCheckTime: 0.3
   groundLayerMask:
     serializedVersion: 2

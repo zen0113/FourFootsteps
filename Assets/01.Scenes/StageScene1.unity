@@ -8079,6 +8079,7 @@ MonoBehaviour:
   fullHeart: {fileID: 21300000, guid: 924157d2f219e1f4cbd0fdf931841daf, type: 3}
   emptyHeart: {fileID: 21300000, guid: 5f3e307b094ac694f8556e699d5a5e4e, type: 3}
   invincibilityDuration: 1.5
+  isInvincible: 0
 --- !u!114 &507170960
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8127,6 +8128,7 @@ MonoBehaviour:
   obstacleMask:
     serializedVersion: 2
     m_Bits: 64
+  forceCrouch: 0
   climbSpeed: 2
   ladderSnapDistance: 0.3
 --- !u!61 &507170961
@@ -8420,6 +8422,7 @@ MonoBehaviour:
   targetPoint: {fileID: 0}
   moveSpeed: 6
   stopDistance: 0.05
+  isInfiniteFlying: 0
   flySound: {fileID: 0}
   flySoundInterval: 0.3
 --- !u!95 &514821360
@@ -15407,6 +15410,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   birdMover: {fileID: 514821359}
   destinationPoint: {fileID: 596595812}
+  IsInfiniteFlying: 0
 --- !u!50 &1017680139
 Rigidbody2D:
   serializedVersion: 4
@@ -18685,6 +18689,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   birdMover: {fileID: 514821359}
   destinationPoint: {fileID: 243751440}
+  IsInfiniteFlying: 0
 --- !u!50 &1296386976
 Rigidbody2D:
   serializedVersion: 4
@@ -20248,7 +20253,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "S\uD0A4\uB97C \uB20C\uB7EC\uC11C\n\uB0AE\uC744 \uACF3\uC744 \uAE30\uC5B4\uAC08
+  m_text: "S\uD0A4\uB97C \uB20C\uB7EC\uC11C\n\uB0AE\uC740 \uACF3\uC744 \uAE30\uC5B4\uAC08
     \uC218 \uC788\uC2B5\uB2C8\uB2E4"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 3924633a032c7cb4597e0645dc1f05c8, type: 2}
@@ -28063,6 +28068,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   birdMover: {fileID: 514821359}
   destinationPoint: {fileID: 1668984064}
+  IsInfiniteFlying: 0
 --- !u!50 &1709752410
 Rigidbody2D:
   serializedVersion: 4
@@ -32742,6 +32748,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   birdMover: {fileID: 514821359}
   destinationPoint: {fileID: 1125910786}
+  IsInfiniteFlying: 0
 --- !u!50 &2048891003
 Rigidbody2D:
   serializedVersion: 4

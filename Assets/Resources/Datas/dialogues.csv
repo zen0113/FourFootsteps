@@ -149,8 +149,8 @@ Recall2_005,Player,,그래도 이제 우리 가족이 된 {YourCatName}인데…
 ,의사,,좋은 선택이에요. 접종부터 시작할게요.\n보호자 분은 여기서 잠시 대기해주세요,,temp_Vet,,,,이후 의사와의 상호작용하기
 ,YourCat,,야옹!,,temp_playerCAT,,,EventRecall2_GoodChoice,예방접종 시 아파하는 야옹 소리(평소 보다 높은 톤)
 Recall2_006,Player,,너무 비싸네요... 오늘은 그냥 집에 가서 생각해볼게요.,,temp_playerHUMAN,,,,부정적 선택지
-,의사,,보호자님 뜻이 그렇다면 어쩔 수 없지만... 길고양이 출신이라 건강상 위험요소가 많을 수 있어요. 가능한 한 빨리 결정하시는 게 좋겠습니다.,,temp_playerHUMAN,,,,병원 나가기
-,Player,,알겠어요... 집에 가서 한번 더 생각해볼게요.,,temp_Vet,,,,
+,의사,,보호자님 뜻이 그렇다면 어쩔 수 없지만... 길고양이 출신이라 건강상 위험요소가 많을 수 있어요. 가능한 한 빨리 결정하시는 게 좋겠습니다.,,temp_Vet,,,,병원 나가기
+,Player,,알겠어요... 집에 가서 한번 더 생각해볼게요.,,temp_playerHUMAN,,,,
 ,YourCat,,야옹…,,temp_playerCAT,,,EventRecall2_BadChoice,
 Recall2_007,Monolog,,그때 접종과 약을 먹여서 정말 다행이었지.\n안 그랬으면 더 큰 병에 걸릴 뻔했어.,AUTO_DELAYED/FADE_OUT,,,,,
 Recall2_008,Monolog,,… 비용이 조금 들더라도 예방접종을 해줄 걸 그랬어. 약도…,AUTO_DELAYED/FADE_OUT,,,,,
@@ -303,7 +303,7 @@ Recall3_007,InnerThoughts,,갑자기 졸음이 몰려오네…,,temp_playerHUMAN
 Recall3_008,Player,,잠깐 쉴까?,,temp_playerHUMAN,,,,
 ,InnerThoughts,,*잠에 들면 다시 이곳으로 돌아올 수 없습니다.,,temp_playerHUMAN,,,Choice_Bed_001,사물 아무거나 하나 조사하여 조사 스크립트 다 보면 포탈이 생김
 Recall3_009,InnerThoughts,,(침대에 눕는다.) 내일도 아침 일찍 일어나야 하는데… ,,temp_playerHUMAN,,,,
-,InnerThoughts,,"(멀리서 고양이의 ""우다다다"" 소리가 들린다.)  ",,temp_playerHUMAN,,,,
+,InnerThoughts,,(멀리서 고양이의 우다다다 소리가 들린다.)  ,,temp_playerHUMAN,,,,
 ,InnerThoughts,,하… 저 에너지는 대체 어디서 나오는 거야?  ,,temp_playerHUMAN,,,,
 ,InnerThoughts,,{YourCatName} 너는 좋겠다. 내일 출근 같은 건 없어서.  ,TRUE,temp_playerHUMAN,,,EventSetNextTutorial,
 Recall3_011,InnerThoughts,,요즘 자주 잊고 있었지… 밥 주는 것도.,,temp_playerHUMAN,,,,

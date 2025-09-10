@@ -25,11 +25,6 @@ public class EventManager : MonoBehaviour
             ConditionManager.Instance.ParseConditions();
             ResultManager.Instance.ParseResults();
             ParseEvents();
-
-            // 디버깅용
-            //DebugLogConditions();
-            //DebugLogResults();
-            //DebugLogEvents();
         }
         else
         {
@@ -147,9 +142,7 @@ public class EventManager : MonoBehaviour
     public void CallEvent(string eventID)
     {
         if (GameManager.Instance.isDebug) Debug.Log($"-#-#-#-#-#-#-#-#- event: \"{eventID}\" -#-#-#-#-#-#-#-#-");
-
         List<EventLine> eventLines = events[eventID].EventLine;
-
         int eventCount = 0;
 
         foreach (EventLine eventLine in eventLines)
@@ -188,7 +181,6 @@ public class EventManager : MonoBehaviour
             {
                 string conditionID = conditions[0].ConditionID;
                 bool isCondition = ConditionManager.Instance.IsCondition(conditionID);
-                //Debug.Log(conditionID+" : "+isCondition);
                 if (isCondition)
                 {
                     ExecuteResults(results, executionMode);

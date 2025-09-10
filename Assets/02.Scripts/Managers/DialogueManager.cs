@@ -125,7 +125,8 @@ public class DialogueManager : MonoBehaviour
     // ---------------------------------------------- Dialogue methods ----------------------------------------------
     public void StartDialogue(string dialogueID)
     {
-        if (isDialogueActive)  // 이미 대화가 진행중이면 큐에 넣음
+        // 대사 시작: 이미 대화가 진행 중이면 큐에 저장
+        if (isDialogueActive)
         {
             Debug.Log($"dialogue ID: {dialogueID} queued!");
 

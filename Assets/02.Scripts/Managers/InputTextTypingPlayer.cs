@@ -44,7 +44,8 @@ public class InputTextTypingPlayer : MonoBehaviour
         if (!inputField.isFocused) return;
 
         // 한글 IME 입력 포함한 키 입력 감지
-        if (e.type == EventType.KeyDown && !string.IsNullOrEmpty(e.character.ToString().Trim()))
+        if (e.type == EventType.KeyDown && 
+            !string.IsNullOrEmpty(e.character.ToString().Trim()))
         {
             typingSound.pitch = Random.Range(minPitch, maxPitch);
             typingSound.Play();

@@ -11,8 +11,8 @@ public class PlayerCatMovement : MonoBehaviour
     public static PlayerCatMovement Instance { get; private set; }
 
     // 핵심 컴포넌트들
-    Rigidbody2D rb;                 // 물리 이동 처리
-    BoxCollider2D boxCollider;      // 충돌 처리 및 크기 조절 (웅크리기용)
+    Rigidbody2D rb;             // 물리 이동 처리
+    BoxCollider2D boxCollider;  // 충돌 처리 및 크기 조절 (웅크리기용)
     SpriteRenderer spriteRenderer;  // 스프라이트 방향 전환
     Animator animator;              // 애니메이션 상태 관리
     AudioSource audioSource;        // 사운드 재생
@@ -49,11 +49,11 @@ public class PlayerCatMovement : MonoBehaviour
     [SerializeField] private AudioClip climbSound;      // 사다리 오르기 소리
 
     // 사운드 재생 간격 제어 (너무 빠르게 재생되는 것을 방지)
-    [SerializeField] private float walkSoundInterval = 0.3f;        // 걷기 소리 간격
-    [SerializeField] private float runSoundInterval = 0.2f;         // 달리기 소리 간격
-    [SerializeField] private float climbSoundInterval = 0.4f;       // 사다리 소리 간격
-    [SerializeField] private float crouchSoundInterval = 0.5f;      // 웅크리기 소리 간격
-    [SerializeField] private float landingSoundDelay = 0.3f;        // 착지 후 소리 재생 대기시간
+    [SerializeField] private float walkSoundInterval = 0.3f;    // 걷기 소리 간격
+    [SerializeField] private float runSoundInterval = 0.2f;     // 달리기 소리 간격
+    [SerializeField] private float climbSoundInterval = 0.4f;   // 사다리 소리 간격
+    [SerializeField] private float crouchSoundInterval = 0.5f;  // 웅크리기 소리 간격
+    [SerializeField] private float landingSoundDelay = 0.3f;    // 착지 후 소리 재생 대기시간
 
     // 사운드 재생 시간 추적 변수들
     private float lastWalkSoundTime;    // 마지막 걷기 소리 재생 시간
@@ -74,8 +74,19 @@ public class PlayerCatMovement : MonoBehaviour
     [SerializeField] private float groundCheckRadius = 0.2f; // 지상 체크 반경
     [SerializeField] private LayerMask groundMask;          // 지상으로 인식할 레이어
     private bool isOnGround;                                // 현재 지상에 있는지 여부
+    private Vector3 originalGroundCheckLocalPosition;
 
-    [SerializeField] private float boxInteractingPower = 1.2f; // 박스와 상호작용 시 이동속도
+    // 경사면 시스템
+    [Header("경사면")]
+    [SerializeField] private float slopeCheckRadius = 0.3f; // 경사면 체크를 위한 별도 반경
+    [SerializeField] private LayerMask slopeLayer;          // 경사면으로 인식할 레이어
+    private bool isOnSlope = false;                         // 현재 경사면에 있는지 여부
+    [SerializeField] private float slopeExitDelay = 0.15f; // 경사면에서 벗어났다고 판정하기까지의 유예 시간
+    private float timeSinceLeftSlope; // 경사면을 마지막으로 감지한 후 흐른 시간
+
+    [Header("경사면 Multi-Raycast 설정")]
+    [SerializeField] private float slopeRaycastDistance = 0.5f; // 레이캐스트의 감지 거리
+    [SerializeField] private Vector2[] raycastOffsets; // 여러 개의 레이캐스트를 쏠 위치 오프셋 배열
 
     // 웅크리기 시스템
     [Header("웅크리기")]
@@ -93,27 +104,29 @@ public class PlayerCatMovement : MonoBehaviour
     // 콜라이더 크기 관련 (웅크리기 시 콜라이더 크기 변경용)
     private Vector2 originalColliderSize, originalColliderOffset;   // 원본 콜라이더 크기와 오프셋
     private Vector2 crouchColliderSize, crouchColliderOffset;       // 웅크린 상태 콜라이더 크기와 오프셋
-    [SerializeField] private bool forceCrouch = false;                               // 외부에서 강제로 웅크리기 상태로 만들기
+    [SerializeField] private bool forceCrouch = false;                                      // 외부에서 강제로 웅크리기 상태로 만들기
 
     // 사다리 시스템
     [Header("사다리")]
-    [SerializeField] private float climbSpeed = 2f;             // 사다리 타는 속도
+    [SerializeField] private float climbSpeed = 2f;         // 사다리 타는 속도
     [SerializeField] private float ladderSnapDistance = 0.3f;   // 사다리 중앙으로 자동 정렬되는 거리
-    private Collider2D currentLadder;                           // 현재 근처에 있는 사다리
-    private bool isClimbing = false;                            // 현재 사다리를 타고 있는지
-    private bool isNearLadder = false;                          // 사다리 근처에 있는지
-    private bool canUseLadder = true;                           // 사다리 사용 가능 여부 (쿨다운용)
+    private Collider2D currentLadder;                       // 현재 근처에 있는 사다리
+    private bool isClimbing = false;                        // 현재 사다리를 타고 있는지
+    private bool isNearLadder = false;                      // 사다리 근처에 있는지
+    private bool canUseLadder = true;                       // 사다리 사용 가능 여부 (쿨다운용)
 
     // 카트 탑승 시스템
     [Header("카트 상호작용")]
-    private bool isOnCart = false;              // 카트에 탑승 중인지
-    private Transform currentCart;              // 현재 탑승 중인 카트
-    private float originalGravityScale;         // 원본 중력 값 (카트 탑승 시 복원용)
+    private bool isOnCart = false;          // 카트에 탑승 중인지
+    private Transform currentCart;          // 현재 탑승 중인 카트
+    private float originalGravityScale;     // 원본 중력 값 (카트 탑승 시 복원용)
 
     // 박스 상호작용 관련
+    [Header("박스 상호작용")]
     private PlayerBoxInteraction boxInteraction;    // 박스 밀기/당기기 컴포넌트
     private bool isBoxInteractionEnabled = false;   // 박스 상호작용 활성화 여부
     private bool isDashing = false;                 // 현재 대시 중인지
+    [SerializeField] private float boxInteractingPower = 1.2f; // 박스와 상호작용 시 이동속도
 
     // 입력 차단 시스템 (미니게임, 대화 등에서 사용)
     private bool isMiniGameInputBlocked = false;
@@ -157,14 +170,19 @@ public class PlayerCatMovement : MonoBehaviour
 
         // 물리 설정 최적화 (안정적인 움직임을 위함)
         rb.freezeRotation = true;                                           // 회전 고정
-        rb.interpolation = RigidbodyInterpolation2D.Interpolate;           // 부드러운 움직임
-        rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;   // 정확한 충돌 감지
+        rb.interpolation = RigidbodyInterpolation2D.Interpolate;            // 부드러운 움직임
+        rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;    // 정확한 충돌 감지
 
         // 파티클 시스템 초기화
         if (dashParticle != null)
         {
             particleEmission = dashParticle.emission;
             particleEmission.rateOverTime = 0f; // 초기에는 파티클 발생하지 않음
+        }
+
+        if (groundCheck != null)
+        {
+            originalGroundCheckLocalPosition = groundCheck.localPosition;
         }
     }
 
@@ -192,6 +210,26 @@ public class PlayerCatMovement : MonoBehaviour
         {
             UpdateAnimationState(0);
             return;
+        }
+
+        if (groundCheck != null)
+        {
+            if (isCrouching || forceCrouch)
+            {
+                // 웅크렸을 때: 콜라이더가 줄어든 만큼 groundCheck 위치를 아래로 내립니다.
+                // originalColliderSize.y - crouchColliderSize.y 는 콜라이더 높이 변화량입니다.
+                float yOffset = (originalColliderSize.y - crouchColliderSize.y) * 0.5f;
+                groundCheck.localPosition = new Vector3(
+                    originalGroundCheckLocalPosition.x,
+                    originalGroundCheckLocalPosition.y - yOffset,
+                    originalGroundCheckLocalPosition.z
+                );
+            }
+            else
+            {
+                // 서 있을 때: 원래 위치로 복원합니다.
+                groundCheck.localPosition = originalGroundCheckLocalPosition;
+            }
         }
 
         // 지상 감지 (이전 프레임과 비교하여 착지 판정)
@@ -244,7 +282,7 @@ public class PlayerCatMovement : MonoBehaviour
                 {
                     // 박스를 당기는 중이라면 박스 위치에 따라 방향 결정
                     bool isBoxOnRight = boxInteraction.CurrentBox != null &&
-                                          boxInteraction.CurrentBox.transform.position.x > transform.position.x;
+                                        boxInteraction.CurrentBox.transform.position.x > transform.position.x;
                     spriteRenderer.flipX = !isBoxOnRight;
                 }
             }
@@ -331,7 +369,7 @@ public class PlayerCatMovement : MonoBehaviour
             return;
 
         // 웅크리기 상태 처리
-        if (isCrouching || forceCrouch)
+        if (isCrouching || forceCrouch || isOnSlope) 
         {
             if (hasHorizontalInput)
             {
@@ -341,7 +379,7 @@ public class PlayerCatMovement : MonoBehaviour
             {
                 animator.SetBool("Crouch", true);       // 웅크린 채로 정지
             }
-            return;
+            return; 
         }
 
         // 일반 상태 처리 (이동, 점프, 대시)
@@ -373,6 +411,7 @@ public class PlayerCatMovement : MonoBehaviour
     int _hashJump = Animator.StringToHash("Jump");
 
     // 애니메이션 파라미터 동기화
+    // 애니메이션 파라미터 동기화
     void SyncAnimatorParams()
     {
         // 입력 차단/미니게임 때는 깔끔하게 0/false로
@@ -395,9 +434,9 @@ public class PlayerCatMovement : MonoBehaviour
 
         // 대시 키: Shift (박스 상호작용/웅크림/사다리 중엔 false)
         bool shiftDown = Input.GetKey(KeyCode.LeftShift)
-                         && !isCrouching
-                         && !isClimbing
-                         && !blocked;
+                                 && !isCrouching
+                                 && !isClimbing
+                                 && !blocked;
 
         // 속도: 입력 기반이 전이 안정적 (물리 미끄러짐 영향 적음)
         float hInput = blocked ? 0f : Mathf.Abs(Input.GetAxisRaw("Horizontal"));
@@ -411,12 +450,17 @@ public class PlayerCatMovement : MonoBehaviour
 
         // 웅크림 상태 계산
         bool jumpAnim = animator.GetBool(_hashJump);
+
         bool inCrouchMode =
-            (isCrouching || forceCrouch) &&
-            isOnGround &&
-            !isClimbing &&
-            !blocked &&
-            !jumpAnim;
+           (
+               // 일반적인 웅크리기(수동, 장애물)는 땅 위에 있어야 함
+               (isCrouching || forceCrouch) && isOnGround ||
+               // 하지만 경사면 위에서는 땅 체크와 상관없이 항상 웅크림 모드
+               isOnSlope
+           ) &&
+           !isClimbing &&
+           !blocked &&
+           !jumpAnim;
 
         bool crouchMoving = inCrouchMode && (speedParam > 0.01f);
         bool crouchIdle = inCrouchMode && !crouchMoving;
@@ -459,14 +503,21 @@ public class PlayerCatMovement : MonoBehaviour
             return;
         }
 
+        CheckSlope();
+
+        if (!isOnSlope)
+        {
+            transform.rotation = Quaternion.identity;
+        }
+
         // 카트에 타지 않았을 때만 일반적인 움직임 처리
         if (!isOnCart)
         {
             if (!isClimbing)
             {
-                Move();                 // 기본 이동 처리
-                BetterJump();          // 점프 중력 보정
-                HandleSound();         // 이동 사운드 처리
+                Move();             // 기본 이동 처리
+                BetterJump();       // 점프 중력 보정
+                HandleSound();      // 이동 사운드 처리
                 UpdateParticleState(); // 파티클 시스템 업데이트
             }
             else
@@ -630,9 +681,9 @@ public class PlayerCatMovement : MonoBehaviour
     bool IsInputBlocked()
     {
         return PauseManager.IsGamePaused
-             || DialogueManager.Instance.isDialogueActive
-             || (GameManager.Instance != null && GameManager.Instance.IsSceneLoading)
-             || isMiniGameInputBlocked;
+           || DialogueManager.Instance.isDialogueActive
+           || (GameManager.Instance != null && GameManager.Instance.IsSceneLoading)
+           || isMiniGameInputBlocked;
     }
 
     /// <summary>
@@ -711,40 +762,41 @@ public class PlayerCatMovement : MonoBehaviour
     /// 웅크리기 입력 및 상태 처리
     /// 자동 웅크리기 (장애물 감지), 수동 웅크리기 (S키), 웅크리기 해제 등을 처리
     /// </summary>
+    /// <summary>
+    /// 웅크리기 입력 및 상태 처리
+    /// [수정] 경사면, 장애물, 수동 입력을 모두 고려하여 웅크리기 상태를 통합 관리합니다.
+    /// </summary>
     void HandleCrouch(bool justLanded)
     {
         bool obstacleAbove = IsObstacleDirectlyAbove();
-        float horizontalInput = Input.GetAxisRaw("Horizontal");
+        bool playerHoldsCrouchKey = Input.GetKey(KeyCode.S);
 
-        // 장애물이 위에 있고 지상에 있으면 자동으로 웅크리기
-        if (obstacleAbove && !isCrouching && isOnGround)
-        {
-            isCrouching = true;
-            boxCollider.size = crouchColliderSize;
-            boxCollider.offset = crouchColliderOffset;
-        }
+        // 웅크려야 하는 모든 조건을 여기에 정의합니다:
+        // 1. 경사면에 있거나
+        // 2. 머리 위에 장애물이 있거나
+        // 3. 플레이어가 S키를 누르고 땅에 있을 때
+        bool shouldBeCrouching = isOnSlope || obstacleAbove || (playerHoldsCrouchKey && isOnGround);
 
-        // S키를 누르면 수동으로 웅크리기
-        if (Input.GetKeyDown(KeyCode.S) && isOnGround)
+        // 위 조건에 따라 현재 캐릭터의 웅크리기 상태를 동기화합니다.
+        if (shouldBeCrouching)
         {
-            isCrouching = true;
-            boxCollider.size = crouchColliderSize;
-            boxCollider.offset = crouchColliderOffset;
+            // 웅크려야 하는데, 웅크리고 있지 않다면 -> 웅크리기 시작
+            if (!isCrouching)
+            {
+                isCrouching = true;
+                boxCollider.size = crouchColliderSize;
+                boxCollider.offset = crouchColliderOffset;
+            }
         }
-        // S키를 떼고 위에 장애물이 없으면 웅크리기 해제
-        else if (Input.GetKeyUp(KeyCode.S) && !obstacleAbove)
+        else
         {
-            isCrouching = false;
-            boxCollider.size = originalColliderSize;
-            boxCollider.offset = originalColliderOffset;
-        }
-
-        // 장애물이 없어지고 S키를 누르지 않으면 웅크리기 해제
-        if (!obstacleAbove && isCrouching && !Input.GetKey(KeyCode.S))
-        {
-            isCrouching = false;
-            boxCollider.size = originalColliderSize;
-            boxCollider.offset = originalColliderOffset;
+            // 웅크릴 필요가 없는데, 웅크리고 있다면 -> 웅크리기 해제
+            if (isCrouching)
+            {
+                isCrouching = false;
+                boxCollider.size = originalColliderSize;
+                boxCollider.offset = originalColliderOffset;
+            }
         }
     }
 
@@ -851,14 +903,16 @@ public class PlayerCatMovement : MonoBehaviour
     /// </summary>
     void Jump()
     {
-        if (isJumpingBlocked) return;
+        if (IsInputBlocked()) return;
+        // isOnSlope 조건 추가하여 경사면에서는 점프 못하게 변경
+        if (isJumpingBlocked || isOnSlope) return;
 
         if (Input.GetKeyDown(KeyCode.Space) && !isCrouching && !isClimbing)
         {
             // 지상에 있거나 더블 점프 가능한 상태에서만 점프
             if (isOnGround || jumpCount < 2)
             {
-                rb.velocity = new Vector2(rb.velocity.x, 0);        // y축 속도 초기화
+                rb.velocity = new Vector2(rb.velocity.x, 0);       // y축 속도 초기화
                 rb.AddForce(Vector2.up * jumpPower, ForceMode2D.Impulse); // 점프 힘 적용
                 jumpCount++;
                 isOnGround = false;
@@ -936,7 +990,7 @@ public class PlayerCatMovement : MonoBehaviour
 
             // 사다리 범위 내에서만 이동 가능하도록 Y 위치 제한
             float clampedY = Mathf.Clamp(transform.position.y + moveY * Time.fixedDeltaTime,
-                                           ladderBottom + 0.2f, ladderTop - 0.2f);
+                                          ladderBottom + 0.2f, ladderTop - 0.2f);
 
             // 경계에서는 이동 불가
             if ((transform.position.y >= ladderTop - 0.2f && verticalInput > 0) ||
@@ -1014,7 +1068,7 @@ public class PlayerCatMovement : MonoBehaviour
     void ExitLadder(bool withJump)
     {
         isClimbing = false;
-        rb.gravityScale = 1.5f;                     // 중력 복원
+        rb.gravityScale = 1.5f;                 // 중력 복원
         animator.SetBool("Climbing", false);
 
         if (withJump)
@@ -1111,6 +1165,60 @@ public class PlayerCatMovement : MonoBehaviour
     }
 
     /// <summary>
+    /// 여러 개의 Raycast를 사용해 발밑의 경사면을 종합적으로 판단하고 부드럽게 회전합니다.
+    /// 경사면 끝에서 발생하는 상태 깜빡임(jittering) 현상을 개선하고, 경사면에서 웅크리기 애니메이션이 정상적으로 재생되도록 수정합니다.
+    /// </summary>
+    void CheckSlope()
+    {
+        int hitsFound = 0;
+        Vector2 combinedNormal = Vector2.zero; // 감지된 모든 경사면의 법선 벡터를 더할 변수
+
+        // 1. Inspector에서 설정한 모든 오프셋 위치에 대해 Raycast를 실행합니다.
+        foreach (var offset in raycastOffsets)
+        {
+            Vector2 castOrigin = (Vector2)transform.position + offset;
+            RaycastHit2D hit = Physics2D.Raycast(castOrigin, Vector2.down, slopeRaycastDistance, slopeLayer);
+
+            if (hit.collider != null)
+            {
+                // 경사면을 감지했다면, 법선 벡터를 더하고 감지 횟수를 1 증가시킵니다.
+                combinedNormal += hit.normal;
+                hitsFound++;
+            }
+        }
+
+        // 2. 하나 이상의 Raycast가 경사면 레이어를 감지한 경우
+        if (hitsFound > 0)
+        {
+            Vector2 averageNormal = combinedNormal / hitsFound;
+
+            // 평균 법선 벡터가 유의미한 기울기(약 5.7도 이상)를 가질 때만 경사면으로 처리
+            if (Mathf.Abs(averageNormal.x) > 0.1f)
+            {
+                // --- 경사면 상태로 확정 ---
+                isOnSlope = true;
+                timeSinceLeftSlope = 0; // 경사면을 벗어나는 타이머 초기화
+
+                // 경사면에 맞춰 캐릭터 회전
+                float slopeAngle = Vector2.SignedAngle(Vector2.up, averageNormal);
+                transform.rotation = Quaternion.Euler(0, 0, slopeAngle);
+                return; // 경사면 처리가 끝났으므로 함수를 즉시 종료합니다.
+            }
+        }
+
+        // 3. 경사면을 감지하지 못했거나, 감지된 경사면이 거의 평평한 경우
+        if (isOnSlope)
+        {
+            timeSinceLeftSlope += Time.fixedDeltaTime;
+            if (timeSinceLeftSlope > slopeExitDelay)
+            {
+                isOnSlope = false;
+            }
+        }
+    }
+
+
+    /// <summary>
     /// Scene View에서 디버그 정보를 시각적으로 표시
     /// 지상 체크, 장애물 체크, 박스 상호작용 상태 등을 Gizmo로 표시
     /// </summary>
@@ -1130,11 +1238,26 @@ public class PlayerCatMovement : MonoBehaviour
             Gizmos.DrawLine(tailCheck.position, tailCheck.position + Vector3.up * tailCheckLength);
         }
 
-        // 지상 체크 원
+        // 지상 체크 원 및 경사면 체크 원
         if (groundCheck)
         {
+            // 지상 체크 (초록색)
             Gizmos.color = Color.green;
             Gizmos.DrawWireSphere(groundCheck.position, groundCheckRadius);
+
+            // 경사면 체크 (노란색)
+            Gizmos.color = Color.yellow;
+            Gizmos.DrawWireSphere(groundCheck.position, slopeCheckRadius);
+        }
+
+        if (Application.isPlaying && raycastOffsets != null)
+        {
+            Gizmos.color = Color.green; // 잘 보이는 초록색으로 변경
+            foreach (var offset in raycastOffsets)
+            {
+                Vector2 castOrigin = (Vector2)transform.position + offset;
+                Gizmos.DrawLine(castOrigin, castOrigin + Vector2.down * slopeRaycastDistance);
+            }
         }
 
         // 박스 상호작용 상태 표시
@@ -1144,6 +1267,7 @@ public class PlayerCatMovement : MonoBehaviour
             Gizmos.DrawWireSphere(transform.position, 0.5f);
         }
     }
+
 
     /// <summary>
     /// 파티클 시스템의 위치와 방향을 플레이어에 맞게 업데이트

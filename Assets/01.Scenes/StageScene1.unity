@@ -8118,7 +8118,13 @@ MonoBehaviour:
   groundMask:
     serializedVersion: 2
     m_Bits: 64
-  boxInteractingPower: 1.2
+  slopeCheckRadius: 0.3
+  slopeLayer:
+    serializedVersion: 2
+    m_Bits: 0
+  slopeExitDelay: 0.15
+  slopeRaycastDistance: 0.5
+  raycastOffsets: []
   passableTag: Passable
   headCheck: {fileID: 891955230}
   tailCheck: {fileID: 1712934572}
@@ -8131,6 +8137,7 @@ MonoBehaviour:
   forceCrouch: 0
   climbSpeed: 2
   ladderSnapDistance: 0.3
+  boxInteractingPower: 1.2
 --- !u!61 &507170961
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -14421,7 +14428,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7285980681169623252, guid: b2a7b04b0ea72be40a356d8756e18ce2, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8696544448854625571, guid: b2a7b04b0ea72be40a356d8756e18ce2, type: 3}
       propertyPath: m_Enabled

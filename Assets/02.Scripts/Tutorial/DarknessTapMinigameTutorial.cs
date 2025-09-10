@@ -22,6 +22,11 @@ public class DarknessTapMinigameTutorial : TutorialBase
 
     public override void Enter()
     {
+        if (PlayerCatMovement.Instance != null)
+        {
+            PlayerCatMovement.Instance.SetMiniGameInputBlocked(true);
+        }
+
         Debug.Log("[DarknessTapMinigameTutorial] 어둠 걷어내기 미니게임 튜토리얼 시작");
 
         // 튜토리얼 시작 시 지정된 UI가 있다면 비활성화합니다.

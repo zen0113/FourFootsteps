@@ -1,43 +1,40 @@
 using UnityEngine;
 
-
 public class ObjectActivationTutorial : TutorialBase
 {
-    [Header("활성화 오브젝트")]
-    [SerializeField] private GameObject objectToActivate;
+    [Header("오브젝트 설정")]
+    [SerializeField] private GameObject targetObject;
+    [SerializeField] private bool activateObject = true; // true: 활성화, false: 비활성화
 
-    [Header("효과음")]
-    [SerializeField] private AudioSource activationSound;
-
-    /// <summary>
+    [Header("효과음 설정")]
+    [SerializeField] private AudioSource sound;
+    [SerializeField] private bool playSound = true; // true: 재생, false: 재생 안함
 
     public override void Enter()
     {
-        
-    }
 
+    }
 
     public override void Execute(TutorialController controller)
     {
-        // 지정된 게임 오브젝트를 활성화
-        if (objectToActivate != null)
+        // 오브젝트 활성화/비활성화
+        if (targetObject != null)
         {
-            objectToActivate.SetActive(true);
+            targetObject.SetActive(activateObject);
         }
 
-        // 지정된 효과음을 재생
-        if (activationSound != null)
+        // 효과음 재생
+        if (playSound && sound != null)
         {
-            activationSound.Play();
+            sound.Play();
         }
 
         // 즉시 다음 튜토리얼
         controller.SetNextTutorial();
     }
 
-
     public override void Exit()
     {
-        
+
     }
 }

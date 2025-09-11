@@ -195,16 +195,18 @@ public class StruggleMiniGame : MonoBehaviour
         successCount = 0; // 성공 횟수 초기화
         currentStage = 0; // 현재 단계 초기화
         isPlayingDialogue = false; // 다이얼로그 재생 상태 초기화
-        // isShowingProgressText = true; // StartGameSequence에서 초기 설정하므로 주석 처리
         keyPressCountSinceInactivity = 0; // 키 입력 횟수 초기화
         lastKeyPressTime = Time.time; // 마지막 키 입력 시간 초기화
 
         // 플레이어 상태 설정 (강제 웅크리기 및 입력 차단) - 즉시 적용
         if (playerMovement != null)
         {
-            Debug.Log("[StruggleMiniGame] 플레이어 강제 웅크리기 활성화");
+            Debug.Log("[StruggleMiniGame] 플레이어 강제 웅크리기 및 점프 차단 활성화");
             playerMovement.SetMiniGameInputBlocked(true); // 미니게임 중 플레이어 입력 차단
             playerMovement.ForceCrouch = true; // 플레이어 강제 웅크리기
+
+            // [수정] 미니게임이 진행되는 동안 Space 키(점프) 입력을 확실하게 차단합니다.
+            playerMovement.IsJumpingBlocked = true;
         }
         else
         {
@@ -428,6 +430,11 @@ public class StruggleMiniGame : MonoBehaviour
     {
         isPlayingDialogue = true; // 다이얼로그 재생 중으로 설정하여 입력 차단
 
+        if (playerMovement != null)
+        {
+            playerMovement.SetMiniGameInputBlocked(true);
+        }
+
         // 비활성 타이머 정지 (다이얼로그 중에는 타이머 작동 안함)
         if (inactivityCoroutine != null)
         {
@@ -483,6 +490,11 @@ public class StruggleMiniGame : MonoBehaviour
 
                 DialogueManager.Instance.StartDialogue(currentDialogueID);
                 yield return StartCoroutine(WaitForDialogueEnd());
+            }
+
+            if (playerMovement != null)
+            {
+                playerMovement.SetMiniGameInputBlocked(true);
             }
 
             // 다음 단계 준비
@@ -594,10 +606,13 @@ public class StruggleMiniGame : MonoBehaviour
         // 플레이어 상태 복원 (미니게임 완전 종료 후)
         if (playerMovement != null)
         {
-            Debug.Log("[StruggleMiniGame] 플레이어 상태 복원 - 웅크리기 해제");
+            Debug.Log("[StruggleMiniGame] 플레이어 상태 복원 - 웅크리기 및 점프 차단 해제");
             playerMovement.SetMiniGameInputBlocked(false); // 플레이어 입력 차단 해제
             playerMovement.ForceCrouch = false; // 강제 웅크리기 해제
             playerMovement.SetCrouchMovingState(false); // 웅크리기 이동 상태 해제
+
+            // [수정] 미니게임이 끝났으므로 Space 키(점프) 입력을 다시 허용합니다.
+            playerMovement.IsJumpingBlocked = false;
         }
 
         Debug.Log("걷기 해방 완료!");
@@ -605,6 +620,7 @@ public class StruggleMiniGame : MonoBehaviour
         // 미니게임 완료 이벤트 호출
         InvokeMiniGameComplete();
     }
+
     IEnumerator HideUIWithFadeOut()
     {
         // 페이드 아웃 효과
@@ -673,6 +689,8 @@ public class StruggleMiniGame : MonoBehaviour
             playerMovement.SetMiniGameInputBlocked(false); // 플레이어 입력 차단 해제
             playerMovement.ForceCrouch = false; // 강제 웅크리기 해제
             playerMovement.SetCrouchMovingState(false); // 웅크리기 이동 상태 해제
+
+            playerMovement.IsJumpingBlocked = false;
         }
 
         // 모든 코루틴 정지

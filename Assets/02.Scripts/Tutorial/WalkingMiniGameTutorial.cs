@@ -23,6 +23,11 @@ public class WalkingMiniGameTutorial : TutorialBase
 
     public override void Enter()
     {
+        if (PlayerCatMovement.Instance != null)
+        {
+            PlayerCatMovement.Instance.SetMiniGameInputBlocked(true);
+        }
+
         Debug.Log("[WalkingMiniGameTutorial] 걷기 미니게임 튜토리얼 시작");
 
         tutorialController = FindObjectOfType<TutorialController>();
@@ -92,6 +97,11 @@ public class WalkingMiniGameTutorial : TutorialBase
 
     private IEnumerator StartWithDialogue()
     {
+        if (PlayerCatMovement.Instance != null)
+        {
+            PlayerCatMovement.Instance.SetMiniGameInputBlocked(true);
+            PlayerCatMovement.Instance.IsJumpingBlocked = true; // 점프도 확실히 차단
+        }
         // 다이얼로그 시작 전 3초 대기
         yield return new WaitForSeconds(3f);
 

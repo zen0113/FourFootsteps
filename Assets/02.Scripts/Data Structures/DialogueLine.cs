@@ -5,6 +5,7 @@ public class DialogueLine
     public string Script { get; private set; }
     public string TextEffect { get; private set; }
     public string ImageID { get; private set; }
+    public string EmotionalState { get; private set; }
     public string SoundID { get; private set; }
     public string CutSceneID { get; private set; }
     public string Next { get; private set; }
@@ -16,6 +17,7 @@ public class DialogueLine
         string script,
         string textEffect,
         string imageID,
+        string emotionalState,
         string soundID,
         string cutSceneID,
         string next)
@@ -25,6 +27,7 @@ public class DialogueLine
         Script = script;
         TextEffect = textEffect;
         ImageID = imageID;
+        EmotionalState = emotionalState;
         SoundID = soundID;
         CutSceneID = cutSceneID;
         Next = next;

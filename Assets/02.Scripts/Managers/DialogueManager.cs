@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Text;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -396,13 +397,18 @@ public class DialogueManager : MonoBehaviour
         }
 
         var imageID = dialogueLine.ImageID;
-
+        var emotion = dialogueLine.EmotionalState;
         if (string.IsNullOrWhiteSpace(imageID))
         {
             foreach (var characterImage in characterImages)
                 characterImage.color = new Color(1, 1, 1, 0);
             return;
         }
+        if (!string.IsNullOrWhiteSpace(emotion))
+            imageID = new StringBuilder(imageID)
+                        .Append('_')
+                        .Append(emotion)
+                        .ToString();
 
         var characterSprite = Resources.Load<Sprite>($"Art/CharacterPortrait/{imageID}");
 

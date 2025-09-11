@@ -20,11 +20,12 @@ public class Dialogue
         string script,
         string textEffect,
         string imageID,
+        string emotionalState,
         string soundID,
         string cutSceneID,
         string next)
     {
-        Lines.Add(new DialogueLine(speakerID, bubbleMode, script, textEffect, imageID, soundID, cutSceneID, next));
+        Lines.Add(new DialogueLine(speakerID, bubbleMode, script, textEffect, imageID, emotionalState, soundID, cutSceneID, next));
     }
 
     public void SetCurrentLineIndex(int currentLineIndex)

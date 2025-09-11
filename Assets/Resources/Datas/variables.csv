@@ -1,0 +1,20 @@
+Unique Variable,Initial Value,Type,Description
+PlayerName,주인공,string,플레이어 이름
+YourCatName,네로,string,플레이어의 고양이 이름
+ResponsibilityScore,0,int,현재 책임감 지수
+MaxResponsibilityScore,5,int,최대 책임감 지수 
+CurrentStageNum,0,int,현재 진행 중인 스테이지 번호(이름)
+CurrentHP,5,int,현재 체력 포인트
+MaxHP,5,int,최대 체력 포인트
+CurrentMemoryPuzzleCount,0,int,현재 모은 기억 퍼즐 개수
+MaxMemoryPuzzleCount,5,int,최대 기억 퍼즐 개수
+isRecalling,false,bool,회상 중인지 나타내는 상태 변수(회상 씬인 경우 true)
+isInvesigating,false,bool,조사 중인가
+RoomSofaClick,0,int,회상 씬 속 할퀴어진 소파 
+CurrentSceneName,TitleScene,string,현재 씬 이름
+NextSceneName,Prologue,string,진행될 다음 씬 이름
+CanMoving,true,bool,플레이어 움직임 제어용 변수
+CanInvesigatingRecallObject,false,bool,회상에서 선택지 다 선택 후 일반 오브젝트 조사 가능
+PrologueStep,0,int,프롤로그 현재 진행 Step 번호
+isPrologueFinished,false,bool,프롤로그 완료됐는가
+isPuzzleMoving,false,bool,puzzle 획득 애니메이션이 진행 중인가

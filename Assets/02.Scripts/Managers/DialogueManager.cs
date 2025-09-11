@@ -57,7 +57,8 @@ public class DialogueManager : MonoBehaviour
     public Transform playerTransform;   // 플레이어 위치
     public Transform npcTransform;      // npc 위치
     public Vector3 bubbleOffset = new Vector3(0, 2.0f, 0);
-
+    public float catOffset_y = 0.5f;
+    public float humanOffset_y = 2.0f;
 
     void Awake()
     {
@@ -390,7 +391,9 @@ public class DialogueManager : MonoBehaviour
 
     private void UpdateCharacterImages(DialogueLine dialogueLine)
     {
-        if (dialogueType == DialogueType.PLAYER_BUBBLE || dialogueType == DialogueType.MONOLOG)
+        if (dialogueType == DialogueType.PLAYER_BUBBLE||
+            dialogueType == DialogueType.NPC_BUBBLE||
+            dialogueType == DialogueType.MONOLOG)
         {
             characterImages[dialogueType.ToInt()].gameObject.SetActive(false);
             return;
@@ -448,6 +451,7 @@ public class DialogueManager : MonoBehaviour
             {
                 dialogueType = DialogueType.PLAYER_BUBBLE;
                 playerTransform = FindSpeakerByName(speaker);
+                // 고양이이면 offset Cat으로, 인간이면 offset Human으로 설정
             }
             else
             {

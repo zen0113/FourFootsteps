@@ -150,9 +150,9 @@ public class KidWatcher : MonoBehaviour
         StealthSFX.Instance.CaughtByKidFX();
         // 카메라 shake에 아이들이 저기 고양이다!! 다이얼로그[Stage03_004] 재생
         cameraShake.enabled = true;
-        cameraShake.Shake(0.5f, 0.25f);
+        cameraShake.ShakeAndDisable(0.5f, 0.25f);
         DialogueManager.Instance.StartDialogue(StealthEndDialogueID);
-        cameraShake.enabled = false;
+        //cameraShake.enabled = false;
         // 이벤트 훅 해제
         if (meter) meter.OnReachedMax -= HandleCaught;
 

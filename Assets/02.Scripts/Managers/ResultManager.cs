@@ -67,8 +67,7 @@ public class ResultManager : MonoBehaviour
     public IEnumerator ExecuteResultCoroutine(string resultID)
     {
         string variableName;
-
-        // ------------------------ 이곳에 모든 동작을 수동으로 추가 ------------------------
+        // Result ID별로 실행 로직 분기
         switch (resultID)
         {
             case string when resultID.StartsWith("Result_StartDialogue"):  // 대사 시작
@@ -97,15 +96,13 @@ public class ResultManager : MonoBehaviour
             case string when resultID.StartsWith("Result_Decrement"):  // 값--
                 variableName = resultID["Result_Decrement".Length..];
                 GameManager.Instance.DecrementVariable(variableName);
-
-                yield return null; // 바로 실행이지만 코루틴 일관성 유지
+                yield return null;
                 break;
 
             case string when resultID.StartsWith("Result_Inverse"):  // !값
                 variableName = resultID["Result_Inverse".Length..];
                 GameManager.Instance.InverseVariable(variableName);
-
-                yield return null; // 바로 실행이지만 코루틴 일관성 유지
+                yield return null;
                 break;
 
             case "ResultCloseEyes": // 눈 깜빡이는 효과
@@ -115,25 +112,21 @@ public class ResultManager : MonoBehaviour
             case "Result_FadeOut":  // fade out
                 float fadeOutTime = 2f;
                 yield return UIManager.Instance.OnFade(null, 0, 1, fadeOutTime);
-                //StartCoroutine(UIManager.Instance.OnFade(null, 0, 1, fadeOutTime));
                 break;
 
             case "Result_FadeIn":  // fade int
                 float fadeInTime = 2f;
                 yield return UIManager.Instance.OnFade(null, 1, 0, fadeInTime);
-                //StartCoroutine(UIManager.Instance.OnFade(null, 1, 0, fadeInTime));
                 break;
 
             case "Result_FastFadeOut":  // Fast fade out
                 fadeOutTime = 1.5f;
                 yield return UIManager.Instance.OnFade(null, 0, 1, fadeOutTime);
-                //StartCoroutine(UIManager.Instance.OnFade(null, 0, 1, fadeOutTime));
                 break;
 
             case "Result_FastFadeIn":  // Fast fade int
                 fadeInTime = 1.5f;
                 yield return UIManager.Instance.OnFade(null, 1, 0, fadeInTime);
-                //StartCoroutine(UIManager.Instance.OnFade(null, 1, 0, fadeInTime));
                 break;
 
             // 다이얼로그 캔버스까지 안 보이게 하는 Fade Out/In
@@ -141,14 +134,12 @@ public class ResultManager : MonoBehaviour
                 Debug.Log("Result_DialogueFadeOut");
                 fadeOutTime = 2f;
                 yield return UIManager.Instance.OnFade(UIManager.Instance.dialogueCoverPanel, 0, 1, fadeOutTime);
-                //StartCoroutine(UIManager.Instance.OnFade(null, 0, 1, fadeOutTime));
                 break;
 
             case "Result_DialogueFadeIn":  // fade int
                 Debug.Log("Result_DialogueFadeIn");
                 fadeInTime = 2f;
                 yield return UIManager.Instance.OnFade(UIManager.Instance.dialogueCoverPanel, 1, 0, fadeInTime);
-                //StartCoroutine(UIManager.Instance.OnFade(null, 1, 0, fadeInTime));
                 break;
 
             // 프롤로그 다음 스텝으로 넘김
@@ -353,54 +344,3 @@ public class ResultManager : MonoBehaviour
         _isMovingRoom = false;
     }
 }
-
-    //public void ExecuteResult(string resultID)
-    //{
-    //    string variableName;
-
-//    // ------------------------ 이곳에 모든 동작을 수동으로 추가 ------------------------
-//    switch (resultID)
-//    {
-//        case string when resultID.StartsWith("Result_StartDialogue"):  // 대사 시작
-//            variableName = resultID["Result_StartDialogue".Length..];
-//            DialogueManager.Instance.StartDialogue(variableName);
-//            break;
-
-//        // GameManager의 해당 변수를 조정 가능(+1 / -1)
-//        case string when resultID.StartsWith("Result_Increment"):  // 값++
-//            variableName = resultID["Result_Increment".Length..];
-//            GameManager.Instance.IncrementVariable(variableName);
-
-//            // 증가시킨게 책임감 점수면 ChangeResponsibilityGauge 호출
-//            if (variableName== "ResponsibilityScore")
-//            {
-//                if (ResponsibilityManager.Instance)
-//                    ResponsibilityManager.Instance.ChangeResponsibilityGauge();
-//            }    
-//            break;
-
-//        case string when resultID.StartsWith("Result_Decrement"):  // 값--
-//            variableName = resultID["Result_Decrement".Length..];
-//            GameManager.Instance.DecrementVariable(variableName);
-//            break;
-
-//        case "Result_FadeOut":  // fade out
-//            float fadeOutTime = 3f;
-//            StartCoroutine(UIManager.Instance.OnFade(null, 0, 1, fadeOutTime));
-//            break;
-
-//        case "Result_FadeIn":  // fade int
-//            float fadeInTime = 3f;
-//            StartCoroutine(UIManager.Instance.OnFade(null, 1, 0, fadeInTime));
-//            break;
-
-//        // 낡은 소파 조사 시, 회상1 씬으로 이동.
-//        case "Result_GoToReminiscence1":
-//            SceneLoader.Instance.LoadScene("Reminiscence1");
-//            break;
-
-//        default:
-//            Debug.Log($"Result ID: {resultID} not found!");
-//            break;
-//    }
-//}

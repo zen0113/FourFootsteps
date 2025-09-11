@@ -14,6 +14,9 @@ public class StealthSettingsSO : ScriptableObject
     [Tooltip("진입/이탈 버퍼(경계 떨림 방지)")]
     public float enterExitBuffer = 0.12f;
 
+    [Header("Hiding Alpha")]
+    public float HidingAlphaValue = 0.8f;
+
     [Header("Player Stealth Movement")]
     public float pushSpeed = 8f;
     [Tooltip("목표 x에 스냅 허용 오차")]

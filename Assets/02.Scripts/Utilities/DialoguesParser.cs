@@ -51,9 +51,10 @@ public class DialoguesParser
                 string script = Escaper(fields[3].Trim());
                 string textEffect = Escaper(fields[4].Trim());
                 string imageID = fields[5].Trim();
-                string soundID = fields[6].Trim();
-                string cutSceneID = fields[7].Trim();
-                string next = fields[8].Trim();
+                string emotionalState = fields[6].Trim();
+                string soundID = fields[7].Trim();
+                string cutSceneID = fields[8].Trim();
+                string next = fields[9].Trim();
 
                 if (!dialogues.ContainsKey(dialogueID))
                 {
@@ -61,7 +62,7 @@ public class DialoguesParser
                     dialogues[dialogueID] = dialogue;
                 }
 
-                dialogues[dialogueID].AddLine(speakerID, bubbleMode, script, textEffect, imageID, soundID, cutSceneID, next);
+                dialogues[dialogueID].AddLine(speakerID, bubbleMode, script, textEffect, imageID, emotionalState, soundID, cutSceneID, next);
             }
             catch (System.Exception e)
             {

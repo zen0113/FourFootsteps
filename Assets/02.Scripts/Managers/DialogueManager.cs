@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Text;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -125,7 +126,8 @@ public class DialogueManager : MonoBehaviour
     // ---------------------------------------------- Dialogue methods ----------------------------------------------
     public void StartDialogue(string dialogueID)
     {
-        if (isDialogueActive)  // 이미 대화가 진행중이면 큐에 넣음
+        // 대사 시작: 이미 대화가 진행 중이면 큐에 저장
+        if (isDialogueActive)
         {
             Debug.Log($"dialogue ID: {dialogueID} queued!");
 
@@ -395,13 +397,18 @@ public class DialogueManager : MonoBehaviour
         }
 
         var imageID = dialogueLine.ImageID;
-
+        var emotion = dialogueLine.EmotionalState;
         if (string.IsNullOrWhiteSpace(imageID))
         {
             foreach (var characterImage in characterImages)
                 characterImage.color = new Color(1, 1, 1, 0);
             return;
         }
+        if (!string.IsNullOrWhiteSpace(emotion))
+            imageID = new StringBuilder(imageID)
+                        .Append('_')
+                        .Append(emotion)
+                        .ToString();
 
         var characterSprite = Resources.Load<Sprite>($"Art/CharacterPortrait/{imageID}");
 

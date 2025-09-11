@@ -45,6 +45,7 @@ public class RopeClipping : MonoBehaviour
         if (referenceTransform == null)
         {
             referenceTransform = transform;
+            Debug.LogWarning($"{gameObject.name}: referenceTransform이 설정되지 않아 자기 자신을 기준으로 설정했습니다.");
         }
     }
     
@@ -98,7 +99,7 @@ public class RopeClipping : MonoBehaviour
         // 줄의 SpriteRenderer를 마스크와 연동
         if (ropeRenderer != null)
         {
-            ropeRenderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
+            ropeRenderer.maskInteraction = SpriteMaskInteraction.VisibleOutsideMask;
         }
     }
     
@@ -180,9 +181,9 @@ public class RopeClipping : MonoBehaviour
     /// </summary>
     private void UpdateSpriteClipping(float clipY)
     {
-        // 마스크 위치 설정 (클리핑 라인 아래 부분을 가리도록)
+        // 마스크를 클리핑 라인 위쪽에 배치 (위쪽 부분을 가림)
         Vector3 maskPosition = transform.position;
-        maskPosition.y = clipY - 1000f; // 클리핑 라인 아래쪽으로 충분히 낮게
+        maskPosition.y = clipY + 1000f; // 클리핑 라인 위쪽으로 충분히 높게
         
         spriteMask.transform.position = maskPosition;
         

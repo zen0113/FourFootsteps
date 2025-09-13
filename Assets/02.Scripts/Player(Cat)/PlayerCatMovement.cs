@@ -79,7 +79,6 @@ public class PlayerCatMovement : MonoBehaviour
     // 경사면 시스템
     [Header("경사면")]
     [SerializeField] private float slopeCheckRadius = 0.3f; // 경사면 체크를 위한 별도 반경
-    [SerializeField] private LayerMask slopeLayer;          // 경사면으로 인식할 레이어
     private bool isOnSlope = false;                         // 현재 경사면에 있는지 여부
     [SerializeField] private float slopeExitDelay = 0.15f; // 경사면에서 벗어났다고 판정하기까지의 유예 시간
     private float timeSinceLeftSlope; // 경사면을 마지막으로 감지한 후 흐른 시간
@@ -505,10 +504,10 @@ public class PlayerCatMovement : MonoBehaviour
 
         CheckSlope();
 
-        if (!isOnSlope)
-        {
-            transform.rotation = Quaternion.identity;
-        }
+        //if (!isOnSlope)
+        //{
+        //    transform.rotation = Quaternion.identity;
+        //}
 
         // 카트에 타지 않았을 때만 일반적인 움직임 처리
         if (!isOnCart)
@@ -762,19 +761,12 @@ public class PlayerCatMovement : MonoBehaviour
     /// 웅크리기 입력 및 상태 처리
     /// 자동 웅크리기 (장애물 감지), 수동 웅크리기 (S키), 웅크리기 해제 등을 처리
     /// </summary>
-    /// <summary>
-    /// 웅크리기 입력 및 상태 처리
-    /// [수정] 경사면, 장애물, 수동 입력을 모두 고려하여 웅크리기 상태를 통합 관리합니다.
-    /// </summary>
     void HandleCrouch(bool justLanded)
     {
         bool obstacleAbove = IsObstacleDirectlyAbove();
         bool playerHoldsCrouchKey = Input.GetKey(KeyCode.S);
 
-        // 웅크려야 하는 모든 조건을 여기에 정의합니다:
-        // 1. 경사면에 있거나
-        // 2. 머리 위에 장애물이 있거나
-        // 3. 플레이어가 S키를 누르고 땅에 있을 때
+        // 웅크려야 하는 모든 조건
         bool shouldBeCrouching = isOnSlope || obstacleAbove || (playerHoldsCrouchKey && isOnGround);
 
         // 위 조건에 따라 현재 캐릭터의 웅크리기 상태를 동기화합니다.
@@ -1171,48 +1163,60 @@ public class PlayerCatMovement : MonoBehaviour
     void CheckSlope()
     {
         int hitsFound = 0;
-        Vector2 combinedNormal = Vector2.zero; // 감지된 모든 경사면의 법선 벡터를 더할 변수
+        Vector2 combinedNormal = Vector2.zero;
+        bool foundActualSlope = false; // 실제 기울어진 경사면을 찾았는지
 
-        // 1. Inspector에서 설정한 모든 오프셋 위치에 대해 Raycast를 실행합니다.
+        // 모든 오프셋에서 Ground 레이어(경사면 포함)를 체크
         foreach (var offset in raycastOffsets)
         {
             Vector2 castOrigin = (Vector2)transform.position + offset;
-            RaycastHit2D hit = Physics2D.Raycast(castOrigin, Vector2.down, slopeRaycastDistance, slopeLayer);
+            RaycastHit2D hit = Physics2D.Raycast(castOrigin, Vector2.down, slopeRaycastDistance, groundMask); // slopeLayer 대신 groundMask 사용
 
             if (hit.collider != null)
             {
-                // 경사면을 감지했다면, 법선 벡터를 더하고 감지 횟수를 1 증가시킵니다.
                 combinedNormal += hit.normal;
                 hitsFound++;
+
+                // 실제로 기울어진 면인지 체크 (5.7도 이상)
+                if (Mathf.Abs(hit.normal.x) > 0.1f)
+                {
+                    foundActualSlope = true;
+                }
             }
         }
 
-        // 2. 하나 이상의 Raycast가 경사면 레이어를 감지한 경우
-        if (hitsFound > 0)
+        if (hitsFound > 0 && foundActualSlope)
         {
             Vector2 averageNormal = combinedNormal / hitsFound;
 
-            // 평균 법선 벡터가 유의미한 기울기(약 5.7도 이상)를 가질 때만 경사면으로 처리
-            if (Mathf.Abs(averageNormal.x) > 0.1f)
-            {
-                // --- 경사면 상태로 확정 ---
-                isOnSlope = true;
-                timeSinceLeftSlope = 0; // 경사면을 벗어나는 타이머 초기화
+            // 경사면 상태로 확정
+            isOnSlope = true;
+            timeSinceLeftSlope = 0;
 
-                // 경사면에 맞춰 캐릭터 회전
-                float slopeAngle = Vector2.SignedAngle(Vector2.up, averageNormal);
-                transform.rotation = Quaternion.Euler(0, 0, slopeAngle);
-                return; // 경사면 처리가 끝났으므로 함수를 즉시 종료합니다.
-            }
+            // 부드러운 회전 적용 (튀는 현상 방지)
+            float slopeAngle = Vector2.SignedAngle(Vector2.up, averageNormal);
+            Quaternion targetRotation = Quaternion.Euler(0, 0, slopeAngle);
+            transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, Time.fixedDeltaTime * 8f);
+            return;
         }
 
-        // 3. 경사면을 감지하지 못했거나, 감지된 경사면이 거의 평평한 경우
+        // 경사면을 벗어날 때 부드러운 전환
         if (isOnSlope)
         {
             timeSinceLeftSlope += Time.fixedDeltaTime;
             if (timeSinceLeftSlope > slopeExitDelay)
             {
                 isOnSlope = false;
+                // 부드럽게 수직으로 복귀
+                transform.rotation = Quaternion.Lerp(transform.rotation, Quaternion.identity, Time.fixedDeltaTime * 10f);
+            }
+        }
+        else
+        {
+            // 경사면이 아닐 때는 즉시 수직으로
+            if (transform.rotation != Quaternion.identity)
+            {
+                transform.rotation = Quaternion.Lerp(transform.rotation, Quaternion.identity, Time.fixedDeltaTime * 10f);
             }
         }
     }

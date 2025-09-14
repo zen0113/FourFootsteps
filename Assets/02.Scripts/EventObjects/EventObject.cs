@@ -15,7 +15,7 @@ public class EventObject : MonoBehaviour
     private bool hasBeenInvestigated = false; // 이미 조사했는지 상태 저장
 
     // 플레이어가 오브젝트 범위 내에 있는지 확인하는 변수
-    private bool _isPlayerInRange = false;
+    protected bool _isPlayerInRange = false;
 
     protected void Start()
     {

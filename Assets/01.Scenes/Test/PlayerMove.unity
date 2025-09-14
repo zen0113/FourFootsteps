@@ -1978,6 +1978,7 @@ MonoBehaviour:
   emptyHeart: {fileID: 21300000, guid: 5f3e307b094ac694f8556e699d5a5e4e, type: 3}
   invincibilityDuration: 1.5
   isInvincible: 0
+  cameraShake: {fileID: 0}
 --- !u!114 &1104583734
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2017,9 +2018,6 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   slopeCheckRadius: 0.7
-  slopeLayer:
-    serializedVersion: 2
-    m_Bits: 131072
   slopeExitDelay: 0.15
   slopeRaycastDistance: 0.5
   raycastOffsets:
@@ -8333,7 +8331,7 @@ GameObject:
   - component: {fileID: 1532663180}
   - component: {fileID: 1532663183}
   - component: {fileID: 1532663182}
-  m_Layer: 17
+  m_Layer: 6
   m_Name: tunnel (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -9012,7 +9010,7 @@ GameObject:
   - component: {fileID: 1988445632}
   - component: {fileID: 1988445634}
   - component: {fileID: 1988445633}
-  m_Layer: 17
+  m_Layer: 6
   m_Name: tunnel (2)
   m_TagString: Ground
   m_Icon: {fileID: 0}

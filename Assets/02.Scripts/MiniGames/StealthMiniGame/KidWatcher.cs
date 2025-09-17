@@ -19,6 +19,7 @@ public class KidWatcher : MonoBehaviour
     public SuspicionMeter meter;
     [SerializeField] private CameraShake cameraShake;
     [SerializeField] private GameObject StageBlockingWall;
+    [SerializeField] private ObjectSfxController sfxController;
 
     public bool isWatching { get; private set; }
 
@@ -55,6 +56,7 @@ public class KidWatcher : MonoBehaviour
 
     public void StartStealthGame()
     {
+        sfxController.StartPlayLoopByDefault();
         PlayerCatMovement.Instance.IsJumpingBlocked = true;
         isPlaying = true;
         StartCoroutine(RandomWatchLoop());
@@ -116,6 +118,11 @@ public class KidWatcher : MonoBehaviour
     {
         isWatching = watching;
         if (kidsImage) kidsImage.sprite = watching ? watchingSprite : normalSprite;
+
+        if (watching)
+            sfxController.Pause(1f);
+        else
+            sfxController.Resume(1f);
     }
 
     float EvaluateSuspicionPerSecond()

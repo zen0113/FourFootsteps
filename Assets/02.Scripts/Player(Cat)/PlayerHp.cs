@@ -170,6 +170,13 @@ public class PlayerHp : MonoBehaviour
     {
         isGameOverLoading = true;
 
+        // UI 비활성화
+        UIManager.Instance.SetUI(eUIGameObjectName.CatVersionUIGroup, false);
+        UIManager.Instance.SetUI(eUIGameObjectName.HumanVersionUIGroup, false);
+
+        // 다이얼로그 재생 중이면 끝냄
+        DialogueManager.Instance.EndDialogue();
+
         Debug.Log("플레이어 사망!");
         // 페이드 인 효과와 함께 게임오버 씬 로드
         SceneLoader.Instance.LoadScene("GameOver");
@@ -177,4 +184,6 @@ public class PlayerHp : MonoBehaviour
 
     // 외부 접근용 프로퍼티
     public int CurrentHp => currentHp;
+
+    public void SetIsInvincible(bool isInvincible) { this.isInvincible = isInvincible; }
 }

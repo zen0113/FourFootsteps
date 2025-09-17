@@ -156,6 +156,8 @@ public class ResultManager : MonoBehaviour
                 // 비동기 대기(애니메이션 끝날 때까지)
                 while ((bool)GameManager.Instance.GetVariable("isPuzzleMoving"))
                     yield return null;
+                if (!(bool)GameManager.Instance.GetVariable("CanMoving"))
+                    GameManager.Instance.SetVariable("CanMoving", true);
                 break;
 
             // 낡은 소파 조사 시, 회상1 씬으로 이동.
@@ -233,22 +235,58 @@ public class ResultManager : MonoBehaviour
 
             // 은신 게임: 들켰을 때 연출
             case "Result_StartChaseGameIntro":
-                fadeOutTime = 1.5f;
-                // 다이얼로그 진행 후
+                const float INITIAL_FADE_TIME = 1.5f;
+                const float FINAL_FADE_TIME = 1f;
+
+                // 플레이어 오브젝트 및 컴포넌트 참조 획득
                 GameObject player = GameObject.FindWithTag("Player");
-                player.GetComponent<PlayerCatMovement>().ForceCrouch = false;
-                player.GetComponent<PlayerCatMovement>().IsJumpingBlocked = false;
-                // 플레이어 오른쪽으로 강제 대쉬 이동시켜서 시야에서 벗어난 후
-                player.GetComponent<CatAutoMover>().enabled = true;
-                player.GetComponent<CatAutoMover>().StartMoving(player.GetComponent<CatAutoMover>().targetPoint);
-                // 화면 어두워짐+ 다음 추격 미니게임 시작
-                yield return UIManager.Instance.OnFade(null, 0, 1, fadeOutTime);
-                FollowCamera followCamera = Camera.main.GetComponent<FollowCamera>();
-                followCamera.enabled = true;
-                yield return new WaitWhile(() => player.GetComponent<CatAutoMover>().IsMoving);
-                fadeOutTime = 1f;
-                yield return UIManager.Instance.OnFade(null, 1, 0, fadeOutTime);
-                TutorialController.Instance.SetNextTutorial();
+                if (player == null)
+                {
+                    Debug.LogError("Player object not found!");
+                    break;
+                }
+
+                PlayerCatMovement playerMovement = player.GetComponent<PlayerCatMovement>();
+                CatAutoMover autoMover = player.GetComponent<CatAutoMover>();
+                PlayerAutoRunner ChaseManager = player.GetComponent<PlayerAutoRunner>();
+
+                if (playerMovement == null || autoMover == null)
+                {
+                    Debug.LogError("Required player components not found!");
+                    break;
+                }
+
+                // 플레이어 상태 복구
+                playerMovement.ForceCrouch = false;
+                playerMovement.IsJumpingBlocked = false;
+
+                // 플레이어 자동 이동 시작 (시야에서 벗어나게)
+                autoMover.enabled = true;
+                autoMover.StartMoving(autoMover.targetPoint);
+
+                // 화면 페이드 아웃
+                yield return UIManager.Instance.OnFade(null, 0, 1, INITIAL_FADE_TIME);
+
+                // 추격 게임 위치로 플레이어 텔레포트
+                if (!ChaseManager.TeleportPlayerToChaseStage(player))
+                {
+                    Debug.LogError("Failed to teleport player to chase stage!");
+                    break;
+                }
+
+                // 페이드 아웃 대기
+                yield return new WaitForSeconds(INITIAL_FADE_TIME);
+
+                // 카메라 설정
+                if (!ChaseManager.SetupChaseCamera())
+                {
+                    Debug.LogError("Failed to setup chase camera!");
+                    break;
+                }
+                // 화면 페이드 인
+                yield return UIManager.Instance.OnFade(null, 1, 0, FINAL_FADE_TIME);
+                // 튜토리얼 진행
+                TutorialController.Instance?.SetNextTutorial();
                 break;
 
             case "Result_MiniGameFailed":
@@ -343,4 +381,5 @@ public class ResultManager : MonoBehaviour
 
         _isMovingRoom = false;
     }
+
 }

@@ -187,7 +187,7 @@ public class DialogueManager : MonoBehaviour
 
     private void SetupCanvasAndSpeakerText(DialogueLine dialogueLine)
     {
-        ChangeDialogueCanvas(dialogueLine.SpeakerID, dialogueLine.BubbleMode);
+        ChangeDialogueCanvas(dialogueLine.SpeakerID, dialogueLine.BubbleMode, dialogueLine.ImageID);
 
         // Deactivate all canvases and then activate the selected one.
         foreach (GameObject canvas in dialogueSet)
@@ -439,7 +439,7 @@ public class DialogueManager : MonoBehaviour
         UpdateCharacterImages(dialogueLine);
     }
 
-    private void ChangeDialogueCanvas(string speaker, bool bubbleMode)
+    private void ChangeDialogueCanvas(string speaker, bool bubbleMode, string imageID)
     {
         //if (dialogueType == DialogueType.CENTER)
         //    dialogueType = DialogueType.PLAYER_TALKING;
@@ -452,6 +452,7 @@ public class DialogueManager : MonoBehaviour
                 dialogueType = DialogueType.PLAYER_BUBBLE;
                 playerTransform = FindSpeakerByName(speaker);
                 // 고양이이면 offset Cat으로, 인간이면 offset Human으로 설정
+                bubbleOffset.y = (imageID.Contains("CAT")) ? catOffset_y : humanOffset_y;
             }
             else
             {
@@ -758,7 +759,18 @@ public class DialogueManager : MonoBehaviour
 
     private void OnChoiceSelected(ChoiceLine choiceLine)
     {
-        Debug.Log($"[DialogueManager] 선택지 선택됨: Script={choiceLine.GetScript()}, Next={choiceLine.Next}, TutorialIndex={choiceLine.TutorialIndex}");
+        Debug.Log($"[DialogueManager] 선택지 선택됨: Script={choiceLine.GetScript()}, " +
+            $"Next={choiceLine.Next}, IsGoodChoice={choiceLine.IsGoodChoice},TutorialIndex={choiceLine.TutorialIndex}");
+
+        if (!string.IsNullOrEmpty(choiceLine.IsGoodChoice))
+        {
+            // puzzleStates 딕셔너리에 선택된 isGoodChoice 값 반영
+            int index = (int)GameManager.Instance.GetVariable("CurrentMemoryPuzzleCount");
+            // Dictionary<int, bool>로 캐스팅
+            var puzzleStates = GameManager.Instance.GetVariable("MemoryPuzzleStates") as Dictionary<int, bool>;
+
+            puzzleStates[index - 1] = choiceLine.IsGoodChoice == "true" ? true : false;
+        }
 
         // 선택지 UI 정리
         foreach (Transform child in choicesContainer[dialogueType.ToInt()])

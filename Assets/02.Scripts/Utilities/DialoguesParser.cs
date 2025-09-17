@@ -91,18 +91,19 @@ public class DialoguesParser
 
             string script = Escaper(fields[1].Trim());
             string next = fields[2].Trim();
-            
+            string isGoodChoice = fields[3].Trim();
+
             // TutorialIndex 파싱 (비어있으면 -1)
             int tutorialIndex = -1;
-            if (fields.Length > 3 && !string.IsNullOrWhiteSpace(fields[3]))
+            if (fields.Length > 3 && !string.IsNullOrWhiteSpace(fields[4]))
             {
-                if (int.TryParse(fields[3].Trim(), out int parsedIndex))
+                if (int.TryParse(fields[4].Trim(), out int parsedIndex))
                 {
                     tutorialIndex = parsedIndex;
                 }
                 else
                 {
-                    Debug.LogWarning($"[DialoguesParser] 잘못된 TutorialIndex 형식: {fields[3]} (Choice ID: {choiceID})");
+                    Debug.LogWarning($"[DialoguesParser] 잘못된 TutorialIndex 형식: {fields[4]} (Choice ID: {choiceID})");
                 }
             }
 
@@ -111,8 +112,8 @@ public class DialoguesParser
                 choices[choiceID] = new Choice(choiceID);
             }
 
-            choices[choiceID].AddLine(script, next, tutorialIndex);
-            //Debug.Log($"[DialoguesParser] Choice 로드: ID={choiceID}, Script={script}, Next={next}, TutorialIndex={tutorialIndex}");
+            choices[choiceID].AddLine(script, next, isGoodChoice, tutorialIndex);
+            //Debug.Log($"[DialoguesParser] Choice 로드: ID={choiceID}, Script={script}, Next={next}, IsGoodChoice={isGoodChoice},TutorialIndex={tutorialIndex}");
         }
 
         return choices;

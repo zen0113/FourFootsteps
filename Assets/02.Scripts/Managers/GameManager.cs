@@ -135,7 +135,7 @@ public class GameManager : MonoBehaviour
     {
         string[] variableLines = variablesCSV.text.Split('\n');
 
-        for(int i = 1; i<variableLines.Length; i++)
+        for (int i = 1; i < variableLines.Length; i++)
         {
             if (string.IsNullOrWhiteSpace(variableLines[i])) continue;
 
@@ -155,6 +155,13 @@ public class GameManager : MonoBehaviour
                     break;
                 case "string":
                     variables.Add(variableName, variableValue);
+                    break;
+                case "dict:int-bool":
+                    int count = int.Parse(variableValue);
+                    Dictionary<int, bool> dict = new Dictionary<int, bool>();
+                    for (int j = 0; j < count; j++)
+                        dict.Add(j, false); // 초기값 전부 false
+                    variables.Add(variableName, dict);
                     break;
                 default:
                     Debug.Log($"Unknown variable type : {variableType}");
@@ -259,12 +266,28 @@ public class GameManager : MonoBehaviour
             "CurrentSceneName",
             "NextSceneName",
             "CanMoving",
-            "CanInvesigatingRecallObject"
+            "CanInvesigatingRecallObject",
+            "CurrentMemoryPuzzleCount",
+            "MemoryPuzzleStates"
         });
 
         foreach (var item in variables)
         {
-            if (keysToShow.Contains(item.Key)) variablesText.text += $"{item.Key}: {item.Value}\n";
+            if (keysToShow.Contains(item.Key))
+            {
+                if(item.Key == "MemoryPuzzleStates")
+                {
+                    variablesText.text += $"{item.Key}\n";
+                    foreach(var dict in item.Value as Dictionary<int, bool>)
+                    {
+                        variablesText.text += $"{dict.Key}: {dict.Value}\n";
+                    }
+                }
+                else
+                {
+                    variablesText.text += $"{item.Key}: {item.Value}\n";
+                }
+            }
         }
     }
 

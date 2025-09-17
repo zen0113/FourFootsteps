@@ -13,9 +13,9 @@ EventFadeOut&NextPrologueStep,,,,C_isNotPrologueFinished,Result_DialogueFadeOut/
 EventNextPrologueStep,,,,C_isNotPrologueFinished,Result_NextPrologueStep,,
 ,,,,,,,
 EventStage1_Puddle,물웅덩이,물웅덩이 조사,,,Result_StartDialogueStage01_004,Instant,
-EventMemoryPuzzle1,기억 조각 1,소파 옆에 있는 기억 조각 조사,,,Result_StartDialogueStage01_006/Result_GetMemoryPuzzle/Result_GoToRecall1,Sequential,회상씬 1로 로딩
-EventMemoryPuzzle2,기억 조각 2,병원 앞에 있는 기억 조각 조사,,,Result_StartDialogueStage02_005/Result_GetMemoryPuzzle/Result_GoToRecall2,Sequential,회상씬 2로 로딩
-EventMemoryPuzzle3,기억 조각 3,정자에 있는 기억 조각 조사,,,Result_StartDialogueStage03_009/Result_GetMemoryPuzzle/Result_GoToRecall3,Sequential,회상씬 3로 로딩
+EventMemoryPuzzle1,기억 조각 1,소파 옆에 있는 기억 조각 조사,,,Result_InverseCanMoving/Result_StartDialogueStage01_006/Result_GetMemoryPuzzle/Result_GoToRecall1/Result_IncrementCurrentMemoryPuzzleCount,Sequential,회상씬 1로 로딩
+EventMemoryPuzzle2,기억 조각 2,병원 앞에 있는 기억 조각 조사,,,Result_InverseCanMoving/Result_StartDialogueStage02_005/Result_GetMemoryPuzzle/Result_GoToRecall2/Result_IncrementCurrentMemoryPuzzleCount,Sequential,회상씬 2로 로딩
+EventMemoryPuzzle3,기억 조각 3,정자에 있는 기억 조각 조사,,,Result_InverseCanMoving/Result_StartDialogueStage03_009/Result_GetMemoryPuzzle/Result_GoToRecall3/Result_IncrementCurrentMemoryPuzzleCount,Sequential,회상씬 3로 로딩
 ,,,,,,,
 EventStage2_Nurse,간호사 대화,간호사 대화,,,Result_StartDialogueStage02_004,Instant,
 ,,,,,,,

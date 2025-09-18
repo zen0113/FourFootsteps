@@ -21883,9 +21883,6 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   slopeCheckRadius: 0.3
-  slopeLayer:
-    serializedVersion: 2
-    m_Bits: 0
   slopeExitDelay: 0.15
   slopeRaycastDistance: 0.5
   raycastOffsets: []
@@ -22822,6 +22819,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerControllerType: 0
   updateAnimationType: 1
+  resetAnimatorParamsNow: 0
   stIdle: Base Layer.Cat_Idle
   stMove: Base Layer.Cat_Walk
   stDash: Base Layer.Cat_Dash
@@ -23175,6 +23173,8 @@ MonoBehaviour:
   showDebugBounds: 1
   useMinYLimit: 1
   minY: -5.5
+  useMaxYLimit: 1
+  maxY: 19
 --- !u!114 &1840444608
 MonoBehaviour:
   m_ObjectHideFlags: 0

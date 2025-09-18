@@ -794,7 +794,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1908852424819478755, guid: 983cb516190604e4abde0c1058639a55, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2845387746234147317, guid: 983cb516190604e4abde0c1058639a55, type: 3}
       propertyPath: m_IsActive
@@ -3440,6 +3440,8 @@ MonoBehaviour:
   showDebugBounds: 1
   useMinYLimit: 1
   minY: -5.5
+  useMaxYLimit: 1
+  maxY: 29
 --- !u!114 &206797096
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4000,6 +4002,10 @@ PrefabInstance:
     - target: {fileID: 5766711805815392164, guid: 436f0b291bf251d42ad5dfabcdcd5c40, type: 3}
       propertyPath: m_Name
       value: Pause UI Canvas
+      objectReference: {fileID: 0}
+    - target: {fileID: 5766711805815392164, guid: 436f0b291bf251d42ad5dfabcdcd5c40, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6337335595680719523, guid: 436f0b291bf251d42ad5dfabcdcd5c40, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
@@ -8057,9 +8063,6 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   slopeCheckRadius: 0.3
-  slopeLayer:
-    serializedVersion: 2
-    m_Bits: 0
   slopeExitDelay: 0.15
   slopeRaycastDistance: 0.5
   raycastOffsets: []
@@ -11170,7 +11173,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5543039565309483218, guid: 66542d5616022d34f9417133611193b8, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -12432,7 +12435,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5723956519785947959, guid: 3748e216849363f48bf06a48de54cf2d, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -14405,7 +14408,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7285980681169623252, guid: b2a7b04b0ea72be40a356d8756e18ce2, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8696544448854625571, guid: b2a7b04b0ea72be40a356d8756e18ce2, type: 3}
       propertyPath: m_Enabled
@@ -19646,7 +19649,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2176935556791448408, guid: fcc937e4cda6d8c4d8de70f5c23e9268, type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4135296550664430820, guid: fcc937e4cda6d8c4d8de70f5c23e9268, type: 3}
       propertyPath: m_Name
@@ -19654,7 +19657,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4135296550664430820, guid: fcc937e4cda6d8c4d8de70f5c23e9268, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5637214151229976665, guid: fcc937e4cda6d8c4d8de70f5c23e9268, type: 3}
       propertyPath: m_AnchorMax.y
@@ -22270,7 +22273,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1611150428
 MonoBehaviour:
   m_ObjectHideFlags: 0

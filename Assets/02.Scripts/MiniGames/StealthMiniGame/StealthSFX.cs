@@ -88,6 +88,8 @@ public class StealthSFX : MonoBehaviour
         if (sfxCo != null) StopCoroutine(sfxCo);
         sfxCo = StartCoroutine(FadeSFXCoroutine(0f, 0.8f, 1f, 0f));
 
+        SoundPlayer.Instance.FadeBGMVolume(6, 0f, 1f);
+
         // 카메라 줌 (기존 코루틴 정리 후 시작)
         if (camCo != null) StopCoroutine(camCo);
         camCo = StartCoroutine(ChangeCameraSize(settings.enterHideSize));
@@ -113,6 +115,8 @@ public class StealthSFX : MonoBehaviour
         if (sfxCo != null) StopCoroutine(sfxCo);
         sfxCo = StartCoroutine(FadeSFXCoroutine(0.8f, 0f, 1f, 0f));
 
+        SoundPlayer.Instance.FadeBGMVolume(6, 0.3f, 1f);
+
         // 카메라 줌 (기존 코루틴 정리 후 시작)
         if (camCo != null) StopCoroutine(camCo);
         camCo = StartCoroutine(ChangeCameraSize(settings.exitHideSize));
@@ -125,6 +129,7 @@ public class StealthSFX : MonoBehaviour
     public void CaughtByKidFX()
     {
         StartCoroutine(FadeSFXCoroutine(0.8f, 0f, 1f, 0f));
+        SoundPlayer.Instance.StopAllBGM();
         //StartCoroutine(ChangeCameraSize(settings.exitHideSize));
         UIManager.Instance.SetBlinkHidingCoroutine(false);
         StartCoroutine(UIManager.Instance.HidingCoroutine(false));
@@ -218,6 +223,8 @@ public class StealthSFX : MonoBehaviour
         if (sfxCo != null) StopCoroutine(sfxCo);
         sfxCo = StartCoroutine(FadeSFXCoroutine(0f, targetVolume, fadeDur, delay));
 
+        //SoundPlayer.Instance.FadeBGMVolume(6, 0, fadeDur);
+
         if (camCo != null) StopCoroutine(camCo);
         camCo = StartCoroutine(ChangeCameraSize(camSize));
 
@@ -233,6 +240,8 @@ public class StealthSFX : MonoBehaviour
     {
         if (sfxCo != null) StopCoroutine(sfxCo);
         sfxCo = StartCoroutine(FadeSFXCoroutine(0.8f, 0f, 1f, 0f));
+
+        SoundPlayer.Instance.StopAllBGM();
 
         if (uiCo != null) StopCoroutine(uiCo);
         UIManager.Instance.SetBlinkHidingCoroutine(false);

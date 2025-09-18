@@ -23,6 +23,10 @@ public class ChaserThrower : MonoBehaviour
     [SerializeField] private float maxInitSpeed = 18f; // 너무 급한 투척 제한
     [SerializeField] private LayerMask groundMask;     // 사전 충돌 레이캐스트(선택)
 
+    [Header("Sound")]
+    [SerializeField] private AudioSource audioSource;
+    [SerializeField] private AudioClip ThrowSound;
+
     private bool running;
 
     private void Awake()
@@ -131,6 +135,16 @@ public class ChaserThrower : MonoBehaviour
 
         var obj = pool.Get();
         obj.Launch(start, vel);
+
+        PlayHurtSound();
+    }
+
+    private void PlayHurtSound()
+    {
+        if (ThrowSound != null)
+        {
+            audioSource.PlayOneShot(ThrowSound);
+        }
     }
 
     private Vector2 SolveBallisticVelocity(Vector2 start, Vector2 target, float time, float g)

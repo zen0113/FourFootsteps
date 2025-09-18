@@ -9,6 +9,7 @@ public class ChaserFollower : MonoBehaviour
     [SerializeField] private PlayerAutoRunner playerRunner;
     [SerializeField] private Camera cam;
     [SerializeField] private AnimationCurve difficultyOverX; // x→0~1
+    [SerializeField] private ObjectSfxController sfxController;
 
     public bool isStartChasing = false;
 
@@ -141,7 +142,8 @@ public class ChaserFollower : MonoBehaviour
 
     IEnumerator StartToChase()
     {
-        if(this.name== "chasingKids")
+        sfxController.StartPlayLoopByDefault();
+        if (this.name== "chasingKids")
         {
             yield return new WaitForSeconds(3f);
         }
@@ -306,6 +308,7 @@ public class ChaserFollower : MonoBehaviour
     private void ChaseGame_GameOver()
     {
         Debug.Log("추격 게임 : 추격자한테 잡힘[게임오버]");
+        sfxController.StopLoop(1f);
         StealthSFX.Instance.StopEnterSFX();
         CatStealthController.Instance.Chase_GameOver();
         EventManager.Instance.CallEvent(gameOverEventID);
@@ -343,6 +346,7 @@ public class ChaserFollower : MonoBehaviour
             this.enabled = false;
         }
         OnCatchMode?.Invoke();
+        sfxController.StopLoop(1f);
     }
 
     private void OnDrawGizmosSelected()

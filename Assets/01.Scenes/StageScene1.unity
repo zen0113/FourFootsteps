@@ -2146,8 +2146,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   sceneOrder: []
-  variablesText: {fileID: 0}
-  isDebug: 0
+  variablesText: {fileID: 950255468}
+  isDebug: 1
 --- !u!4 &133425631
 Transform:
   m_ObjectHideFlags: 0
@@ -3810,11 +3810,9 @@ GameObject:
   m_Component:
   - component: {fileID: 217499487}
   - component: {fileID: 217499490}
-  - component: {fileID: 217499489}
-  - component: {fileID: 217499488}
   m_Layer: 0
   m_Name: Object_puzzle1
-  m_TagString: Untagged
+  m_TagString: PuzzlePiece
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -3834,67 +3832,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 719081165}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!61 &217499488
-BoxCollider2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 217499486}
-  m_Enabled: 1
-  m_Density: 1
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_ForceSendLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ForceReceiveLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ContactCaptureLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_CallbackLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_IsTrigger: 1
-  m_UsedByEffector: 0
-  m_UsedByComposite: 0
-  m_Offset: {x: 0, y: 0}
-  m_SpriteTilingProperty:
-    border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 9.02, y: 9.01}
-    newSize: {x: 1, y: 1}
-    adaptiveTilingThreshold: 0.5
-    drawMode: 0
-    adaptiveTiling: 0
-  m_AutoTiling: 0
-  serializedVersion: 2
-  m_Size: {x: 29.05, y: 15}
-  m_EdgeRadius: 0
---- !u!114 &217499489
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 217499486}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 91bd2daab0fd8904b8fac09c427ec9fc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  eventId: EventMemoryPuzzle1
-  spriteGlowEffect: {fileID: 0}
-  isOneTimeOnly: 0
-  keyImage: {fileID: 0}
 --- !u!212 &217499490
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -11577,7 +11514,7 @@ GameObject:
   m_Component:
   - component: {fileID: 774612307}
   - component: {fileID: 774612311}
-  - component: {fileID: 774612310}
+  - component: {fileID: 774612312}
   - component: {fileID: 774612309}
   - component: {fileID: 774612308}
   m_Layer: 0
@@ -11665,22 +11602,6 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 11.009926, y: 5.060315}
   m_EdgeRadius: 0
---- !u!114 &774612310
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 774612306}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 91bd2daab0fd8904b8fac09c427ec9fc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  eventId: EventMemoryPuzzle1
-  spriteGlowEffect: {fileID: 0}
-  isOneTimeOnly: 0
-  keyImage: {fileID: 0}
 --- !u!212 &774612311
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -11733,6 +11654,50 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!114 &774612312
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 774612306}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2265d19c9256eea45ab4294117358fb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  eventId: EventMemoryPuzzle1
+  spriteGlowEffect: {fileID: 0}
+  isOneTimeOnly: 0
+  keyImage: {fileID: 0}
+  puzzleId: 1
+  puzzleObject: {fileID: 0}
+  puzzleBagButton: {fileID: 0}
+  durationTime: 2
+  animationCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
 --- !u!1 &777290285
 GameObject:
   m_ObjectHideFlags: 0
@@ -14295,6 +14260,17 @@ Transform:
   - {fileID: 906320894}
   m_Father: {fileID: 1335048225}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &950255468 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 4098248339931582100, guid: 66542d5616022d34f9417133611193b8, type: 3}
+  m_PrefabInstance: {fileID: 743705977}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &963259999
 PrefabInstance:
   m_ObjectHideFlags: 0

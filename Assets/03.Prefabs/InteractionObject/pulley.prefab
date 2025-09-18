@@ -1713,6 +1713,7 @@ GameObject:
   - component: {fileID: 5927016950747350839}
   - component: {fileID: 8533263795431547296}
   - component: {fileID: 2343962429499915313}
+  - component: {fileID: 12594712490963942}
   m_Layer: 11
   m_Name: PlatformB
   m_TagString: wall
@@ -1878,6 +1879,25 @@ MonoBehaviour:
   currentHeight: 0
   targetHeight: 0
   isMoving: 0
+--- !u!251 &12594712490963942
+PlatformEffector2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7438068007100546377}
+  m_Enabled: 1
+  m_UseColliderMask: 1
+  m_ColliderMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_RotationalOffset: 0
+  m_UseOneWay: 1
+  m_UseOneWayGrouping: 0
+  m_SurfaceArc: 180
+  m_UseSideFriction: 0
+  m_UseSideBounce: 0
+  m_SideArc: 1
 --- !u!1 &7571502702814519762
 GameObject:
   m_ObjectHideFlags: 0
@@ -1890,6 +1910,7 @@ GameObject:
   - component: {fileID: 830527787822573004}
   - component: {fileID: 2709133985239203399}
   - component: {fileID: 4116910610706291086}
+  - component: {fileID: 6993895722513812626}
   m_Layer: 11
   m_Name: PlatformA
   m_TagString: wall
@@ -2055,6 +2076,25 @@ MonoBehaviour:
   currentHeight: 0
   targetHeight: 0
   isMoving: 0
+--- !u!251 &6993895722513812626
+PlatformEffector2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7571502702814519762}
+  m_Enabled: 1
+  m_UseColliderMask: 1
+  m_ColliderMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_RotationalOffset: 0
+  m_UseOneWay: 1
+  m_UseOneWayGrouping: 0
+  m_SurfaceArc: 180
+  m_UseSideFriction: 0
+  m_UseSideBounce: 0
+  m_SideArc: 1
 --- !u!1 &7842896980140841709
 GameObject:
   m_ObjectHideFlags: 0

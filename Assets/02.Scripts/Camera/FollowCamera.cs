@@ -16,6 +16,8 @@ public class FollowCamera : MonoBehaviour
     [Header("Y축 제한")]
     public bool useMinYLimit = true;      // 최소 Y 제한 사용
     public float minY = 0f;               // 카메라가 내려갈 수 있는 최소 Y 위치
+    public bool useMaxYLimit = false;     // 최대 Y 제한 사용
+    public float maxY = 20f;              // 카메라가 올라갈 수 있는 최대 Y 위치
 
     private Camera cam;
     private LayerMask boundaryLayer;      // CameraLimit 레이어 마스크
@@ -54,7 +56,6 @@ public class FollowCamera : MonoBehaviour
         }
     }
 
-
     private void LateUpdate()
     {
         if (target == null) return;
@@ -78,6 +79,13 @@ public class FollowCamera : MonoBehaviour
         {
             float minCameraY = minY + cameraHalfHeight; // 카메라 하단이 minY보다 아래로 가지 못하게
             desiredPosition.y = Mathf.Max(desiredPosition.y, minCameraY);
+        }
+
+        // Y축 최대값 제한 적용
+        if (useMaxYLimit)
+        {
+            float maxCameraY = maxY - cameraHalfHeight; // 카메라 상단이 maxY보다 위로 가지 못하게
+            desiredPosition.y = Mathf.Min(desiredPosition.y, maxCameraY);
         }
 
         // 경계 제한 적용 - 각 축을 개별적으로 처리
@@ -144,6 +152,13 @@ public class FollowCamera : MonoBehaviour
         {
             Gizmos.color = Color.red;
             Gizmos.DrawLine(new Vector3(-50, minY, 0), new Vector3(50, minY, 0));
+        }
+
+        // Max Y 경계선 표시
+        if (useMaxYLimit)
+        {
+            Gizmos.color = Color.blue;
+            Gizmos.DrawLine(new Vector3(-50, maxY, 0), new Vector3(50, maxY, 0));
         }
 
         // 카메라 모서리 점들 표시

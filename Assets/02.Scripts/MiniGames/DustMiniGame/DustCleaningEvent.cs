@@ -34,6 +34,7 @@ public class DustCleaningEvent : EventObject
 
     private Coroutine _cursorAnimationCoroutine;
     private bool _isMinigameFinished = false;
+    private PlayerHumanMovement _playerMovement;
 
     private void Awake()
     {
@@ -93,6 +94,7 @@ public class DustCleaningEvent : EventObject
         SetupMinigame();
         yield return new WaitUntil(() => _activeDustObjects.Count == 0);
 
+        _playerMovement?.BlockMiniGameInput(false);
         _isMinigameRunning = false; // 커서 제어 로직 비활성화
         if (_cursorAnimationCoroutine != null)
         {
@@ -113,6 +115,7 @@ public class DustCleaningEvent : EventObject
 
     private void SetupMinigame()
     {
+        _playerMovement?.BlockMiniGameInput(true);
         _isMinigameRunning = true;
 
         cleaningCanvas.SetActive(true);
@@ -175,6 +178,7 @@ public class DustCleaningEvent : EventObject
         if (other.CompareTag("Player"))
         {
             _isPlayerInRange = true;
+            _playerMovement = other.GetComponent<PlayerHumanMovement>();
         }
     }
 
@@ -183,6 +187,7 @@ public class DustCleaningEvent : EventObject
         if (other.CompareTag("Player"))
         {
             _isPlayerInRange = false;
+            _playerMovement = null;
         }
     }
 }

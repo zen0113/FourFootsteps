@@ -305,7 +305,6 @@ public class PlayerCatMovement : MonoBehaviour
             animator.SetBool("Moving", false);
             animator.SetBool("Dash", false);
             animator.SetBool("Climbing", false);
-            //animator.SetBool("Jump", false);
 
             // 입력 차단 중에도, 강제/수동 웅크림이면 상태를 유지
             if (isCrouching || forceCrouch)
@@ -338,7 +337,6 @@ public class PlayerCatMovement : MonoBehaviour
             animator.SetBool("Dash", false);
             animator.SetBool("Crouching", false);
             animator.SetBool("Crouch", false);
-            animator.SetBool("Jump", false);
 
             animator.SetBool("Climbing", true);
 
@@ -358,7 +356,6 @@ public class PlayerCatMovement : MonoBehaviour
         animator.SetBool("Dash", false);
         animator.SetBool("Crouch", false);
         animator.SetBool("Crouching", false);
-        //animator.SetBool("Jump", false);
 
         // 실제 키 입력이 있는지 확인 (물리적 속도가 아닌 입력 기준으로 판단)
         bool hasHorizontalInput = Mathf.Abs(horizontalInput) > 0.01f;
@@ -391,8 +388,7 @@ public class PlayerCatMovement : MonoBehaviour
         }
         else if (isJumping)
         {
-            // 점프 애니메이션 (필요시 추가)
-            //animator.SetBool("Jump", true);
+
         }
         else if (hasHorizontalInput)
         {
@@ -1017,8 +1013,6 @@ public class PlayerCatMovement : MonoBehaviour
         rb.velocity = Vector2.zero; // 속도 초기화
         jumpCount = 0;
 
-        animator.SetBool("Jump", false);
-
         // 사다리 중앙으로 위치 조정하고 약간 아래로
         Vector3 pos = transform.position;
         pos.x = currentLadder.bounds.center.x;
@@ -1041,8 +1035,6 @@ public class PlayerCatMovement : MonoBehaviour
         rb.gravityScale = 0f;       // 중력 제거
         rb.velocity = Vector2.zero; // 속도 초기화
         jumpCount = 0;
-
-        animator.SetBool("Jump", false);
 
         // 사다리 중앙으로 자동 정렬 (일정 거리 내에서만)
         Vector3 pos = transform.position;
@@ -1075,8 +1067,6 @@ public class PlayerCatMovement : MonoBehaviour
             float hForce = spriteRenderer.flipX ? -1f : 1f;
             rb.velocity = new Vector2(hForce * movePower * 0.8f, jumpPower * 0.9f);
             jumpCount = 1;
-
-            animator.SetBool("Jump", true);
         }
         else
         {

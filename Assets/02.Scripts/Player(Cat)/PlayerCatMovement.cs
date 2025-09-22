@@ -260,7 +260,6 @@ public class PlayerCatMovement : MonoBehaviour
         if (justLanded)
         {
             lastLandingTime = Time.time;
-            animator.SetBool("Jump", false);
         }
 
         // 지상에 있고 떨어지는 중이면 점프 카운트 리셋
@@ -896,7 +895,10 @@ public class PlayerCatMovement : MonoBehaviour
     /// </summary>
     void Jump()
     {
-        if (justLanded) return; // 착지한 프레임에는 점프 입력을 무시
+        if (Time.time - lastLandingTime < 0.1f)
+        {
+            return;
+        }
 
         if (IsInputBlocked()) return;
         // isOnSlope 조건 추가하여 경사면에서는 점프 못하게 변경
@@ -912,10 +914,7 @@ public class PlayerCatMovement : MonoBehaviour
                 jumpCount++;
                 isOnGround = false;
 
-                if (jumpCount == 1)
-                {
-                    animator.SetBool("Jump", true);
-                }
+                animator.SetTrigger("Jump");
 
                 // 점프 시 파티클 효과
                 if (dashParticle != null)

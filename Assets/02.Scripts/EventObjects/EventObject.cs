@@ -99,7 +99,7 @@ public class EventObject : MonoBehaviour
     }
 
     // 회상 씬에서 조사 가능한지 확인하는 메서드
-    private bool CanInteractInRecallScene()
+    protected virtual bool CanInteractInRecallScene()
     {
         // RecallManager가 없으면 일반 씬이므로 조사 가능
         if (RecallManager.Instance == null)

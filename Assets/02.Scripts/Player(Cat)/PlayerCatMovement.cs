@@ -74,6 +74,7 @@ public class PlayerCatMovement : MonoBehaviour
     [SerializeField] private float groundCheckRadius = 0.2f; // 지상 체크 반경
     [SerializeField] private LayerMask groundMask;          // 지상으로 인식할 레이어
     private bool isOnGround;                                // 현재 지상에 있는지 여부
+    private bool justLanded = false;
     private Vector3 originalGroundCheckLocalPosition;
 
     // 경사면 시스템
@@ -255,7 +256,7 @@ public class PlayerCatMovement : MonoBehaviour
         }
 
         // 방금 착지했는지 확인 (착지 사운드 처리용)
-        bool justLanded = isOnGround && !prevOnGround;
+        justLanded = isOnGround && !prevOnGround;
         if (justLanded)
         {
             lastLandingTime = Time.time;
@@ -895,6 +896,8 @@ public class PlayerCatMovement : MonoBehaviour
     /// </summary>
     void Jump()
     {
+        if (justLanded) return; // 착지한 프레임에는 점프 입력을 무시
+
         if (IsInputBlocked()) return;
         // isOnSlope 조건 추가하여 경사면에서는 점프 못하게 변경
         if (isJumpingBlocked || isOnSlope) return;
@@ -1015,6 +1018,8 @@ public class PlayerCatMovement : MonoBehaviour
         rb.velocity = Vector2.zero; // 속도 초기화
         jumpCount = 0;
 
+        animator.SetBool("Jump", false);
+
         // 사다리 중앙으로 위치 조정하고 약간 아래로
         Vector3 pos = transform.position;
         pos.x = currentLadder.bounds.center.x;
@@ -1037,6 +1042,8 @@ public class PlayerCatMovement : MonoBehaviour
         rb.gravityScale = 0f;       // 중력 제거
         rb.velocity = Vector2.zero; // 속도 초기화
         jumpCount = 0;
+
+        animator.SetBool("Jump", false);
 
         // 사다리 중앙으로 자동 정렬 (일정 거리 내에서만)
         Vector3 pos = transform.position;
@@ -1141,13 +1148,8 @@ public class PlayerCatMovement : MonoBehaviour
         {
             foreach (ContactPoint2D contact in collision.contacts)
             {
-                // 위쪽에서 충돌하거나 옆에서 충돌하면 점프 카운트 리셋
+                // contact.normal.y > 0.5f는 캐릭터 아래에 바닥이 있다는 뜻
                 if (contact.normal.y > 0.5f)
-                {
-                    jumpCount = 0;
-                    break;
-                }
-                else if (Mathf.Abs(contact.normal.x) > 0.5f)
                 {
                     jumpCount = 0;
                     break;

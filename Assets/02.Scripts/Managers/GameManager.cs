@@ -30,6 +30,10 @@ public class GameManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI variablesText;
     public bool isDebug = false;
 
+    // --- 청소 카운터 관련 ---
+    // variables.csv 파일에 CleanedObjectCount를 추가했기 때문에
+    // 별도의 변수나 함수를 추가할 필요 없이, 기존 기능으로 모두 제어 가능합니다.
+
     private void Awake()
     {
         if (Instance == null)
@@ -87,19 +91,6 @@ public class GameManager : MonoBehaviour
     // 씬 상태 업데이트
     public void UpdateSceneProgress(string loadedSceneName)
     {
-        //string currentSceneName = loadedSceneName;
-        //SetVariable("CurrentSceneName", currentSceneName);
-        //int index = sceneOrder.FindIndex(s => s.sceneName == loadedSceneName);
-        //if (index >= 0 && index + 1 < sceneOrder.Count)
-        //{
-        //    string nextSceneName = sceneOrder[index + 1].sceneName;
-        //    SetVariable("NextSceneName", nextSceneName);
-        //}
-        //else
-        //{
-        //    SetVariable("NextSceneName", null); // 마지막 씬일 경우
-        //}
-
         var currentScene = sceneOrder.FirstOrDefault(s => s.sceneName == loadedSceneName);
         if (currentScene != null)
         {
@@ -114,7 +105,8 @@ public class GameManager : MonoBehaviour
             if (currentScene.isRecall)
             {
                 SetVariable("isRecalling", true);
-            }else
+            }
+            else
                 SetVariable("isRecalling", false);
         }
     }
@@ -268,17 +260,18 @@ public class GameManager : MonoBehaviour
             "CanMoving",
             "CanInvesigatingRecallObject",
             "CurrentMemoryPuzzleCount",
-            "MemoryPuzzleStates"
+            "MemoryPuzzleStates",
+            "CleanedObjectCount" // 디버깅을 위해 추가
         });
 
         foreach (var item in variables)
         {
             if (keysToShow.Contains(item.Key))
             {
-                if(item.Key == "MemoryPuzzleStates")
+                if (item.Key == "MemoryPuzzleStates")
                 {
                     variablesText.text += $"{item.Key}\n";
-                    foreach(var dict in item.Value as Dictionary<int, bool>)
+                    foreach (var dict in item.Value as Dictionary<int, bool>)
                     {
                         variablesText.text += $"{dict.Key}: {dict.Value}\n";
                     }
@@ -290,5 +283,4 @@ public class GameManager : MonoBehaviour
             }
         }
     }
-
 }

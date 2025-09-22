@@ -785,9 +785,9 @@ GameObject:
   - component: {fileID: 640231364}
   - component: {fileID: 640231363}
   - component: {fileID: 640231366}
-  m_Layer: 6
+  m_Layer: 11
   m_Name: tunnel
-  m_TagString: Ground
+  m_TagString: wall
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -2017,7 +2017,7 @@ MonoBehaviour:
   groundMask:
     serializedVersion: 2
     m_Bits: 64
-  slopeCheckRadius: 0.7
+  slopeCheckRadius: 0.3
   slopeExitDelay: 0.15
   slopeRaycastDistance: 0.5
   raycastOffsets:
@@ -2028,7 +2028,7 @@ MonoBehaviour:
   tailCheck: {fileID: 1353058283}
   headCheckLength: 1.5
   tailCheckLength: 1.5
-  crouchSprite: {fileID: 21300000, guid: f98b6b477705fc248a741e587b532201, type: 3}
+  crouchSprite: {fileID: 0}
   obstacleMask:
     serializedVersion: 2
     m_Bits: 64
@@ -8718,6 +8718,8 @@ MonoBehaviour:
   showDebugBounds: 1
   useMinYLimit: 0
   minY: 0
+  useMaxYLimit: 0
+  maxY: 20
 --- !u!1 &1754609818
 GameObject:
   m_ObjectHideFlags: 0

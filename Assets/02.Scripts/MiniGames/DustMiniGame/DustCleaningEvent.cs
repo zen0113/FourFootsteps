@@ -82,9 +82,21 @@ public class DustCleaningEvent : EventObject
         }
     }
 
+    protected override bool CanInteractInRecallScene()
+    {
+        // 이미 청소가 끝났다면 더 이상 조사할 수 없음
+        if (_isMinigameFinished)
+        {
+            return false;
+        }
+        // GameManager의 CanStartCleaningMinigame 변수 값을 반환
+        return (bool)GameManager.Instance.GetVariable("CanStartCleaningMinigame");
+    }
+
     private IEnumerator EventFlow()
     {
         _isEventActive = true;
+
 
         // --- 시작 대화 구간 (기본 커서) ---
         EventManager.Instance.CallEvent(startDialogueId);
@@ -109,8 +121,15 @@ public class DustCleaningEvent : EventObject
 
         // --- 최종 정리 ---
         cleaningCanvas.SetActive(false);
-        _isMinigameFinished = true;
-        _isEventActive = false; // 모든 이벤트가 끝났으므로 false로 변경
+
+        if (!_isMinigameFinished)
+        {
+            _isMinigameFinished = true;
+            // 기존의 IncrementCleanedObjectCount() 대신 IncrementVariable() 사용
+            GameManager.Instance.IncrementVariable("CleanedObjectCount");
+        }
+
+        _isEventActive = false;
     }
 
     private void SetupMinigame()

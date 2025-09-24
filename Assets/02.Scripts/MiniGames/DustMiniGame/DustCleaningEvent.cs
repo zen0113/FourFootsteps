@@ -82,16 +82,16 @@ public class DustCleaningEvent : EventObject
         }
     }
 
-    protected override bool CanInteractInRecallScene()
-    {
-        // 이미 청소가 끝났다면 더 이상 조사할 수 없음
-        if (_isMinigameFinished)
-        {
-            return false;
-        }
-        // GameManager의 CanStartCleaningMinigame 변수 값을 반환
-        return (bool)GameManager.Instance.GetVariable("CanStartCleaningMinigame");
-    }
+    //protected override bool CanInteractInRecallScene()
+    //{
+    //    // 이미 청소가 끝났다면 더 이상 조사할 수 없음
+    //    if (_isMinigameFinished)
+    //    {
+    //        return false;
+    //    }
+    //    // GameManager의 CanStartCleaningMinigame 변수 값을 반환
+    //    return (bool)GameManager.Instance.GetVariable("CanStartCleaningMinigame");
+    //}
 
     private IEnumerator EventFlow()
     {

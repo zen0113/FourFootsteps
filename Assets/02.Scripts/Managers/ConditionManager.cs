@@ -17,6 +17,8 @@ public class ConditionManager : MonoBehaviour
             conditionsCSV = Resources.Load<TextAsset>("Datas/conditions");
             Instance = this;
             DontDestroyOnLoad(gameObject);
+
+            ParseConditions();
         }
         else
         {
@@ -49,8 +51,14 @@ public class ConditionManager : MonoBehaviour
     // Condition ID를 받아서 개별 조건의 true/false 판단
     public bool IsCondition(string conditionID)
     {
-        string variableName = conditions[conditionID].VariableName;
-        string logic = conditions[conditionID].Logic;
+        if (!conditions.TryGetValue(conditionID, out Condition condition))
+        {
+            Debug.LogWarning($"ConditionManager: '{conditionID}'에 해당하는 조건을 찾을 수 없습니다!");
+            return false;
+        }
+
+        string variableName = condition.VariableName;
+        string logic = condition.Logic;
         string value = conditions[conditionID].Value;
 
         object variableValue = GameManager.Instance.GetVariable(variableName);
@@ -71,7 +79,7 @@ public class ConditionManager : MonoBehaviour
         }
         else if (variableValue is bool boolVal)
         {
-            bool targetValue = bool.Parse(value);
+            bool targetValue = value.Equals("true", System.StringComparison.OrdinalIgnoreCase);
             return logic switch
             {
                 "==" => boolVal == targetValue,

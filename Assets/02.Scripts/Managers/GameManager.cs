@@ -259,9 +259,10 @@ public class GameManager : MonoBehaviour
             "NextSceneName",
             "CanMoving",
             "CanInvesigatingRecallObject",
+            "CanStartCleaningMinigame",
             "CurrentMemoryPuzzleCount",
             "MemoryPuzzleStates",
-            "CleanedObjectCount" // 디버깅을 위해 추가
+            "CleanedObjectCount"
         });
 
         foreach (var item in variables)

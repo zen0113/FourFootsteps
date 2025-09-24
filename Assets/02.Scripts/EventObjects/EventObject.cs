@@ -13,6 +13,9 @@ public class EventObject : MonoBehaviour
     [SerializeField]
     private GameObject keyImage; // 키 이미지 오브젝트 (E키 UI 등)
     private bool hasBeenInvestigated = false; // 이미 조사했는지 상태 저장
+    [Header("Interaction Condition")]
+    [SerializeField]
+    private string requiredCondition;
 
     // 플레이어가 오브젝트 범위 내에 있는지 확인하는 변수
     protected bool _isPlayerInRange = false;
@@ -101,11 +104,21 @@ public class EventObject : MonoBehaviour
     // 회상 씬에서 조사 가능한지 확인하는 메서드
     protected virtual bool CanInteractInRecallScene()
     {
-        // RecallManager가 없으면 일반 씬이므로 조사 가능
+        // RecallManager가 없다면 일반 씬이므로, 항상 상호작용 가능합니다.
         if (RecallManager.Instance == null)
+        {
             return true;
-        // RecallManager가 있으면 회상 씬이므로 CanInvesigatingRecallObject 변수 확인
-        return (bool)GameManager.Instance.GetVariable("CanInvesigatingRecallObject");
+        }
+
+        // 'Required Condition' 필드가 비어있다면, 지정된 조건이 없으므로 상호작용이 "불가능"합니다.
+        if (string.IsNullOrEmpty(requiredCondition))
+        {
+            return false;
+        }
+
+        // 'Required Condition'이 지정되어 있다면, GameManager의 변수 값을 확인하여
+        // 실제 조건이 충족되었는지 판단합니다.
+        return ConditionManager.Instance.IsCondition(requiredCondition);
     }
 
     // 플레이어가 트리거에 들어왔을 때

@@ -8,6 +8,23 @@ public class ButtonAnimator : MonoBehaviour
 {
     [Header("Hover Effect")]
     [SerializeField] private bool enableHoverEffect = true;
+    public bool EnableHoverEffect
+    {
+        get => enableHoverEffect;
+        set
+        {
+            if (enableHoverEffect == value) return;
+            enableHoverEffect = value;
+
+            if (enableHoverEffect)
+                AddHoverEvents();
+            else
+                RemoveHoverEvents();
+        }
+    }
+
+    private EventTrigger trigger;
+
     [SerializeField] private float hoverScaleAmount = 1.05f;
 
     private RectTransform rectTransform;
@@ -30,21 +47,31 @@ public class ButtonAnimator : MonoBehaviour
 
         // Add hover detection if needed
         if (enableHoverEffect)
-        {
-            Button button = GetComponent<Button>();
-            if (button != null)
-            {
-#if UNITY_EDITOR || UNITY_STANDALONE
-                EventTrigger trigger = GetComponent<EventTrigger>();
-                if (trigger == null)
-                    trigger = gameObject.AddComponent<EventTrigger>();
+            AddHoverEvents();
+    }
 
-                // Add pointer enter and exit events
-                AddEventTriggerListener(trigger, EventTriggerType.PointerEnter, OnPointerEnter);
-                AddEventTriggerListener(trigger, EventTriggerType.PointerExit, OnPointerExit);
+    private void AddHoverEvents()
+    {
+        Button button = GetComponent<Button>();
+        if (button == null) return;
+
+#if UNITY_EDITOR || UNITY_STANDALONE
+        if (trigger == null)
+            trigger = gameObject.AddComponent<EventTrigger>();
+
+        AddEventTriggerListener(trigger, EventTriggerType.PointerEnter, OnPointerEnter);
+        AddEventTriggerListener(trigger, EventTriggerType.PointerExit, OnPointerExit);
 #endif
-            }
+    }
+
+    private void RemoveHoverEvents()
+    {
+#if UNITY_EDITOR || UNITY_STANDALONE
+        if (trigger != null)
+        {
+            trigger.triggers.Clear(); // 이벤트 전부 제거
         }
+#endif
     }
 
     private void OnDisable()

@@ -130,6 +130,13 @@ public class PlayerCatMovement : MonoBehaviour
     // 입력 차단 시스템 (미니게임, 대화 등에서 사용)
     private bool isMiniGameInputBlocked = false;
 
+    // 웅크림 해제 그레이스(스티키) 설정
+    [SerializeField] private float crouchReleaseGrace = 0.12f; // 2~3프레임 정도(60fps 기준)
+    private float crouchStickyUntil = -1f;
+
+    // 스티키 활성 여부 보조
+    private bool IsCrouchStickyActive => Time.time < crouchStickyUntil;
+
     /// <summary>
     /// 게임 시작 시 초기화 작업
     /// UI 설정, 컴포넌트 참조, 물리 설정 등을 수행
@@ -664,11 +671,38 @@ public class PlayerCatMovement : MonoBehaviour
             }
             else
             {
-                // 강제 웅크리기 해제: 원래 콜라이더 크기로 복원
-                isCrouching = false;
+                // 해제 직후 기본은 스티키 걸어서 튐 방지
+                crouchStickyUntil = Time.time + crouchReleaseGrace;
+
+                // 첫 프레임엔 웅크림 유지(한 프레임 튐 방지용)
+                isCrouching = true;
                 isCrouchMoving = false;
-                boxCollider.size = originalColliderSize;
-                boxCollider.offset = originalColliderOffset;
+                boxCollider.size = crouchColliderSize;
+                boxCollider.offset = crouchColliderOffset;
+
+                // 해제 프레임 즉시 머리 위 장애물 체크
+                bool obstacleAboveNow = IsObstacleDirectlyAbove();
+
+                if (!obstacleAboveNow)
+                {
+                    // 장애물 없음: 스티키 건너뛰고 즉시 해제(자연스럽게 일어서기)
+                    crouchStickyUntil = -1f; // 스티키 무효화
+                    isCrouching = false;
+                    boxCollider.size = originalColliderSize;
+                    boxCollider.offset = originalColliderOffset;
+
+                    // 즉시 애니메이터도 맞춰주고 싶다면(선택):
+                    animator.SetBool("Crouching", false);
+                    animator.SetBool("Crouch", false);
+                }
+                else
+                {
+                    // 장애물 있음: 스티키 유지(계속 엎드림)
+                    // 필요하면 스티키를 약간 더 길게
+                    crouchStickyUntil = Time.time + Mathf.Max(crouchReleaseGrace, 0.15f);
+                    animator.SetBool("Crouching", false);
+                    animator.SetBool("Crouch", true);
+                }
             }
         }
     }
@@ -765,6 +799,10 @@ public class PlayerCatMovement : MonoBehaviour
     {
         bool obstacleAbove = IsObstacleDirectlyAbove();
         bool playerHoldsCrouchKey = Input.GetKey(KeyCode.S);
+
+        // 스티키가 활성화되어 있으면 머리 장애물 여부와 무관하게 '계속 웅크림'
+        if (IsCrouchStickyActive)
+            obstacleAbove = true;
 
         // 웅크려야 하는 모든 조건
         bool shouldBeCrouching = isOnSlope || obstacleAbove || (playerHoldsCrouchKey && isOnGround);

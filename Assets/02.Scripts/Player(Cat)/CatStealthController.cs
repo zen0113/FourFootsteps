@@ -402,7 +402,7 @@ public class CatStealthController : MonoBehaviour
     public void Chase_CourchingDisabled()
     {
         // 원복
-        movement.SetMiniGameInputBlocked(false);
+        //movement.SetMiniGameInputBlocked(false);
         isHiding = false;
         this.enabled = false;
     }

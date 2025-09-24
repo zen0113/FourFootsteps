@@ -10,6 +10,7 @@ public class ChaserFollower : MonoBehaviour
     [SerializeField] private Camera cam;
     [SerializeField] private AnimationCurve difficultyOverX; // x→0~1
     [SerializeField] private ObjectSfxController sfxController;
+    [SerializeField] private Animator animator;
 
     public bool isStartChasing = false;
 
@@ -47,6 +48,7 @@ public class ChaserFollower : MonoBehaviour
     [SerializeField] private bool keepVisibleAtLeft = true;
 
     [Header("Pavilion Clamp")]
+    [Tooltip("Chase_Goal Area에 있는 Key Icon으로 할당")]
     [SerializeField] private Transform pavilionClampPoint;  // 정자 앞 X 기준 오브젝트
     [SerializeField] private float clampArriveSpeed = 5f;   // 정자 앞까지 다가오는 속도
     [SerializeField] private float clampStopEpsilon = 0.02f;// 이 오차 이내면 도착으로 간주
@@ -115,6 +117,7 @@ public class ChaserFollower : MonoBehaviour
     void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
+        animator = GetComponent<Animator>();
         if (!col) col = GetComponent<BoxCollider2D>();
         if (!cam) cam = Camera.main;
 
@@ -143,6 +146,7 @@ public class ChaserFollower : MonoBehaviour
     IEnumerator StartToChase()
     {
         sfxController.StartPlayLoopByDefault();
+        animator.SetBool("Moving", true);
         if (this.name== "chasingKids")
         {
             yield return new WaitForSeconds(3f);
@@ -155,6 +159,11 @@ public class ChaserFollower : MonoBehaviour
     {
         if (!isStartChasing || !playerRunner || !playerTransform) return;
 
+        if (playerRunner.AtHide)
+        {
+            if (col != null && col.isTrigger) col.isTrigger = false;
+        }
+
         // 1) 숨었으면 정자 앞에서 멈춤
         if (playerRunner.IsHiding)
         {
@@ -166,6 +175,7 @@ public class ChaserFollower : MonoBehaviour
         if (gameOverTriggered)
         {
             rb.velocity = Vector2.zero;
+            animator.SetBool("Moving", false);
             return;
         }
 
@@ -312,6 +322,8 @@ public class ChaserFollower : MonoBehaviour
         StealthSFX.Instance.StopEnterSFX();
         CatStealthController.Instance.Chase_GameOver();
         EventManager.Instance.CallEvent(gameOverEventID);
+
+        this.enabled = false;
     }
 
     // =========================
@@ -342,7 +354,8 @@ public class ChaserFollower : MonoBehaviour
         if (Mathf.Abs(newX - targetX) <= clampStopEpsilon)
         {
             rb.velocity = Vector2.zero;
-            col.isTrigger = true;
+            col.isTrigger = false;
+            animator.SetBool("Moving", false);
             this.enabled = false;
         }
         OnCatchMode?.Invoke();
@@ -370,6 +383,7 @@ public class ChaserFollower : MonoBehaviour
         {
             gameOverTriggered = true;
             rb.velocity = Vector2.zero;
+            animator.SetBool("Moving", false);
             ChaseGame_GameOver();
         }
     }

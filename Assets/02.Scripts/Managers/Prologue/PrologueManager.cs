@@ -20,6 +20,7 @@ public class PrologueManager : MonoBehaviour
 
     [Header("Follow Camera 관리")]
     [SerializeField] private FollowCamera PrologueCamera;
+    [SerializeField] private GameObject CameraLimit1;
 
     private void Awake()
     {
@@ -77,6 +78,7 @@ public class PrologueManager : MonoBehaviour
 
             case 3:
                 Debug.Log($"프롤로그 {currentStep}");
+                CameraLimit1.SetActive(false);
                 yield return new WaitForSeconds(waitingTime * 2.5f);  // 5초 대기
                 StartCoroutine(ResultManager.Instance.ExecuteResultCoroutine("Result_DialogueFadeIn"));
                 // 뒷골목에 있는 플레이어
@@ -166,7 +168,7 @@ public class PrologueManager : MonoBehaviour
         if (humanMovers[index] != null && destinationPoints[index] != null)
         {
             humanMovers[index].OnArrived += HandleArrival;
-            humanMovers[index].StartMoving(destinationPoints[index]);
+            humanMovers[index].StartMoving(destinationPoints[index], true);
         }else
             Debug.LogError("[HumanAutoMove_Prologue] 사람 또는 목적지가 할당되지 않았습니다.");
     }

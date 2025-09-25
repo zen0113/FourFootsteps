@@ -51,6 +51,7 @@ public class NpcAutoMover : MonoBehaviour
         if (audioSource != null) audioSource.Stop();
         //SetAnim(false, false);
         isMoving = false;
+        animator?.SetBool("Moving", false);
         state = MoveState.Idle;
     }
 
@@ -66,7 +67,7 @@ public class NpcAutoMover : MonoBehaviour
         //SetAnim(moving: true, dashing: false);
         lastWalkSoundTime = Time.time; // 이동 시작 시 바로 소리 재생을 위해 초기화
         PlayFootstepIfDue(true); // 이동 시작 시 걷는 소리 바로 재생
-        //animator?.SetBool("Moving", true); // 이동 시작 시 애니메이션 설정
+        animator?.SetBool("Moving", true); // 이동 시작 시 애니메이션 설정
         //PlayWalkSound(); // 이동 시작 시 걷는 소리 바로 재생
     }
 
@@ -77,6 +78,7 @@ public class NpcAutoMover : MonoBehaviour
         state = MoveState.Idle;
         currentSpeed = 0f;
         audioSource.Stop();
+        animator?.SetBool("Moving", false);
         //SetAnim(false, false);
     }
 

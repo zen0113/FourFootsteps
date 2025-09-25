@@ -62,7 +62,7 @@ public class PlayerAutoRunner : MonoBehaviour
 
     public bool sTriggeredOnce = false;
     public bool IsHiding => sTriggeredOnce;
-    private bool atHide = false;        // HideObject에 도착
+    [SerializeField] private bool atHide = false;        // HideObject에 도착
     public bool  AtHide => atHide;
     public bool chaseFinished = false; // S로 마무리했는지
     private HideObject lastHide;
@@ -218,8 +218,7 @@ public class PlayerAutoRunner : MonoBehaviour
             // Bird에 '진입'하는 순간: 무적 ON (한 번만)
             if (prevPhase != ChaserFollower.Phase.Bird && curr == ChaserFollower.Phase.Bird)
             {
-                if (!playerHp.isInvincible)
-                    playerHp.isInvincible = true;
+                playerHp.isInvincible = true;
 
                 SyncAnimatorParams();
                 prevPhase = curr;
@@ -236,7 +235,7 @@ public class PlayerAutoRunner : MonoBehaviour
             }
 
             prevPhase = curr;
-        }else if (curr == prevPhase && curr == ChaserFollower.Phase.Bird)
+        }else if (curr == ChaserFollower.Phase.Bird)
             return; // 새 발견 대사 나오고 있는 동안에는 움직이는 입력 받지X
 
         // 입력 → 목표 오프셋

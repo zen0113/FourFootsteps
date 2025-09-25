@@ -33,16 +33,18 @@ public class HumanAutoMover : MonoBehaviour
     }
 
     // 무릎 꿇는 애니메이션 재생
-    public void SetHumanCrouch(bool isActive)
+    public void SetHumanCrouch(bool isActive, bool isHoldingCarrier=false)
     {
         animator.SetBool("Crouch", isActive);
+        animator.SetBool("Holding_Carrier", isHoldingCarrier);
     }
 
-    public void StartMoving(Transform destination)
+    public void StartMoving(Transform destination, bool isHoldingCarrier = false)
     {
         targetPoint = destination;
         isMoving = true;
         animator?.SetBool("Moving", true); // 이동 시작 시 애니메이션 설정
+        animator?.SetBool("Holding_Carrier", isHoldingCarrier);
         lastWalkSoundTime = Time.time; // 이동 시작 시 바로 소리 재생을 위해 초기화
         PlayWalkSound(); // 이동 시작 시 걷는 소리 바로 재생
     }

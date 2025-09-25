@@ -19,7 +19,7 @@ public class PostFXZone2D : MonoBehaviour
 
     [Header("Targets")]
     [SerializeField, Range(-100f, 100f)] private float targetContrast = -15f;
-    [SerializeField] private Color targetColorFilter = new Color32(255, 164, 124, 255);
+    [SerializeField] private Color targetColorFilter = new Color32(255, 209, 189, 255);
     [SerializeField] private bool switchTonemapping = true;
 
     [Header("Latch / Persistence")]

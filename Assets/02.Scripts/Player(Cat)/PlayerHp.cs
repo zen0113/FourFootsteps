@@ -47,6 +47,7 @@ public class PlayerHp : MonoBehaviour
 
         currentHp = maxHp;
         CreateHearts();
+        cameraShake.enabled = false;
     }
 
     // create 5 hearts on screen on Player UI Canvas 

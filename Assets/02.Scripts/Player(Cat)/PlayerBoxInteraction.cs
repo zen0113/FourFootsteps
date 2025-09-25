@@ -35,7 +35,7 @@ public class PlayerBoxInteraction : MonoBehaviour
     private void Update()
     {
         // E키 입력 처리
-        HandleEKeyInput();
+        //HandleEKeyInput();
         
         // 상호작용 중일 때만 처리
         if (isEKeyPressed)
@@ -56,7 +56,7 @@ public class PlayerBoxInteraction : MonoBehaviour
         }
     }
 
-    private void HandleEKeyInput()
+    /*private void HandleEKeyInput()
     {
         if (Input.GetKeyDown(KeyCode.E))
         {
@@ -68,7 +68,7 @@ public class PlayerBoxInteraction : MonoBehaviour
             isEKeyPressed = false;
             Debug.Log("E키 뗌");
         }
-    }
+    }*/
 
     private void CheckBoxInteraction()
     {

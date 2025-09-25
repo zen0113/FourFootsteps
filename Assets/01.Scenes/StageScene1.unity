@@ -8079,6 +8079,7 @@ MonoBehaviour:
   climbSpeed: 2
   ladderSnapDistance: 0.3
   boxInteractingPower: 1.2
+  crouchReleaseGrace: 0.12
 --- !u!61 &507170961
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -11673,6 +11674,7 @@ MonoBehaviour:
   spriteGlowEffect: {fileID: 0}
   isOneTimeOnly: 0
   keyImage: {fileID: 0}
+  requiredCondition: 
   puzzleId: 1
   puzzleObject: {fileID: 0}
   puzzleBagButton: {fileID: 0}
@@ -31436,6 +31438,7 @@ MonoBehaviour:
   spriteGlowEffect: {fileID: 0}
   isOneTimeOnly: 1
   keyImage: {fileID: 224884894}
+  requiredCondition: 
 --- !u!61 &1901309365
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -32181,6 +32184,8 @@ MonoBehaviour:
   - {fileID: 8300000, guid: ab5b87ae348791c4fa46e61d3f830ef6, type: 3}
   - {fileID: 8300000, guid: 4f19fb89eb3d99141a48c9b614870730, type: 3}
   - {fileID: 8300000, guid: e1c71fc22570a54428a3f82b3ffce9c4, type: 3}
+  - {fileID: 8300000, guid: 0286df4da9ae64a40bb29cc71c74896f, type: 3}
+  - {fileID: 8300000, guid: 1a06979a818ee7e41bb788d28644b9c1, type: 3}
   uiSoundClips:
   - {fileID: 8300000, guid: 71fa15381e64e7a468d1698e94c48886, type: 3}
   - {fileID: 8300000, guid: bac8b5e2006d282498f3c5049224c9fd, type: 3}
@@ -32223,6 +32228,14 @@ MonoBehaviour:
     bgmIndex1: 3
     bgmIndex2: 4
     bgm1VolumeMultiplier: 0.253
+    bgm2VolumeMultiplier: 0.247
+    autoPlay: 1
+    syncStart: 1
+    bgm2Delay: 0
+  - sceneName: StageScene2
+    bgmIndex1: 5
+    bgmIndex2: 6
+    bgm1VolumeMultiplier: 0.489
     bgm2VolumeMultiplier: 0.247
     autoPlay: 1
     syncStart: 1

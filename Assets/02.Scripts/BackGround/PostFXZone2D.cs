@@ -2,6 +2,8 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 
+// 프레임 말미에 실행되도록 우선순위 크게 (원한다면 더 키워도 됨)
+[DefaultExecutionOrder(10000)]
 [RequireComponent(typeof(Collider2D))]
 public class PostFXZone2D : MonoBehaviour
 {
@@ -12,6 +14,12 @@ public class PostFXZone2D : MonoBehaviour
     [Header("Target Global Volume (URP)")]
     [SerializeField] private Volume globalVolume;
 
+    [Header("Target Sky Object (Sun Or Moon)")]
+    [SerializeField] private bool useSkyObject = false;
+    [SerializeField] private Transform skyObject;
+    [Tooltip("하늘 오브젝트 Y를 로컬좌표로 제어(권장). 끄면 월드좌표로 제어.")]
+    [SerializeField] private bool skyUseLocalSpace = true;
+
     [Header("Mapping along zone (left->right)")]
     [SerializeField] private AnimationCurve positionToWeight = AnimationCurve.Linear(0, 0, 1, 1);
     [SerializeField] private bool clampWeight01 = true;
@@ -21,6 +29,7 @@ public class PostFXZone2D : MonoBehaviour
     [SerializeField, Range(-100f, 100f)] private float targetContrast = -15f;
     [SerializeField] private Color targetColorFilter = new Color32(255, 209, 189, 255);
     [SerializeField] private bool switchTonemapping = true;
+    [SerializeField] private float targetSkyObjectYPos = 0f; // 로컬/월드 선택에 따라 해석
 
     [Header("Latch / Persistence")]
     [Tooltip("w가 이 임계값을 넘는 순간부터 변화를 시작")]
@@ -29,11 +38,8 @@ public class PostFXZone2D : MonoBehaviour
     [Tooltip("존을 떠나도 진행도를 기억(재진입 시 이어서 시작)")]
     [SerializeField] private bool rememberProgressAcrossExit = true;
 
-    [Tooltip("존을 떠날 때 화면 효과를 즉시 0(하양/Contrast 원래)으로 원복. 기본값 False")]
+    [Tooltip("존을 떠날 때 화면 효과를 즉시 0(하양/Contrast 원래)으로 원복")]
     [SerializeField] private bool visualResetOnExit = false;
-
-    //[Tooltip("필요하면 수동으로 진행도를 초기화")]
-    //[SerializeField] private KeyCode debugResetKey = KeyCode.None;
 
     private Collider2D zoneCol;
     private Transform playerTf;
@@ -45,9 +51,14 @@ public class PostFXZone2D : MonoBehaviour
     private Color baseColorFilter = Color.white;
     private TonemappingMode baseToneMode = TonemappingMode.None;
 
+    private float baseSkyY = 0f; // skyUseLocalSpace에 따라 localY 또는 worldY 저장
+
     // 진행 상태
     private bool started = false;     // 현재 존 내부에서 “시작됨” 여부
     private float latchedMaxW = 0f;   // 지금까지 도달한 최대 가중치 (존 밖에서도 유지할 값)
+
+    // LateUpdate에서 최종 1회 적용하기 위한 캐시
+    private float lastComputedW = 0f;
 
     private void Awake()
     {
@@ -68,7 +79,7 @@ public class PostFXZone2D : MonoBehaviour
         }
         if (globalVolume == null) { Debug.LogError("[PostFXZone2D] Global Volume 없음"); enabled = false; return; }
 
-        // 런타임 프로필 복제
+        // 런타임 프로필 복제(원본 보호)
         if (globalVolume.profile == null && globalVolume.sharedProfile != null)
             globalVolume.profile = Instantiate(globalVolume.sharedProfile);
         else if (globalVolume.profile != null && ReferenceEquals(globalVolume.profile, globalVolume.sharedProfile))
@@ -82,6 +93,28 @@ public class PostFXZone2D : MonoBehaviour
         baseContrast = colorAdj.contrast.value;
         baseColorFilter = colorAdj.colorFilter.value;
         baseToneMode = tonemapping.mode.value;
+
+        // SkyObject 가드 + 기준값 설정
+        if (useSkyObject)
+        {
+            if (skyObject == null)
+            {
+                Debug.LogWarning("[PostFXZone2D] useSkyObject=true 이지만 skyObject가 비어 있습니다. sky 기능을 비활성화합니다.");
+                useSkyObject = false;
+            }
+            else
+            {
+                baseSkyY = skyUseLocalSpace ? skyObject.localPosition.y : skyObject.position.y;
+
+                // 참고: 물리 영향 방지(선택 사항)
+                var rb2d = skyObject.GetComponent<Rigidbody2D>();
+                if (rb2d != null)
+                {
+                    rb2d.gravityScale = 0f;
+                    rb2d.isKinematic = true;
+                }
+            }
+        }
     }
 
     private void OnTriggerEnter2D(Collider2D other)
@@ -89,18 +122,17 @@ public class PostFXZone2D : MonoBehaviour
         if (!other.CompareTag(playerTag)) return;
         playerInside = true;
 
-        // 재진입 시 처리:
-        // 진행도를 기억하는 경우(latchedMaxW>0), 바로 그 값부터 재개
         if (rememberProgressAcrossExit && latchedMaxW > 0f)
         {
-            started = true;                 // 이미 시작 상태로 간주
-            ApplyWithWeight(latchedMaxW);   // 시각적으로도 이어서 보이게
+            started = true;
+            lastComputedW = latchedMaxW;
+            ApplyWithWeight(lastComputedW); // 즉시 반영
         }
         else
         {
-            // 처음 진입이거나 기억한 진행도 없음 → 아직 시작 전
             started = false;
-            // (latchedMaxW는 유지. 기억을 끄고 완전 초기화를 원하면 여기서 0으로)
+            lastComputedW = 0f;
+            ApplyWithWeight(lastComputedW);
         }
     }
 
@@ -109,13 +141,12 @@ public class PostFXZone2D : MonoBehaviour
         if (!other.CompareTag(playerTag)) return;
         playerInside = false;
 
-        // 화면은 원복하되, 진행도(latchedMaxW)는 남겨둠 → 재진입 시 이어서 시작
         if (visualResetOnExit)
         {
-            ApplyWithWeight(0f);
+            lastComputedW = 0f;
+            ApplyWithWeight(0f); // 즉시 원복
         }
 
-        // rememberProgressAcrossExit가 꺼져 있으면 진행도도 지움
         if (!rememberProgressAcrossExit)
         {
             latchedMaxW = 0f;
@@ -123,16 +154,12 @@ public class PostFXZone2D : MonoBehaviour
         }
         else
         {
-            // 기억 모드에서는 진행도 유지. 단, 존을 벗어나면 현재 세션은 끝났다고 표기.
-            started = false;
+            started = false; // 진행도 유지
         }
     }
 
     private void Update()
     {
-        //if (debugResetKey != KeyCode.None && Input.GetKeyDown(debugResetKey))
-        //    ResetProgress();
-
         if (!playerInside || playerTf == null) return;
 
         Bounds b = zoneCol.bounds;
@@ -150,42 +177,76 @@ public class PostFXZone2D : MonoBehaviour
         if (!started && w > startThreshold)
         {
             started = true;
-            // 재진입이어도 latchedMaxW가 더 크면 그 값 유지
-            if (w > latchedMaxW) latchedMaxW = w;
+            if (w > latchedMaxW) latchedMaxW = w; // 재진입이어도 더 크면 갱신
         }
 
         if (started)
         {
-            if (w > latchedMaxW) latchedMaxW = w; // 최대치 갱신
-            w = latchedMaxW;                      // 감소 금지(모노톤 증가)
+            if (w > latchedMaxW) latchedMaxW = w;
+            w = latchedMaxW; // 감소 금지
         }
         else
         {
-            // 아직 시작 전이면 0 유지
             w = 0f;
         }
 
-        ApplyWithWeight(w);
+        lastComputedW = w; // 계산만
+    }
+
+    private void LateUpdate()
+    {
+        // 프레임 마지막에 최종 1회 덮어쓰기 → 다른 스크립트와 충돌 방지
+        ApplyWithWeight(lastComputedW);
     }
 
     private void ApplyWithWeight(float w)
     {
+        // 안전 보정
+        w = clampWeight01 ? Mathf.Clamp01(w) : w;
+
+        // PostFX 보간
         colorAdj.contrast.value = Mathf.Lerp(baseContrast, targetContrast, w);
         colorAdj.colorFilter.value = Color.Lerp(baseColorFilter, targetColorFilter, w);
 
+        // 하늘 오브젝트(Y) 이동
+        if (useSkyObject && skyObject != null)
+        {
+            float yBase = baseSkyY;
+            float yTarget = targetSkyObjectYPos;
+            float yLerp = Mathf.Lerp(yBase, yTarget, w);
+
+            // 오버슈트 절대 방지
+            float minY = Mathf.Min(yBase, yTarget);
+            float maxY = Mathf.Max(yBase, yTarget);
+            yLerp = Mathf.Clamp(yLerp, minY, maxY);
+
+            if (skyUseLocalSpace)
+            {
+                var lp = skyObject.localPosition;
+                lp.y = yLerp;
+                skyObject.localPosition = lp;
+            }
+            else
+            {
+                var p = skyObject.position;
+                p.y = yLerp;
+                skyObject.position = p;
+            }
+        }
+
+        // Tonemapping
         if (switchTonemapping)
         {
-            if (w > 0.001f) tonemapping.mode.value = TonemappingMode.Neutral;
-            else tonemapping.mode.value = baseToneMode; // 보통 None
+            tonemapping.mode.value = (w > 0.001f) ? TonemappingMode.Neutral : baseToneMode;
         }
     }
 
-    /// <summary>진행도(래치) 강제 초기화 API (예: 체크포인트, 챕터 리셋 등에서 호출)</summary>
+    /// <summary>진행도(래치) 강제 초기화</summary>
     public void ResetProgress()
     {
         latchedMaxW = 0f;
         started = false;
-        // 화면도 0으로 돌리고 싶으면 아래 줄 유지
+        lastComputedW = 0f;
         ApplyWithWeight(0f);
     }
 

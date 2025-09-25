@@ -38,12 +38,15 @@ public class DogAutoMove : MonoBehaviour
     [SerializeField] private float walkSoundInterval = 0.3f;
     private float lastWalkSoundTime;
 
+    [SerializeField] private Animator animator;
+
     public Action OnArrived;
 
     private void Awake()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
         audioSource = GetComponent<AudioSource>();
+        animator = GetComponent<Animator>();
 
         if (audioSource == null) audioSource = gameObject.AddComponent<AudioSource>();
 
@@ -61,6 +64,8 @@ public class DogAutoMove : MonoBehaviour
         {
             exclamationInitialLocalPos = exclamationMark.transform.localPosition;
         }
+
+        animator.SetBool("Moving", true);
     }
 
     private void SetPatrolBoundaries()

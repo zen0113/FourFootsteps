@@ -62,7 +62,7 @@ public class PlayerAutoRunner : MonoBehaviour
 
     public bool sTriggeredOnce = false;
     public bool IsHiding => sTriggeredOnce;
-    private bool atHide = false;        // HideObject에 도착
+    [SerializeField] private bool atHide = false;        // HideObject에 도착
     public bool  AtHide => atHide;
     public bool chaseFinished = false; // S로 마무리했는지
     private HideObject lastHide;
@@ -125,6 +125,9 @@ public class PlayerAutoRunner : MonoBehaviour
         Bird.SetActive(true);
         scroller.paused = false;
         sprite.flipX = false;
+        Color restorationColor = sprite.color;
+        restorationColor.a = 1f;
+        sprite.color = restorationColor;
         isChasePlaying = true;
 
         mainCamera.GetComponent<FollowCamera>().target = centerAnchor;
@@ -135,6 +138,10 @@ public class PlayerAutoRunner : MonoBehaviour
 
         CameraShake cameraShake = Camera.main.GetComponent<CameraShake>();
         cameraShake.target = centerAnchor;
+
+        // 추격용 BGM 전환
+        SoundPlayer.Instance.ChangeDualBGM(8, -1, 0.6f, 1f, true, 0f);
+        
     }
 
     void Update()
@@ -203,27 +210,33 @@ public class PlayerAutoRunner : MonoBehaviour
 
         var curr = kidsFollower.phase;
 
+        //Debug.Log($"현재 페이즈 : {curr}  |  이전 페이즈 : {prevPhase}");
         if (curr != prevPhase)
         {
+            var last = prevPhase;
+
             // Bird에 '진입'하는 순간: 무적 ON (한 번만)
             if (prevPhase != ChaserFollower.Phase.Bird && curr == ChaserFollower.Phase.Bird)
             {
-                if (!playerHp.isInvincible)
-                    playerHp.isInvincible = true;
+                playerHp.isInvincible = true;
+
+                SyncAnimatorParams();
+                prevPhase = curr;
                 return;
             }
 
             // Bird에서 '이탈'하는 순간: 무적 OFF (한 번만)
-            if (!turnedOffOnce && prevPhase == ChaserFollower.Phase.Bird && curr != ChaserFollower.Phase.Bird)
+            if (!turnedOffOnce && prevPhase == ChaserFollower.Phase.Bird && curr == ChaserFollower.Phase.Chasing)
             {
+                Debug.Log("Bird 대사 끝. 무적 해제");
                 if (playerHp.isInvincible)
                     playerHp.isInvincible = false;
-
                 turnedOffOnce = true;
             }
 
             prevPhase = curr;
-        }
+        }else if (curr == ChaserFollower.Phase.Bird)
+            return; // 새 발견 대사 나오고 있는 동안에는 움직이는 입력 받지X
 
         // 입력 → 목표 오프셋
         float h = Input.GetAxisRaw("Horizontal"); // A/D or ←/→
@@ -324,6 +337,12 @@ public class PlayerAutoRunner : MonoBehaviour
     IEnumerator FinishChase()
     {
         sTriggeredOnce = true;
+
+        if (!playerHp.isInvincible)
+            playerHp.isInvincible = true;
+
+        // 정자로 들어가면 모든 BGM 스탑하기
+        SoundPlayer.Instance.StopAllBGM();
 
         if (SFX) SFX.PlayEnterSFX(5f);
         if (catStealth) catStealth.Chase_StartEnter(lastHide);
@@ -430,4 +449,58 @@ public class PlayerAutoRunner : MonoBehaviour
         mainCamera.GetComponent<CameraShake>().target = this.transform;
     }
 
+    //Chase Stage 시작 전 ResultManager의 "Result_StartChaseGameIntro"에서 진행되는 인트로 연출
+    public bool TeleportPlayerToChaseStage(GameObject player)
+    {
+        if (!GetChaseAnchor()) return false;
+
+        SetXPosition(player.transform, centerAnchor.position.x);
+        return true;
+    }
+
+    public bool SetupChaseCamera()
+    {
+        Camera mainCamera = Camera.main;
+        if (mainCamera == null)
+        {
+            Debug.LogError("Main camera not found!");
+            return false;
+        }
+
+        FollowCamera followCamera = mainCamera.GetComponent<FollowCamera>();
+        if (followCamera == null)
+        {
+            Debug.LogError("FollowCamera component not found!");
+            return false;
+        }
+
+        followCamera.enabled = true;
+
+        // 카메라도 같은 X 위치로 이동
+        if (!GetChaseAnchor()) return false;
+        SetXPosition(mainCamera.transform, centerAnchor.position.x);
+
+        return true;
+    }
+
+    private bool GetChaseAnchor()
+    {
+        if (centerAnchor == null)
+        {
+            GameObject chaseAnchorObj = GameObject.Find("Chase_Center Anchor");
+            if (chaseAnchorObj == null)
+            {
+                Debug.LogError("Chase_Center Anchor not found!");
+                return false;
+            }
+            centerAnchor = chaseAnchorObj.transform;
+        }
+        return true;
+    }
+
+    private void SetXPosition(Transform target, float newX)
+    {
+        Vector3 currentPos = target.position;
+        target.position = new Vector3(newX, currentPos.y, currentPos.z);
+    }
 }

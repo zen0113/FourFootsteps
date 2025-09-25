@@ -94,8 +94,8 @@ public class CameraController : MonoBehaviour
         Vector3 startPosition = transform.position;
         Vector3 targetPosition = new Vector3(zone.fixedPosition.x, zone.fixedPosition.y, transform.position.z);
         
-        // MinY 제한 적용
-        targetPosition = ApplyMinYLimit(targetPosition);
+        // Y축 제한 적용 (MinY, MaxY)
+        targetPosition = ApplyYLimits(targetPosition);
         
         float startZoom = cameraComponent.orthographicSize;
         float targetZoom = zone.changeZoom ? zone.targetZoomSize : originalZoomSize;
@@ -121,13 +121,13 @@ public class CameraController : MonoBehaviour
                 float positionCurveT = zone.transitionCurve.Evaluate(positionT);
                 Vector3 lerpedPosition = Vector3.Lerp(startPosition, targetPosition, positionCurveT);
                 
-                // MinY 제한 적용
-                lerpedPosition = ApplyMinYLimit(lerpedPosition);
+                // Y축 제한 적용 (MinY, MaxY)
+                lerpedPosition = ApplyYLimits(lerpedPosition);
                 transform.position = lerpedPosition;
             }
             else
             {
-                transform.position = ApplyMinYLimit(targetPosition);
+                transform.position = ApplyYLimits(targetPosition);
             }
             
             // 줌 전환
@@ -141,13 +141,13 @@ public class CameraController : MonoBehaviour
                 UpdateFollowCameraSize();
                 
                 // 줌 변경 후 위치 재조정
-                transform.position = ApplyMinYLimit(transform.position);
+                transform.position = ApplyYLimits(transform.position);
             }
             else if (zone.changeZoom)
             {
                 cameraComponent.orthographicSize = targetZoom;
                 UpdateFollowCameraSize();
-                transform.position = ApplyMinYLimit(transform.position);
+                transform.position = ApplyYLimits(transform.position);
             }
             
             yield return null;
@@ -159,7 +159,7 @@ public class CameraController : MonoBehaviour
             cameraComponent.orthographicSize = targetZoom;
             UpdateFollowCameraSize();
         }
-        transform.position = ApplyMinYLimit(targetPosition);
+        transform.position = ApplyYLimits(targetPosition);
         
         isTransitioning = false;
     }
@@ -212,13 +212,13 @@ public class CameraController : MonoBehaviour
                 float positionCurveT = curve.Evaluate(positionT);
                 Vector3 lerpedPosition = Vector3.Lerp(startPosition, targetPosition, positionCurveT);
                 
-                // MinY 제한 적용
-                lerpedPosition = ApplyMinYLimit(lerpedPosition);
+                // Y축 제한 적용 (MinY, MaxY)
+                lerpedPosition = ApplyYLimits(lerpedPosition);
                 transform.position = lerpedPosition;
             }
             else
             {
-                transform.position = ApplyMinYLimit(targetPosition);
+                transform.position = ApplyYLimits(targetPosition);
             }
             
             // 줌 전환
@@ -231,13 +231,13 @@ public class CameraController : MonoBehaviour
                 UpdateFollowCameraSize();
                 
                 // 줌 변경 후 위치 재조정
-                transform.position = ApplyMinYLimit(transform.position);
+                transform.position = ApplyYLimits(transform.position);
             }
             else if (shouldChangeZoom)
             {
                 cameraComponent.orthographicSize = targetZoom;
                 UpdateFollowCameraSize();
-                transform.position = ApplyMinYLimit(transform.position);
+                transform.position = ApplyYLimits(transform.position);
             }
             else if (zone == null) // 기본 상태로 복원
             {
@@ -249,13 +249,13 @@ public class CameraController : MonoBehaviour
                     UpdateFollowCameraSize();
                     
                     // 줌 변경 후 위치 재조정
-                    transform.position = ApplyMinYLimit(transform.position);
+                    transform.position = ApplyYLimits(transform.position);
                 }
                 else
                 {
                     cameraComponent.orthographicSize = originalZoomSize;
                     UpdateFollowCameraSize();
-                    transform.position = ApplyMinYLimit(transform.position);
+                    transform.position = ApplyYLimits(transform.position);
                 }
             }
             
@@ -275,14 +275,25 @@ public class CameraController : MonoBehaviour
         isTransitioning = false;
     }
     
-    // FollowCamera의 MinY 제한을 여기서도 적용
-    Vector3 ApplyMinYLimit(Vector3 position)
+    // FollowCamera의 MinY, MaxY 제한을 모두 적용
+    Vector3 ApplyYLimits(Vector3 position)
     {
-        if (followCamera != null && followCamera.useMinYLimit)
+        if (followCamera == null) return position;
+        
+        // MinY 제한 적용
+        if (followCamera.useMinYLimit)
         {
             float minCameraY = followCamera.minY + followCamera.cameraHalfHeight;
             position.y = Mathf.Max(position.y, minCameraY);
         }
+        
+        // MaxY 제한 적용
+        if (followCamera.useMaxYLimit)
+        {
+            float maxCameraY = followCamera.maxY - followCamera.cameraHalfHeight;
+            position.y = Mathf.Min(position.y, maxCameraY);
+        }
+        
         return position;
     }
     
@@ -325,15 +336,15 @@ public class CameraController : MonoBehaviour
             // FollowCamera 크기 업데이트
             UpdateFollowCameraSize();
             
-            // 줌 변경 후 MinY 제한 적용
-            transform.position = ApplyMinYLimit(transform.position);
+            // 줌 변경 후 Y축 제한 적용
+            transform.position = ApplyYLimits(transform.position);
             
             yield return null;
         }
         
         cameraComponent.orthographicSize = targetZoom;
         UpdateFollowCameraSize();
-        transform.position = ApplyMinYLimit(transform.position);
+        transform.position = ApplyYLimits(transform.position);
     }
     
     // 현재 상태 확인용

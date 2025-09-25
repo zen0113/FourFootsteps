@@ -22,6 +22,8 @@ public class PlayerHumanMovement : MonoBehaviour
     [SerializeField] private float dashSoundInterval = 0.2f;
     private float lastWalkSoundTime;
 
+    private bool isMiniGameInputBlocked = false;
+
     private void Start()
     {
         UIManager.Instance.SetUI(eUIGameObjectName.HumanVersionUIGroup, true);
@@ -131,7 +133,8 @@ public class PlayerHumanMovement : MonoBehaviour
     {
         return PauseManager.IsGamePaused ||
                DialogueManager.Instance.isDialogueActive ||
-               (GameManager.Instance != null && GameManager.Instance.IsSceneLoading);
+               (GameManager.Instance != null && GameManager.Instance.IsSceneLoading)
+               || isMiniGameInputBlocked;
     }
 
     void Move(float horizontalInput)
@@ -161,5 +164,10 @@ public class PlayerHumanMovement : MonoBehaviour
         {
             isCrouching = false;
         }
+    }
+
+    public void BlockMiniGameInput(bool isBlocked)
+    {
+        isMiniGameInputBlocked = isBlocked;
     }
 }

@@ -74,6 +74,7 @@ public class PlayerCatMovement : MonoBehaviour
     [SerializeField] private float groundCheckRadius = 0.2f; // 지상 체크 반경
     [SerializeField] private LayerMask groundMask;          // 지상으로 인식할 레이어
     private bool isOnGround;                                // 현재 지상에 있는지 여부
+    private bool justLanded = false;
     private Vector3 originalGroundCheckLocalPosition;
 
     // 경사면 시스템
@@ -129,6 +130,13 @@ public class PlayerCatMovement : MonoBehaviour
 
     // 입력 차단 시스템 (미니게임, 대화 등에서 사용)
     private bool isMiniGameInputBlocked = false;
+
+    // 웅크림 해제 그레이스(스티키) 설정
+    [SerializeField] private float crouchReleaseGrace = 0.12f; // 2~3프레임 정도(60fps 기준)
+    private float crouchStickyUntil = -1f;
+
+    // 스티키 활성 여부 보조
+    private bool IsCrouchStickyActive => Time.time < crouchStickyUntil;
 
     /// <summary>
     /// 게임 시작 시 초기화 작업
@@ -255,11 +263,10 @@ public class PlayerCatMovement : MonoBehaviour
         }
 
         // 방금 착지했는지 확인 (착지 사운드 처리용)
-        bool justLanded = isOnGround && !prevOnGround;
+        justLanded = isOnGround && !prevOnGround;
         if (justLanded)
         {
             lastLandingTime = Time.time;
-            animator.SetBool("Jump", false);
         }
 
         // 지상에 있고 떨어지는 중이면 점프 카운트 리셋
@@ -305,7 +312,6 @@ public class PlayerCatMovement : MonoBehaviour
             animator.SetBool("Moving", false);
             animator.SetBool("Dash", false);
             animator.SetBool("Climbing", false);
-            //animator.SetBool("Jump", false);
 
             // 입력 차단 중에도, 강제/수동 웅크림이면 상태를 유지
             if (isCrouching || forceCrouch)
@@ -338,7 +344,6 @@ public class PlayerCatMovement : MonoBehaviour
             animator.SetBool("Dash", false);
             animator.SetBool("Crouching", false);
             animator.SetBool("Crouch", false);
-            animator.SetBool("Jump", false);
 
             animator.SetBool("Climbing", true);
 
@@ -358,7 +363,6 @@ public class PlayerCatMovement : MonoBehaviour
         animator.SetBool("Dash", false);
         animator.SetBool("Crouch", false);
         animator.SetBool("Crouching", false);
-        //animator.SetBool("Jump", false);
 
         // 실제 키 입력이 있는지 확인 (물리적 속도가 아닌 입력 기준으로 판단)
         bool hasHorizontalInput = Mathf.Abs(horizontalInput) > 0.01f;
@@ -391,8 +395,7 @@ public class PlayerCatMovement : MonoBehaviour
         }
         else if (isJumping)
         {
-            // 점프 애니메이션 (필요시 추가)
-            //animator.SetBool("Jump", true);
+
         }
         else if (hasHorizontalInput)
         {
@@ -664,11 +667,38 @@ public class PlayerCatMovement : MonoBehaviour
             }
             else
             {
-                // 강제 웅크리기 해제: 원래 콜라이더 크기로 복원
-                isCrouching = false;
+                // 해제 직후 기본은 스티키 걸어서 튐 방지
+                crouchStickyUntil = Time.time + crouchReleaseGrace;
+
+                // 첫 프레임엔 웅크림 유지(한 프레임 튐 방지용)
+                isCrouching = true;
                 isCrouchMoving = false;
-                boxCollider.size = originalColliderSize;
-                boxCollider.offset = originalColliderOffset;
+                boxCollider.size = crouchColliderSize;
+                boxCollider.offset = crouchColliderOffset;
+
+                // 해제 프레임 즉시 머리 위 장애물 체크
+                bool obstacleAboveNow = IsObstacleDirectlyAbove();
+
+                if (!obstacleAboveNow)
+                {
+                    // 장애물 없음: 스티키 건너뛰고 즉시 해제(자연스럽게 일어서기)
+                    crouchStickyUntil = -1f; // 스티키 무효화
+                    isCrouching = false;
+                    boxCollider.size = originalColliderSize;
+                    boxCollider.offset = originalColliderOffset;
+
+                    // 즉시 애니메이터도 맞춰주고 싶다면(선택):
+                    animator.SetBool("Crouching", false);
+                    animator.SetBool("Crouch", false);
+                }
+                else
+                {
+                    // 장애물 있음: 스티키 유지(계속 엎드림)
+                    // 필요하면 스티키를 약간 더 길게
+                    crouchStickyUntil = Time.time + Mathf.Max(crouchReleaseGrace, 0.15f);
+                    animator.SetBool("Crouching", false);
+                    animator.SetBool("Crouch", true);
+                }
             }
         }
     }
@@ -765,6 +795,10 @@ public class PlayerCatMovement : MonoBehaviour
     {
         bool obstacleAbove = IsObstacleDirectlyAbove();
         bool playerHoldsCrouchKey = Input.GetKey(KeyCode.S);
+
+        // 스티키가 활성화되어 있으면 머리 장애물 여부와 무관하게 '계속 웅크림'
+        if (IsCrouchStickyActive)
+            obstacleAbove = true;
 
         // 웅크려야 하는 모든 조건
         bool shouldBeCrouching = isOnSlope || obstacleAbove || (playerHoldsCrouchKey && isOnGround);
@@ -895,6 +929,11 @@ public class PlayerCatMovement : MonoBehaviour
     /// </summary>
     void Jump()
     {
+        if (Time.time - lastLandingTime < 0.1f)
+        {
+            return;
+        }
+
         if (IsInputBlocked()) return;
         // isOnSlope 조건 추가하여 경사면에서는 점프 못하게 변경
         if (isJumpingBlocked || isOnSlope) return;
@@ -909,10 +948,7 @@ public class PlayerCatMovement : MonoBehaviour
                 jumpCount++;
                 isOnGround = false;
 
-                if (jumpCount == 1)
-                {
-                    animator.SetBool("Jump", true);
-                }
+                animator.SetTrigger("Jump");
 
                 // 점프 시 파티클 효과
                 if (dashParticle != null)
@@ -1069,8 +1105,6 @@ public class PlayerCatMovement : MonoBehaviour
             float hForce = spriteRenderer.flipX ? -1f : 1f;
             rb.velocity = new Vector2(hForce * movePower * 0.8f, jumpPower * 0.9f);
             jumpCount = 1;
-
-            animator.SetBool("Jump", true);
         }
         else
         {
@@ -1141,13 +1175,8 @@ public class PlayerCatMovement : MonoBehaviour
         {
             foreach (ContactPoint2D contact in collision.contacts)
             {
-                // 위쪽에서 충돌하거나 옆에서 충돌하면 점프 카운트 리셋
+                // contact.normal.y > 0.5f는 캐릭터 아래에 바닥이 있다는 뜻
                 if (contact.normal.y > 0.5f)
-                {
-                    jumpCount = 0;
-                    break;
-                }
-                else if (Mathf.Abs(contact.normal.x) > 0.5f)
                 {
                     jumpCount = 0;
                     break;

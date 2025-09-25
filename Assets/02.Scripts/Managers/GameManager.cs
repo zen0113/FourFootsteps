@@ -30,6 +30,10 @@ public class GameManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI variablesText;
     public bool isDebug = false;
 
+    // --- 청소 카운터 관련 ---
+    // variables.csv 파일에 CleanedObjectCount를 추가했기 때문에
+    // 별도의 변수나 함수를 추가할 필요 없이, 기존 기능으로 모두 제어 가능합니다.
+
     private void Awake()
     {
         if (Instance == null)
@@ -87,19 +91,6 @@ public class GameManager : MonoBehaviour
     // 씬 상태 업데이트
     public void UpdateSceneProgress(string loadedSceneName)
     {
-        //string currentSceneName = loadedSceneName;
-        //SetVariable("CurrentSceneName", currentSceneName);
-        //int index = sceneOrder.FindIndex(s => s.sceneName == loadedSceneName);
-        //if (index >= 0 && index + 1 < sceneOrder.Count)
-        //{
-        //    string nextSceneName = sceneOrder[index + 1].sceneName;
-        //    SetVariable("NextSceneName", nextSceneName);
-        //}
-        //else
-        //{
-        //    SetVariable("NextSceneName", null); // 마지막 씬일 경우
-        //}
-
         var currentScene = sceneOrder.FirstOrDefault(s => s.sceneName == loadedSceneName);
         if (currentScene != null)
         {
@@ -114,7 +105,8 @@ public class GameManager : MonoBehaviour
             if (currentScene.isRecall)
             {
                 SetVariable("isRecalling", true);
-            }else
+            }
+            else
                 SetVariable("isRecalling", false);
         }
     }
@@ -135,7 +127,7 @@ public class GameManager : MonoBehaviour
     {
         string[] variableLines = variablesCSV.text.Split('\n');
 
-        for(int i = 1; i<variableLines.Length; i++)
+        for (int i = 1; i < variableLines.Length; i++)
         {
             if (string.IsNullOrWhiteSpace(variableLines[i])) continue;
 
@@ -155,6 +147,13 @@ public class GameManager : MonoBehaviour
                     break;
                 case "string":
                     variables.Add(variableName, variableValue);
+                    break;
+                case "dict:int-bool":
+                    int count = int.Parse(variableValue);
+                    Dictionary<int, bool> dict = new Dictionary<int, bool>();
+                    for (int j = 0; j < count; j++)
+                        dict.Add(j, false); // 초기값 전부 false
+                    variables.Add(variableName, dict);
                     break;
                 default:
                     Debug.Log($"Unknown variable type : {variableType}");
@@ -259,13 +258,30 @@ public class GameManager : MonoBehaviour
             "CurrentSceneName",
             "NextSceneName",
             "CanMoving",
-            "CanInvesigatingRecallObject"
+            "CanInvesigatingRecallObject",
+            "CanStartCleaningMinigame",
+            "CurrentMemoryPuzzleCount",
+            "MemoryPuzzleStates",
+            "CleanedObjectCount"
         });
 
         foreach (var item in variables)
         {
-            if (keysToShow.Contains(item.Key)) variablesText.text += $"{item.Key}: {item.Value}\n";
+            if (keysToShow.Contains(item.Key))
+            {
+                if (item.Key == "MemoryPuzzleStates")
+                {
+                    variablesText.text += $"{item.Key}\n";
+                    foreach (var dict in item.Value as Dictionary<int, bool>)
+                    {
+                        variablesText.text += $"{dict.Key}: {dict.Value}\n";
+                    }
+                }
+                else
+                {
+                    variablesText.text += $"{item.Key}: {item.Value}\n";
+                }
+            }
         }
     }
-
 }

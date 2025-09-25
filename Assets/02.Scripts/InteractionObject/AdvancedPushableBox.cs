@@ -23,7 +23,7 @@ public class AdvancedPushableBox : MonoBehaviour
     
     [Header("원래 위치 복귀 시스템")]
     [SerializeField] private bool enableReturnToOrigin = true;      
-    [SerializeField] private float returnDelay = 5f;               
+    [SerializeField] private float returnDelay = 10f;               
     [SerializeField] private float minDistanceFromOrigin = 3f;     
     [SerializeField] private Vector3 customReturnPosition = Vector3.zero; 
     [SerializeField] private bool useCustomReturnPosition = false; 

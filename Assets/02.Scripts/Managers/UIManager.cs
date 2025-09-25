@@ -61,6 +61,7 @@ public class UIManager : MonoBehaviour
             Destroy(gameObject);
 
         AddUIGameObjects();
+
         SetAllUI(false);
 
     }
@@ -102,14 +103,14 @@ public class UIManager : MonoBehaviour
     }
 
 
-    // <summary> 변수 설명
-    // fadeObject는 fade 효과를 적용할 물체 (null을 주면 화면 전체)
-    // start = 1, end = 0 이면 밝아짐 start = 0, end = 1이면 어두워짐
-    // fadeTime은 밝아짐(또는 어두워짐)에 걸리는 시간
-    // blink가 true이면 어두워졌다가 밝아짐
-    // waitingTime은 blink가 true일 때 어두워져 있는 시간
-    // changeFadeTime은 다시 밝아질 때 걸리는 시간을 조정하고 싶으면 쓰는 변수
-    // </summary>
+    /// <summary> 변수 설명
+    /// <param name="fadeObject"> fade 효과를 적용할 물체 (null을 주면 화면 전체)
+    /// <param name="start"><param name="end"> start = 1, end = 0 이면 밝아짐 start = 0, end = 1이면 어두워짐
+    /// <param name="fadeTime"> 밝아짐(또는 어두워짐)에 걸리는 시간
+    /// <param name="blink"> true이면 어두워졌다가 밝아짐
+    /// <param name="waitingTime"> blink가 true일 때 어두워져 있는 시간
+    /// <param name="changeFadeTime"> 다시 밝아질 때 걸리는 시간을 조정하고 싶으면 쓰는 변수
+    /// </summary>
     public IEnumerator OnFade(Image fadeObject, float start, float end, float fadeTime, bool blink = false, float waitingTime = 0f, float changeFadeTime = 0f)
     {
         if (!fadeObject)

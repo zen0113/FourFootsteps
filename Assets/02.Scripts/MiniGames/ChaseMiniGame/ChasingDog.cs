@@ -23,6 +23,7 @@ public class ChasingDog : MonoBehaviour
         chaserFollower = GetComponent<ChaserFollower>();
 
         spriteRenderer.flipX = true;
+        animator.SetBool("Moving", false);
         animator.speed = 0f;
         chaserFollower.enabled = false;
     }
@@ -45,6 +46,7 @@ public class ChasingDog : MonoBehaviour
         gameObject.tag = tagName;
         spriteRenderer.flipX = false;
         animator.speed = 1f;
+        animator.SetBool("Moving", true);
         chaserFollower.enabled = true;
         startChasing = true;
     }

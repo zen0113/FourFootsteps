@@ -12,7 +12,7 @@ public class GeneratorMinigameUI : MonoBehaviour
     public Text instructionText;
     
     [Header("게임 설정")]
-    public float autoProgressSpeed = 12f; // %/초
+    public float autoProgressSpeed = 6f; // %/초 (기존 12에서 6으로 변경)
     public float timingChallengeInterval = 4f; // 타이밍 도전 간격
     public float timingChallengeDuration = 3.5f;
     public float successZoneSize = 15f; // 성공 구역 크기

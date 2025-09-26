@@ -4837,6 +4837,7 @@ MonoBehaviour:
   climbSpeed: 2
   ladderSnapDistance: 0.3
   boxInteractingPower: 1.2
+  crouchReleaseGrace: 0.12
 --- !u!61 &605793051
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -5699,30 +5700,35 @@ MonoBehaviour:
   needle: {fileID: 1123589602}
   successZonePresets:
   - zRotation: -6.495
-    startAngle: 66
-    endAngle: 360
+    startAngle: 247
+    endAngle: 297
     positionOffset: {x: -45.4, y: -0.2}
-    showGizmo: 0
+    showGizmo: 1
     gizmoColor: {r: 0, g: 1, b: 0, a: 1}
   - zRotation: 84.568
-    startAngle: 63
-    endAngle: 345
+    startAngle: 338
+    endAngle: 27
     positionOffset: {x: 0.7, y: -45.6}
     showGizmo: 1
     gizmoColor: {r: 0, g: 1, b: 0, a: 1}
   - zRotation: 155.702
-    startAngle: 49
-    endAngle: 345
+    startAngle: 44
+    endAngle: 99
     positionOffset: {x: 43.6, y: -15.4}
-    showGizmo: 0
+    showGizmo: 1
     gizmoColor: {r: 0, g: 1, b: 0, a: 1}
   - zRotation: -95.774
-    startAngle: 47
-    endAngle: 345
+    startAngle: 151
+    endAngle: 206
     positionOffset: {x: -0.4, y: 45.8}
-    showGizmo: 0
+    showGizmo: 1
     gizmoColor: {r: 0, g: 1, b: 0, a: 1}
-  currentPresetIndex: 1
+  - zRotation: -49.331
+    startAngle: 201
+    endAngle: 250
+    positionOffset: {x: -33.1, y: 31.5}
+    showGizmo: 1
+    gizmoColor: {r: 0, g: 1, b: 0, a: 1}
   successZoneSize: 0.4
   perfectZoneSize: 5
   showDebugInfo: 1
@@ -7258,7 +7264,7 @@ MonoBehaviour:
   progressGauge: {fileID: 1813048265}
   circularTimer: {fileID: 791849963}
   instructionText: {fileID: 799038807}
-  autoProgressSpeed: 12
+  autoProgressSpeed: 4
   timingChallengeInterval: 4
   timingChallengeDuration: 3.5
   successZoneSize: 15
@@ -7689,13 +7695,13 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1123589600}
-  m_LocalRotation: {x: -0, y: -0, z: -0.06957162, w: 0.99757695}
+  m_LocalRotation: {x: 0, y: 0, z: 0.86602545, w: 0.49999994}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0.26, y: 0.26, z: 0.26}
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 791849962}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: -7.979}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 120}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
@@ -17918,16 +17924,16 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1976263148}
-  m_LocalRotation: {x: -0, y: -0, z: -0.7418265, w: 0.6705919}
+  m_LocalRotation: {x: -0, y: -0, z: -0.41732374, w: 0.9087579}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0.4, y: 0.4, z: 0.4}
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 791849962}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: -95.774}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: -49.331}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -0.4, y: 45.8}
+  m_AnchoredPosition: {x: -33.1, y: 31.5}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1976263150

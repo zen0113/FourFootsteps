@@ -18,7 +18,6 @@ public class CircularTimer : MonoBehaviour
     
     [Header("성공 존 설정")]
     public SuccessZoneSettings[] successZonePresets;
-    public int currentPresetIndex = 0;
     public float successZoneSize = 30f; // 고정 성공 존 크기 (도)
     public float perfectZoneSize = 5f;
     
@@ -55,6 +54,7 @@ public class CircularTimer : MonoBehaviour
     private float currentRotation = 0f;
     private bool isRunning = false;
     private SuccessZoneSettings currentZoneSetting;
+    private int selectedPresetIndex = 0; // 현재 선택된 랜덤 프리셋
     
     void Update()
     {
@@ -69,7 +69,8 @@ public class CircularTimer : MonoBehaviour
                 RectTransform needleRect = needle.GetComponent<RectTransform>();
                 if (needleRect != null)
                 {
-                    needleRect.localRotation = Quaternion.Euler(0, 0, -(currentRotation - 90f));
+                    // 바늘이 반대로 가고 있으므로 180도 추가 보정
+                    needleRect.localRotation = Quaternion.Euler(0, 0, -(currentRotation + 120f + 180f));
                 }
             }
         }
@@ -79,26 +80,37 @@ public class CircularTimer : MonoBehaviour
     {
         currentSettings = settings;
         isRunning = true;
-        currentRotation = 0f;
+        currentRotation = 0f; // 항상 0도에서 시작
         
+        // 랜덤으로 프리셋 선택
         if (successZonePresets != null && successZonePresets.Length > 0)
         {
-            int index = Mathf.Clamp(currentPresetIndex, 0, successZonePresets.Length - 1);
-            currentZoneSetting = successZonePresets[index];
+            selectedPresetIndex = Random.Range(0, successZonePresets.Length);
+            currentZoneSetting = successZonePresets[selectedPresetIndex];
         }
         else
         {
+            // 기본값 설정
             currentZoneSetting = new SuccessZoneSettings();
+            selectedPresetIndex = 0;
         }
         
         SetupSuccessZone();
         
         if (needle != null)
+        {
             needle.gameObject.SetActive(true);
+            // 바늘을 강제로 0도 위치로 초기화
+            RectTransform needleRect = needle.GetComponent<RectTransform>();
+            if (needleRect != null)
+            {
+                needleRect.localRotation = Quaternion.Euler(0, 0, -120f); // 120도 오프셋 적용
+            }
+        }
             
         if (showDebugInfo)
         {
-            Debug.Log($"성공 존 설정: Z회전={currentZoneSetting.zRotation}°, 크기={successZoneSize}°");
+            Debug.Log($"랜덤 선택된 프리셋 {selectedPresetIndex}: Z회전={currentZoneSetting.zRotation}°, 성공범위={currentZoneSetting.startAngle}°~{currentZoneSetting.endAngle}°");
         }
     }
     
@@ -139,7 +151,11 @@ public class CircularTimer : MonoBehaviour
         
         if (showDebugInfo)
         {
-            Debug.Log($"바늘: {normalizedNeedle:F1}°, 성공존: {normalizedStart:F1}°~{normalizedEnd:F1}°, 성공: {inSuccessZone}");
+            Debug.Log($"=== 타이밍 판정 ===");
+            Debug.Log($"바늘 각도: {normalizedNeedle:F1}°");
+            Debug.Log($"성공존 범위: {normalizedStart:F1}° ~ {normalizedEnd:F1}°");
+            Debug.Log($"성공존 교차여부: {normalizedStart > normalizedEnd}");
+            Debug.Log($"판정 결과: {inSuccessZone}");
         }
         
         if (!inSuccessZone)
@@ -157,12 +173,19 @@ public class CircularTimer : MonoBehaviour
     
     bool IsAngleInRange(float angle, float start, float end)
     {
+        // 모든 각도를 0-360 범위로 정규화
+        angle = NormalizeAngle(angle);
+        start = NormalizeAngle(start);
+        end = NormalizeAngle(end);
+        
         if (start <= end)
         {
+            // 일반적인 경우: start=45, end=75 -> 45~75도
             return angle >= start && angle <= end;
         }
         else
         {
+            // 360도를 넘나드는 경우: start=350, end=10 -> 350~360 또는 0~10도
             return angle >= start || angle <= end;
         }
     }
@@ -189,10 +212,20 @@ public class CircularTimer : MonoBehaviour
     {
         if (successZonePresets == null || successZonePresets.Length == 0) return;
         
-        // 현재 프리셋의 기즈모 표시
-        int index = Mathf.Clamp(currentPresetIndex, 0, successZonePresets.Length - 1);
-        var preset = successZonePresets[index];
+        // 런타임 중이면 현재 선택된 프리셋, 아니면 첫 번째 프리셋 표시
+        int index = 0;
+        if (Application.isPlaying && currentZoneSetting != null)
+        {
+            index = selectedPresetIndex;
+        }
+        else
+        {
+            index = 0; // 에디터에서는 첫 번째 프리셋만 미리보기
+        }
         
+        if (index >= successZonePresets.Length) return;
+        
+        var preset = successZonePresets[index];
         if (!preset.showGizmo) return;
         
         Vector3 center = transform.position;
@@ -211,20 +244,44 @@ public class CircularTimer : MonoBehaviour
         // 성공존 호(Arc) 그리기
         DrawArcGizmo(center, radius, preset.startAngle, preset.endAngle, preset.gizmoColor);
         
-        // 바늘 현재 위치도 표시 (실행 중일 때만)
+        // 바늘 기즈모 항상 표시 (에디터와 런타임 모두)
+        Gizmos.color = Color.red;
+        float needleAngle = 0f; // 기본값
+        
         if (Application.isPlaying && isRunning)
         {
-            Gizmos.color = Color.red;
-            Vector3 needleDirection = AngleToDirection(currentRotation);
-            Gizmos.DrawLine(center, center + needleDirection * (radius + 20f));
+            needleAngle = currentRotation; // 실행 중일 때는 실제 각도
         }
+        
+        Vector3 needleDirection = AngleToDirection(needleAngle);
+        Gizmos.DrawLine(center, center + needleDirection * (radius + 20f));
+        
+        // 0도 위치 표시 (12시 방향)
+        Gizmos.color = Color.blue;
+        Vector3 zeroDirection = AngleToDirection(0f);
+        Gizmos.DrawLine(center, center + zeroDirection * (radius + 40f));
+        
+        #if UNITY_EDITOR
+        // 현재 프리셋과 바늘 각도 정보 표시
+        UnityEditor.Handles.color = Color.white;
+        if (Application.isPlaying)
+        {
+            UnityEditor.Handles.Label(center + Vector3.up * (radius + 60f), $"프리셋 {selectedPresetIndex}");
+            UnityEditor.Handles.Label(center + Vector3.up * (radius + 80f), $"바늘: {needleAngle:F1}°");
+        }
+        else
+        {
+            UnityEditor.Handles.Label(center + Vector3.up * (radius + 60f), "에디터 모드");
+            UnityEditor.Handles.Label(center + Vector3.up * (radius + 80f), "빨간선=바늘(0°), 파란선=0도기준");
+        }
+        #endif
     }
     
     Vector3 AngleToDirection(float angle)
     {
-        // Unity의 각도 시스템에 맞춰 변환 (0도 = 12시 방향)
-        float rad = (angle - 90f) * Mathf.Deg2Rad;
-        return new Vector3(Mathf.Cos(rad), Mathf.Sin(rad), 0);
+        // 바늘과 동일한 각도 시스템 사용 (0도 = 12시 방향)
+        float rad = angle * Mathf.Deg2Rad;
+        return new Vector3(Mathf.Sin(rad), Mathf.Cos(rad), 0);
     }
     
     void DrawArcGizmo(Vector3 center, float radius, float startAngle, float endAngle, Color color)

@@ -3,7 +3,7 @@ using UnityEngine;
 public class EventObject : MonoBehaviour
 {
     [SerializeField]
-    protected string eventId;
+    public string eventId;
     [SerializeField]
     protected SpriteGlow.SpriteGlowEffect spriteGlowEffect;
 

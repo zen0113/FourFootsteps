@@ -3464,6 +3464,8 @@ MonoBehaviour:
   showDebugBounds: 1
   useMinYLimit: 1
   minY: -5.5
+  useMaxYLimit: 0
+  maxY: 20
 --- !u!114 &174401760
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -16498,7 +16500,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!82 &785937240
 AudioSource:
   m_ObjectHideFlags: 0
@@ -16666,6 +16668,7 @@ MonoBehaviour:
   emptyHeart: {fileID: 21300000, guid: 5f3e307b094ac694f8556e699d5a5e4e, type: 3}
   invincibilityDuration: 1.5
   isInvincible: 0
+  cameraShake: {fileID: 0}
 --- !u!114 &785937245
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -16704,7 +16707,10 @@ MonoBehaviour:
   groundMask:
     serializedVersion: 2
     m_Bits: 64
-  boxInteractingPower: 1.2
+  slopeCheckRadius: 0.3
+  slopeExitDelay: 0.15
+  slopeRaycastDistance: 0.5
+  raycastOffsets: []
   passableTag: Passable
   headCheck: {fileID: 501995005}
   tailCheck: {fileID: 1609305604}
@@ -16717,6 +16723,8 @@ MonoBehaviour:
   forceCrouch: 0
   climbSpeed: 2
   ladderSnapDistance: 0.3
+  boxInteractingPower: 1.2
+  crouchReleaseGrace: 0.12
 --- !u!61 &785937246
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -17610,6 +17618,7 @@ MonoBehaviour:
   areaRadius: 6.5
   walkSound: {fileID: 0}
   walkSoundInterval: 0.3
+  animator: {fileID: 0}
 --- !u!95 &825343096
 Animator:
   serializedVersion: 5
@@ -21682,8 +21691,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9f3738b3401b2e34bb407373bb14b1e6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  objectToActivate: {fileID: 2065881965}
-  activationSound: {fileID: 2065881971}
+  targetObject: {fileID: 2065881965}
+  activateObject: 1
+  sound: {fileID: 2065881971}
+  playSound: 1
 --- !u!1 &1096021034
 GameObject:
   m_ObjectHideFlags: 0
@@ -22600,6 +22611,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   tutorials:
+  - {fileID: 1503826582}
+  - {fileID: 1095768435}
+  - {fileID: 963115110}
   - {fileID: 1492910174}
   - {fileID: 384820906}
   - {fileID: 1503153617}
@@ -22615,11 +22629,8 @@ MonoBehaviour:
   - {fileID: 428892636}
   - {fileID: 424816089}
   - {fileID: 803058016}
-  - {fileID: 1503826582}
   - {fileID: 2013204856}
   - {fileID: 2133851565}
-  - {fileID: 1095768435}
-  - {fileID: 963115110}
   nextSceneName: 
 --- !u!4 &1141768215
 Transform:
@@ -22649,9 +22660,9 @@ Transform:
   - {fileID: 428892639}
   - {fileID: 424816092}
   - {fileID: 803058019}
-  - {fileID: 1503826585}
   - {fileID: 2013204859}
   - {fileID: 2133851568}
+  - {fileID: 1503826585}
   - {fileID: 1095768434}
   - {fileID: 963115113}
   m_Father: {fileID: 0}
@@ -29829,6 +29840,7 @@ MonoBehaviour:
   areaRadius: 6.5
   walkSound: {fileID: 0}
   walkSoundInterval: 0.3
+  animator: {fileID: 0}
 --- !u!1 &1552374767
 GameObject:
   m_ObjectHideFlags: 0
@@ -29937,7 +29949,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!82 &1556289782
 AudioSource:
   m_ObjectHideFlags: 0
@@ -30105,6 +30117,7 @@ MonoBehaviour:
   emptyHeart: {fileID: 21300000, guid: 5f3e307b094ac694f8556e699d5a5e4e, type: 3}
   invincibilityDuration: 1.5
   isInvincible: 0
+  cameraShake: {fileID: 0}
 --- !u!114 &1556289787
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -30143,7 +30156,10 @@ MonoBehaviour:
   groundMask:
     serializedVersion: 2
     m_Bits: 64
-  boxInteractingPower: 1.2
+  slopeCheckRadius: 0.3
+  slopeExitDelay: 0.15
+  slopeRaycastDistance: 0.5
+  raycastOffsets: []
   passableTag: Passable
   headCheck: {fileID: 1825292219}
   tailCheck: {fileID: 529075590}
@@ -30156,6 +30172,8 @@ MonoBehaviour:
   forceCrouch: 0
   climbSpeed: 2
   ladderSnapDistance: 0.3
+  boxInteractingPower: 1.2
+  crouchReleaseGrace: 0.12
 --- !u!61 &1556289788
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -45496,12 +45514,12 @@ PrefabInstance:
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 7438068007100546377, guid: 02280693573a60642bfb7595df428471, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 296303031}
     - targetCorrespondingSourceObject: {fileID: 7571502702814519762, guid: 02280693573a60642bfb7595df428471, type: 3}
       insertIndex: -1
       addedObject: {fileID: 126363717}
+    - targetCorrespondingSourceObject: {fileID: 7438068007100546377, guid: 02280693573a60642bfb7595df428471, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 296303031}
   m_SourcePrefab: {fileID: 100100000, guid: 02280693573a60642bfb7595df428471, type: 3}
 --- !u!1001 &1595900305665341888
 PrefabInstance:

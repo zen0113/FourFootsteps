@@ -22,11 +22,22 @@ public class MemoryPuzzle : EventObject, IResultExecutable
     private new void Start()
     {
         base.Start();
-        ResultManager.Instance.RegisterExecutable($"MemoryPuzzle", this);
-        if (puzzleObject == null)
-            puzzleObject = GameObject.FindWithTag("PuzzlePiece");
+        if (!string.IsNullOrEmpty(eventId))
+        {
+            ResultManager.Instance.RegisterExecutable(eventId, this);
+        }
+        else
+        {
+            // eventId가 설정되지 않은 경우를 대비한 경고 메시지
+            Debug.LogWarning($"'{gameObject.name}' 오브젝트의 eventId가 비어있어 ResultManager에 등록할 수 없습니다.");
+        }
+
+        puzzleObject = this.gameObject;
+
         if (puzzleBagButton == null)
+        {
             puzzleBagButton = UIManager.Instance.puzzleBagButton.GetComponent<RectTransform>();
+        }
     }
 
     private new void Update()

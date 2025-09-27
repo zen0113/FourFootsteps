@@ -15,6 +15,7 @@ public class BirdAutoMover : MonoBehaviour
     private AudioSource audioSource; // AudioSource 추가
     private bool isMoving = false;
     public bool isInfiniteFlying = false;
+    public event Action OnMovementFinished;
     // 목표지점 도착했어도 계속 나는 애니메이션 재생(추격 게임 중간에 필요)
 
     // 도착 처리 플래그 & 마지막 이동 방향(1=오른쪽, -1=왼쪽)
@@ -84,6 +85,8 @@ public class BirdAutoMover : MonoBehaviour
             {
                 hasArrivedOnce = true;
                 OnArrived?.Invoke();
+
+                OnMovementFinished?.Invoke();
             }
 
             if (isInfiniteFlying)
@@ -91,10 +94,6 @@ public class BirdAutoMover : MonoBehaviour
                 // 이동은 멈추되 날기 연출은 유지
                 isMoving = false; // 위치 이동 중단
                 animator?.SetBool("Moving", true);
-                //// 방향 고정을 위해 마지막 프레임의 이동 방향 보존(0일 수 있어 안전 처리)
-                //// 방향 벡터가 너무 작으면 기존 lastMoveDirX 유지
-                //if (Mathf.Abs(direction.x) > 0.0001f)
-                //    lastMoveDirX = direction.x >= 0 ? 1 : -1;
 
                 spriteRenderer.flipX = (lastMoveDirX < 0);
                 PlayFlyLoop();
@@ -111,9 +110,15 @@ public class BirdAutoMover : MonoBehaviour
 
         // 방향 반전
         if (direction.x > 0)
+        {
+            lastMoveDirX = 1; 
             spriteRenderer.flipX = false; // 오른쪽으로 이동 시 정상
+        }
         else if (direction.x < 0)
+        {
+            lastMoveDirX = -1; 
             spriteRenderer.flipX = true;  // 왼쪽으로 이동 시 반전
+        }
 
         Vector2 moveDir = direction.normalized;
         transform.Translate(moveDir * moveSpeed * Time.deltaTime);
@@ -132,7 +137,6 @@ public class BirdAutoMover : MonoBehaviour
     {
         if (flySound != null)
         {
-            // 현재 재생 중인 소리가 날기 소리가 아니거나, 재생 중인 소리가 없으면 재생
             if (!audioSource.isPlaying || audioSource.clip != flySound)
             {
                 audioSource.PlayOneShot(flySound);
@@ -145,7 +149,6 @@ public class BirdAutoMover : MonoBehaviour
         if (flySound == null) return;
         if (Time.time - lastFlySoundTime >= flySoundInterval)
         {
-            // OneShot으로 겹치지 않게 주기 재생
             audioSource.PlayOneShot(flySound);
             lastFlySoundTime = Time.time;
         }

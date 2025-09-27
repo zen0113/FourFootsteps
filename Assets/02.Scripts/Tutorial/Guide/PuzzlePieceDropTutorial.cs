@@ -21,7 +21,6 @@ public class PuzzlePieceDropTutorial : TutorialBase
     public bool hasLanded = false;
     private TutorialController tutorialController;
 
-    // FloatingEffect 스크립트를 제어하기 위한 변수
     private FloatingEffect puzzleFloatingEffect;
 
     public override void Enter()
@@ -33,19 +32,15 @@ public class PuzzlePieceDropTutorial : TutorialBase
     {
         tutorialController = controller;
 
-        if (spawnedPuzzlePiece != null)
+        if (spawnedPuzzlePiece != null && !hasLanded)
         {
-            if (!hasLanded)
-            {
-                // 떨어지는 동안 Z축 회전
-                spawnedPuzzlePiece.transform.Rotate(Vector3.forward * rotationSpeed * Time.deltaTime);
-            }
+            spawnedPuzzlePiece.transform.Rotate(Vector3.forward * rotationSpeed * Time.deltaTime);
         }
     }
 
     public override void Exit()
     {
-        // 이 스크립트의 역할이 끝나도 퍼즐 조각은 계속 둥둥 뜹니다.
+        // 역할이 끝나도 퍼즐 조각은 유지
     }
 
     private void SpawnPuzzlePiece()
@@ -64,45 +59,35 @@ public class PuzzlePieceDropTutorial : TutorialBase
             spawnedPuzzlePiece.name = eventId;
         }
 
-        // 생성된 퍼즐 조각에서 FloatingEffect 컴포넌트를 가져옵니다.
         puzzleFloatingEffect = spawnedPuzzlePiece.GetComponent<FloatingEffect>();
-        if (puzzleFloatingEffect == null)
-        {
-            Debug.LogWarning("퍼즐 조각 프리펩에 FloatingEffect 스크립트가 없습니다! 추가해주세요.");
-        }
 
-        puzzleRigidbody = spawnedPuzzlePiece.GetComponent<Rigidbody>();
-        if (puzzleRigidbody == null)
-        {
-            puzzleRigidbody = spawnedPuzzlePiece.AddComponent<Rigidbody>();
-        }
-
-        Collider puzzleCollider = spawnedPuzzlePiece.GetComponent<Collider>();
-        if (puzzleCollider == null)
-        {
-            puzzleCollider = spawnedPuzzlePiece.AddComponent<BoxCollider>();
-        }
-
-        PuzzlePieceGroundDetector detector = spawnedPuzzlePiece.GetComponent<PuzzlePieceGroundDetector>();
+        PuzzlePieceGroundDetector detector = spawnedPuzzlePiece.GetComponentInChildren<PuzzlePieceGroundDetector>(true);
         if (detector == null)
         {
             detector = spawnedPuzzlePiece.AddComponent<PuzzlePieceGroundDetector>();
         }
         detector.Initialize(this);
 
-        MemoryPuzzle memoryPuzzle = spawnedPuzzlePiece.GetComponent<MemoryPuzzle>();
+
+        // 자식 오브젝트에서 MemoryPuzzle 컴포넌트를 찾습니다.
+        MemoryPuzzle memoryPuzzle = spawnedPuzzlePiece.GetComponentInChildren<MemoryPuzzle>();
         if (memoryPuzzle != null)
         {
-            // eventId와 puzzleId를 하나의 if 블록 안에서 모두 설정합니다.
+            // eventId 할당
             if (!string.IsNullOrEmpty(eventId))
             {
-                memoryPuzzle.eventId = eventId; // EventObject로부터 상속받은 eventId
+                memoryPuzzle.eventId = eventId;
             }
 
+            // puzzleId 할당
             if (!string.IsNullOrEmpty(puzzleId))
             {
                 memoryPuzzle.puzzleId = puzzleId;
             }
+        }
+        else
+        {
+            Debug.LogWarning("생성된 퍼즐 조각 프리펩 또는 그 자식에서 MemoryPuzzle 컴포넌트를 찾을 수 없습니다.");
         }
 
         if (playSound && sound != null)
@@ -111,7 +96,6 @@ public class PuzzlePieceDropTutorial : TutorialBase
         }
     }
 
-    // 퍼즐 조각이 바닥에 닿았을 때 호출되는 메서드
     public void OnPuzzlePieceLanded()
     {
         if (hasLanded) return;
@@ -119,6 +103,7 @@ public class PuzzlePieceDropTutorial : TutorialBase
         Debug.Log("퍼즐 조각이 바닥에 닿았습니다!");
         hasLanded = true;
 
+        puzzleRigidbody = spawnedPuzzlePiece.GetComponent<Rigidbody>();
         if (puzzleRigidbody != null)
         {
             puzzleRigidbody.velocity = Vector3.zero;
@@ -126,12 +111,8 @@ public class PuzzlePieceDropTutorial : TutorialBase
             puzzleRigidbody.isKinematic = true;
         }
 
-        // 현재 회전 상태를 그대로 유지 (회전을 멈추기만 함)
-        // 별도의 회전 보간이나 리셋 없이, 떨어진 그 각도 그대로 고정
-
         if (puzzleFloatingEffect != null)
         {
-            // FloatingEffect 스크립트 활성화
             puzzleFloatingEffect.enabled = true;
         }
 

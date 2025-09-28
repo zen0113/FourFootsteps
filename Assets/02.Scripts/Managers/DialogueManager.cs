@@ -781,6 +781,18 @@ public class DialogueManager : MonoBehaviour
         // 대화 종료
         EndDialogue();
 
+        // tutorialIndex가 -4일 경우, Next에 지정된 대사를 바로 시작
+        if (choiceLine.TutorialIndex == -4)
+        {
+            // Next 필드가 비어있지 않고, 유효한 dialogue ID인지 확인
+            if (!string.IsNullOrEmpty(choiceLine.Next) && dialogues.ContainsKey(choiceLine.Next))
+            {
+                Debug.Log($"[DialogueManager] TutorialIndex가 -4입니다. 다음 대사 '{choiceLine.Next}'를 바로 시작합니다.");
+                StartDialogue(choiceLine.Next);
+                return; // 기능 수행 후 메서드 종료
+            }
+        }
+
         // 현재 활성화된 TutorialDialog에게 선택된 튜토리얼 인덱스 전달
         TutorialDialog currentTutorialDialog = FindObjectOfType<TutorialDialog>();
         if (currentTutorialDialog != null)

@@ -19,18 +19,21 @@ public class PuzzlePieceDropTutorial : TutorialBase
     private GameObject spawnedPuzzlePiece;
     private Rigidbody puzzleRigidbody;
     public bool hasLanded = false;
-    private TutorialController tutorialController;
+    // ✨ private TutorialController tutorialController; // 더 이상 필요 없으므로 삭제합니다.
 
     private FloatingEffect puzzleFloatingEffect;
 
     public override void Enter()
     {
         SpawnPuzzlePiece();
+
+        // ✨ 조각을 생성한 직후, 바로 다음 튜토리얼로 진행하도록 명령합니다.
+        FindObjectOfType<TutorialController>()?.SetNextTutorial();
     }
 
     public override void Execute(TutorialController controller)
     {
-        tutorialController = controller;
+        // ✨ tutorialController = controller; // 더 이상 필요 없으므로 삭제합니다.
 
         if (spawnedPuzzlePiece != null && !hasLanded)
         {
@@ -68,18 +71,14 @@ public class PuzzlePieceDropTutorial : TutorialBase
         }
         detector.Initialize(this);
 
-
-        // 자식 오브젝트에서 MemoryPuzzle 컴포넌트를 찾습니다.
         MemoryPuzzle memoryPuzzle = spawnedPuzzlePiece.GetComponentInChildren<MemoryPuzzle>();
         if (memoryPuzzle != null)
         {
-            // eventId 할당
             if (!string.IsNullOrEmpty(eventId))
             {
                 memoryPuzzle.eventId = eventId;
             }
 
-            // puzzleId 할당
             if (!string.IsNullOrEmpty(puzzleId))
             {
                 memoryPuzzle.puzzleId = puzzleId;
@@ -116,14 +115,16 @@ public class PuzzlePieceDropTutorial : TutorialBase
             puzzleFloatingEffect.enabled = true;
         }
 
-        if (tutorialController != null)
-        {
-            Invoke(nameof(MoveToNextTutorial), 2f);
-        }
+        // ✨ 다음 튜토리얼로 넘어가는 로직을 Enter()로 옮겼으므로 아래 코드는 삭제합니다.
+        // if (tutorialController != null)
+        // {
+        //     Invoke(nameof(MoveToNextTutorial), 2f);
+        // }
     }
 
-    private void MoveToNextTutorial()
-    {
-        tutorialController.SetNextTutorial();
-    }
+    // ✨ 더 이상 사용하지 않으므로 메서드 자체를 삭제합니다.
+    // private void MoveToNextTutorial()
+    // {
+    //     tutorialController.SetNextTutorial();
+    // }
 }

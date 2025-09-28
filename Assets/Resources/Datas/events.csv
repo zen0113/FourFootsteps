@@ -16,8 +16,20 @@ EventStage1_Puddle,물웅덩이,물웅덩이 조사,,,Result_StartDialogueStage0
 EventMemoryPuzzle1,기억 조각 1,소파 옆에 있는 기억 조각 조사,,,Result_InverseCanMoving/Result_StartDialogueStage01_006/Result_GetMemoryPuzzle/Result_GoToRecall1/Result_IncrementCurrentMemoryPuzzleCount,Sequential,회상씬 1로 로딩
 EventMemoryPuzzle2,기억 조각 2,병원 앞에 있는 기억 조각 조사,,,Result_InverseCanMoving/Result_StartDialogueStage02_005/Result_GetMemoryPuzzle/Result_GoToRecall2/Result_IncrementCurrentMemoryPuzzleCount,Sequential,회상씬 2로 로딩
 EventMemoryPuzzle3,기억 조각 3,정자에 있는 기억 조각 조사,,,Result_InverseCanMoving/Result_StartDialogueStage03_009/Result_GetMemoryPuzzle/Result_GoToRecall3/Result_IncrementCurrentMemoryPuzzleCount,Sequential,회상씬 3로 로딩
+EventMemoryPuzzle4,기억 조각 4,트럭 안 기억 조각 조사,,,Result_InverseCanMoving/Result_StartDialogueStage04_003/Result_GetMemoryPuzzle/Result_GoToRecall4/Result_IncrementCurrentMemoryPuzzleCount,Sequential,회상씬 3로 로딩
 ,,,,,,,
 EventStage2_Nurse,간호사 대화,간호사 대화,,,Result_StartDialogueStage02_004,Instant,
+,,,,,,,
+EventStage4_PetBowl,스테이지 4 속 밥그릇,밥그릇 조사 스크립트,,,Result_StartDialogueStage04_006,Instant,
+EventStage4_Towel,스테이지 4 속 밥그릇,밥그릇 조사 스크립트,,,Result_StartDialogueStage04_007,Instant,
+EventStage4_Ttoli,스테이지 4 속 밥그릇,밥그릇 조사 스크립트,,,Result_StartDialogueStage04_Ttoli_001,Instant,
+EventStage4_Leo,스테이지 4 속 밥그릇,밥그릇 조사 스크립트,,,Result_StartDialogueStage04_Leo_001,Instant,
+EventStage4_Bogsil,스테이지 4 속 밥그릇,밥그릇 조사 스크립트,,,Result_StartDialogueStage04_Bogsil_001,Instant,
+EventStage4_Miya,스테이지 4 속 밥그릇,밥그릇 조사 스크립트,,,Result_StartDialogueStage04_Miya_001,Instant,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
 ,,,,,,,
 EventRecall1_Sofa_Test,회상 속 소파,회상에서 할퀴어진 소파 조사,,C_RoomSofaFirstClick,Result_StartDialogueRecall1_002/Result_IncrementRoomSofaClick,Instant,
 EventRecall1_Sofa,회상 속 소파,다음 씬으로 넘어가는 오브젝트,,C_CanInvesigatingRecall,Result_StartDialogueRecall1_008,,

@@ -100,12 +100,7 @@ public class CircularTimer : MonoBehaviour
         if (needle != null)
         {
             needle.gameObject.SetActive(true);
-            // 바늘을 강제로 0도 위치로 초기화
-            RectTransform needleRect = needle.GetComponent<RectTransform>();
-            if (needleRect != null)
-            {
-                needleRect.localRotation = Quaternion.Euler(0, 0, -120f); // 120도 오프셋 적용
-            }
+            // 바늘 초기화는 제거 - Update에서만 처리
         }
             
         if (showDebugInfo)

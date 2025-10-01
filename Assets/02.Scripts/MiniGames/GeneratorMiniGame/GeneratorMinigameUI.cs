@@ -24,6 +24,16 @@ public class GeneratorMinigameUI : MonoBehaviour
     public AudioClip timingAppearSound;
     public AudioClip successSound;
     public AudioClip failSound;
+    public AudioClip generatorCompleteSound; // 발전기 수리 완료 효과음
+    
+    [Header("플레이어 컨트롤러 설정")]
+    public PlayerCatMovement playerMovement;
+    
+    [Header("발전기 오브젝트 설정")]
+    public SpriteRenderer generatorSpriteRenderer; // 발전기의 SpriteRenderer
+    public Sprite generatorRepairedSprite; // 수리 완료 후 스프라이트
+    private int originalSortingOrder = 3; // 원래 Sorting Order
+    private int repairedSortingOrder = 1; // 수리 후 Sorting Order
     
     private Action<bool> onComplete;
     private bool isActive = false;
@@ -32,19 +42,35 @@ public class GeneratorMinigameUI : MonoBehaviour
     private int consecutiveFails = 0;
     private const int maxConsecutiveFails = 3;
     
-    // 플레이어 참조 추가
-    private PlayerCatMovement player;
-    
     void Start()
     {
         if (audioSource == null)
             audioSource = GetComponent<AudioSource>();
             
-        // 플레이어 찾기
-        player = FindObjectOfType<PlayerCatMovement>();
-        if (player == null)
+        // 플레이어 자동 찾기
+        if (playerMovement == null)
         {
-            Debug.LogError("PlayerCatMovement를 찾을 수 없습니다!");
+            playerMovement = FindObjectOfType<PlayerCatMovement>();
+            if (playerMovement == null)
+            {
+                Debug.LogError("[GeneratorMinigameUI] PlayerCatMovement를 찾을 수 없습니다!");
+            }
+        }
+        
+        // 발전기 SpriteRenderer 확인
+        if (generatorSpriteRenderer != null)
+        {
+            originalSortingOrder = generatorSpriteRenderer.sortingOrder;
+            Debug.Log($"[GeneratorMinigameUI] 발전기 원본 Sorting Order: {originalSortingOrder}");
+        }
+        
+        // 게임 시작 시 플레이어를 웅크린 상태로 만들고 입력 차단
+        if (playerMovement != null)
+        {
+            Debug.Log("[GeneratorMinigameUI] 게임 시작 - 플레이어 강제 웅크리기 및 입력 차단");
+            playerMovement.SetMiniGameInputBlocked(true);
+            playerMovement.ForceCrouch = true;
+            playerMovement.IsJumpingBlocked = true;
         }
     }
     
@@ -57,11 +83,13 @@ public class GeneratorMinigameUI : MonoBehaviour
         progress = 0f;
         consecutiveFails = 0;
         
-        // 플레이어 입력 차단
-        if (player != null)
+        // 플레이어 상태 확인
+        if (playerMovement != null)
         {
-            player.SetMiniGameInputBlocked(true);
-            Debug.Log("플레이어 입력 차단 완료");
+            playerMovement.SetMiniGameInputBlocked(true);
+            playerMovement.ForceCrouch = true;
+            playerMovement.IsJumpingBlocked = true;
+            Debug.Log("[GeneratorMinigameUI] 플레이어 입력 차단 및 웅크리기 활성화");
         }
         
         // Canvas 활성화
@@ -289,19 +317,83 @@ public class GeneratorMinigameUI : MonoBehaviour
     
     void CompleteMinigame(bool success)
     {
+        Debug.Log($"[GeneratorMinigameUI] 미니게임 완료 - 성공 여부: {success}");
+        
         isActive = false;
         
-        // 플레이어 입력 차단 해제
-        if (player != null)
+        // 성공했을 때만 플레이어 해방 및 발전기 변경
+        if (success)
         {
-            player.SetMiniGameInputBlocked(false);
-            Debug.Log("플레이어 입력 차단 해제 완료");
+            StartCoroutine(FinishMinigameSequence());
+        }
+        else
+        {
+            // 실패 시 미니게임만 종료하고 플레이어는 웅크린 상태 유지
+            if (minigameCanvas != null)
+                minigameCanvas.SetActive(false);
+                
+            onComplete?.Invoke(success);
+        }
+    }
+    
+    IEnumerator FinishMinigameSequence()
+    {
+        Debug.Log("[GeneratorMinigameUI] 미니게임 성공 - 마무리 시퀀스 시작");
+        
+        // 약간의 대기 (성공 연출)
+        yield return new WaitForSeconds(0.5f);
+        
+        // 발전기 수리 완료 효과음 재생
+        if (generatorCompleteSound != null)
+        {
+            PlaySound(generatorCompleteSound);
+            Debug.Log("[GeneratorMinigameUI] 발전기 수리 완료 효과음 재생");
         }
         
+        // 발전기 스프라이트 변경 및 Sorting Order 변경
+        if (generatorSpriteRenderer != null)
+        {
+            // 스프라이트 변경
+            if (generatorRepairedSprite != null)
+            {
+                generatorSpriteRenderer.sprite = generatorRepairedSprite;
+                Debug.Log("[GeneratorMinigameUI] 발전기 스프라이트 변경 완료");
+            }
+            else
+            {
+                Debug.LogWarning("[GeneratorMinigameUI] generatorRepairedSprite가 할당되지 않았습니다!");
+            }
+            
+            // Sorting Order 변경 (3 → 1)
+            generatorSpriteRenderer.sortingOrder = repairedSortingOrder;
+            Debug.Log($"[GeneratorMinigameUI] 발전기 Sorting Order 변경: {originalSortingOrder} → {repairedSortingOrder}");
+        }
+        else
+        {
+            Debug.LogWarning("[GeneratorMinigameUI] generatorSpriteRenderer가 할당되지 않았습니다!");
+        }
+        
+        // 효과음이 재생될 시간을 추가로 대기 (선택사항)
+        yield return new WaitForSeconds(0.3f);
+        
+        // UI 비활성화
         if (minigameCanvas != null)
             minigameCanvas.SetActive(false);
-            
-        onComplete?.Invoke(success);
+        
+        // 플레이어 상태 복원 - 자유롭게 움직일 수 있도록
+        if (playerMovement != null)
+        {
+            Debug.Log("[GeneratorMinigameUI] 플레이어 해방 - 웅크리기 및 입력 차단 해제");
+            playerMovement.SetMiniGameInputBlocked(false);
+            playerMovement.ForceCrouch = false;
+            playerMovement.IsJumpingBlocked = false;
+            playerMovement.SetCrouchMovingState(false);
+        }
+        
+        Debug.Log("[GeneratorMinigameUI] 플레이어 이제 자유롭게 움직일 수 있음!");
+        
+        // 콜백 호출
+        onComplete?.Invoke(true);
     }
     
     void Update()
@@ -316,13 +408,21 @@ public class GeneratorMinigameUI : MonoBehaviour
         }
     }
     
-    // 오브젝트가 비활성화될 때도 입력 차단 해제
+    // 오브젝트가 비활성화될 때도 안전하게 처리
     void OnDisable()
     {
-        if (player != null && isActive)
+        if (isActive)
         {
-            player.SetMiniGameInputBlocked(false);
-            Debug.Log("OnDisable: 플레이어 입력 차단 해제");
+            Debug.Log("[GeneratorMinigameUI] OnDisable - 비정상 종료 감지");
+            isActive = false;
+            
+            // 비정상 종료 시에도 플레이어 해방
+            if (playerMovement != null)
+            {
+                playerMovement.SetMiniGameInputBlocked(false);
+                playerMovement.ForceCrouch = false;
+                playerMovement.IsJumpingBlocked = false;
+            }
         }
     }
 }

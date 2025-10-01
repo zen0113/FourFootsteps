@@ -472,6 +472,7 @@ MonoBehaviour:
   spriteGlowEffect: {fileID: 0}
   isOneTimeOnly: 0
   keyImage: {fileID: 0}
+  requiredCondition: 
 --- !u!1 &46550098
 GameObject:
   m_ObjectHideFlags: 0
@@ -1186,6 +1187,10 @@ PrefabInstance:
       propertyPath: m_AnchorMax.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2231135697267280911, guid: fcc937e4cda6d8c4d8de70f5c23e9268, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 4135296550664430820, guid: fcc937e4cda6d8c4d8de70f5c23e9268, type: 3}
       propertyPath: m_Name
       value: Player UI Canvas
@@ -1323,6 +1328,11 @@ MonoBehaviour:
   - sceneName: RecallScene2
     sceneDescription: "\uB3D9\uBB3C\uBCD1\uC6D0"
   defaultText: "\uD604\uC7AC \uC52C\uC5D0 \uB300\uD55C \uC124\uBA85\uC774 \uC5C6\uC2B5\uB2C8\uB2E4."
+--- !u!224 &121090440 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 5462265599879523924, guid: fcc937e4cda6d8c4d8de70f5c23e9268, type: 3}
+  m_PrefabInstance: {fileID: 121090436}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &143213732
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1939,6 +1949,7 @@ MonoBehaviour:
   spriteGlowEffect: {fileID: 0}
   isOneTimeOnly: 0
   keyImage: {fileID: 0}
+  requiredCondition: 
   randomDialogueIds:
   - EventRecall2_Poster1
   - EventRecall2_Poster2
@@ -2282,6 +2293,7 @@ MonoBehaviour:
   spriteGlowEffect: {fileID: 0}
   isOneTimeOnly: 0
   keyImage: {fileID: 0}
+  requiredCondition: 
 --- !u!61 &301281596
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -6265,6 +6277,7 @@ MonoBehaviour:
   spriteGlowEffect: {fileID: 0}
   isOneTimeOnly: 0
   keyImage: {fileID: 0}
+  requiredCondition: 
   randomDialogueIds: []
 --- !u!1 &760062083
 GameObject:
@@ -6752,6 +6765,7 @@ MonoBehaviour:
   spriteGlowEffect: {fileID: 0}
   isOneTimeOnly: 0
   keyImage: {fileID: 0}
+  requiredCondition: 
 --- !u!1 &835995107
 GameObject:
   m_ObjectHideFlags: 0
@@ -8257,6 +8271,7 @@ MonoBehaviour:
   spriteGlowEffect: {fileID: 0}
   isOneTimeOnly: 0
   keyImage: {fileID: 0}
+  requiredCondition: 
 --- !u!61 &1021726781
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -9299,6 +9314,7 @@ MonoBehaviour:
   spriteGlowEffect: {fileID: 0}
   isOneTimeOnly: 0
   keyImage: {fileID: 0}
+  requiredCondition: 
 --- !u!61 &1154155718
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -10937,6 +10953,7 @@ MonoBehaviour:
   spriteGlowEffect: {fileID: 0}
   isOneTimeOnly: 0
   keyImage: {fileID: 0}
+  requiredCondition: 
 --- !u!61 &1431219419
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -11052,6 +11069,7 @@ MonoBehaviour:
   spriteGlowEffect: {fileID: 0}
   isOneTimeOnly: 0
   keyImage: {fileID: 0}
+  requiredCondition: 
   randomDialogueIds:
   - EventRecall2_Good_Doctor1
   - EventRecall2_Good_Doctor2
@@ -11388,6 +11406,7 @@ MonoBehaviour:
   spriteGlowEffect: {fileID: 0}
   isOneTimeOnly: 0
   keyImage: {fileID: 0}
+  requiredCondition: 
 --- !u!61 &1460555275
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -12789,6 +12808,213 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 1958815240789535501, guid: 1da32e186052b2546bdf2d0a6f06e658, type: 3}
   m_PrefabInstance: {fileID: 1642291183}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1659239781
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1659239783}
+  - component: {fileID: 1659239782}
+  m_Layer: 0
+  m_Name: ToastTextSpawner
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1659239782
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1659239781}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 84c61fd204c6d144194c68eddb1cc7a0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  toastPrefab: {fileID: 2208031083558113381, guid: 63b48124017c20d438d9929451db2072, type: 3}
+  toastParent: {fileID: 121090440}
+  duration: 3
+  jitterX: {x: -12, y: 12}
+  positiveTextColor: {r: 0, g: 0, b: 0, a: 1}
+  positiveBgColor: {r: 1, g: 1, b: 1, a: 0.85}
+  riseOffsetUp: {x: 0, y: 60}
+  alphaUp:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 8
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.12
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.8
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: -8
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  scaleUp:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0.85
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.15
+      value: 1.1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  negativeTextColor: {r: 1, g: 0, b: 0, a: 1}
+  negativeBgColor: {r: 1, g: 1, b: 1, a: 0.85}
+  riseOffsetDown: {x: 0, y: -60}
+  alphaDown:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 9
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.7
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.95
+      value: 0
+      inSlope: -9
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  scaleDown:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1.05
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.2
+      value: 0.95
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 0.95
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  autoToggleLayer: 0
+  layerOffDelay: 0.25
+  initialPool: 2
+--- !u!4 &1659239783
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1659239781}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 880.6951, y: 505.79745, z: -3.9874892}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1673401866
 GameObject:
   m_ObjectHideFlags: 0
@@ -13657,6 +13883,7 @@ MonoBehaviour:
   spriteGlowEffect: {fileID: 0}
   isOneTimeOnly: 0
   keyImage: {fileID: 0}
+  requiredCondition: 
 --- !u!61 &1769555273
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -14222,6 +14449,8 @@ MonoBehaviour:
   showDebugBounds: 1
   useMinYLimit: 1
   minY: -6
+  useMaxYLimit: 0
+  maxY: 20
 --- !u!114 &1890628831
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -14652,6 +14881,7 @@ MonoBehaviour:
   spriteGlowEffect: {fileID: 0}
   isOneTimeOnly: 0
   keyImage: {fileID: 0}
+  requiredCondition: 
 --- !u!61 &1938240648
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -15020,6 +15250,7 @@ MonoBehaviour:
   spriteGlowEffect: {fileID: 0}
   isOneTimeOnly: 0
   keyImage: {fileID: 0}
+  requiredCondition: 
 --- !u!114 &1994566715
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -16015,3 +16246,4 @@ SceneRoots:
   - {fileID: 1890628834}
   - {fileID: 714426434}
   - {fileID: 1420786909}
+  - {fileID: 1659239783}

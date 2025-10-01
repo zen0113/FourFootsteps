@@ -50,6 +50,7 @@ public static class KoreanJosa
     private static string PickEunNeun(bool hasJong) => hasJong ? "은" : "는";
     private static string PickIGa(bool hasJong) => hasJong ? "이" : "가";
     private static string PickGwaWa(bool hasJong) => hasJong ? "과" : "와";
+    private static string PickIRangRang(bool hasJong) => hasJong ? "이랑" : "랑";
     private static string PickEuroRo(bool hasJong, bool rieul)
     {
         // 받침이 없거나 받침이 ㄹ이면 "로", 그 외는 "으로"
@@ -71,7 +72,7 @@ public static class KoreanJosa
         {
             var (hasJong, rieul) = AnalyzeTail(value);
 
-            // 1) 괄호 패턴들: (이)가, (은)는, (을)를, (과)와, (으)로
+            // 1) 괄호 패턴: (이)가, (은)는, (을)를, (과)와, (으)로, (이)랑
             text = Regex.Replace(
                 text,
                 $@"\{{{varToken}\}}\((.)\)(.)",
@@ -79,9 +80,15 @@ public static class KoreanJosa
                 {
                     string a = m.Groups[1].Value; // 괄호 안
                     string b = m.Groups[2].Value; // 괄호 뒤
-                    // (으)로는 특수 규칙
-                    if ((a == "으" && b == "로"))
+
+                    // (으)로 특수 규칙
+                    if (a == "으" && b == "로")
                         return value + PickEuroRo(hasJong, rieul);
+
+                    // (이)랑 규칙
+                    if (a == "이" && b == "랑")
+                        return value + PickIRangRang(hasJong);
+
                     // 일반 2선택 조사
                     string pair = $"{a}/{b}";
                     string picked = pair switch
@@ -90,20 +97,22 @@ public static class KoreanJosa
                         "은/는" => PickEunNeun(hasJong),
                         "을/를" => PickEulReul(hasJong),
                         "과/와" => PickGwaWa(hasJong),
+                        "이랑/랑" => PickIRangRang(hasJong),
                         _ => Pick(pair, hasJong)
                     };
                     return value + picked;
                 });
 
-            // 2) 슬래시 패턴: {Var}이/가, {Var}은/는, {Var}을/를, {Var}과/와
+            // 2) 슬래시 패턴 (멀티 음절 우선)
             text = Regex.Replace(
                 text,
-                $@"\{{{varToken}\}}(이/가|은/는|을/를|과/와)",
+                $@"\{{{varToken}\}}(이랑/랑|이/가|은/는|을/를|과/와)",
                 m =>
                 {
                     string pair = m.Groups[1].Value;
                     string picked = pair switch
                     {
+                        "이랑/랑" => PickIRangRang(hasJong),
                         "이/가" => PickIGa(hasJong),
                         "은/는" => PickEunNeun(hasJong),
                         "을/를" => PickEulReul(hasJong),
@@ -113,20 +122,22 @@ public static class KoreanJosa
                     return value + picked;
                 });
 
-            // 3) 단일 조사 패턴: {Var}은|는|이|가|을|를|과|와|으로|로
+            // 3) 단일 조사 패턴 (멀티 음절 먼저, 그리고 '이|가'는 뒤가 '랑'이면 매칭 금지)
             text = Regex.Replace(
                 text,
-                $@"\{{{varToken}\}}(은|는|이|가|을|를|과|와|으로|로)",
+                $@"\{{{varToken}\}}(이랑|랑|으로|로|은|는|을|를|과|와|이(?!랑)|가(?!랑))",
                 m =>
                 {
                     string j = m.Groups[1].Value;
                     string picked = j switch
                     {
+                        "이랑" => PickIRangRang(hasJong),
+                        "랑" => PickIRangRang(hasJong),
+                        "으로" or "로" => PickEuroRo(hasJong, rieul),
                         "은" or "는" => PickEunNeun(hasJong),
-                        "이" or "가" => PickIGa(hasJong),
                         "을" or "를" => PickEulReul(hasJong),
                         "과" or "와" => PickGwaWa(hasJong),
-                        "으로" or "로" => PickEuroRo(hasJong, rieul),
+                        "이" or "가" => PickIGa(hasJong),
                         _ => j
                     };
                     return value + picked;

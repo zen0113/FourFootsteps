@@ -64,6 +64,17 @@ public class ResultManager : MonoBehaviour
         }
     }
 
+    public void Test()
+    {
+        GameManager.Instance.IncrementVariable("ResponsibilityScore",3);
+        ResponsibilityManager.Instance.ChangeResponsibilityGauge();
+    }
+
+    public void ExecuteResult(string resultID)
+    {
+        StartCoroutine(ExecuteResultCoroutine(resultID));
+    }
+
     public IEnumerator ExecuteResultCoroutine(string resultID)
     {
         string variableName;
@@ -102,6 +113,23 @@ public class ResultManager : MonoBehaviour
             case string when resultID.StartsWith("Result_Inverse"):  // !값
                 variableName = resultID["Result_Inverse".Length..];
                 GameManager.Instance.InverseVariable(variableName);
+                yield return null;
+                break;
+
+            // 책임지수 토스트 텍스트 효과
+            // Result_RespScoreToastText1 -> 긍정적 토스트 효과
+            // Result_RespScoreToastText0 -> 부정적 토스트 효과
+            case string when resultID.StartsWith("Result_RespScoreToastText"):
+                int score;
+                if(int.TryParse(resultID["Result_RespScoreToastText".Length..],out score))
+                {
+                    var (msg, mood) = ToastTextSpawner.GetToastForDelta(score);
+                    ToastTextSpawner.Instance.ShowToast(msg, Vector2.zero, mood);
+                }
+                else
+                {
+                    Debug.LogError("Result_RespScoreToastText 뒤에 0이나 1의 숫자 입력 필요!!");
+                }
                 yield return null;
                 break;
 
@@ -294,6 +322,7 @@ public class ResultManager : MonoBehaviour
                 SceneLoader.Instance.LoadScene("GameOver");
                 yield return null;
                 break;
+
 
             default:
                 Debug.Log($"Result ID: {resultID} not found!");

@@ -47,7 +47,12 @@ public class PuzzleMemoryManager : MonoBehaviour
         }
 
         ParseMemoryContents();
+    }
+
+    private void Start()
+    {
         UpdateHomePuzzleState();
+        gameObject.SetActive(false);
     }
 
     // UI Canvas의 PuzzleBag Button에 연결
@@ -195,13 +200,18 @@ public class PuzzleMemoryManager : MonoBehaviour
     // 단순하게 {YourCatName} 부분 바꾸는 것만 추가
     private string ProcessPlaceholders(string originalString)
     {
-        var catName = (string)GameManager.Instance.GetVariable("YourCatName");
+        string yourCatName = (GameManager.Instance.GetVariable("YourCatName") as string) ?? "";
 
-        string modifiedString = originalString.Replace("\\n", "\n");
-        modifiedString = modifiedString.Replace("`", ",");
-        modifiedString = modifiedString.Replace("", "");
+        string modifiedString = originalString.Replace("\\n", "\n")
+                       .Replace("`", ",")
+                       .Replace("", "")
+                       .Replace("\u0008", "");
 
-        modifiedString = modifiedString.Replace("{YourCatName}", catName);
+        // 한 번에 모든 패턴(괄호/슬래시/단일조사/단독)을 처리
+        modifiedString = KoreanJosa.Apply(
+            modifiedString,
+            ("YourCatName", yourCatName)
+        );
 
         return modifiedString;
     }

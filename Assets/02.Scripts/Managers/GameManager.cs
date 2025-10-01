@@ -75,8 +75,15 @@ public class GameManager : MonoBehaviour
                 new SceneData("RecallScene1", true),
                 new SceneData("StageScene2"),
                 new SceneData("RecallScene2", true),
-                new SceneData("StageScene3_IncludeMiniGame"),
-                new SceneData("RecallScene3", true)
+                new SceneData("StageScene3"),
+                new SceneData("RecallScene3", true),
+                new SceneData("StageScene3_2"),
+                new SceneData("StageScene4"),
+                new SceneData("RecallScene4", true),
+                new SceneData("StageScene5"),
+                new SceneData("RecallScene5", true),
+                new SceneData("Ending_Happy"),
+                new SceneData("Ending_Bad"),
             };
     }
 
@@ -160,6 +167,11 @@ public class GameManager : MonoBehaviour
                     break;
             }
         }
+    }
+
+    public void LoadTitleScene()
+    {
+        SceneLoader.Instance.LoadScene("TitleScene");
     }
 
     // Variable 값 설정

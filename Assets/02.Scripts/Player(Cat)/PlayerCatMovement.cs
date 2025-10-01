@@ -138,6 +138,10 @@ public class PlayerCatMovement : MonoBehaviour
     // 스티키 활성 여부 보조
     private bool IsCrouchStickyActive => Time.time < crouchStickyUntil;
 
+    // 엔딩 조작 상태
+    [Header("엔딩 조작 상태")]
+    public bool processingBadEnding = false;
+
     /// <summary>
     /// 게임 시작 시 초기화 작업
     /// UI 설정, 컴포넌트 참조, 물리 설정 등을 수행
@@ -386,7 +390,8 @@ public class PlayerCatMovement : MonoBehaviour
         }
 
         // 일반 상태 처리 (이동, 점프, 대시)
-        isDashing = Input.GetKey(KeyCode.LeftShift) && !(boxInteraction != null && boxInteraction.IsInteracting);
+        isDashing = Input.GetKey(KeyCode.LeftShift) && !(boxInteraction != null && boxInteraction.IsInteracting)
+            && !processingBadEnding;
         bool isJumping = !isOnGround;
 
         if (isDashing && hasHorizontalInput)
@@ -861,7 +866,7 @@ public class PlayerCatMovement : MonoBehaviour
             // 웅크린 상태일 때
             currentPower = crouchPower;
         }
-        else if (Input.GetKey(KeyCode.LeftShift) && !isCrouching && !isInteractingWithBox)
+        else if (Input.GetKey(KeyCode.LeftShift) && !isCrouching && !isInteractingWithBox&&!processingBadEnding)
         {
             // 대시 상태일 때 (웅크리거나 박스 상호작용 중이 아닐 때만)
             currentPower = dashPower;

@@ -15,7 +15,7 @@ public class TutorialController : MonoBehaviour
     private GameObject black; // 자동으로 찾을 GameObject
 
     private TutorialBase currentTutorial = null;
-    private int currentIndex = -1;
+    [SerializeField] private int currentIndex = -1;
     public int CurrentIndex => currentIndex;
 
     void Awake()

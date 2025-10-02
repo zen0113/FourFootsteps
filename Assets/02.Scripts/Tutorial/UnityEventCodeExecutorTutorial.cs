@@ -14,6 +14,8 @@ public class UnityEventCodeExecutorTutorial : TutorialBase
 {
     [SerializeField] private List<NamedUnityEvent> executedEvents = new List<NamedUnityEvent>();
 
+    [SerializeField] private bool isNextImmediate = true;
+
     public override void Enter()
     {
         Debug.Log($"[UnityEventCodeExecutorTutorial] {executedEvents.Count}개의 이벤트를 실행합니다.");
@@ -26,7 +28,7 @@ public class UnityEventCodeExecutorTutorial : TutorialBase
                 namedEvent.unityEvent.Invoke();
             }
         }
-        TutorialController.Instance.SetNextTutorial();
+        if(isNextImmediate) TutorialController.Instance.SetNextTutorial();
     }
 
     public override void Execute(TutorialController controller)

@@ -265,10 +265,15 @@ public class DialogueManager : MonoBehaviour
                     case "TRUE":
                         var playerName = (string)GameManager.Instance.GetVariable("PlayerName");
                         var yourCatName = (string)GameManager.Instance.GetVariable("YourCatName");
-                        if (sentence.Contains("{PlayerName}"))
-                            sentence = sentence.Replace("{PlayerName}", playerName);
-                        else if (sentence.Contains("{YourCatName}"))
-                            sentence = sentence.Replace("{YourCatName}", yourCatName);
+
+                        // 1) 한 번에 모든 패턴(괄호/슬래시/단일조사/단독)을 처리
+                        sentence = KoreanJosa.Apply(
+                            sentence,
+                            ("PlayerName", playerName),
+                            ("YourCatName", yourCatName)
+                        );
+
+                        // 끝. 별도의 Replace("{Var}", name) 불필요 (위에서 처리)
                         break;
                     case "SHAKE":
                         StartCoroutine(TextShakeEffectCoroutine(dialogueType.ToInt()));

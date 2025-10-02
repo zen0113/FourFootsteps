@@ -17,6 +17,8 @@ public class HintAndInstallTutorial : TutorialBase
     private bool isInteracting = false;
     private TutorialController tutorialController;
 
+    [SerializeField] private bool isHintMaintained = false;
+
     public override void Enter()
     {
         if (hideObject != null)
@@ -61,7 +63,7 @@ public class HintAndInstallTutorial : TutorialBase
     {
         isInteracting = true;
         // 설치 처리
-        hintOutline.SetActive(false);
+        hintOutline.SetActive(isHintMaintained);
         if (installerPrefab != null)
         {
             installerPrefab.SetActive(true);
@@ -78,6 +80,6 @@ public class HintAndInstallTutorial : TutorialBase
 
     public override void Exit()
     {
-        hintOutline.SetActive(false);
+        hintOutline.SetActive(isHintMaintained);
     }
 }

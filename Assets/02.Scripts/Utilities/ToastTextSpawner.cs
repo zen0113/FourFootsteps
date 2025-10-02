@@ -12,6 +12,7 @@ public class ToastTextSpawner : MonoBehaviour
 
     [Header("Prefab & Parent")]
     [SerializeField] private GameObject toastPrefab;
+    [Tooltip("PlayerUI 캔버스의 ToastLayer 할당")]
     [SerializeField] private RectTransform toastParent;
 
     [Header("Common Anim")]

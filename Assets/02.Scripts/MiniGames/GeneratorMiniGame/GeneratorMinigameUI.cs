@@ -12,11 +12,11 @@ public class GeneratorMinigameUI : MonoBehaviour
     public Text instructionText;
     
     [Header("게임 설정")]
-    public float autoProgressSpeed = 12f; // %/초
-    public float timingChallengeInterval = 4f; // 타이밍 도전 간격
+    public float autoProgressSpeed = 6f;
+    public float timingChallengeInterval = 4f;
     public float timingChallengeDuration = 3.5f;
-    public float successZoneSize = 15f; // 성공 구역 크기
-    public float rotationSpeed = 300f; // 바늘 회전 속도
+    public float successZoneSize = 15f;
+    public float rotationSpeed = 300f;
     
     [Header("오디오")]
     public AudioSource audioSource;
@@ -24,6 +24,16 @@ public class GeneratorMinigameUI : MonoBehaviour
     public AudioClip timingAppearSound;
     public AudioClip successSound;
     public AudioClip failSound;
+    public AudioClip generatorCompleteSound;
+    
+    [Header("플레이어 컨트롤러 설정")]
+    public PlayerCatMovement playerMovement;
+    
+    [Header("발전기 오브젝트 설정")]
+    public SpriteRenderer generatorSpriteRenderer;
+    public Sprite generatorRepairedSprite;
+    private int originalSortingOrder = 3;
+    private int repairedSortingOrder = 1;
     
     private Action<bool> onComplete;
     private bool isActive = false;
@@ -34,11 +44,54 @@ public class GeneratorMinigameUI : MonoBehaviour
     
     void Start()
     {
-        // Canvas는 Unity에서 이미 비활성화 상태로 설정해두므로
-        // 여기서는 아무것도 하지 않음
-        
         if (audioSource == null)
             audioSource = GetComponent<AudioSource>();
+            
+        // 플레이어 자동 찾기
+        if (playerMovement == null)
+        {
+            playerMovement = FindObjectOfType<PlayerCatMovement>();
+            if (playerMovement == null)
+            {
+                Debug.LogError("[GeneratorMinigameUI] PlayerCatMovement를 찾을 수 없습니다!");
+            }
+        }
+        
+        // 발전기 SpriteRenderer 확인
+        if (generatorSpriteRenderer != null)
+        {
+            originalSortingOrder = generatorSpriteRenderer.sortingOrder;
+            Debug.Log($"[GeneratorMinigameUI] 발전기 원본 Sorting Order: {originalSortingOrder}");
+        }
+        
+        // UI 초기 상태 설정 - 게이지와 타이머 모두 비활성화
+        if (progressGauge != null)
+        {
+            progressGauge.gameObject.SetActive(false);
+            Debug.Log("[GeneratorMinigameUI] ProgressGauge 초기 비활성화");
+        }
+        
+        if (circularTimer != null)
+        {
+            circularTimer.gameObject.SetActive(false);
+            Debug.Log("[GeneratorMinigameUI] CircularTimer 초기 비활성화");
+        }
+        
+        // Canvas도 비활성화 (E키 누르기 전까지)
+        if (minigameCanvas != null)
+        {
+            minigameCanvas.SetActive(false);
+            Debug.Log("[GeneratorMinigameUI] MinigameCanvas 초기 비활성화");
+        }
+        
+        // 게임 시작 시 플레이어를 웅크린 상태로 만들고 입력 차단
+        if (playerMovement != null)
+        {
+            Debug.Log("[GeneratorMinigameUI] 게임 시작 - 플레이어 강제 웅크리기 및 입력 차단");
+            playerMovement.SetMiniGameInputBlocked(true);
+            playerMovement.ForceCrouch = true;
+            playerMovement.IsJumpingBlocked = true;
+        }
     }
     
     public void StartMinigame(Action<bool> completeCallback)
@@ -50,41 +103,47 @@ public class GeneratorMinigameUI : MonoBehaviour
         progress = 0f;
         consecutiveFails = 0;
         
-        // Canvas 상태 확인
-        Debug.Log($"minigameCanvas null? {minigameCanvas == null}");
+        // 플레이어 상태 확인
+        if (playerMovement != null)
+        {
+            playerMovement.SetMiniGameInputBlocked(true);
+            playerMovement.ForceCrouch = true;
+            playerMovement.IsJumpingBlocked = true;
+            Debug.Log("[GeneratorMinigameUI] 플레이어 입력 차단 및 웅크리기 활성화");
+        }
+        
+        // Canvas 활성화 (E키 누르면 나타남)
         if (minigameCanvas != null)
         {
-            Debug.Log($"Canvas 현재 상태: {minigameCanvas.activeSelf}");
             minigameCanvas.SetActive(true);
-            Debug.Log($"Canvas 활성화 후 상태: {minigameCanvas.activeSelf}");
-            Debug.Log($"Canvas activeInHierarchy: {minigameCanvas.activeInHierarchy}");
+            Debug.Log($"Canvas 활성화: {minigameCanvas.activeSelf}");
         }
         else
         {
             Debug.LogError("MinigameCanvas가 null입니다!");
         }
         
-        // ProgressGauge 상태 확인
-        Debug.Log($"progressGauge null? {progressGauge == null}");
+        // ProgressGauge 활성화 및 초기화 (E키 누르면 나타남)
         if (progressGauge != null)
         {
+            progressGauge.gameObject.SetActive(true);
             progressGauge.SetProgress(0f);
-            Debug.Log("ProgressGauge 초기화 완료");
+            Debug.Log("ProgressGauge 활성화 및 초기화 완료");
         }
         else
         {
             Debug.LogError("ProgressGauge가 null입니다!");
         }
         
-        // CircularTimer 상태 확인
-        Debug.Log($"circularTimer null? {circularTimer == null}");
+        // CircularTimer는 계속 비활성화 상태 유지 (타이밍 도전 때만 나타남)
         if (circularTimer != null)
+        {
             circularTimer.gameObject.SetActive(false);
+            Debug.Log("CircularTimer 비활성화 유지");
+        }
             
         UpdateInstructionText("발전기 수리 중...");
-        Debug.Log("텍스트 업데이트 완료");
         
-        Debug.Log("MinigameLoop 코루틴 시작...");
         StartCoroutine(MinigameLoop());
     }
     
@@ -94,14 +153,12 @@ public class GeneratorMinigameUI : MonoBehaviour
         
         while (isActive && progress < 100f)
         {
-            Debug.Log("자동 진행 단계 시작");
             // 자동 진행 단계
             yield return StartCoroutine(AutoProgressPhase());
             Debug.Log($"자동 진행 완료, 현재 진행도: {progress}%");
             
             if (progress >= 100f) break;
             
-            Debug.Log("타이밍 도전 단계 시작");
             // 타이밍 도전 단계
             if (isActive)
             {
@@ -139,10 +196,11 @@ public class GeneratorMinigameUI : MonoBehaviour
     {
         isTimingChallenge = true;
         
-        // 타이밍 UI 표시
+        // 타이밍 UI 표시 (이때만 활성화)
         if (circularTimer != null)
         {
             circularTimer.gameObject.SetActive(true);
+            Debug.Log("[GeneratorMinigameUI] CircularTimer 활성화 (타이밍 도전 시작)");
             
             var settings = new CircularTimer.TimingSettings();
             settings.rotationSpeed = rotationSpeed;
@@ -174,18 +232,18 @@ public class GeneratorMinigameUI : MonoBehaviour
             ProcessTimingResult(TimingResult.NoInput);
         }
         
-        // 타이밍 UI 숨기기
+        // 타이밍 UI 숨기기 (타이밍 도전 끝)
         if (circularTimer != null)
         {
             circularTimer.gameObject.SetActive(false);
+            Debug.Log("[GeneratorMinigameUI] CircularTimer 비활성화 (타이밍 도전 종료)");
         }
         
         isTimingChallenge = false;
         
-        // 결과 메시지가 표시될 시간을 기다림 (2초)
+        // 결과 메시지 표시 시간
         yield return new WaitForSeconds(2f);
         
-        // 그 다음에 기본 메시지로 복원
         if (isActive)
         {
             UpdateInstructionText("발전기 수리 중...");
@@ -241,7 +299,6 @@ public class GeneratorMinigameUI : MonoBehaviour
                 break;
         }
         
-        // 결과 메시지 표시
         UpdateInstructionText($"{resultMessage} (진행도 {progressChange:+0;-0}%)");
         
         progress += progressChange;
@@ -259,7 +316,6 @@ public class GeneratorMinigameUI : MonoBehaviour
     
     IEnumerator ShowFeedbackEffect(Color color)
     {
-        // 간단한 화면 효과
         if (minigameCanvas != null)
         {
             var canvasGroup = minigameCanvas.GetComponent<CanvasGroup>();
@@ -287,20 +343,124 @@ public class GeneratorMinigameUI : MonoBehaviour
     
     void CompleteMinigame(bool success)
     {
+        Debug.Log($"[GeneratorMinigameUI] 미니게임 완료 - 성공 여부: {success}");
+        
         isActive = false;
         
+        // 성공했을 때만 플레이어 해방 및 발전기 변경
+        if (success)
+        {
+            StartCoroutine(FinishMinigameSequence());
+        }
+        else
+        {
+            // 실패 시 UI들 비활성화
+            if (progressGauge != null)
+                progressGauge.gameObject.SetActive(false);
+            
+            if (circularTimer != null)
+                circularTimer.gameObject.SetActive(false);
+                
+            if (minigameCanvas != null)
+                minigameCanvas.SetActive(false);
+                
+            onComplete?.Invoke(success);
+        }
+    }
+    
+    IEnumerator FinishMinigameSequence()
+    {
+        Debug.Log("[GeneratorMinigameUI] 미니게임 성공 - 마무리 시퀀스 시작");
+        
+        // 약간의 대기 (성공 연출)
+        yield return new WaitForSeconds(0.5f);
+        
+        // 발전기 수리 완료 효과음 재생
+        if (generatorCompleteSound != null)
+        {
+            PlaySound(generatorCompleteSound);
+            Debug.Log("[GeneratorMinigameUI] 발전기 수리 완료 효과음 재생");
+        }
+        
+        // 발전기 스프라이트 변경 및 Sorting Order 변경
+        if (generatorSpriteRenderer != null)
+        {
+            // 스프라이트 변경
+            if (generatorRepairedSprite != null)
+            {
+                generatorSpriteRenderer.sprite = generatorRepairedSprite;
+                Debug.Log("[GeneratorMinigameUI] 발전기 스프라이트 변경 완료");
+            }
+            else
+            {
+                Debug.LogWarning("[GeneratorMinigameUI] generatorRepairedSprite가 할당되지 않았습니다!");
+            }
+            
+            // Sorting Order 변경 (3 → 1)
+            generatorSpriteRenderer.sortingOrder = repairedSortingOrder;
+            Debug.Log($"[GeneratorMinigameUI] 발전기 Sorting Order 변경: {originalSortingOrder} → {repairedSortingOrder}");
+        }
+        else
+        {
+            Debug.LogWarning("[GeneratorMinigameUI] generatorSpriteRenderer가 할당되지 않았습니다!");
+        }
+        
+        // 효과음이 재생될 시간을 추가로 대기
+        yield return new WaitForSeconds(0.3f);
+        
+        // UI들 비활성화
+        if (progressGauge != null)
+            progressGauge.gameObject.SetActive(false);
+        
+        if (circularTimer != null)
+            circularTimer.gameObject.SetActive(false);
+            
         if (minigameCanvas != null)
             minigameCanvas.SetActive(false);
-            
-        onComplete?.Invoke(success);
+        
+        // 플레이어 상태 복원 - 자유롭게 움직일 수 있도록
+        if (playerMovement != null)
+        {
+            Debug.Log("[GeneratorMinigameUI] 플레이어 해방 - 웅크리기 및 입력 차단 해제");
+            playerMovement.SetMiniGameInputBlocked(false);
+            playerMovement.ForceCrouch = false;
+            playerMovement.IsJumpingBlocked = false;
+            playerMovement.SetCrouchMovingState(false);
+        }
+        
+        Debug.Log("[GeneratorMinigameUI] 플레이어 이제 자유롭게 움직일 수 있음!");
+        
+        // 콜백 호출
+        onComplete?.Invoke(true);
     }
     
     void Update()
     {
-        // ESC로 미니게임 중단 (옵션)
-        if (isActive && Input.GetKeyDown(KeyCode.Escape))
+        if (!isActive) return;
+        
+        // ESC로 미니게임 중단
+        if (Input.GetKeyDown(KeyCode.Escape))
         {
             CompleteMinigame(false);
+            return;
+        }
+    }
+    
+    // 오브젝트가 비활성화될 때도 안전하게 처리
+    void OnDisable()
+    {
+        if (isActive)
+        {
+            Debug.Log("[GeneratorMinigameUI] OnDisable - 비정상 종료 감지");
+            isActive = false;
+            
+            // 비정상 종료 시에도 플레이어 해방
+            if (playerMovement != null)
+            {
+                playerMovement.SetMiniGameInputBlocked(false);
+                playerMovement.ForceCrouch = false;
+                playerMovement.IsJumpingBlocked = false;
+            }
         }
     }
 }

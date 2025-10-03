@@ -22,7 +22,7 @@ public class ReactorPuzzle : MonoBehaviour
     [Tooltip("상단의 5개 단계 표시 불빛")]
     public Image[] stageIndicators;
     
-    [Tooltip("오른쪽 패널의 진행 상황 표시 불빛 (최대 6개)")]  // ⭐ 추가
+    [Tooltip("오른쪽 패널의 진행 상황 표시 불빛 (5개)")]
     public Image[] progressIndicators;
 
     // ==================== 게임 스프라이트 ====================
@@ -81,7 +81,7 @@ public class ReactorPuzzle : MonoBehaviour
     // ==================== 난이도 설정 ====================
     
     /// <summary>각 단계별 정답 개수 [1단계, 2단계, 3단계, 4단계, 5단계]</summary>
-    private int[] answerCounts = { 2, 3, 4, 5, 6 };
+    private int[] answerCounts = { 2, 3, 4, 5, 5 };
     
     /// <summary>각 단계별 페이크 개수 [1단계는 0개, 2단계부터 등장]</summary>
     private int[] fakeCounts = { 0, 1, 1, 2, 2 };
@@ -94,6 +94,9 @@ public class ReactorPuzzle : MonoBehaviour
     /// </summary>
     void Start()
     {
+        // 진행 표시 동그라미 5개 모두 초기 설정 (항상 보이게)
+        InitializeProgressIndicator();
+        
         // 오른쪽 패널의 각 버튼에 클릭 이벤트 연결
         for (int i = 0; i < rightButtons.Length; i++)
         {
@@ -138,7 +141,7 @@ public class ReactorPuzzle : MonoBehaviour
 
         // 4. 플레이어 입력 대기 상태로 전환
         answerIndex = 0;  // 입력 인덱스 초기화
-        UpdateProgressIndicator();  // ⭐ 진행 상황 표시 초기화
+        UpdateProgressIndicator();  // 진행 상황 표시 초기화
         SetRightPanelInteractable(true);  // 오른쪽 패널 활성화
     }
 
@@ -273,7 +276,7 @@ public class ReactorPuzzle : MonoBehaviour
             // 정답!
             StartCoroutine(FlashCell(rightButtons[clickedIndex].GetComponent<Image>(), correctColor));
             answerIndex++;  // 다음 정답으로 넘어감
-            UpdateProgressIndicator();  // ⭐ 진행 상황 업데이트
+            UpdateProgressIndicator();  // 진행 상황 업데이트
 
             Debug.Log($"정답! ({answerIndex}/{currentAnswer.Count})");
 
@@ -390,36 +393,40 @@ public class ReactorPuzzle : MonoBehaviour
     }
 
     /// <summary>
-    /// 오른쪽 패널의 진행 상황 표시 업데이트
-    /// 현재 입력한 정답 개수만큼 초록색으로 표시
+    /// 진행 상황 표시 동그라미 초기 설정
+    /// 게임 시작 시 5개 모두 회색으로 보이게 설정
     /// </summary>
-    void UpdateProgressIndicator()  // ⭐ 새로 추가된 함수
+    void InitializeProgressIndicator()
     {
-        // 현재 단계의 정답 개수
-        int totalAnswers = currentAnswer.Count;
-
+        // 5개 동그라미 모두 회색으로 초기화하고 항상 보이게
         for (int i = 0; i < progressIndicators.Length; i++)
         {
-            if (i < totalAnswers)
+            progressIndicators[i].sprite = unlitCircleSprite;  // 회색 동그라미
+            progressIndicators[i].enabled = true;  // 항상 보이게
+        }
+    }
+
+    /// <summary>
+    /// 오른쪽 패널의 진행 상황 표시 업데이트
+    /// 항상 5개 동그라미를 보여주고, 현재 입력한 정답 개수만큼 초록색으로 표시
+    /// </summary>
+    void UpdateProgressIndicator()
+    {
+        // 5개 동그라미 모두 항상 표시
+        for (int i = 0; i < progressIndicators.Length; i++)
+        {
+            progressIndicators[i].enabled = true;  // ⭐ 무조건 항상 보이게!
+
+            // 현재 입력한 개수보다 작으면 초록색
+            if (i < answerIndex)
             {
-                // 이번 단계에서 필요한 정답 범위 안
-                if (i < answerIndex)
-                {
-                    // 이미 입력한 정답 - 초록 동그라미
-                    progressIndicators[i].sprite = litCircleSprite;
-                    progressIndicators[i].enabled = true;
-                }
-                else
-                {
-                    // 아직 입력하지 않은 정답 - 회색 동그라미
-                    progressIndicators[i].sprite = unlitCircleSprite;
-                    progressIndicators[i].enabled = true;
-                }
+                // 이미 입력한 정답 - 초록 동그라미
+                progressIndicators[i].sprite = litCircleSprite;
             }
             else
             {
-                // 이번 단계에 필요 없는 동그라미는 숨김
-                progressIndicators[i].enabled = false;
+                // 아직 입력하지 않은 정답 - 회색 동그라미
+                progressIndicators[i].sprite = unlitCircleSprite;
             }
         }
     }

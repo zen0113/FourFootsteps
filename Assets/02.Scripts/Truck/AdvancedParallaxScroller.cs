@@ -64,6 +64,6 @@ public class AdvancedParallaxScroller : MonoBehaviour
         // 왼쪽으로 이동 중이었다면, 전체 너비만큼 오른쪽으로 이동하여 맨 뒤에 붙습니다.
         // 오른쪽으로 이동 중이었다면, 전체 너비만큼 왼쪽으로 이동하여 맨 뒤에 붙습니다.
         float offset = scrollLeft ? totalWidth : -totalWidth;
-        bg.position = new Vector2(bg.position.x + offset, bg.position.y);
+        bg.position = new Vector2(bg.position.x + offset - 20, bg.position.y);
     }
 }

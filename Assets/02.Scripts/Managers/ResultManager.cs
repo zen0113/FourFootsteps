@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using static Constants;
 using Random = Unity.Mathematics.Random;
@@ -7,6 +8,11 @@ using Random = Unity.Mathematics.Random;
 public class ResultManager : MonoBehaviour
 {
     public static ResultManager Instance { get; private set; }
+
+    [Header("Stage 4 미니게임 참조")]
+    public HeartbeatMinigame heartbeatMinigame;
+    private Dictionary<string, float[]> catBeatTimings;
+    private string currentMinigameCat;
 
     private TextAsset resultsCSV;
 
@@ -22,6 +28,7 @@ public class ResultManager : MonoBehaviour
         {
             resultsCSV = Resources.Load<TextAsset>("Datas/results");
             Instance = this;
+            InitializeCatBeatTimings(); // 고양이별 비트 데이터 초기화
             DontDestroyOnLoad(gameObject);
         }
         else
@@ -29,6 +36,19 @@ public class ResultManager : MonoBehaviour
             Destroy(gameObject);
         }
     }
+
+    // 고양이별 미니게임 비트 데이터 초기화
+    private void InitializeCatBeatTimings()
+    {
+        catBeatTimings = new Dictionary<string, float[]>()
+        {
+            { "Ttoli", new float[] { 1.0f, 1.4f, 1.9f, 2.2f, 2.8f, 3.1f } }, // 불안 (빠르고 불규칙)
+            { "Leo", new float[] { 1.0f, 1.6f, 2.2f, 2.8f, 3.4f } },          // 분노 (강하고 일정)
+            { "Bogsil", new float[] { 1.2f, 2.4f, 3.6f, 4.8f } },             // 그리움 (느리고 깊게)
+            { "Miya", new float[] { 1.5f, 3.0f, 4.5f, 6.0f } }              // 절망 (매우 느리고 간헐적)
+        };
+    }
+
 
     public void RegisterExecutable(string objectName, IResultExecutable executable)
     {
@@ -47,7 +67,11 @@ public class ResultManager : MonoBehaviour
 
     public void ParseResults()
     {
+        results = new Dictionary<string, Result>();
+
         string[] lines = resultsCSV.text.Split('\n');
+        Debug.Log($"--- Parsing results.csv: {lines.Length - 1} 개의 데이터를 발견 ---");
+
         for (int i = 1; i < lines.Length; i++)
         {
             string[] fields = lines[i].Split(',');
@@ -58,10 +82,19 @@ public class ResultManager : MonoBehaviour
                 fields[0].Trim(),   // Result ID
                 fields[1].Trim(),   // Result Description
                 fields[2].Trim()    // Dialogue ID
-                );
+            );
 
-            results[result.ResultID] = result;
+
+            if (results.ContainsKey(result.ResultID))
+            {
+                Debug.LogWarning($"중복된 Result ID 발견! Key: {result.ResultID}");
+            }
+            else
+            {
+                results[result.ResultID] = result;
+            }
         }
+        Debug.Log("--- 파싱 완료 ---");
     }
 
     public void Test()
@@ -196,6 +229,68 @@ public class ResultManager : MonoBehaviour
                     yield return null;
                 if (!(bool)GameManager.Instance.GetVariable("CanMoving"))
                     GameManager.Instance.SetVariable("CanMoving", true);
+                break;
+
+            // ##################################################################
+            // #################### Stage 4 설득 로직 시작 ####################
+            // ##################################################################
+
+            case "Result_DecideTtoliPath":
+                Debug.Log("Decide Ttoli Path");
+                yield return StartCoroutine(DecideCatPath("Ttoli"));
+                break;
+            case "Result_DecideLeoPath":
+                yield return StartCoroutine(DecideCatPath("Leo"));
+                break;
+            case "Result_DecideBogsilPath":
+                yield return StartCoroutine(DecideCatPath("Bogsil"));
+                break;
+            case "Result_DecideMiyaPath":
+                yield return StartCoroutine(DecideCatPath("Miya"));
+                break;
+
+            case "Result_SetTtoliInteracted":
+                GameManager.Instance.SetVariable("Ttoli_Interacted", true);
+                yield return StartCoroutine(CheckForAllInteracted());
+                break;
+            case "Result_SetLeoInteracted":
+                GameManager.Instance.SetVariable("Leo_Interacted", true);
+                yield return StartCoroutine(CheckForAllInteracted());
+                break;
+            case "Result_SetBogsilInteracted":
+                GameManager.Instance.SetVariable("Bogsil_Interacted", true);
+                yield return StartCoroutine(CheckForAllInteracted());
+                break;
+            case "Result_SetMiyaInteracted":
+                GameManager.Instance.SetVariable("Miya_Interacted", true);
+                yield return StartCoroutine(CheckForAllInteracted());
+                break;
+
+            case "Result_SetTtoliPersuaded":
+                GameManager.Instance.SetVariable("Ttoli_Persuaded", true);
+                yield return StartCoroutine(CheckForAllPersuaded());
+                break;
+            case "Result_SetLeoPersuaded":
+                GameManager.Instance.SetVariable("Leo_Persuaded", true);
+                yield return StartCoroutine(CheckForAllPersuaded());
+                break;
+            case "Result_SetBogsilPersuaded":
+                GameManager.Instance.SetVariable("Bogsil_Persuaded", true);
+                yield return StartCoroutine(CheckForAllPersuaded());
+                break;
+            case "Result_SetMiyaPersuaded":
+                GameManager.Instance.SetVariable("Miya_Persuaded", true);
+                yield return StartCoroutine(CheckForAllPersuaded());
+                break;
+
+            case string when resultID.StartsWith("Result_SetupAndStartMinigame"):
+                currentMinigameCat = resultID.Split('_').Last(); // "Result_SetupAndStartMinigame_Ttoli" -> "Ttoli"
+                if (catBeatTimings.ContainsKey(currentMinigameCat))
+                {
+                    heartbeatMinigame.SetupWaveform(currentMinigameCat);
+                    heartbeatMinigame.OnMinigameEnd += HandleMinigameResult;
+                    heartbeatMinigame.gameObject.SetActive(true);
+                }
                 break;
 
             //// 낡은 소파 조사 시, 회상1 씬으로 이동.
@@ -335,11 +430,114 @@ public class ResultManager : MonoBehaviour
 
 
             default:
-                Debug.Log($"Result ID: {resultID} not found!");
+                Debug.LogError($"Result ID: '{resultID}' not found! (Length: {resultID.Length})");
                 yield return null;
                 break;
         }
     }
+
+    /// <summary>
+    /// 고양이와의 상호작용 분기를 처리하는 핵심 함수
+    /// </summary>
+    private IEnumerator DecideCatPath(string catName)
+    {
+        var gm = GameManager.Instance;
+        Debug.Log($"Deciding path for {catName}");
+
+        // GameManager에서 현재 상태 변수들을 가져옴
+        int responsibilityScore = (int)gm.GetVariable("ResponsibilityScore");
+        bool interacted = (bool)gm.GetVariable($"{catName}_Interacted");
+        bool persuaded = (bool)gm.GetVariable($"{catName}_Persuaded");
+
+        string dialogueToStart = "";
+
+        if (responsibilityScore >= 3 && !persuaded)
+        {
+            dialogueToStart = $"Stage04_{catName}_High_001";
+        }
+        else if (responsibilityScore < 3 && !interacted)
+        {
+            dialogueToStart = $"Stage04_{catName}_Low_Initial_001";
+        }
+        else if (responsibilityScore < 3 && interacted && !persuaded)
+        {
+            dialogueToStart = $"Stage04_{catName}_Low_Choice_001";
+        }
+
+        if (!string.IsNullOrEmpty(dialogueToStart))
+        {
+            DialogueManager.Instance.StartDialogue(dialogueToStart);
+            while (DialogueManager.Instance.isDialogueActive)
+                yield return null;
+        }
+    }
+
+    /// <summary>
+    /// 모든 고양이와 상호작용했는지 확인하고, 조건 충족 시 독백 출력
+    /// </summary>
+    private IEnumerator CheckForAllInteracted()
+    {
+        var gm = GameManager.Instance;
+        bool monologueShown = (bool)gm.GetVariable("Monologue_Shown");
+
+        if (!monologueShown)
+        {
+            bool allInteracted = (bool)gm.GetVariable("Ttoli_Interacted");
+                                 //(bool)gm.GetVariable("Leo_Interacted") &&
+                                 //(bool)gm.GetVariable("Bogsil_Interacted") &&
+                                 //(bool)gm.GetVariable("Miya_Interacted");
+
+            if (allInteracted)
+            {
+                gm.SetVariable("AllCatsInteracted", true);
+                DialogueManager.Instance.StartDialogue("Stage04_Monologue_001");
+                while (DialogueManager.Instance.isDialogueActive)
+                    yield return null;
+                gm.SetVariable("Monologue_Shown", true);
+            }
+        }
+        yield return null;
+    }
+
+    /// <summary>
+    /// 모든 고양이를 설득했는지 확인하고, 조건 충족 시 탈출 시퀀스 시작
+    /// </summary>
+    private IEnumerator CheckForAllPersuaded()
+    {
+        var gm = GameManager.Instance;
+        bool allPersuaded = (bool)gm.GetVariable("Ttoli_Persuaded");
+                            //(bool)gm.GetVariable("Leo_Persuaded") &&
+                            //(bool)gm.GetVariable("Bogsil_Persuaded") &&
+                            //(bool)gm.GetVariable("Miya_Persuaded");
+
+        if (allPersuaded)
+        {
+            Debug.Log("모든 고양이 설득 완료! 탈출 시퀀스를 시작합니다.");
+            // "탈출시작대사"는 실제 존재하는 Dialogue ID로 변경해야 합니다.
+            DialogueManager.Instance.StartDialogue("탈출시작대사");
+            while (DialogueManager.Instance.isDialogueActive)
+                yield return null;
+        }
+        yield return null;
+    }
+
+    /// <summary>
+    /// 미니게임 종료 시 호출될 콜백 함수
+    /// </summary>
+    private void HandleMinigameResult(bool success)
+    {
+        heartbeatMinigame.OnMinigameEnd -= HandleMinigameResult;
+
+        if (success)
+        {
+            DialogueManager.Instance.StartDialogue($"Stage04_{currentMinigameCat}_Low_Success_001");
+        }
+        else
+        {
+            DialogueManager.Instance.StartDialogue($"Stage04_{currentMinigameCat}_Low_Fail_001");
+        }
+    }
+
 
     private bool _isMovingRoom = false;
 

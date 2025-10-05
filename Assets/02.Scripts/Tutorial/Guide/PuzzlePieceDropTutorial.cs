@@ -19,7 +19,6 @@ public class PuzzlePieceDropTutorial : TutorialBase
     private GameObject spawnedPuzzlePiece;
     private Rigidbody puzzleRigidbody;
     public bool hasLanded = false;
-    // ✨ private TutorialController tutorialController; // 더 이상 필요 없으므로 삭제합니다.
 
     private FloatingEffect puzzleFloatingEffect;
 
@@ -27,13 +26,11 @@ public class PuzzlePieceDropTutorial : TutorialBase
     {
         SpawnPuzzlePiece();
 
-        // ✨ 조각을 생성한 직후, 바로 다음 튜토리얼로 진행하도록 명령합니다.
         FindObjectOfType<TutorialController>()?.SetNextTutorial();
     }
 
     public override void Execute(TutorialController controller)
     {
-        // ✨ tutorialController = controller; // 더 이상 필요 없으므로 삭제합니다.
 
         if (spawnedPuzzlePiece != null && !hasLanded)
         {
@@ -115,16 +112,5 @@ public class PuzzlePieceDropTutorial : TutorialBase
             puzzleFloatingEffect.enabled = true;
         }
 
-        // ✨ 다음 튜토리얼로 넘어가는 로직을 Enter()로 옮겼으므로 아래 코드는 삭제합니다.
-        // if (tutorialController != null)
-        // {
-        //     Invoke(nameof(MoveToNextTutorial), 2f);
-        // }
     }
-
-    // ✨ 더 이상 사용하지 않으므로 메서드 자체를 삭제합니다.
-    // private void MoveToNextTutorial()
-    // {
-    //     tutorialController.SetNextTutorial();
-    // }
 }

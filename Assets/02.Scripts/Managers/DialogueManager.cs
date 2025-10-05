@@ -786,16 +786,30 @@ public class DialogueManager : MonoBehaviour
         // 대화 종료
         EndDialogue();
 
-        // tutorialIndex가 -4일 경우, Next에 지정된 대사를 바로 시작
         if (choiceLine.TutorialIndex == -4)
         {
-            // Next 필드가 비어있지 않고, 유효한 dialogue ID인지 확인
-            if (!string.IsNullOrEmpty(choiceLine.Next) && dialogues.ContainsKey(choiceLine.Next))
+            Debug.Log($"[DialogueManager] TutorialIndex가 -4입니다. Next 값 '{choiceLine.Next}'를 처리합니다.");
+
+            string nextID = choiceLine.Next;
+
+            // Next 값이 유효한 Dialogue ID인지 확인
+            if (!string.IsNullOrEmpty(nextID) && dialogues.ContainsKey(nextID))
             {
-                Debug.Log($"[DialogueManager] TutorialIndex가 -4입니다. 다음 대사 '{choiceLine.Next}'를 바로 시작합니다.");
-                StartDialogue(choiceLine.Next);
-                return; // 기능 수행 후 메서드 종료
+                Debug.Log($"...'Next'는 DialogueID 입니다. 대사를 시작합니다.");
+                StartDialogue(nextID);
             }
+            // Next 값이 유효한 Event ID인지 확인
+            else if (!string.IsNullOrEmpty(nextID) && EventManager.Instance.events.ContainsKey(nextID))
+            {
+                Debug.Log($"...'Next'는 EventID 입니다. 이벤트를 호출합니다.");
+                EventManager.Instance.CallEvent(nextID);
+            }
+            else
+            {
+                Debug.LogWarning($"...'Next' 값 '{nextID}'는 유효한 DialogueID 또는 EventID가 아닙니다.");
+            }
+
+            return;
         }
 
         // 현재 활성화된 TutorialDialog에게 선택된 튜토리얼 인덱스 전달

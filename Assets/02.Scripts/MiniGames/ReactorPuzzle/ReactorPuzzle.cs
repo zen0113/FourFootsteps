@@ -22,8 +22,20 @@ public class ReactorPuzzle : MonoBehaviour
     [Tooltip("상단의 5개 단계 표시 불빛")]
     public Image[] stageIndicators;
     
-    [Tooltip("오른쪽 패널의 진행 상황 표시 불빛 (최대 6개)")]  // ⭐ 추가
+    [Tooltip("오른쪽 패널의 진행 상황 표시 불빛 (5개)")]
     public Image[] progressIndicators;
+
+    // ==================== 타이머 UI ====================
+    
+    [Header("Timer UI")]
+    [Tooltip("상단 빨간 신호등 (제한 시간 내)")]
+    public Image topLight;
+    
+    [Tooltip("중간 초록 신호등 (시간 종료 시)")]
+    public Image middleLight;
+    
+    [Tooltip("남은 시간 텍스트 (맨 아래 표시)")]
+    public Text timeText;
 
     // ==================== 게임 스프라이트 ====================
     
@@ -66,6 +78,12 @@ public class ReactorPuzzle : MonoBehaviour
     
     [Tooltip("이미지 표시 후 다음 이미지까지의 대기 시간 (초)")]
     public float delayBetween = 0.3f;
+    
+    [Tooltip("제한 시간 (초)")]
+    public float timeLimit = 60f;
+    
+    [Tooltip("시간 종료 후 초록 신호 표시 시간 (초)")]
+    public float warningDuration = 2f;
 
     // ==================== 게임 상태 변수 ====================
     
@@ -77,11 +95,20 @@ public class ReactorPuzzle : MonoBehaviour
     
     /// <summary>플레이어가 현재 입력해야 할 정답의 인덱스</summary>
     private int answerIndex = 0;
+    
+    /// <summary>남은 시간</summary>
+    private float remainingTime;
+    
+    /// <summary>타이머 실행 중인지 여부</summary>
+    private bool isTimerRunning = false;
+    
+    /// <summary>타이머 코루틴 참조</summary>
+    private Coroutine timerCoroutine;
 
     // ==================== 난이도 설정 ====================
     
     /// <summary>각 단계별 정답 개수 [1단계, 2단계, 3단계, 4단계, 5단계]</summary>
-    private int[] answerCounts = { 2, 3, 4, 5, 6 };
+    private int[] answerCounts = { 2, 3, 4, 5, 5 };
     
     /// <summary>각 단계별 페이크 개수 [1단계는 0개, 2단계부터 등장]</summary>
     private int[] fakeCounts = { 0, 1, 1, 2, 2 };
@@ -94,6 +121,12 @@ public class ReactorPuzzle : MonoBehaviour
     /// </summary>
     void Start()
     {
+        // 진행 표시 동그라미 5개 모두 초기 설정 (항상 보이게)
+        InitializeProgressIndicator();
+        
+        // 타이머 UI 초기화
+        InitializeTimer();
+        
         // 오른쪽 패널의 각 버튼에 클릭 이벤트 연결
         for (int i = 0; i < rightButtons.Length; i++)
         {
@@ -101,8 +134,9 @@ public class ReactorPuzzle : MonoBehaviour
             rightButtons[i].onClick.AddListener(() => OnCellClick(index));
         }
 
-        // 게임 시작
+        // 게임 시작 + 타이머 시작 (한 번만)
         StartGame();
+        StartTimer();  // 게임 시작 시 한 번만 타이머 시작
     }
 
     // ==================== 게임 흐름 제어 ====================
@@ -138,8 +172,10 @@ public class ReactorPuzzle : MonoBehaviour
 
         // 4. 플레이어 입력 대기 상태로 전환
         answerIndex = 0;  // 입력 인덱스 초기화
-        UpdateProgressIndicator();  // ⭐ 진행 상황 표시 초기화
+        UpdateProgressIndicator();  // 진행 상황 표시 초기화
         SetRightPanelInteractable(true);  // 오른쪽 패널 활성화
+        
+        // 타이머는 Start()에서 한 번만 시작되므로 여기서는 시작하지 않음
     }
 
     // ==================== 패턴 생성 ====================
@@ -273,19 +309,21 @@ public class ReactorPuzzle : MonoBehaviour
             // 정답!
             StartCoroutine(FlashCell(rightButtons[clickedIndex].GetComponent<Image>(), correctColor));
             answerIndex++;  // 다음 정답으로 넘어감
-            UpdateProgressIndicator();  // ⭐ 진행 상황 업데이트
+            UpdateProgressIndicator();  // 진행 상황 업데이트
 
             Debug.Log($"정답! ({answerIndex}/{currentAnswer.Count})");
 
             // 이번 단계의 모든 정답을 입력했는지 확인
             if (answerIndex >= currentAnswer.Count)
             {
+                // 타이머는 계속 실행 중이므로 중지하지 않음
                 StartCoroutine(OnStageComplete());
             }
         }
         else
         {
             // 오답!
+            // 타이머는 계속 실행 중이므로 중지하지 않음
             StartCoroutine(FlashCell(rightButtons[clickedIndex].GetComponent<Image>(), wrongColor));
             StartCoroutine(OnStageFailed());
         }
@@ -295,7 +333,7 @@ public class ReactorPuzzle : MonoBehaviour
 
     /// <summary>
     /// 현재 단계를 클리어했을 때 호출되는 코루틴
-    /// - 5단계 클리어 시: 게임 완료
+    /// - 5단계 클리어 시: 게임 완료 + 타이머 중지
     /// - 그 외: 다음 단계로 진행
     /// </summary>
     IEnumerator OnStageComplete()
@@ -308,12 +346,13 @@ public class ReactorPuzzle : MonoBehaviour
         // 마지막 단계(5단계)를 클리어했는지 확인
         if (currentStage >= 5)
         {
+            StopTimer();  // 게임 완전 클리어 시에만 타이머 중지
             Debug.Log("===== 게임 클리어! =====");
             // TODO: 게임 완료 처리 (보상, 애니메이션 등)
         }
         else
         {
-            // 다음 단계로 진행
+            // 다음 단계로 진행 (타이머는 계속 실행)
             currentStage++;
             UpdateStageIndicator();
             StartCoroutine(PlayStage());
@@ -322,7 +361,7 @@ public class ReactorPuzzle : MonoBehaviour
 
     /// <summary>
     /// 오답을 입력했을 때 호출되는 코루틴
-    /// 1단계부터 다시 시작
+    /// 1단계부터 다시 시작 (타이머는 계속 실행)
     /// </summary>
     IEnumerator OnStageFailed()
     {
@@ -331,10 +370,128 @@ public class ReactorPuzzle : MonoBehaviour
 
         yield return new WaitForSeconds(1.5f);  // 실패 피드백 시간
 
-        // 1단계로 리셋
+        // 1단계로 리셋 (타이머는 계속 실행)
         currentStage = 1;
         UpdateStageIndicator();
         StartCoroutine(PlayStage());
+    }
+
+    // ==================== 타이머 시스템 ====================
+
+    /// <summary>
+    /// 타이머 UI 초기화
+    /// 모든 신호등과 텍스트를 숨김
+    /// </summary>
+    void InitializeTimer()
+    {
+        topLight.enabled = false;
+        middleLight.enabled = false;
+        timeText.enabled = false;
+    }
+
+    /// <summary>
+    /// 타이머 시작
+    /// 빨간 신호 + 시간 텍스트 표시
+    /// </summary>
+    void StartTimer()
+    {
+        // 이전 타이머가 있으면 중지
+        if (timerCoroutine != null)
+        {
+            StopCoroutine(timerCoroutine);
+        }
+        
+        remainingTime = timeLimit;
+        isTimerRunning = true;
+        
+        // UI 설정: 빨간 신호 ON + 시간 텍스트 표시
+        topLight.enabled = true;
+        middleLight.enabled = false;
+        timeText.enabled = true;
+        
+        timerCoroutine = StartCoroutine(TimerCoroutine());
+    }
+
+    /// <summary>
+    /// 타이머 중지
+    /// 모든 타이머 UI 숨김
+    /// </summary>
+    void StopTimer()
+    {
+        isTimerRunning = false;
+        
+        if (timerCoroutine != null)
+        {
+            StopCoroutine(timerCoroutine);
+            timerCoroutine = null;
+        }
+        
+        // 타이머 UI 모두 숨기기
+        topLight.enabled = false;
+        middleLight.enabled = false;
+        timeText.enabled = false;
+    }
+
+    /// <summary>
+    /// 타이머 실행 코루틴
+    /// 매 프레임 시간을 감소시키고 텍스트 업데이트
+    /// </summary>
+    IEnumerator TimerCoroutine()
+    {
+        while (isTimerRunning && remainingTime > 0)
+        {
+            remainingTime -= Time.deltaTime;
+            
+            // 시간 텍스트 업데이트 (정수로 올림)
+            timeText.text = Mathf.Ceil(remainingTime).ToString("F0");
+            
+            yield return null;
+        }
+        
+        // 시간 종료
+        if (isTimerRunning)
+        {
+            yield return OnTimeUp();
+        }
+    }
+
+    /// <summary>
+    /// 제한 시간 종료 시 호출
+    /// 빨간 신호 + 시간 텍스트 OFF → 초록 신호 ON → 종료 처리
+    /// </summary>
+    IEnumerator OnTimeUp()
+    {
+        isTimerRunning = false;
+        SetRightPanelInteractable(false);  // 입력 차단
+        
+        Debug.Log("⏰ 제한 시간 종료!");
+        
+        // UI 변경: 빨간 신호 + 시간 텍스트 OFF, 초록 신호 ON
+        topLight.enabled = false;
+        timeText.enabled = false;
+        
+        middleLight.enabled = true;
+        
+        // 초록 신호 표시 시간 대기
+        yield return new WaitForSeconds(warningDuration);
+        
+        // 초록 신호 OFF
+        middleLight.enabled = false;
+        
+        // 제한 시간 종료 처리 함수 호출
+        OnTimeLimitExpired();
+    }
+
+    /// <summary>
+    /// 제한 시간 종료 처리
+    /// 1단계부터 재시작
+    /// </summary>
+    void OnTimeLimitExpired()
+    {
+        Debug.Log("🚨 제한 시간 종료! 게임 오버.");
+        
+        // TODO: 게임 오버 처리 (팝업, 재시작 버튼 등)
+        // 현재는 로그만 출력
     }
 
     // ==================== UI 유틸리티 함수 ====================
@@ -390,36 +547,40 @@ public class ReactorPuzzle : MonoBehaviour
     }
 
     /// <summary>
-    /// 오른쪽 패널의 진행 상황 표시 업데이트
-    /// 현재 입력한 정답 개수만큼 초록색으로 표시
+    /// 진행 상황 표시 동그라미 초기 설정
+    /// 게임 시작 시 5개 모두 회색으로 보이게 설정
     /// </summary>
-    void UpdateProgressIndicator()  // ⭐ 새로 추가된 함수
+    void InitializeProgressIndicator()
     {
-        // 현재 단계의 정답 개수
-        int totalAnswers = currentAnswer.Count;
-
+        // 5개 동그라미 모두 회색으로 초기화하고 항상 보이게
         for (int i = 0; i < progressIndicators.Length; i++)
         {
-            if (i < totalAnswers)
+            progressIndicators[i].sprite = unlitCircleSprite;  // 회색 동그라미
+            progressIndicators[i].enabled = true;  // 항상 보이게
+        }
+    }
+
+    /// <summary>
+    /// 오른쪽 패널의 진행 상황 표시 업데이트
+    /// 항상 5개 동그라미를 보여주고, 현재 입력한 정답 개수만큼 초록색으로 표시
+    /// </summary>
+    void UpdateProgressIndicator()
+    {
+        // 5개 동그라미 모두 항상 표시
+        for (int i = 0; i < progressIndicators.Length; i++)
+        {
+            progressIndicators[i].enabled = true;  // 무조건 항상 보이게!
+
+            // 현재 입력한 개수보다 작으면 초록색
+            if (i < answerIndex)
             {
-                // 이번 단계에서 필요한 정답 범위 안
-                if (i < answerIndex)
-                {
-                    // 이미 입력한 정답 - 초록 동그라미
-                    progressIndicators[i].sprite = litCircleSprite;
-                    progressIndicators[i].enabled = true;
-                }
-                else
-                {
-                    // 아직 입력하지 않은 정답 - 회색 동그라미
-                    progressIndicators[i].sprite = unlitCircleSprite;
-                    progressIndicators[i].enabled = true;
-                }
+                // 이미 입력한 정답 - 초록 동그라미
+                progressIndicators[i].sprite = litCircleSprite;
             }
             else
             {
-                // 이번 단계에 필요 없는 동그라미는 숨김
-                progressIndicators[i].enabled = false;
+                // 아직 입력하지 않은 정답 - 회색 동그라미
+                progressIndicators[i].sprite = unlitCircleSprite;
             }
         }
     }

@@ -1476,6 +1476,7 @@ MonoBehaviour:
   birdMover: {fileID: 1640062164}
   destinationPoint: {fileID: 1143420939}
   IsInfiniteFlying: 0
+  waitForMovementEnd: 0
 --- !u!50 &243409113
 Rigidbody2D:
   serializedVersion: 4
@@ -2127,6 +2128,75 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 31, y: 0.4}
   m_EdgeRadius: 0
+--- !u!1001 &358200511
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 1811036649}
+    m_Modifications:
+    - target: {fileID: 1958815240789535501, guid: 1da32e186052b2546bdf2d0a6f06e658, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -33.621513
+      objectReference: {fileID: 0}
+    - target: {fileID: 1958815240789535501, guid: 1da32e186052b2546bdf2d0a6f06e658, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -5.1175365
+      objectReference: {fileID: 0}
+    - target: {fileID: 1958815240789535501, guid: 1da32e186052b2546bdf2d0a6f06e658, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -3.0244455
+      objectReference: {fileID: 0}
+    - target: {fileID: 1958815240789535501, guid: 1da32e186052b2546bdf2d0a6f06e658, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1958815240789535501, guid: 1da32e186052b2546bdf2d0a6f06e658, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1958815240789535501, guid: 1da32e186052b2546bdf2d0a6f06e658, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1958815240789535501, guid: 1da32e186052b2546bdf2d0a6f06e658, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1958815240789535501, guid: 1da32e186052b2546bdf2d0a6f06e658, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1958815240789535501, guid: 1da32e186052b2546bdf2d0a6f06e658, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1958815240789535501, guid: 1da32e186052b2546bdf2d0a6f06e658, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4858130242049329221, guid: 1da32e186052b2546bdf2d0a6f06e658, type: 3}
+      propertyPath: imagePosition.x
+      value: 2.08
+      objectReference: {fileID: 0}
+    - target: {fileID: 4858130242049329221, guid: 1da32e186052b2546bdf2d0a6f06e658, type: 3}
+      propertyPath: imagePosition.y
+      value: -0.77
+      objectReference: {fileID: 0}
+    - target: {fileID: 4880186662953582631, guid: 1da32e186052b2546bdf2d0a6f06e658, type: 3}
+      propertyPath: m_Name
+      value: InteractionKeyPoint_Survey
+      objectReference: {fileID: 0}
+    - target: {fileID: 4880186662953582631, guid: 1da32e186052b2546bdf2d0a6f06e658, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 1da32e186052b2546bdf2d0a6f06e658, type: 3}
 --- !u!1 &359007269
 GameObject:
   m_ObjectHideFlags: 0
@@ -2686,6 +2756,7 @@ MonoBehaviour:
   birdMover: {fileID: 1640062164}
   destinationPoint: {fileID: 1798538887}
   IsInfiniteFlying: 0
+  waitForMovementEnd: 0
 --- !u!50 &416043901
 Rigidbody2D:
   serializedVersion: 4
@@ -3960,6 +4031,16 @@ Transform:
   - {fileID: 481243529}
   m_Father: {fileID: 1918584037}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &537008039 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4880186662953582631, guid: 1da32e186052b2546bdf2d0a6f06e658, type: 3}
+  m_PrefabInstance: {fileID: 358200511}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &537008042 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 1958815240789535501, guid: 1da32e186052b2546bdf2d0a6f06e658, type: 3}
+  m_PrefabInstance: {fileID: 358200511}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &543610669
 GameObject:
   m_ObjectHideFlags: 0
@@ -4846,6 +4927,7 @@ MonoBehaviour:
   ladderSnapDistance: 0.3
   boxInteractingPower: 1.2
   crouchReleaseGrace: 0.12
+  processingBadEnding: 0
 --- !u!61 &605793051
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -7898,51 +7980,6 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
---- !u!1 &1149379890
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1149379892}
-  - component: {fileID: 1149379891}
-  m_Layer: 0
-  m_Name: MinigameManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1149379891
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1149379890}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3c3199fb3d661884e8df395cf6a79df3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  minigameUI: {fileID: 1093648143}
---- !u!4 &1149379892
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1149379890}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -4.143087, y: 0.5568356, z: 0.6266661}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1159639948
 GameObject:
   m_ObjectHideFlags: 0
@@ -7956,6 +7993,7 @@ GameObject:
   - component: {fileID: 1159639953}
   - component: {fileID: 1159639952}
   - component: {fileID: 1159639951}
+  - component: {fileID: 1159639954}
   m_Layer: 0
   m_Name: Generator
   m_TagString: Untagged
@@ -8023,12 +8061,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1159639948}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -5.31, y: -1.36, z: 0.28776282}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -34.051514, y: -4.9375367, z: -1.4583266}
   m_LocalScale: {x: 0.5881, y: 0.5881, z: 0.5881}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 1811036649}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!82 &1159639951
 AudioSource:
@@ -8138,10 +8176,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 599cc879643e0844e865243c75f3f041, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  interactionRange: 2.5
-  interactionKey: 101
-  isCompleted: 0
-  generatorHumSound: {fileID: 0}
 --- !u!61 &1159639953
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -8187,6 +8221,21 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 9, y: 9}
   m_EdgeRadius: 0
+--- !u!114 &1159639954
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1159639948}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 03f81264f1c9a304aa5eff80abe669de, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  minigameUI: {fileID: 1093648143}
+  triggerObject: {fileID: 537008039}
+  showDebugLog: 1
 --- !u!1 &1174552166
 GameObject:
   m_ObjectHideFlags: 0
@@ -8221,6 +8270,7 @@ MonoBehaviour:
   birdMover: {fileID: 1640062164}
   destinationPoint: {fileID: 289385383}
   IsInfiniteFlying: 0
+  waitForMovementEnd: 0
 --- !u!50 &1174552168
 Rigidbody2D:
   serializedVersion: 4
@@ -8653,6 +8703,7 @@ MonoBehaviour:
   birdMover: {fileID: 1640062164}
   destinationPoint: {fileID: 289385383}
   IsInfiniteFlying: 0
+  waitForMovementEnd: 0
 --- !u!50 &1249609136
 Rigidbody2D:
   serializedVersion: 4
@@ -16732,7 +16783,9 @@ Transform:
   m_LocalPosition: {x: 28.741514, y: 3.5775366, z: 1.7460893}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 1159639950}
+  - {fileID: 537008042}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1813048262
@@ -17774,6 +17827,7 @@ MonoBehaviour:
   - {fileID: 115084419}
   - {fileID: 359007270}
   nextSceneName: 
+  currentIndex: -1
 --- !u!4 &1962565351
 Transform:
   m_ObjectHideFlags: 0
@@ -18660,7 +18714,5 @@ SceneRoots:
   - {fileID: 318027013}
   - {fileID: 534153449}
   - {fileID: 213451220}
-  - {fileID: 1048351900}
-  - {fileID: 1159639950}
-  - {fileID: 1149379892}
   - {fileID: 1093648142}
+  - {fileID: 1048351900}

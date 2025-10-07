@@ -9,7 +9,7 @@ public class HeartbeatMinigame : MonoBehaviour
     [SerializeField] private RectTransform drawingArea;
     [SerializeField] private Image targetLineImage;
     [SerializeField] private Image playerLineImage;
-    [SerializeField] private Text feedbackText; // 실시간 피드백을 위한 Text UI
+    [SerializeField] private Text feedbackText;
 
     [Header("=== 난이도 조절 ===")]
     [Tooltip("가이드라인으로 사용할 색상")]
@@ -19,13 +19,35 @@ public class HeartbeatMinigame : MonoBehaviour
     [Tooltip("성공 판정 범위 (값이 작을수록 어려워짐)")]
     [SerializeField] private float matchTolerance = 25f;
     [Tooltip("성공으로 인정되는 정확도(%)의 최소값")]
-    [SerializeField] private float successThreshold = 80f; // 80% 이상이면 성공
+    [SerializeField] private float successThreshold = 80f;
 
     [Header("=== 게임플레이 설정 ===")]
     [SerializeField] private float gameDuration = 5.0f;
     [SerializeField] private float showPatternTime = 2.0f;
 
-    private Dictionary<string, List<Vector2>> catWaveforms;
+
+    // ✨ 새로운 점 1: "특별한 박동"을 위한 파라미터 추가
+    private struct WaveformParameters
+    {
+        // 일반 박동
+        public float minAmplitude;
+        public float maxAmplitude;
+        public float minDip;
+        public float maxDip;
+        public float minInterval;
+        public float maxInterval;
+        public float peakWidth;
+
+        // 특별한 박동
+        [Tooltip("특별한 박동이 나타날 확률 (0.0 ~ 1.0)")]
+        public float specialBeatChance;
+        public float minSpecialAmplitude;
+        public float maxSpecialAmplitude;
+        public float minSpecialDip;
+        public float maxSpecialDip;
+    }
+
+    private Dictionary<string, WaveformParameters> catWaveformParameters;
     private List<Vector2> currentWaveformPoints;
     private Texture2D targetTexture;
     private Texture2D playerTexture;
@@ -41,6 +63,7 @@ public class HeartbeatMinigame : MonoBehaviour
 
     void Awake()
     {
+        // ... (Awake 함수 내용은 기존과 동일) ...
         Canvas canvas = GetComponentInParent<Canvas>();
         if (canvas.renderMode != RenderMode.ScreenSpaceOverlay)
         {
@@ -51,55 +74,147 @@ public class HeartbeatMinigame : MonoBehaviour
         targetLineImage.transform.localPosition = Vector3.zero;
         playerLineImage.transform.SetParent(drawingArea, false);
         playerLineImage.transform.localPosition = Vector3.zero;
+
+        InitializeWaveformParameters();
     }
 
-    private void InitializeWaveforms()
+    // ✨ 새로운 점 2: 각 캐릭터의 "특별한 박동" 규칙을 구체적으로 정의
+    private void InitializeWaveformParameters()
     {
-        catWaveforms = new Dictionary<string, List<Vector2>>();
-        catWaveforms["Ttoli"] = new List<Vector2>
+        catWaveformParameters = new Dictionary<string, WaveformParameters>();
+
+        // 똘이 (활발함): 가끔 더 강하게 뜀
+        catWaveformParameters["Ttoli"] = new WaveformParameters
         {
-            new Vector2(0.0f, 0), new Vector2(0.5f, 0), new Vector2(0.6f, 60), new Vector2(0.65f, -30),
-            new Vector2(0.9f, 0), new Vector2(1.5f, 0), new Vector2(1.6f, 70), new Vector2(1.65f, -40),
-            new Vector2(2.0f, 0), new Vector2(2.4f, 0), new Vector2(2.5f, 50), new Vector2(2.55f, -20),
-            new Vector2(3.0f, 0), new Vector2(3.8f, 0), new Vector2(3.9f, 80), new Vector2(3.95f, -50),
-            new Vector2(5.0f, 0)
-        };
-        catWaveforms["Leo"] = new List<Vector2>
-        {
-            new Vector2(0.0f, 0), new Vector2(0.8f, 0), new Vector2(0.9f, 90), new Vector2(0.95f, -60),
-            new Vector2(1.2f, 0), new Vector2(2.3f, 0), new Vector2(2.4f, 90), new Vector2(2.45f, -60),
-            new Vector2(2.7f, 0), new Vector2(3.8f, 0), new Vector2(3.9f, 90), new Vector2(3.95f, -60),
-            new Vector2(4.2f, 0), new Vector2(5.0f, 0)
-        };
-        // 복실이 (그리움): 느리고 깊은 심장박동
-        catWaveforms["Bogsil"] = new List<Vector2>
-        {
-            new Vector2(0.0f, 0), new Vector2(1.0f, 0), new Vector2(1.1f, 40), new Vector2(1.3f, -10),
-            new Vector2(1.6f, 0), new Vector2(2.8f, 0), new Vector2(2.9f, 40), new Vector2(3.1f, -10),
-            new Vector2(3.4f, 0), new Vector2(5.0f, 0)
+            minAmplitude = 55f,
+            maxAmplitude = 75f,
+            minDip = 25f,
+            maxDip = 35f,
+            minInterval = 0.8f,
+            maxInterval = 1.1f,
+            peakWidth = 0.1f,
+            specialBeatChance = 0.2f, // 20% 확률로 특별한 박동
+            minSpecialAmplitude = 90f,
+            maxSpecialAmplitude = 100f, // 더 강하게
+            minSpecialDip = 40f,
+            maxSpecialDip = 50f
         };
 
-        // 미야 (절망): 매우 약하고 거의 멈추는 심장박동
-        catWaveforms["Miya"] = new List<Vector2>
+        // 레오 (강렬함): 더 자주, 훨씬 강렬하게 뜀
+        catWaveformParameters["Leo"] = new WaveformParameters
         {
-            new Vector2(0.0f, 0), new Vector2(1.5f, 0), new Vector2(1.6f, 15), new Vector2(1.7f, 0),
-            new Vector2(3.2f, 0), new Vector2(3.3f, 15), new Vector2(3.4f, 0),
-            new Vector2(5.0f, 0)
+            minAmplitude = 80f,
+            maxAmplitude = 100f,
+            minDip = 50f,
+            maxDip = 60f,
+            minInterval = 0.6f,
+            maxInterval = 0.9f,
+            peakWidth = 0.08f,
+            specialBeatChance = 0.3f, // 30% 확률
+            minSpecialAmplitude = 110f,
+            maxSpecialAmplitude = 120f, // 훨씬 강하게
+            minSpecialDip = 60f,
+            maxSpecialDip = 70f
+        };
+
+        // 복실이 (그리움): 가끔 박동을 건너뛰는 듯 약하게 뜀
+        catWaveformParameters["Bogsil"] = new WaveformParameters
+        {
+            minAmplitude = 35f,
+            maxAmplitude = 50f,
+            minDip = 10f,
+            maxDip = 15f,
+            minInterval = 1.4f,
+            maxInterval = 1.8f,
+            peakWidth = 0.2f,
+            specialBeatChance = 0.25f, // 25% 확률
+            minSpecialAmplitude = 15f,
+            maxSpecialAmplitude = 25f, // 더 약하게
+            minSpecialDip = 5f,
+            maxSpecialDip = 10f
+        };
+
+        // 미야 (절망): 거의 멈출 것처럼 매우 불안정하게 뜀
+        catWaveformParameters["Miya"] = new WaveformParameters
+        {
+            minAmplitude = 10f,
+            maxAmplitude = 20f,
+            minDip = 2f,
+            maxDip = 8f,
+            minInterval = 1.8f,
+            maxInterval = 2.5f,
+            peakWidth = 0.15f,
+            specialBeatChance = 0.4f, // 40% 확률로 불안정
+            minSpecialAmplitude = 25f,
+            maxSpecialAmplitude = 35f, // 갑자기 조금 강해지거나
+            minSpecialDip = 0f,
+            maxSpecialDip = 5f // 거의 평탄하게 지나감
         };
     }
+
+    // ✨ 새로운 점 3: '특별한 박동'을 그리는 로직을 생성 함수에 추가
+    private List<Vector2> GenerateRandomWaveform(WaveformParameters parameters)
+    {
+        var points = new List<Vector2> { new Vector2(0, 0) };
+        float currentTime = 0f;
+
+        while (currentTime < gameDuration)
+        {
+            float interval = Random.Range(parameters.minInterval, parameters.maxInterval);
+            currentTime += interval;
+
+            if (currentTime >= gameDuration) break;
+
+            points.Add(new Vector2(currentTime - 0.1f, 0));
+
+            float amplitude;
+            float dip;
+
+            // 확률 체크!
+            if (Random.value < parameters.specialBeatChance)
+            {
+                // "특별한 박동"의 수치를 사용
+                amplitude = Random.Range(parameters.minSpecialAmplitude, parameters.maxSpecialAmplitude);
+                dip = Random.Range(parameters.minSpecialDip, parameters.maxSpecialDip);
+            }
+            else
+            {
+                // "일반 박동"의 수치를 사용
+                amplitude = Random.Range(parameters.minAmplitude, parameters.maxAmplitude);
+                dip = Random.Range(parameters.minDip, parameters.maxDip);
+            }
+
+            // 뾰족한 심장박동 모양(QRS파)을 만듦
+            points.Add(new Vector2(currentTime, 0));
+            points.Add(new Vector2(currentTime + (parameters.peakWidth / 2f), amplitude));
+            points.Add(new Vector2(currentTime + parameters.peakWidth, -dip));
+
+            currentTime += parameters.peakWidth;
+            if (currentTime < gameDuration)
+            {
+                points.Add(new Vector2(currentTime + 0.1f, 0));
+            }
+        }
+
+        points.Add(new Vector2(gameDuration, 0));
+        return points;
+    }
+
 
     public void SetupWaveform(string catName)
     {
-        if (catWaveforms == null) InitializeWaveforms();
+        if (catWaveformParameters == null) InitializeWaveformParameters();
 
-        if (catWaveforms.ContainsKey(catName))
+        if (catWaveformParameters.ContainsKey(catName))
         {
-            currentWaveformPoints = catWaveforms[catName];
+            WaveformParameters parameters = catWaveformParameters[catName];
+            currentWaveformPoints = GenerateRandomWaveform(parameters);
         }
         else
         {
-            Debug.LogError($"{catName}의 파형 데이터가 없습니다! 기본 파형으로 실행합니다.");
-            currentWaveformPoints = catWaveforms["Ttoli"];
+            Debug.LogError($"{catName}의 파형 데이터가 없습니다! 기본 파형(Ttoli)으로 실행합니다.");
+            WaveformParameters parameters = catWaveformParameters["Ttoli"];
+            currentWaveformPoints = GenerateRandomWaveform(parameters);
         }
     }
 

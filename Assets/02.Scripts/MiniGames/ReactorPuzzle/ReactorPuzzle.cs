@@ -121,6 +121,15 @@ public class ReactorPuzzle : MonoBehaviour
     /// </summary>
     void Start()
     {
+        // 게임 상태 초기화 (씬 시작 시마다 처음부터)
+        InitializeGame();
+    }
+    
+    /// <summary>
+    /// 게임 전체 초기화 (씬 시작 시 호출)
+    /// </summary>
+    void InitializeGame()
+    {
         // 진행 표시 동그라미 5개 모두 초기 설정 (항상 보이게)
         InitializeProgressIndicator();
         
@@ -134,9 +143,9 @@ public class ReactorPuzzle : MonoBehaviour
             rightButtons[i].onClick.AddListener(() => OnCellClick(index));
         }
 
-        // 게임 시작 + 타이머 시작 (한 번만)
+        // 게임 시작 + 타이머 시작
         StartGame();
-        StartTimer();  // 게임 시작 시 한 번만 타이머 시작
+        StartTimer();
     }
 
     // ==================== 게임 흐름 제어 ====================
@@ -241,6 +250,32 @@ public class ReactorPuzzle : MonoBehaviour
         int stageIdx = currentStage - 1;
         int fakeCount = fakeCounts[stageIdx];
 
+        // 페이크를 표시할 순서를 랜덤으로 결정
+        List<int> fakeShowIndices = new List<int>();
+        if (fakeCount > 0)
+        {
+            // 페이크 개수만큼 순서 선택 (각 순서마다 페이크 등장)
+            // 5단계도 2번 나오도록
+            int showCount = fakeCount;
+            
+            // 0 ~ (정답 개수-1) 범위에서 랜덤하게 선택
+            List<int> availableIndices = new List<int>();
+            for (int i = 0; i < currentAnswer.Count; i++)
+            {
+                availableIndices.Add(i);
+            }
+
+            // 페이크를 보여줄 순서 선택
+            for (int i = 0; i < Mathf.Min(showCount, currentAnswer.Count); i++)
+            {
+                int randomIdx = Random.Range(0, availableIndices.Count);
+                fakeShowIndices.Add(availableIndices[randomIdx]);
+                availableIndices.RemoveAt(randomIdx);
+            }
+        }
+
+        int fakeCounter = 0; // 현재까지 표시한 페이크 횟수
+
         // 정답들을 하나씩 순차적으로 표시
         for (int i = 0; i < currentAnswer.Count; i++)
         {
@@ -251,9 +286,10 @@ public class ReactorPuzzle : MonoBehaviour
             leftCells[answerPos].enabled = true;
             leftCells[answerPos].color = Color.white;  // Alpha 값을 255로 (불투명)
 
-            // === 페이크 이미지 표시 (2단계부터) ===
+            // === 페이크 이미지 표시 (랜덤 순서) ===
             List<int> fakePositions = new List<int>();
-            if (fakeCount > 0 && i < fakeCount)
+            
+            if (fakeShowIndices.Contains(i) && fakeCounter < fakeCount)
             {
                 // 이미 사용된 위치들을 제외하고 페이크 위치 선택
                 HashSet<int> usedInThisFrame = new HashSet<int> { answerPos };
@@ -262,15 +298,39 @@ public class ReactorPuzzle : MonoBehaviour
                 for (int j = 0; j < currentAnswer.Count; j++)
                     usedInThisFrame.Add(currentAnswer[j]);
 
-                // 페이크 위치 선택
-                int fakePos = GetRandomUnused(usedInThisFrame);
-                fakePositions.Add(fakePos);
+                // 5단계: 빨간 고양이 + 초록 강아지 동시 표시
+                if (currentStage == 5)
+                {
+                    // 빨간 고양이
+                    int redCatPos = GetRandomUnused(usedInThisFrame);
+                    usedInThisFrame.Add(redCatPos);
+                    fakePositions.Add(redCatPos);
+                    leftCells[redCatPos].sprite = redCatSprite;
+                    leftCells[redCatPos].enabled = true;
+                    leftCells[redCatPos].color = Color.white;
 
-                // 페이크 이미지 선택 (50% 확률로 빨간 고양이 or 초록 강아지)
-                Sprite fakeSprite = Random.value > 0.5f ? redCatSprite : greenDogSprite;
-                leftCells[fakePos].sprite = fakeSprite;
-                leftCells[fakePos].enabled = true;
-                leftCells[fakePos].color = Color.white;  // Alpha 값을 255로 (불투명)
+                    // 초록 강아지
+                    int greenDogPos = GetRandomUnused(usedInThisFrame);
+                    usedInThisFrame.Add(greenDogPos);
+                    fakePositions.Add(greenDogPos);
+                    leftCells[greenDogPos].sprite = greenDogSprite;
+                    leftCells[greenDogPos].enabled = true;
+                    leftCells[greenDogPos].color = Color.white;
+                }
+                // 2~4단계: 각 순서마다 1개씩 랜덤 타입으로 표시
+                else
+                {
+                    int fakePos = GetRandomUnused(usedInThisFrame);
+                    fakePositions.Add(fakePos);
+                    
+                    // 50% 확률로 빨간 고양이 or 초록 강아지
+                    Sprite fakeSprite = Random.value > 0.5f ? redCatSprite : greenDogSprite;
+                    leftCells[fakePos].sprite = fakeSprite;
+                    leftCells[fakePos].enabled = true;
+                    leftCells[fakePos].color = Color.white;
+                }
+                
+                fakeCounter++;
             }
 
             // 이미지 표시 시간 대기
@@ -290,6 +350,8 @@ public class ReactorPuzzle : MonoBehaviour
             yield return new WaitForSeconds(delayBetween);
         }
     }
+
+
 
     // ==================== 플레이어 입력 처리 ====================
 

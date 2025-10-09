@@ -31,7 +31,8 @@ public class PlayerHumanMovement : MonoBehaviour
         UIManager.Instance.SetUI(eUIGameObjectName.ResponsibilityGroup, true);
         UIManager.Instance.SetUI(eUIGameObjectName.ResponsibilityGauge, true);
         UIManager.Instance.SetUI(eUIGameObjectName.PlaceUI, true);
-        UIManager.Instance.SetUI(eUIGameObjectName.PuzzleBagButton, false);
+        bool puzzleBagState = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name == "Ending_Happy";
+        UIManager.Instance.SetUI(eUIGameObjectName.PuzzleBagButton, puzzleBagState);
 
         // rb = GetComponent<Rigidbody2D>(); // Rigidbody2D 관련 코드 제거
         spriteRenderer = GetComponent<SpriteRenderer>();
@@ -170,4 +171,10 @@ public class PlayerHumanMovement : MonoBehaviour
     {
         isMiniGameInputBlocked = isBlocked;
     }
+
+    public void SetPlayerPosition(Transform transform)
+    {
+        this.transform.position = transform.position;
+    }
+
 }

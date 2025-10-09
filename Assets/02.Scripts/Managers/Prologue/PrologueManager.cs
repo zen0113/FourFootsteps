@@ -22,6 +22,9 @@ public class PrologueManager : MonoBehaviour
     [SerializeField] private FollowCamera PrologueCamera;
     [SerializeField] private GameObject CameraLimit1;
 
+    [Header("Cat Name")]
+    [SerializeField] private PlayerName SetCatName;
+
     private void Awake()
     {
         if (Instance == null)
@@ -41,6 +44,7 @@ public class PrologueManager : MonoBehaviour
 
     void Start()
     {
+        SetCatName.gameObject.SetActive(false);
         StartCoroutine(ProceedToNextStep());
     }
 
@@ -58,13 +62,21 @@ public class PrologueManager : MonoBehaviour
                 break;
 
             case 1:
+                // 고양이 이름 설정
                 Debug.Log($"프롤로그 {currentStep}");
-                yield return new WaitForSeconds(waitingTime);  // 2초 대기
+                //StartCoroutine(ResultManager.Instance.ExecuteResultCoroutine("Result_DialogueFadeIn"));
+                //EventManager.Instance.CallEvent("EventPrologue");
+                StartCoroutine(SetCatName.SetNameCanvas(true));
+                break;
+
+            case 2:
+                Debug.Log($"프롤로그 {currentStep}");
+                //yield return new WaitForSeconds(waitingTime);  // 2초 대기
                 StartCoroutine(ResultManager.Instance.ExecuteResultCoroutine("Result_DialogueFadeIn"));
                 EventManager.Instance.CallEvent("EventPrologue");
                 break;
 
-            case 2:
+            case 3:
                 Debug.Log($"프롤로그 {currentStep}");
                 SoundPlayer.Instance.UISoundPlay(Constants.Sound_RoomDoorOpenAndClose);
                 yield return new WaitForSeconds(waitingTime);  // 2초 대기
@@ -76,7 +88,7 @@ public class PrologueManager : MonoBehaviour
                 // 문에 도착 시, 현관문이 크게 닫히는 효과음 재생
                 break;
 
-            case 3:
+            case 4:
                 Debug.Log($"프롤로그 {currentStep}");
                 CameraLimit1.SetActive(false);
                 yield return new WaitForSeconds(waitingTime * 2.5f);  // 5초 대기
@@ -92,14 +104,14 @@ public class PrologueManager : MonoBehaviour
                 // 뒷골목 최종 위치 도착 시, 플레이어 무릎 꿇고 이동장 내려놓음.
                 break;
 
-            case 4:
+            case 5:
                 Debug.Log($"프롤로그 {currentStep}");
                 EventManager.Instance.CallEvent("EventPrologue");
                 // 이동장 다 내려놓으면 Prologue_006 다이얼로그 재생
                 // 다 재생되면 화면 어두워짐
                 break;
 
-            case 5:
+            case 6:
                 Debug.Log($"프롤로그 {currentStep}");
                 yield return new WaitForSeconds(waitingTime);  // 2초 대기
                 SetPrologueStage(1, false);
@@ -109,7 +121,7 @@ public class PrologueManager : MonoBehaviour
                 EventManager.Instance.CallEvent("EventPrologue");
                 break;
 
-            case 6:
+            case 7:
                 Debug.Log($"프롤로그 {currentStep}");
                 yield return new WaitForSeconds(waitingTime);  // 2초 대기
                 StartCoroutine(ResultManager.Instance.ExecuteResultCoroutine("Result_DialogueFadeIn"));
@@ -117,7 +129,7 @@ public class PrologueManager : MonoBehaviour
                 EventManager.Instance.CallEvent("EventPrologue");
                 break;
 
-            case 7:
+            case 8:
                 Debug.Log($"프롤로그 {currentStep}");
                 // 눈 깜빡
                 //StartCoroutine(UIManager.Instance.OnFade(UIManager.Instance.dialogueCoverPanel, 0, 1, 1, true, 0.5f, 0));
@@ -125,7 +137,7 @@ public class PrologueManager : MonoBehaviour
                 EventManager.Instance.CallEvent("EventPrologue");
                 break;
 
-            case 8:
+            case 9:
                 Debug.Log($"프롤로그 {currentStep}");
                 // 프롤로그 끝!
                 // 스테이지1로 이동
@@ -149,7 +161,7 @@ public class PrologueManager : MonoBehaviour
     private void HandleArrival()
     {
         Debug.Log("사람 도착 완료, 다음 프롤로그 진행.");
-        if (currentStep == 3)
+        if (currentStep == 4)
         {
             SoundPlayer.Instance.UISoundPlay(Constants.Sound_RoomDoorOpenAndClose);
             StartCoroutine(ResultManager.Instance.ExecuteResultCoroutine("Result_DialogueFadeOut"));

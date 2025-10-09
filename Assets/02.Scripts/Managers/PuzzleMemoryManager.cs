@@ -25,6 +25,8 @@ public class PuzzleMemoryManager : MonoBehaviour
     [SerializeField] Image[] puzzleWhiteImages;
     [Tooltip("Puzzle Piece_picture 1개 할당")]
     [SerializeField] Image puzzlePictureImage;
+    [Tooltip("Puzzle Piece_Crack 1개 할당")]
+    [SerializeField] Image puzzleCrackImage;
 
     [SerializeField] TextMeshProUGUI TitleText;
     [SerializeField] TextMeshProUGUI explainText;
@@ -33,6 +35,7 @@ public class PuzzleMemoryManager : MonoBehaviour
     [Header("Puzzle Sprite Rescources")]
     [SerializeField] Sprite[] whitePuzzleResources;
     [SerializeField] Sprite[] picturePuzzleResources;
+    [SerializeField] Sprite[] crackResources;
 
     void Awake()
     {
@@ -58,9 +61,17 @@ public class PuzzleMemoryManager : MonoBehaviour
     // UI Canvas의 PuzzleBag Button에 연결
     public void OnClickPuzzleBag()
     {
-        gameObject.SetActive(true);
+        bool isActive = true;
+        gameObject.SetActive(isActive);
         UpdateHomePuzzleState();
-        PlayerCatMovement.Instance.SetMiniGameInputBlocked(true);
+        var player = GameObject.FindGameObjectWithTag("Player");
+        if (PlayerCatMovement.Instance != null)
+            PlayerCatMovement.Instance.SetMiniGameInputBlocked(isActive);
+        else
+        {
+            if (player.TryGetComponent<PlayerHumanMovement>(out var human))
+                human.BlockMiniGameInput(isActive);
+        }
         // bgm 사운드 줄이기
         float changedVolume = SoundPlayer.Instance.GetBGMVolume() * 0.5f;
         SoundPlayer.Instance.ChangeVolume(changedVolume);
@@ -134,13 +145,34 @@ public class PuzzleMemoryManager : MonoBehaviour
             whiteImage.sprite = whitePuzzleResources[idNum];
         }
         puzzlePictureImage.sprite = picturePuzzleResources[idNum];
+
+        var puzzleStates = GameManager.Instance.GetVariable("MemoryPuzzleStates") as Dictionary<int, bool>;
+        if (!puzzleStates[idNum])
+        {
+            puzzleCrackImage.gameObject.SetActive(true);
+            puzzleCrackImage.sprite = crackResources[idNum];
+        }
+        else
+        {
+            puzzleCrackImage.sprite = null;
+            puzzleCrackImage.gameObject.SetActive(false);
+        }
     }
 
     // Puzzle Home의 나가기 버튼
     public void OnClickExitButton()
     {
-        gameObject.SetActive(false);
-        PlayerCatMovement.Instance.SetMiniGameInputBlocked(false);
+        bool isActive = false;
+        gameObject.SetActive(isActive);
+
+        var player = GameObject.FindGameObjectWithTag("Player");
+        if (PlayerCatMovement.Instance != null)
+            PlayerCatMovement.Instance.SetMiniGameInputBlocked(isActive);
+        else
+        {
+            if (player.TryGetComponent<PlayerHumanMovement>(out var human))
+                human.BlockMiniGameInput(isActive);
+        }
 
         float changedVolume = SoundPlayer.Instance.GetBGMVolume() * 2f;
         SoundPlayer.Instance.ChangeVolume(changedVolume);

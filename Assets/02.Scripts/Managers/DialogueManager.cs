@@ -21,6 +21,14 @@ public class DialogueManager : MonoBehaviour
     public Transform[] choicesContainer;
     public GameObject choicePrefab;
     public GameObject[] skipText;
+    public Image[] cutsceneCoverPanels;
+
+    // 상태 추적
+    private bool lastHadCutscene = false;        // 직전 프레임(또는 현재 라인)에서 컷씬이 있었는지
+    private bool isCoverTransitioning = false;   // 커버 페이드 중인지(중복 방지)
+
+    // 커버 페이드 시간 (요구대로 2초)
+    [SerializeField] private float coverFadeDuration = 2f;
 
     // 타자 효과 속도
     [Header("Typing Speed")]
@@ -59,6 +67,7 @@ public class DialogueManager : MonoBehaviour
     public Vector3 bubbleOffset = new Vector3(0, 2.0f, 0);
     public float catOffset_y = 0.5f;
     public float humanOffset_y = 2.0f;
+    private static readonly string[] CatIdMarkers = { "CAT", "Ttoli", "Leo", "Bogsil", "Miya" };
 
     void Awake()
     {
@@ -84,7 +93,7 @@ public class DialogueManager : MonoBehaviour
         {
             Debug.LogWarning("Index out of range: " + dialogueType.ToInt());
         }
-
+        EnsureCoverPanelsInitialized();
     }
 
     private void Update()
@@ -94,23 +103,23 @@ public class DialogueManager : MonoBehaviour
             return;
 
         // 다이얼로그 출력될 때 space bar 누르면 스크립트 넘겨짐
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (Input.GetKeyDown(KeyCode.Space)&&!isCoverTransitioning)
             OnDialoguePanelClick();
     }
 
     private void LateUpdate()
     {
         // 플레이어 말풍선
-        if(dialogueType== DialogueType.PLAYER_BUBBLE && dialogueSet[dialogueType.ToInt()].activeSelf)
+        if (dialogueType == DialogueType.PLAYER_BUBBLE && dialogueSet[dialogueType.ToInt()].activeSelf)
         {
-            dialogueSet[dialogueType.ToInt()].transform.position = 
+            dialogueSet[dialogueType.ToInt()].transform.position =
                 Camera.main.WorldToScreenPoint(playerTransform.position + bubbleOffset);
         }
 
         // NPC 말풍선
         if (dialogueType == DialogueType.NPC_BUBBLE && dialogueSet[dialogueType.ToInt()].activeSelf)
         {
-            dialogueSet[dialogueType.ToInt()].transform.position = 
+            dialogueSet[dialogueType.ToInt()].transform.position =
                 Camera.main.WorldToScreenPoint(npcTransform.position + bubbleOffset);
         }
 
@@ -218,7 +227,7 @@ public class DialogueManager : MonoBehaviour
                     speakerText.text = dialogueLine.SpeakerID;
                     break;
             }
-            if(dialogueLine.BubbleMode)
+            if (dialogueLine.BubbleMode)
                 speakerText.text = "";
         }
     }
@@ -290,7 +299,12 @@ public class DialogueManager : MonoBehaviour
         foreach (var currentCutSceneImage in cutSceneImages)
         {
             if (string.IsNullOrWhiteSpace(cutSceneID))
-                currentCutSceneImage.color = new Color(1, 1, 1, 0);
+            {
+                //currentCutSceneImage.color = new Color(1, 1, 1, 0);
+                // 여기서는 바로 지우지 않음!
+                // 다음 이동 시점(ProceedToNext)에서 커버 트랜지션으로 처리
+                continue;
+            }
             else
             {
                 switch (cutSceneID)
@@ -298,21 +312,18 @@ public class DialogueManager : MonoBehaviour
                     case "BLACK":
                         // CutScene Image의 Color 값을 WHITE에서 BLACK으로 서서히 바꿈
                         StartCoroutine(FadeToBlack(currentCutSceneImage, 2f));
-                        break;
-
-                    case "WHITE":
-                        // CutScene Image의 위에 전체 화면을 덮는 Image 객체 생성(하얀색에 알파값은 0)
-                        // 알파값 0->1되면 Image 객체 삭제
+                        lastHadCutscene = true;
                         break;
 
                     default:
                         var cutSceneSprite = Resources.Load<Sprite>($"Art/CutScenes/{cutSceneID}");
                         currentCutSceneImage.sprite = cutSceneSprite;
                         currentCutSceneImage.color = new Color(1, 1, 1, 1);
+                        lastHadCutscene = true;
                         break;
                 }
             }
-        }    
+        }
     }
 
     // 컷씬 이미지를 Black으로 바꿈
@@ -333,6 +344,77 @@ public class DialogueManager : MonoBehaviour
         targetImage.color = endColor; // 보정
         isCutsceneFadingToBlack = false;
     }
+
+    private void EnsureCoverPanelsInitialized()
+    {
+        // 요구조건: 시작 시 color=black, alpha=0 유지
+        foreach (var cover in cutsceneCoverPanels)
+        {
+            if (!cover) continue;
+            var c = cover.color;
+            cover.color = new Color(0f, 0f, 0f, 0f); // black, transparent
+            cover.gameObject.SetActive(false);
+        }
+    }
+
+    // 컷씬 이미지 위로 alpha start→end 로 페이드
+    private IEnumerator FadeCoverPanels(float start, float end, float duration)
+    {
+        isCoverTransitioning = true;
+
+        foreach (var cover in cutsceneCoverPanels)
+        {
+            if (!cover) continue;
+            cover.gameObject.SetActive(true);
+            cover.color = new Color(0f, 0f, 0f, start);
+        }
+
+        float t = 0f;
+        while (t < duration)
+        {
+            t += Time.deltaTime;
+            float a = Mathf.Lerp(start, end, Mathf.Clamp01(t / duration));
+            foreach (var cover in cutsceneCoverPanels)
+            {
+                if (!cover) continue;
+                cover.color = new Color(0f, 0f, 0f, a);
+            }
+            yield return null;
+        }
+
+        // 알파 0이면 꺼줘서 클릭 막힘 방지
+        if (end <= 0.001f)
+        {
+            foreach (var cover in cutsceneCoverPanels)
+                if (cover) cover.gameObject.SetActive(false);
+        }
+
+        isCoverTransitioning = false;
+    }
+
+    // 전환 래퍼: 먼저 블랙업 → 액션 → 블랙다운
+    private IEnumerator CoverTransitionThen(System.Action thenAction, bool fadeOutAfter = true)
+    {
+        // 1) 블랙 커버 올리기
+        yield return StartCoroutine(FadeCoverPanels(0f, 1f, coverFadeDuration));
+
+        // 2) 컷씬 이미지들 실제로 내림(사라짐)
+        foreach (var img in cutSceneImages)
+        {
+            if (!img) continue;
+            img.color = new Color(1, 1, 1, 0);
+            img.sprite = null; // 완전히 제거(선택)
+        }
+        lastHadCutscene = false;
+
+        // 3) 전환 작업 수행
+        thenAction?.Invoke();
+
+        // 4) 필요하면 다시 투명화(자연스럽게 복귀)
+        if (fadeOutAfter)
+            yield return StartCoroutine(FadeCoverPanels(1f, 0f, 0.35f)); // 복귀는 짧게
+    }
+
 
 
     private IEnumerator TextShakeEffectCoroutine(int dialogueType)
@@ -387,20 +469,22 @@ public class DialogueManager : MonoBehaviour
 
     private void PlayDialogueSound(DialogueLine dialogueLine)
     {
-        //if (string.IsNullOrWhiteSpace(dialogueLine.SoundID))
-        //    return;
-        //var soundID = "Sound_" + dialogueLine.SoundID;
-        //var soundNum = (int)typeof(Constants).GetField(soundID).GetValue(null);
-        //SoundPlayer.Instance.UISoundPlay_LOOP(soundNum, true);
+        if (string.IsNullOrWhiteSpace(dialogueLine.SoundID))
+            return;
+        var soundID = "Sound_" + dialogueLine.SoundID;
+        var soundNum = (int)typeof(Constants).GetField(soundID).GetValue(null);
+        SoundPlayer.Instance.UISoundPlay(soundNum);
     }
 
     private void UpdateCharacterImages(DialogueLine dialogueLine)
     {
-        if (dialogueType == DialogueType.PLAYER_BUBBLE||
-            dialogueType == DialogueType.NPC_BUBBLE||
+        if (dialogueType == DialogueType.PLAYER_BUBBLE ||
+            dialogueType == DialogueType.NPC_BUBBLE ||
             dialogueType == DialogueType.MONOLOG)
         {
             characterImages[dialogueType.ToInt()].gameObject.SetActive(false);
+
+            bubbleOffset.y = IsCatImageID(dialogueLine.ImageID) ? catOffset_y : humanOffset_y;
             return;
         }
 
@@ -425,6 +509,18 @@ public class DialogueManager : MonoBehaviour
         characterImages[dialogueType.ToInt()].gameObject.SetActive(true);
     }
 
+    private static bool IsCatImageID(string imageId)
+    {
+        if (string.IsNullOrEmpty(imageId)) return false;
+
+        // 대소문자 무시하고 부분일치 확인
+        foreach (var marker in CatIdMarkers)
+        {
+            if (imageId.IndexOf(marker, System.StringComparison.OrdinalIgnoreCase) >= 0)
+                return true;
+        }
+        return false;
+    }
 
     private void DisplayDialogueLine(DialogueLine dialogueLine)
     {
@@ -487,23 +583,40 @@ public class DialogueManager : MonoBehaviour
                     break;
             }
         }
-            
+
     }
 
     public void EndDialogue()
     {
-        // 타자 소리 정지
-        SoundPlayer.Instance.UISoundPlay_LOOP(0, false);
+        if (isCoverTransitioning) return;
 
+        // 컷씬 중에 바로 종료될 때도 자연스럽게
+        if (lastHadCutscene)
+        {
+            StartCoroutine(CoverTransitionThen(() =>
+            {
+                ForceEndDialogueCore();
+            }, fadeOutAfter: false)); // 다음 씬 전환 등으로 페이드아웃은 상위 로직에서
+        }
+        else
+        {
+            ForceEndDialogueCore();
+        }
+    }
+
+    private void ForceEndDialogueCore()
+    {
+        SoundPlayer.Instance.UISoundPlay_LOOP(0, false);
         isDialogueActive = false;
+
+        // 현재 타입 패널만 끄기
         dialogueSet[dialogueType.ToInt()].SetActive(false);
-        //foreach (Image characterImage in characterImages)
-        //    characterImage.gameObject.SetActive(false);
-        if (dialogueQueue.Count > 0)  // 큐에 다이얼로그가 들어있으면 다시 대화 시작
+
+        // 큐가 있으면 이어서
+        if (dialogueQueue.Count > 0)
         {
             string queuedDialogueID = dialogueQueue.Dequeue();
             StartDialogue(queuedDialogueID);
-
             return;
         }
     }
@@ -541,40 +654,144 @@ public class DialogueManager : MonoBehaviour
     // ---------------------------------------------- Script methods ----------------------------------------------
     private void ProceedToNext()
     {
+        if (isCoverTransitioning) return; // 전환 중엔 무시
         StopAllCoroutines();
+
         int currentDialogueLineIndex = dialogues[currentDialogueID].CurrentLineIndex;
         string next = dialogues[currentDialogueID].Lines[currentDialogueLineIndex].Next;
 
-        if (EventManager.Instance.events.ContainsKey(next))  // Event인 경우
+        // --- 전환 필요성 계산 ---
+        bool willGoToEvent = EventManager.Instance.events.ContainsKey(next);
+        bool willGoToChoice = choices.ContainsKey(next);
+        bool willGoToOtherDialogue = dialogues.ContainsKey(next);
+        bool willGoToNextLine = string.IsNullOrWhiteSpace(next);
+
+        bool nextHasCutscene = false;
+
+        if (willGoToOtherDialogue)
+            nextHasCutscene = NextHasCutscene(next);
+        else if (willGoToNextLine)
+            nextHasCutscene = NextLineHasCutsceneInSameDialogue();
+        else
+            nextHasCutscene = false; // 이벤트/선택/종료 취급
+
+        // 지금 컷씬이 있었고, 다음 대상에는 컷씬이 없다면 → 커버 전환 후 진행
+        if (lastHadCutscene && !nextHasCutscene)
+        {
+            StartCoroutine(CoverTransitionThen(() =>
+            {
+                // 커버가 다 올라간 뒤에 실제로 '다음' 로직 수행
+                ProceedToNextCore(currentDialogueLineIndex, next,
+                                  willGoToEvent, willGoToChoice, willGoToOtherDialogue, willGoToNextLine);
+            }));
+            return;
+        }
+
+        // 컷씬 전환 필요 없다면 기존처럼 바로 진행
+        ProceedToNextCore(currentDialogueLineIndex, next,
+                          willGoToEvent, willGoToChoice, willGoToOtherDialogue, willGoToNextLine);
+
+        //if (EventManager.Instance.events.ContainsKey(next))  // Event인 경우
+        //{
+        //    EndDialogue();
+        //    EventManager.Instance.CallEvent(next);
+        //}
+        //if (dialogues.ContainsKey(next))  // Dialogue인 경우
+        //{
+        //    EndDialogue();
+        //    StartDialogue(next);
+        //}
+        //else if (string.IsNullOrWhiteSpace(next))  // 빈칸인 경우 다음 줄(대사)로 이동
+        //{
+        //    currentDialogueLineIndex++;
+
+        //    if (currentDialogueLineIndex >= dialogues[currentDialogueID].Lines.Count)
+        //    {
+        //        EndDialogue();  // 더 이상 DialogueLine이 존재하지 않으면 대화 종료
+        //        return;
+        //    }
+        //    else if (currentDialogueLineIndex == dialogues[currentDialogueID].Lines.Count - 1)
+        //    {
+        //        foreach (GameObject skip in skipText) skip.SetActive(false); //  다이얼로그의 마지막 대사는 스킵 불가능
+        //    }
+        //    dialogues[currentDialogueID].SetCurrentLineIndex(currentDialogueLineIndex);
+        //    DialogueLine nextDialogueLine = dialogues[currentDialogueID].Lines[currentDialogueLineIndex];
+        //    DisplayDialogueLine(nextDialogueLine);
+        //}
+        //else if (choices.ContainsKey(next)) // Choice인 경우
+        //{
+        //    DisplayChoices(next);
+        //}
+    }
+
+
+    private bool NextHasCutscene(string nextId, int nextLineIndexIfSameDialogue = -1)
+    {
+        // 1) 다음이 Event/Choice/끝 -> 컷씬 없음
+        if (string.IsNullOrEmpty(nextId))  // 다음 줄(빈)인 케이스는 아래에서 계산
+            return false;
+        if (EventManager.Instance.events.ContainsKey(nextId)) return false;
+        if (choices.ContainsKey(nextId)) return false;
+        if (!dialogues.ContainsKey(nextId)) return false;
+
+        // 2) 다음이 다른 Dialogue 시작일 때: 첫 줄 확인
+        var nextDialogue = dialogues[nextId];
+        if (nextDialogue.Lines.Count == 0) return false;
+        var first = nextDialogue.Lines[0];
+        return !string.IsNullOrWhiteSpace(first.CutSceneID);
+    }
+
+    private bool NextLineHasCutsceneInSameDialogue()
+    {
+        var idx = dialogues[currentDialogueID].CurrentLineIndex + 1;
+        if (idx >= dialogues[currentDialogueID].Lines.Count) return false;
+        var line = dialogues[currentDialogueID].Lines[idx];
+        return !string.IsNullOrWhiteSpace(line.CutSceneID);
+    }
+
+    private void ProceedToNextCore(int currentDialogueLineIndex, string next,
+    bool willGoToEvent, bool willGoToChoice, bool willGoToOtherDialogue, bool willGoToNextLine)
+    {
+        if (willGoToEvent)
         {
             EndDialogue();
             EventManager.Instance.CallEvent(next);
+            return;
         }
-        if (dialogues.ContainsKey(next))  // Dialogue인 경우
+
+        if (willGoToOtherDialogue)
         {
             EndDialogue();
             StartDialogue(next);
+            return;
         }
-        else if (string.IsNullOrWhiteSpace(next))  // 빈칸인 경우 다음 줄(대사)로 이동
+
+        if (willGoToNextLine)
         {
             currentDialogueLineIndex++;
 
             if (currentDialogueLineIndex >= dialogues[currentDialogueID].Lines.Count)
             {
-                EndDialogue();  // 더 이상 DialogueLine이 존재하지 않으면 대화 종료
+                EndDialogue();
                 return;
             }
             else if (currentDialogueLineIndex == dialogues[currentDialogueID].Lines.Count - 1)
             {
-                foreach (GameObject skip in skipText) skip.SetActive(false); //  다이얼로그의 마지막 대사는 스킵 불가능
+                foreach (GameObject skip in skipText) skip.SetActive(false);
             }
+
             dialogues[currentDialogueID].SetCurrentLineIndex(currentDialogueLineIndex);
             DialogueLine nextDialogueLine = dialogues[currentDialogueID].Lines[currentDialogueLineIndex];
+
+            // 다음 줄에 컷씬ID가 비어있지 않다면, 이제서야 lastHadCutscene 갱신은 UpdateCutScene()에서 자동 반영
             DisplayDialogueLine(nextDialogueLine);
+            return;
         }
-        else if (choices.ContainsKey(next)) // Choice인 경우
+
+        if (willGoToChoice)
         {
             DisplayChoices(next);
+            return;
         }
     }
 
@@ -682,7 +899,7 @@ public class DialogueManager : MonoBehaviour
 
     public void OnDialoguePanelClick()
     {
-        if (!isDialogueActive || isAuto || isCutsceneFadingToBlack) return;
+        if (!isDialogueActive || isAuto || isCutsceneFadingToBlack|| isCoverTransitioning) return;
 
         if (isTyping)
         {

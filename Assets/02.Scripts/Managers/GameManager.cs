@@ -69,7 +69,6 @@ public class GameManager : MonoBehaviour
             {
                 new SceneData("TitleScene"),
                 new SceneData("SetPlayerName"),
-                new SceneData("SetCatName"),
                 new SceneData("Prologue"),
                 new SceneData("StageScene1"),
                 new SceneData("RecallScene1", true),
@@ -169,7 +168,15 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public void LoadTitleScene()
+    public void LoadTitleSceneWithDelayed(bool withDelayed)
+    {
+        if (withDelayed)
+            Invoke("LoadTitleScene", 3f);
+        else
+            LoadTitleScene();
+    }
+
+    private void LoadTitleScene()
     {
         SceneLoader.Instance.LoadScene("TitleScene");
     }

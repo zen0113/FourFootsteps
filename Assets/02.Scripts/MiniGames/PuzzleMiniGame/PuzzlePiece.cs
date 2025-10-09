@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 
 [RequireComponent(typeof(SpriteRenderer))]
 [RequireComponent(typeof(Collider2D))]
@@ -10,6 +9,8 @@ public class PuzzlePiece : MonoBehaviour
     [Header("Refs")]
     [SerializeField] private SpriteRenderer mainRenderer;   // 본체
     [SerializeField] private SpriteRenderer shadowRenderer; // 그림자
+    [SerializeField] private SpriteRenderer crackRenderer;  // 크랙
+    [SerializeField] private SpriteMask mask; // 본체의 스프라이트 마스크
 
     [Header("Snap / Rotate")]
     public int id = 0;
@@ -35,9 +36,11 @@ public class PuzzlePiece : MonoBehaviour
     private Rigidbody2D rb;
 
     // --- Sorting 설정 ---
-    private const int BASE_ORDER = 10; // 시작값
-    private const int STEP_ORDER = 2;  // 간격 (10,12,14,…)
-    private const int SLOT_COUNT = 5;  // 조각 수
+    // 요청: BASE_ORDER를 4(또는 5)부터 시작. 크랙은 main+1, 그림자는 main-1.
+    // 중요: crack(+1)과 shadow(-1)가 인접 조각과 겹치지 않도록 STEP_ORDER=3로 설정.
+    private const int BASE_ORDER = 4;  // 시작값 (원하면 5로 변경해도 됨)
+    private const int STEP_ORDER = 3;  // 간격 (4,7,10,…)  / shadow: main-1 / crack: main+1
+    private const int SLOT_COUNT = 5;  // 조각 수(참고용, 다르면 경고만)
 
     private static readonly List<PuzzlePiece> puzzleList_all = new List<PuzzlePiece>();
 
@@ -51,6 +54,8 @@ public class PuzzlePiece : MonoBehaviour
         // 에디터에서 컴포넌트 붙일 때 자동 참조 시도
         if (!mainRenderer) mainRenderer = GetComponent<SpriteRenderer>();
         if (!shadowRenderer) shadowRenderer = transform.Find("Shadow")?.GetComponent<SpriteRenderer>();
+        if (!crackRenderer) crackRenderer = transform.Find("Crack")?.GetComponent<SpriteRenderer>();
+        if (!mask) mask = GetComponent<SpriteMask>();
     }
 
     void Awake()
@@ -58,19 +63,58 @@ public class PuzzlePiece : MonoBehaviour
         cam = Camera.main;
         if (!mainRenderer) mainRenderer = GetComponent<SpriteRenderer>();
         if (!shadowRenderer) shadowRenderer = transform.Find("Shadow")?.GetComponent<SpriteRenderer>();
+        if (!crackRenderer) crackRenderer = transform.Find("Crack")?.GetComponent<SpriteRenderer>();
+        if (!mask) mask = GetComponent<SpriteMask>();
         sr = GetComponent<SpriteRenderer>();
         rb = GetComponent<Rigidbody2D>();
         rb.isKinematic = true;
 
         if (!puzzleList_all.Contains(this)) puzzleList_all.Add(this);
 
+        // 초기 정렬: 그림자/크랙은 본체 기준으로 -1 / +1
+        if (mainRenderer)
+        {
+            if (shadowRenderer) shadowRenderer.sortingOrder = mainRenderer.sortingOrder - 1;
+            if (crackRenderer) crackRenderer.sortingOrder = mainRenderer.sortingOrder + 1;
+        }
+
         // 그림자 초기 색/알파
         if (shadowRenderer)
         {
             var c = shadowColor; c.a = shadowIdleAlpha;
             shadowRenderer.color = c;
-            // 항상 본체보다 한 단계 아래
-            shadowRenderer.sortingOrder = (mainRenderer ? mainRenderer.sortingOrder - 1 : BASE_ORDER - 1);
+        }
+
+        if (mask != null)
+        {
+            int layerID = mainRenderer.sortingLayerID;
+
+            mask.isCustomRangeActive = true;
+            mask.backSortingLayerID = layerID;
+            mask.frontSortingLayerID = layerID;
+            mask.backSortingOrder = mainRenderer.sortingOrder - 1; // main-1
+            mask.frontSortingOrder = mainRenderer.sortingOrder + 1; // main+1
+        }
+    }
+
+    private void Start()
+    {
+        NormalizeSortingOrders();
+        SetCrackSprite();
+    }
+
+    public void SetCrackSprite()
+    {
+        // 퍼즐 피스에 부정 선택인 경우 크랙 오브젝트 활성화
+        // 긍정 선택인 경우에는 크랙 오브젝트 비활성화
+        var puzzleStates = GameManager.Instance.GetVariable("MemoryPuzzleStates") as Dictionary<int, bool>;
+        if (puzzleStates != null && puzzleStates.ContainsKey(id) && !puzzleStates[id])
+        {
+            if (crackRenderer) crackRenderer.gameObject.SetActive(true);
+        }
+        else
+        {
+            if (crackRenderer) crackRenderer.gameObject.SetActive(false);
         }
     }
 
@@ -78,7 +122,6 @@ public class PuzzlePiece : MonoBehaviour
     {
         puzzleList_all.Remove(this);
     }
-
 
     void OnMouseDown()
     {
@@ -88,7 +131,7 @@ public class PuzzlePiece : MonoBehaviour
         transform.localScale *= clickedScale;
         SetShadowAlpha(shadowSelectedAlpha);
 
-        // 정렬: 이 조각을 맨 위(15)로, 나머지는 한 칸씩 뒤로
+        // 정렬: 이 조각을 맨 위로
         BringToTop(this);
 
         current = this;
@@ -134,9 +177,20 @@ public class PuzzlePiece : MonoBehaviour
 
     #region Gameplay
 
+    // sfx를 카메라로부터 z축 +5f 위치에서 재생 (x,y는 원래 값 유지)
+    void PlayPuzzleSfxRelativeToCamera(AudioClip sfx, float volume)
+    {
+        var cam = Camera.main;
+        if (!cam || !sfx) return;
+
+        Vector3 p = transform.position;
+        p.z = cam.transform.position.z + 5f;
+        AudioSource.PlayClipAtPoint(sfx, p, volume);
+    }
+
     void Rotate(float delta)
     {
-        if (sfxRotate) AudioSource.PlayClipAtPoint(sfxRotate, transform.position, 1f);
+        if (sfxRotate) PlayPuzzleSfxRelativeToCamera(sfxRotate, 1f);
 
         var z = Mathf.Round((transform.eulerAngles.z + delta) / 90f) * 90f;
         transform.rotation = Quaternion.Euler(0, 0, z % 360f);
@@ -157,10 +211,11 @@ public class PuzzlePiece : MonoBehaviour
             placed = true;
 
             // 더 이상 상호작용 안 되게
-            GetComponent<Collider2D>().enabled = false;
+            var col = GetComponent<Collider2D>();
+            if (col) col.enabled = false;
 
             // 스냅 소리
-            if (sfxSnap) AudioSource.PlayClipAtPoint(sfxSnap, transform.position, 0.8f);
+            if (sfxSnap) PlayPuzzleSfxRelativeToCamera(sfxSnap, 0.8f);
 
             if (PuzzleManager.Instance) PuzzleManager.Instance.NotifyPlaced(this);
         }
@@ -168,8 +223,39 @@ public class PuzzlePiece : MonoBehaviour
     #endregion
 
     #region Sorting (BringToTop + 재배치)
-    // 현재 오브젝트가 맨 위(15)가 되도록 재배치
-    // 그림자 렌더러는 본체보다 항상 -1로
+
+    // index(0..N-1) → main sorting order
+    private static int SlotOrder(int index)
+    {
+        // 예: BASE=4 → main: 4,7,10,13,...
+        return BASE_ORDER + STEP_ORDER * index;
+    }
+
+    // index(0..N-1) → shadow sorting order (항상 main-1)
+    private static int SlotOrderShadow(int index)
+    {
+        return SlotOrder(index) - 1;
+    }
+
+    // index(0..N-1) → crack sorting order (항상 main+1)
+    private static int SlotOrderCrack(int index)
+    {
+        return SlotOrder(index) + 1;
+    }
+
+    // 현재 본체 sortingOrder 기준으로 낮은→높은 정렬
+    private static void SortByCurrentOrder(List<PuzzlePiece> list)
+    {
+        list.Sort((a, b) =>
+        {
+            int ao = a.mainRenderer ? a.mainRenderer.sortingOrder : int.MinValue;
+            int bo = b.mainRenderer ? b.mainRenderer.sortingOrder : int.MinValue;
+            return ao.CompareTo(bo);
+        });
+    }
+
+    // 현재 오브젝트가 맨 위가 되도록 재배치
+    // 그림자: main-1, 크랙: main+1 유지
     private static void BringToTop(PuzzlePiece selected)
     {
         // 1) 현재 눈에 보이는 순서를 정렬 기준으로 확정(낮은→높은)
@@ -187,56 +273,44 @@ public class PuzzlePiece : MonoBehaviour
         }
 
         // 3) 슬롯 재할당
-        //    앞에서부터 BASE, BASE+STEP, ... 로 할당.
         for (int i = 0; i < work.Count; i++)
         {
             int mainOrder = SlotOrder(i);
-            int shadOrder = mainOrder - 1;
+            int shadOrder = SlotOrderShadow(i);
+            int crackOrder = SlotOrderCrack(i);
 
             var p = work[i];
             if (p.mainRenderer) p.mainRenderer.sortingOrder = mainOrder;
             if (p.shadowRenderer) p.shadowRenderer.sortingOrder = shadOrder;
+            if (p.crackRenderer) p.crackRenderer.sortingOrder = crackOrder;
+            if (p.mask)
+            {
+                p.mask.backSortingOrder = shadOrder; // main-1
+                p.mask.frontSortingOrder = crackOrder; // main+1
+            }
         }
     }
 
-    // index(0..N-1) → main sorting order
-    private static int SlotOrder(int index)
-    {
-        // 0→10, 1→12, 2→14, ...
-        return BASE_ORDER + STEP_ORDER * index;
-    }
-
-    // index(0..N-1) → shadow sorting order (항상 main-1)
-    private static int SlotOrderShadow(int index)
-    {
-        return SlotOrder(index) - 1;
-    }
-
-    // 현재 본체 sortingOrder 기준으로 낮은→높은 정렬
-    private static void SortByCurrentOrder(List<PuzzlePiece> list)
-    {
-        list.Sort((a, b) =>
-        {
-            int ao = a.mainRenderer ? a.mainRenderer.sortingOrder : int.MinValue;
-            int bo = b.mainRenderer ? b.mainRenderer.sortingOrder : int.MinValue;
-            return ao.CompareTo(bo);
-        });
-    }
-
-
-    // 에디터 초기화용: 계층 순서대로 10,12,14,16,18 할당
-    [ContextMenu("Normalize Sorting Orders (10,12,14,16,18)")]
+    // 에디터 초기화용: 계층 순서대로 BASE, BASE+STEP, ... 할당 (shadow: -1, crack: +1)
+    [ContextMenu("Normalize Sorting Orders (BASE, BASE+STEP, … with shadow/crack offsets)")]
     private void NormalizeSortingOrders()
     {
         puzzleList_all.Sort((a, b) => a.transform.GetSiblingIndex().CompareTo(b.transform.GetSiblingIndex()));
         for (int i = 0; i < puzzleList_all.Count; i++)
         {
             int mainOrder = SlotOrder(i);
-            int shadOrder = mainOrder - 1;
+            int shadOrder = SlotOrderShadow(i);
+            int crackOrder = SlotOrderCrack(i);
 
             var p = puzzleList_all[i];
             if (p.mainRenderer) p.mainRenderer.sortingOrder = mainOrder;
             if (p.shadowRenderer) p.shadowRenderer.sortingOrder = shadOrder;
+            if (p.crackRenderer) p.crackRenderer.sortingOrder = crackOrder;
+            if (p.mask)
+            {
+                p.mask.backSortingOrder = shadOrder; // main-1
+                p.mask.frontSortingOrder = crackOrder; // main+1
+            }
         }
     }
     #endregion
@@ -255,5 +329,4 @@ public class PuzzlePiece : MonoBehaviour
             shadowRenderer.sortingOrder = mainRenderer.sortingOrder - 1;
     }
     #endregion
-
 }

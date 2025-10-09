@@ -74,4 +74,11 @@ public class SceneUITextManager : MonoBehaviour
         };
         sceneTextDataList.Add(newData);
     }
+
+    // 해피 엔딩에선 장소가 2번 바뀌기 때문에 (집 안 -> 뒷골목 -> 유기동물 보호소 )
+    // 장소가 바뀔 경우 튜토리얼 매니저에서 재설정
+    public void ResetSceneText(string sceneName)
+    {
+        sceneDescriptionText.text = sceneName;
+    }
 } 

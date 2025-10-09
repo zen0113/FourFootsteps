@@ -175,4 +175,14 @@ public class FollowCamera : MonoBehaviour
             Gizmos.DrawLine(transform.position, target.position + (Vector3)offset);
         }
     }
+
+    public void SetTarget(Transform transform)
+    {
+        target = transform;
+    }
+
+    public void SetCameraPosition(Transform transform)
+    {
+        this.transform.position = transform.position;
+    }
 }

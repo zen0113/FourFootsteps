@@ -198,42 +198,6 @@ public class ResultManager : MonoBehaviour
                     GameManager.Instance.SetVariable("CanMoving", true);
                 break;
 
-            //// 낡은 소파 조사 시, 회상1 씬으로 이동.
-            //case "Result_GoToRecall1":
-            //    InitializeExecutableObjects();
-            //    GameManager.Instance.SetVariable("CanInvesigatingRecallObject", false);
-            //    SceneLoader.Instance.LoadScene(GameManager.Instance.GetNextSceneData().sceneName);
-            //    yield return new WaitForSeconds(1f);
-            //    break;
-
-            //// 동물 병원 앞 퍼즐 조사 시, 회상2 씬으로 이동.
-            //case "Result_GoToRecall2":
-            //    InitializeExecutableObjects();
-            //    GameManager.Instance.SetVariable("CanInvesigatingRecallObject", false);
-            //    SceneLoader.Instance.LoadScene(GameManager.Instance.GetNextSceneData().sceneName);
-            //    yield return new WaitForSeconds(1f);
-            //    break;
-
-            //// 정자 밑 퍼즐 조사 시, 회상3 씬으로 이동.
-            //case "Result_GoToRecall3":
-            //    InitializeExecutableObjects();
-            //    GameManager.Instance.SetVariable("CanInvesigatingRecallObject", false);
-            //    SceneLoader.Instance.LoadScene(GameManager.Instance.GetNextSceneData().sceneName);
-            //    yield return new WaitForSeconds(1f);
-            //    break;
-
-            // 웜홀 최초 등장
-            case "Result_FirstWormholeActivation":
-                executableObjects["WormholeActivation"].ExecuteAction();
-                // 아래 코드는 임시!!! 나중에 RecallManager 제대로 만들면 수정될 것
-                if (RecallManager.Instance != null)
-                {
-                    Debug.Log("Recall Manger 호출");
-                    RecallManager.Instance.SetInteractKeyGroup(true);
-                }
-                yield return null;
-                break;
-
             // 웜홀 사용 시, 다음 씬으로 이동
             case "Result_WormholeNextScene":
                 //Debug.Log("웜홀 사용 ");
@@ -300,7 +264,7 @@ public class ResultManager : MonoBehaviour
 
                 // 플레이어 자동 이동 시작 (시야에서 벗어나게)
                 autoMover.enabled = true;
-                autoMover.StartMoving(autoMover.targetPoint);
+                autoMover.StartDashMoving(autoMover.targetPoint);
 
                 // 화면 페이드 아웃
                 yield return UIManager.Instance.OnFade(null, 0, 1, INITIAL_FADE_TIME);
@@ -311,6 +275,10 @@ public class ResultManager : MonoBehaviour
                     Debug.LogError("Failed to teleport player to chase stage!");
                     break;
                 }
+
+                // 은신게임 UI 비활성화
+                GameObject.Find("Stealth Canvas")?.SetActive(false);
+                GameObject.Find("Stealth UI Canvas")?.SetActive(false);
 
                 // 페이드 아웃 대기
                 yield return new WaitForSeconds(INITIAL_FADE_TIME);
@@ -330,6 +298,20 @@ public class ResultManager : MonoBehaviour
             case "Result_MiniGameFailed":
                 // 페이드 인 효과와 함께 게임오버 씬 로드
                 SceneLoader.Instance.LoadScene("GameOver");
+                yield return null;
+                break;
+
+            case string when resultID.StartsWith("Result_OnEventObject"):  // EventObject 컴포넌트 활성화
+                var objName = resultID["Result_OnEventObject".Length..];
+                if (GameObject.Find(objName)?.GetComponent<EventObject>() is EventObject eo) eo.enabled = true;
+                else
+                    Debug.LogError($"{objName} 의 이름을 가진 GameObject가 없거나 EventObject 컴포넌트가 없습니다.");
+                yield return null;
+                break;
+
+            case string when resultID.StartsWith("Result_ExecuteAction"):  // executableObjects 실행
+                objName = resultID["Result_ExecuteAction".Length..];
+                executableObjects[objName].ExecuteAction();
                 yield return null;
                 break;
 
@@ -363,6 +345,9 @@ public class ResultManager : MonoBehaviour
         GameObject playerSpawnPoint = GameObject.Find($"{roomName}_PlayerSpawn");
         GameObject cameraTargetPoint = GameObject.Find($"{roomName}_CameraTarget");
 
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        // 이동 연출 중에는 입력 막음.
+        player.GetComponent<PlayerHumanMovement>().BlockMiniGameInput(true);
         if (playerSpawnPoint == null)
         {
             Debug.LogError($"Player spawn point not found: {roomName}_PlayerSpawn");
@@ -384,7 +369,6 @@ public class ResultManager : MonoBehaviour
         }
 
         // 플레이어 위치, 회전 이동 (컨트롤러 enable/disable 제거)
-        GameObject player = GameObject.FindGameObjectWithTag("Player");
         if (player != null)
         {
             player.transform.position = playerSpawnPoint.transform.position;
@@ -417,6 +401,9 @@ public class ResultManager : MonoBehaviour
         }
 
         Debug.Log($"Successfully moved to room: {roomName}");
+
+        // 이동 완료 후 입력 받기 허용
+        player.GetComponent<PlayerHumanMovement>().BlockMiniGameInput(false);
 
         _isMovingRoom = false;
     }

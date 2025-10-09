@@ -5,7 +5,7 @@ using UnityEngine.Events;
 
 public class PlayerAutoRunner : MonoBehaviour
 {
-    private bool isChasePlaying = false;
+    [SerializeField] private bool isChasePlaying = false;
     public bool IsChasePlaying => isChasePlaying;
 
     [Header("Refs")]
@@ -141,7 +141,29 @@ public class PlayerAutoRunner : MonoBehaviour
 
         // 추격용 BGM 전환
         SoundPlayer.Instance.ChangeDualBGM(8, -1, 0.6f, 1f, true, 0f);
-        
+        // 점프/웅크리기 등 이전 상태 확실히 리셋
+        if (animator != null)
+        {
+            animator.SetBool("Jump", false);
+            animator.SetBool("Crouch", false);
+            animator.SetBool("Crouching", false);
+            animator.SetBool("Climbing", false);
+
+            // 오토런 구간: 대시 & 이동 애니 바로 ON
+            animator.SetBool("Dash", true);
+            animator.SetBool("Moving", true);
+
+            // 바닥 상태 동기화(가능하면 실제 체크로)
+            bool groundedNow = true;
+            if (groundCheck != null)
+                groundedNow = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundMask);
+
+            animator.SetBool(H_IsGrounded, groundedNow);
+
+            // 속도/쉬프트 파라미터 강제 세팅
+            animator.SetFloat(H_Speed, 1f);   // 오토런 시작이니 '달리는 상태'로
+            animator.SetBool(H_Shift, true);  // 대시 연출 유지
+        }
     }
 
     void Update()

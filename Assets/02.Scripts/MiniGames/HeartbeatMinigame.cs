@@ -25,8 +25,6 @@ public class HeartbeatMinigame : MonoBehaviour
     [SerializeField] private float gameDuration = 5.0f;
     [SerializeField] private float showPatternTime = 2.0f;
 
-
-    // ✨ 새로운 점 1: "특별한 박동"을 위한 파라미터 추가
     private struct WaveformParameters
     {
         // 일반 박동
@@ -63,7 +61,6 @@ public class HeartbeatMinigame : MonoBehaviour
 
     void Awake()
     {
-        // ... (Awake 함수 내용은 기존과 동일) ...
         Canvas canvas = GetComponentInParent<Canvas>();
         if (canvas.renderMode != RenderMode.ScreenSpaceOverlay)
         {
@@ -78,7 +75,6 @@ public class HeartbeatMinigame : MonoBehaviour
         InitializeWaveformParameters();
     }
 
-    // ✨ 새로운 점 2: 각 캐릭터의 "특별한 박동" 규칙을 구체적으로 정의
     private void InitializeWaveformParameters()
     {
         catWaveformParameters = new Dictionary<string, WaveformParameters>();
@@ -152,7 +148,6 @@ public class HeartbeatMinigame : MonoBehaviour
         };
     }
 
-    // ✨ 새로운 점 3: '특별한 박동'을 그리는 로직을 생성 함수에 추가
     private List<Vector2> GenerateRandomWaveform(WaveformParameters parameters)
     {
         var points = new List<Vector2> { new Vector2(0, 0) };

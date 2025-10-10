@@ -1,125 +1,46 @@
 using UnityEngine;
+using System;
 
 /// <summary>
-/// 발전기 오브젝트와의 상호작용을 담당하는 스크립트
-/// 특정 오브젝트가 활성화되어 있을 때 E키를 누르면 미니게임 시작
+/// 발전기 오브젝트와의 상호작용을 감지하고 이벤트를 발생시키는 역할만 담당.
+/// 실제 미니게임 시작 로직은 튜토리얼 스크립트로 이전됨.
 /// </summary>
 public class GeneratorInteraction : MonoBehaviour
 {
-    [Header("미니게임 UI")]
-    [SerializeField] private GeneratorMinigameUI minigameUI;
-    
     [Header("트리거 조건 오브젝트")]
     [Tooltip("이 오브젝트가 활성화되어 있을 때만 E키 입력을 받습니다")]
     [SerializeField] private GameObject triggerObject;
-    
-    [Header("디버그")]
-    [SerializeField] private bool showDebugLog = true;
-    
-    private bool hasCompletedMinigame = false; // 미니게임을 이미 완료했는지 여부
-    
-    void Start()
-    {
-        // 미니게임 UI 자동 찾기
-        if (minigameUI == null)
-        {
-            minigameUI = FindObjectOfType<GeneratorMinigameUI>();
-            if (minigameUI == null)
-            {
-                Debug.LogError("[GeneratorInteraction] GeneratorMinigameUI를 찾을 수 없습니다!");
-            }
-        }
-    }
-    
+
+    // 플레이어가 상호작용했을 때 발생시킬 이벤트
+    public event Action OnInteract;
+
+    private bool canInteract = true;
+
     void Update()
     {
-        // 미니게임을 이미 완료했으면 더 이상 입력 받지 않음
-        if (hasCompletedMinigame)
+        // 상호작용이 불가능한 상태이거나, 조건 오브젝트가 비활성화 상태이면 return
+        if (!canInteract || (triggerObject != null && !triggerObject.activeSelf))
         {
             return;
         }
-        
-        // 트리거 오브젝트가 활성화되어 있는지 확인
-        bool canInteract = triggerObject != null && triggerObject.activeSelf;
-        
-        // 트리거 오브젝트가 활성화되어 있고 E키를 눌렀을 때
-        if (canInteract && Input.GetKeyDown(KeyCode.E))
+
+        // E키를 눌렀을 때
+        if (Input.GetKeyDown(KeyCode.E))
         {
-            StartGeneratorMinigame();
+            Debug.Log("[GeneratorInteraction] 상호작용 키 (E) 입력 감지됨. OnInteract 이벤트 발생!");
+            // 구독된 모든 곳에 이벤트 알림
+            OnInteract?.Invoke();
         }
     }
-    
-    /// <summary>
-    /// 발전기 미니게임 시작
-    /// </summary>
-    private void StartGeneratorMinigame()
+
+    // 미니게임이 완료되면 다시 상호작용할 수 없도록 외부에서 호출
+    public void DisableInteraction()
     {
-        if (showDebugLog)
+        canInteract = false;
+        if (triggerObject != null)
         {
-            Debug.Log("[GeneratorInteraction] 발전기 미니게임 시작!");
+            triggerObject.SetActive(false);
         }
-        
-        // 미니게임 시작
-        if (minigameUI != null)
-        {
-            minigameUI.StartMinigame(OnMinigameComplete);
-        }
-        else
-        {
-            Debug.LogError("[GeneratorInteraction] minigameUI가 null입니다!");
-        }
-    }
-    
-    /// <summary>
-    /// 미니게임 완료 콜백
-    /// </summary>
-    /// <param name="success">성공 여부</param>
-    private void OnMinigameComplete(bool success)
-    {
-        if (showDebugLog)
-        {
-            Debug.Log($"[GeneratorInteraction] 미니게임 완료! 성공 여부: {success}");
-        }
-        
-        if (success)
-        {
-            // 성공 시 다시 시작할 수 없도록 설정
-            hasCompletedMinigame = true;
-            
-            // 트리거 오브젝트 비활성화 (선택사항)
-            if (triggerObject != null)
-            {
-                triggerObject.SetActive(false);
-                if (showDebugLog)
-                {
-                    Debug.Log("[GeneratorInteraction] 트리거 오브젝트 비활성화");
-                }
-            }
-        }
-        else
-        {
-            // 실패 시 다시 시도 가능
-            if (showDebugLog)
-            {
-                Debug.Log("[GeneratorInteraction] 미니게임 실패 - 다시 시도 가능");
-            }
-        }
-    }
-    
-    /// <summary>
-    /// 미니게임 완료 상태를 외부에서 확인할 수 있도록
-    /// </summary>
-    public bool IsCompleted => hasCompletedMinigame;
-    
-    /// <summary>
-    /// 미니게임 완료 상태를 외부에서 리셋할 수 있도록 (테스트용)
-    /// </summary>
-    public void ResetCompletion()
-    {
-        hasCompletedMinigame = false;
-        if (showDebugLog)
-        {
-            Debug.Log("[GeneratorInteraction] 완료 상태 리셋");
-        }
+        Debug.Log("[GeneratorInteraction] 상호작용 비활성화됨.");
     }
 }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using static Constants;
-using Random = Unity.Mathematics.Random;
+using Random = UnityEngine.Random;
 
 public class ResultManager : MonoBehaviour
 {
@@ -268,19 +268,15 @@ public class ResultManager : MonoBehaviour
 
             case "Result_SetTtoliPersuaded":
                 GameManager.Instance.SetVariable("Ttoli_Persuaded", true);
-                yield return StartCoroutine(CheckForAllPersuaded());
                 break;
             case "Result_SetLeoPersuaded":
                 GameManager.Instance.SetVariable("Leo_Persuaded", true);
-                yield return StartCoroutine(CheckForAllPersuaded());
                 break;
             case "Result_SetBogsilPersuaded":
                 GameManager.Instance.SetVariable("Bogsil_Persuaded", true);
-                yield return StartCoroutine(CheckForAllPersuaded());
                 break;
             case "Result_SetMiyaPersuaded":
                 GameManager.Instance.SetVariable("Miya_Persuaded", true);
-                yield return StartCoroutine(CheckForAllPersuaded());
                 break;
 
             case string when resultID.StartsWith("Result_SetupAndStartMinigame"):
@@ -448,20 +444,40 @@ public class ResultManager : MonoBehaviour
         int responsibilityScore = (int)gm.GetVariable("ResponsibilityScore");
         bool interacted = (bool)gm.GetVariable($"{catName}_Interacted");
         bool persuaded = (bool)gm.GetVariable($"{catName}_Persuaded");
+        bool allCatsInteracted = (gm.GetVariable("AllCatsInteracted") is bool val) ? val : false;
 
         string dialogueToStart = "";
 
-        if (responsibilityScore >= 3 && !persuaded)
+        if (persuaded)
         {
-            dialogueToStart = $"Stage04_{catName}_High_001";
+            // 이미 설득된 고양이에게 다시 말을 걸었을 때의 공통 대사
+            dialogueToStart = "Stage04_Generic_Persuaded";
         }
-        else if (responsibilityScore < 3 && !interacted)
+        else
         {
-            dialogueToStart = $"Stage04_{catName}_Low_Initial_001";
-        }
-        else if (responsibilityScore < 3 && interacted && !persuaded)
-        {
-            dialogueToStart = $"Stage04_{catName}_Low_Choice_001";
+            // 아직 설득되지 않았다면
+            if (responsibilityScore >= 3)
+            {
+                dialogueToStart = $"Stage04_{catName}_High_001";
+            }
+            else
+            {
+                if (allCatsInteracted)
+                {
+                    // 모든 고양이와 상호작용 완료 -> 미니게임 도전
+                    dialogueToStart = $"Stage04_{catName}_Low_Choice_001";
+                }
+                else if (!interacted)
+                {
+                    // 첫 상호작용
+                    dialogueToStart = $"Stage04_{catName}_Low_Initial_001";
+                }
+                else
+                {
+                    // 상호작용은 했지만, 아직 모두와 하지는 않음
+                    dialogueToStart = "Stage04_Generic_Wait_001";
+                }
+            }
         }
 
         if (!string.IsNullOrEmpty(dialogueToStart))
@@ -482,10 +498,10 @@ public class ResultManager : MonoBehaviour
 
         if (!monologueShown)
         {
-            bool allInteracted = (bool)gm.GetVariable("Ttoli_Interacted");
-                                 //(bool)gm.GetVariable("Leo_Interacted") &&
-                                 //(bool)gm.GetVariable("Bogsil_Interacted") &&
-                                 //(bool)gm.GetVariable("Miya_Interacted");
+            bool allInteracted = (bool)gm.GetVariable("Ttoli_Interacted") &&
+                                 (bool)gm.GetVariable("Leo_Interacted") &&
+                                 (bool)gm.GetVariable("Bogsil_Interacted") &&
+                                 (bool)gm.GetVariable("Miya_Interacted");
 
             if (allInteracted)
             {
@@ -499,27 +515,6 @@ public class ResultManager : MonoBehaviour
         yield return null;
     }
 
-    /// <summary>
-    /// 모든 고양이를 설득했는지 확인하고, 조건 충족 시 탈출 시퀀스 시작
-    /// </summary>
-    private IEnumerator CheckForAllPersuaded()
-    {
-        var gm = GameManager.Instance;
-        bool allPersuaded = (bool)gm.GetVariable("Ttoli_Persuaded");
-                            //(bool)gm.GetVariable("Leo_Persuaded") &&
-                            //(bool)gm.GetVariable("Bogsil_Persuaded") &&
-                            //(bool)gm.GetVariable("Miya_Persuaded");
-
-        if (allPersuaded)
-        {
-            Debug.Log("모든 고양이 설득 완료! 탈출 시퀀스를 시작합니다.");
-            // "탈출시작대사"는 실제 존재하는 Dialogue ID로 변경해야 합니다.
-            DialogueManager.Instance.StartDialogue("탈출시작대사");
-            while (DialogueManager.Instance.isDialogueActive)
-                yield return null;
-        }
-        yield return null;
-    }
 
     /// <summary>
     /// 미니게임 종료 시 호출될 콜백 함수

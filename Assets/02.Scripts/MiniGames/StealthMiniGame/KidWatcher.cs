@@ -218,6 +218,14 @@ public class KidWatcher : MonoBehaviour
         // 발각 연출
         // 은신 비네팅 효과 사라지게
         StealthSFX.Instance.CaughtByKidFX();
+
+        // 카메라 Shake 효과 전에 카메라의 자식 오브젝트로 Canvas 넣어둔 거 풀기
+        // 로컬 좌표를 월드 좌표로 변환
+        Vector3 worldPos = transform.TransformPoint(this.transform.localPosition);
+
+        this.transform.SetParent(null);
+        this.transform.position = worldPos;
+
         // 카메라 shake에 아이들이 저기 고양이다!! 다이얼로그[Stage03_004] 재생
         cameraShake.enabled = true;
         cameraShake.ShakeAndDisable(0.5f, 0.25f);

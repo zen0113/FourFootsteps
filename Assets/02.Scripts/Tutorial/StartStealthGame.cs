@@ -7,7 +7,6 @@ public class StartStealthGame : TutorialBase
     // 은신 미니게임 세팅 및 시작
     [Header("Refs")]
     [SerializeField] private FollowCamera followCamera;
-    [SerializeField] private GameObject Kids_worldImage;
     private Animator playerAnimator;
     private MonoBehaviour playerController;
 
@@ -31,9 +30,12 @@ public class StartStealthGame : TutorialBase
     {
         followCamera = FindObjectOfType<FollowCamera>();
         followCamera.smoothSpeedX = originalXValue;
-        Kids_worldImage.SetActive(false);
-        StealthCanvas.SetActive(true);
+       
+        // StealthCanvas 카메라의 자식으로 옮김
+        StealthCanvas.transform.SetParent(Camera.main.transform);
+
         StealthUICanvas.SetActive(true);
+
         KidWatcher.Instance.StartStealthGame();
         PlayerCatMovement.Instance.SetMiniGameInputBlocked(false);
         CatStealthController.Instance.isPlaying = true;

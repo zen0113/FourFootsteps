@@ -151,7 +151,7 @@ public class PlayerAutoRunner : MonoBehaviour
 
             // 오토런 구간: 대시 & 이동 애니 바로 ON
             animator.SetBool("Dash", true);
-            animator.SetBool("Moving", true);
+            //animator.SetBool("Moving", true);
 
             // 바닥 상태 동기화(가능하면 실제 체크로)
             bool groundedNow = true;

@@ -33,7 +33,7 @@ public class ShowBubbleTutorialStep : TutorialBase
         // 설정에 따라 말풍선 표시
         if (useCustomPosition)
         {
-            SpeechBubbleController.Instance.ShowBubble(message, faceSprite, screenPosition);
+            SpeechBubbleController.Instance.ShowBubble(message, faceSprite);
         }
         else
         {

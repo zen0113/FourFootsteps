@@ -1,7 +1,9 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using Random = UnityEngine.Random;
 
 /// <summary>
 /// 원자로 메모리 퍼즐 미니게임
@@ -11,8 +13,14 @@ using UnityEngine.UI;
 public class ReactorPuzzle : MonoBehaviour
 {
     // ==================== UI 레퍼런스 ====================
-    
+
+
+    public event Action<bool> OnPuzzleEnd; // true = 성공, false = 실패
+    public event Action<bool> OnAnswerSelected; // true: 정답, false: 오답
+    public event Action OnStageCleared;
     [Header("UI References")]
+    [SerializeField] private GameObject leftPanel;
+    [SerializeField] private GameObject rightPanel;
     [Tooltip("왼쪽 패널의 9개 셀 (패턴을 보여주는 용도)")]
     public Image[] leftCells;
     
@@ -115,51 +123,53 @@ public class ReactorPuzzle : MonoBehaviour
 
     // ==================== Unity 생명주기 ====================
 
-    /// <summary>
-    /// 게임 시작 시 호출
-    /// 오른쪽 패널의 버튼들에 클릭 이벤트를 연결하고 게임 시작
-    /// </summary>
-    void Start()
+    void Awake()
     {
-        // 게임 상태 초기화 (씬 시작 시마다 처음부터)
-        InitializeGame();
-    }
-    
-    /// <summary>
-    /// 게임 전체 초기화 (씬 시작 시 호출)
-    /// </summary>
-    void InitializeGame()
-    {
-        // 진행 표시 동그라미 5개 모두 초기 설정 (항상 보이게)
-        InitializeProgressIndicator();
-        
-        // 타이머 UI 초기화
-        InitializeTimer();
-        
-        // 오른쪽 패널의 각 버튼에 클릭 이벤트 연결
         for (int i = 0; i < rightButtons.Length; i++)
         {
-            int index = i;  // 클로저 문제 방지용 로컬 변수
+            rightButtons[i].onClick.RemoveAllListeners();
+            int index = i;
             rightButtons[i].onClick.AddListener(() => OnCellClick(index));
         }
+    }
 
-        // 게임 시작 + 타이머 시작
-        StartGame();
+    /// <summary>
+    /// [명령 1] 게임을 초기 상태로 준비 (패널 숨김 등)
+    /// </summary>
+    public void PrepareForTutorial()
+    {
+        gameObject.SetActive(true); // 캔버스 자체를 활성화
+        currentStage = 1;
+        answerIndex = 0;
+        InitializeProgressIndicator();
+        UpdateStageIndicator();
+        ClearAllCells();
+        SetRightPanelInteractable(false);
+
+        if (leftPanel != null) leftPanel.SetActive(false);
+        if (rightPanel != null) rightPanel.SetActive(false);
+    }
+
+    /// <summary>
+    /// [명령 2] 타이머 UI를 보여주고 타이머 시작
+    /// </summary>
+    public void ShowAndStartTimer()
+    {
+        InitializeTimer();
         StartTimer();
     }
 
-    // ==================== 게임 흐름 제어 ====================
-
     /// <summary>
-    /// 게임을 처음부터 시작
-    /// 1단계부터 시작하고 단계 표시를 초기화
+    /// [명령 3] 실제 패턴 암기/입력 단계를 시작 (패널 보이기)
     /// </summary>
-    void StartGame()
+    public void StartPatternPhase()
     {
-        currentStage = 1;
-        UpdateStageIndicator();
+        if (leftPanel != null) leftPanel.SetActive(true);
+        if (rightPanel != null) rightPanel.SetActive(true);
+
         StartCoroutine(PlayStage());
     }
+
 
     /// <summary>
     /// 현재 단계를 진행하는 코루틴
@@ -386,6 +396,7 @@ public class ReactorPuzzle : MonoBehaviour
         {
             // 오답!
             // 타이머는 계속 실행 중이므로 중지하지 않음
+            OnAnswerSelected?.Invoke(false);
             StartCoroutine(FlashCell(rightButtons[clickedIndex].GetComponent<Image>(), wrongColor));
             StartCoroutine(OnStageFailed());
         }
@@ -400,21 +411,23 @@ public class ReactorPuzzle : MonoBehaviour
     /// </summary>
     IEnumerator OnStageComplete()
     {
-        SetRightPanelInteractable(false);  // 입력 차단
+        SetRightPanelInteractable(false);
         Debug.Log($"Stage {currentStage} 클리어!");
 
-        yield return new WaitForSeconds(1f);  // 잠시 대기
+        yield return new WaitForSeconds(1f);
 
-        // 마지막 단계(5단계)를 클리어했는지 확인
-        if (currentStage >= 5)
+        if (currentStage == 5)
         {
-            StopTimer();  // 게임 완전 클리어 시에만 타이머 중지
-            Debug.Log("===== 게임 클리어! =====");
-            // TODO: 게임 완료 처리 (보상, 애니메이션 등)
+            // 5단계(마지막) 클리어 시: 최종 성공 신호만 보냅니다.
+            StopTimer();
+            Debug.Log("===== 모든 스테이지 클리어! 튜토리얼 성공! =====");
+            OnPuzzleEnd?.Invoke(true);
         }
         else
         {
-            // 다음 단계로 진행 (타이머는 계속 실행)
+            // --- 💡 [추가] 1~4단계 클리어 시: '스테이지 클리어' 신호를 보냅니다. ---
+            OnStageCleared?.Invoke();
+
             currentStage++;
             UpdateStageIndicator();
             StartCoroutine(PlayStage());
@@ -521,40 +534,22 @@ public class ReactorPuzzle : MonoBehaviour
     /// 제한 시간 종료 시 호출
     /// 빨간 신호 + 시간 텍스트 OFF → 초록 신호 ON → 종료 처리
     /// </summary>
-    IEnumerator OnTimeUp()
+    private IEnumerator OnTimeUp()
     {
         isTimerRunning = false;
-        SetRightPanelInteractable(false);  // 입력 차단
-        
+        SetRightPanelInteractable(false);
         Debug.Log("⏰ 제한 시간 종료!");
-        
-        // UI 변경: 빨간 신호 + 시간 텍스트 OFF, 초록 신호 ON
-        topLight.enabled = false;
-        timeText.enabled = false;
-        
-        middleLight.enabled = true;
-        
-        // 초록 신호 표시 시간 대기
-        yield return new WaitForSeconds(warningDuration);
-        
-        // 초록 신호 OFF
-        middleLight.enabled = false;
-        
-        // 제한 시간 종료 처리 함수 호출
-        OnTimeLimitExpired();
+
+        // --- 💡 [수정] 즉시 실패 신호를 외부로 보냅니다. ---
+        OnPuzzleEnd?.Invoke(false);
+
+        // --- 💡 [수정] 즉시 퍼즐 게임 오브젝트를 비활성화합니다. ---
+        gameObject.SetActive(false);
+
+        // 코루틴을 여기서 완전히 종료합니다.
+        yield break;
     }
 
-    /// <summary>
-    /// 제한 시간 종료 처리
-    /// 1단계부터 재시작
-    /// </summary>
-    void OnTimeLimitExpired()
-    {
-        Debug.Log("🚨 제한 시간 종료! 게임 오버.");
-        
-        // TODO: 게임 오버 처리 (팝업, 재시작 버튼 등)
-        // 현재는 로그만 출력
-    }
 
     // ==================== UI 유틸리티 함수 ====================
 

@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -18,7 +19,7 @@ public class SpeechBubbleController : MonoBehaviour
     [Header("설정")]
     [SerializeField] private float fadeDuration = 0.3f;
 
-    private Coroutine fadeCoroutine;
+    private Coroutine displayCoroutine;
     private RectTransform rectTransform;
 
     private void Awake()
@@ -29,65 +30,57 @@ public class SpeechBubbleController : MonoBehaviour
             Destroy(gameObject);
 
         rectTransform = GetComponent<RectTransform>();
-    }
-
-    public void ShowBubble(string message, Sprite faceSprite)
-    {
-        // 말풍선 위치를 원래 위치(앵커 기준)로 설정합니다.
-        rectTransform.anchoredPosition = Vector2.zero;
-        InternalShow(message, faceSprite);
-    }
-
-
-    /// <param name="screenPosition">말풍선이 표시될 화면상의 픽셀 좌표 (x, y)</param>
-    public void ShowBubble(string message, Sprite faceSprite, Vector2 screenPosition)
-    {
-        rectTransform.position = screenPosition; // 전달받은 스크린 좌표로 위치 설정
-        InternalShow(message, faceSprite);
-    }
-
-    private void InternalShow(string message, Sprite faceSprite)
-    {
-        messageText.text = message;
-        if (faceSprite != null)
-        {
-            faceImage.gameObject.SetActive(true);
-            faceImage.sprite = faceSprite;
-        }
-        else
-        {
-            faceImage.gameObject.SetActive(false);
-        }
-
-        if (fadeCoroutine != null) StopCoroutine(fadeCoroutine);
-        fadeCoroutine = StartCoroutine(FadeIn());
-    }
-
-    public void HideBubbleInstant()
-    {
-        if (fadeCoroutine != null) StopCoroutine(fadeCoroutine);
         bubbleCanvasGroup.alpha = 0f;
         bubbleCanvasGroup.gameObject.SetActive(false);
     }
 
+    // --- 💡 [추가] 말풍선을 즉시 숨기는 함수 ---
+    public void HideBubble()
+    {
+        // 진행 중인 모든 애니메이션(코루틴)을 즉시 중단
+        if (displayCoroutine != null)
+        {
+            StopCoroutine(displayCoroutine);
+            displayCoroutine = null;
+        }
+        // 알파 값을 0으로 만들고 게임 오브젝트를 비활성화
+        bubbleCanvasGroup.alpha = 0f;
+        bubbleCanvasGroup.gameObject.SetActive(false);
+    }
+
+    public void ShowBubble(string message, Sprite faceSprite)
+    {
+        rectTransform.anchoredPosition = Vector2.zero;
+        StartDisplayCoroutine(FadeIn(message, faceSprite));
+    }
+
+    public void ShowBubbleForDuration(string message, Sprite faceSprite, float duration)
+    {
+        rectTransform.anchoredPosition = Vector2.zero;
+        StartDisplayCoroutine(ShowAndFadeOut(message, faceSprite, duration));
+    }
+
     public void FadeOutBubble()
     {
-        if (!bubbleCanvasGroup.gameObject.activeSelf || bubbleCanvasGroup.alpha == 0) return;
-
-        if (fadeCoroutine != null) StopCoroutine(fadeCoroutine);
-        fadeCoroutine = StartCoroutine(FadeOut());
+        StartDisplayCoroutine(FadeOut());
     }
 
-    public void FadeOutBubbleAfterDelay(float delay)
+    private void StartDisplayCoroutine(IEnumerator routine)
     {
-        if (fadeCoroutine != null) StopCoroutine(fadeCoroutine);
-        fadeCoroutine = StartCoroutine(FadeOutWithDelay(delay));
+        if (displayCoroutine != null)
+        {
+            StopCoroutine(displayCoroutine);
+        }
+        displayCoroutine = StartCoroutine(routine);
     }
 
-    private IEnumerator FadeIn()
+    private IEnumerator FadeIn(string message, Sprite faceSprite)
     {
-        bubbleCanvasGroup.alpha = 0f;
         bubbleCanvasGroup.gameObject.SetActive(true);
+        messageText.text = message;
+        faceImage.sprite = faceSprite;
+        faceImage.gameObject.SetActive(faceSprite != null);
+
         float elapsed = 0f;
         while (elapsed < fadeDuration)
         {
@@ -100,6 +93,8 @@ public class SpeechBubbleController : MonoBehaviour
 
     private IEnumerator FadeOut()
     {
+        if (!bubbleCanvasGroup.gameObject.activeSelf || bubbleCanvasGroup.alpha == 0) yield break;
+
         float startAlpha = bubbleCanvasGroup.alpha;
         float elapsed = 0f;
         while (elapsed < fadeDuration)
@@ -112,9 +107,10 @@ public class SpeechBubbleController : MonoBehaviour
         bubbleCanvasGroup.gameObject.SetActive(false);
     }
 
-    private IEnumerator FadeOutWithDelay(float delay)
+    private IEnumerator ShowAndFadeOut(string message, Sprite faceSprite, float duration)
     {
-        yield return new WaitForSeconds(delay);
+        yield return StartCoroutine(FadeIn(message, faceSprite));
+        yield return new WaitForSeconds(duration);
         yield return StartCoroutine(FadeOut());
     }
 }

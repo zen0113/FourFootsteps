@@ -85,35 +85,51 @@ public class DialoguesParser
 
             string[] fields = lines[i].Split(',');
 
-            string choiceID = fields[0].Trim();
-            if (string.IsNullOrWhiteSpace(choiceID)) choiceID = lastChoiceID;
-            else lastChoiceID = choiceID;
-
-            string script = Escaper(fields[1].Trim());
-            string next = fields[2].Trim();
-            string isGoodChoice = fields[3].Trim();
-
-            // TutorialIndex 파싱 (비어있으면 -1)
-            int tutorialIndex = -1;
-            if (fields.Length > 3 && !string.IsNullOrWhiteSpace(fields[4]))
+            try
             {
-                if (int.TryParse(fields[4].Trim(), out int parsedIndex))
-                {
-                    tutorialIndex = parsedIndex;
-                }
-                else
-                {
-                    Debug.LogWarning($"[DialoguesParser] 잘못된 TutorialIndex 형식: {fields[4]} (Choice ID: {choiceID})");
-                }
-            }
+                string choiceID = fields[0].Trim();
+                if (string.IsNullOrWhiteSpace(choiceID)) choiceID = lastChoiceID;
+                else lastChoiceID = choiceID;
 
-            if (!choices.ContainsKey(choiceID))
+                string script = Escaper(fields[1].Trim());
+                string next = fields[2].Trim();
+                string isGoodChoice = fields[3].Trim();
+
+                // TutorialIndex 파싱 (5번째 열, 비어있으면 -1)
+                int tutorialIndex = -1;
+                if (fields.Length > 4 && !string.IsNullOrWhiteSpace(fields[4]))
+                {
+                    if (!int.TryParse(fields[4].Trim(), out tutorialIndex))
+                    {
+                        Debug.LogWarning($"[DialoguesParser] 잘못된 TutorialIndex 형식: {fields[4]} (Choice ID: {choiceID})");
+                        tutorialIndex = -1; // 파싱 실패 시 기본값으로 설정
+                    }
+                }
+
+                // 7번째 열(fields[6])에서 필요 책임지수 값을 읽어옵니다.
+                int requiredResponsibility = 0;
+                if (fields.Length > 6 && !string.IsNullOrWhiteSpace(fields[6])) // 인덱스를 5 -> 6으로 변경
+                {
+                    if (!int.TryParse(fields[6].Trim(), out requiredResponsibility)) // 인덱스를 5 -> 6으로 변경
+                    {
+                        Debug.LogWarning($"[DialoguesParser] 잘못된 RequiredResponsibility 형식: {fields[6]} (Choice ID: {choiceID})");
+                        requiredResponsibility = 0; // 파싱 실패 시 기본값으로 설정
+                    }
+                }
+
+
+                if (!choices.ContainsKey(choiceID))
+                {
+                    choices[choiceID] = new Choice(choiceID);
+                }
+
+                // AddLine 메서드에 requiredResponsibility 인자 추가
+                choices[choiceID].AddLine(script, next, isGoodChoice, tutorialIndex, requiredResponsibility);
+            }
+            catch (System.Exception e)
             {
-                choices[choiceID] = new Choice(choiceID);
+                Debug.LogError($"CSV 파싱 중 오류 발생 (줄 번호 {i + 1}): {e.Message}\n내용: {lines[i]}");
             }
-
-            choices[choiceID].AddLine(script, next, isGoodChoice, tutorialIndex);
-            //Debug.Log($"[DialoguesParser] Choice 로드: ID={choiceID}, Script={script}, Next={next}, IsGoodChoice={isGoodChoice},TutorialIndex={tutorialIndex}");
         }
 
         return choices;

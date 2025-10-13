@@ -475,7 +475,7 @@ public class ResultManager : MonoBehaviour
                 else
                 {
                     // 상호작용은 했지만, 아직 모두와 하지는 않음
-                    dialogueToStart = "Stage04_Generic_Wait_001";
+                    dialogueToStart = "Stage04_Generic_Wait";
                 }
             }
         }

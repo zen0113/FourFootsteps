@@ -466,10 +466,10 @@ Stage04_005,Player,,흠… 이 [철장 잠금장치]` 생각보다 헐거운 것
 ,Player,,[타이밍 잘 맞추면 풀 수 있을지도 몰라!],,temp_playerCAT,,,,,
 Stage04_Cage_Success,Player,TRUE,(찰칵-) 드디어...!,,temp_playerCAT,,,,,
 ,Player,TRUE,철장 문이 열렸어. 이제 나갈 수 있어!,,temp_playerCAT,,,,,
-,InnerThoughts,,주위를 둘러보니 철장과 철장안에 고양이들이 보인다.,,temp_playerHUMAN,,,,,
-,,,여기는 길에 돌아다니는 유기동물을 잡아가는 곳인가..?,,,,,,,
-,,,안돼! 이러다간 집에서 더 멀어지게 생겼어!,,,,,,,
-,,,이 곳을 나갈 방법을 찾아봐야겠어.,,,,,,,
+,InnerThoughts,,주위를 둘러보니 철장과 철장안에 고양이들이 보인다.,,temp_playerCAT,,,,,
+,Player,,여기는 길에 돌아다니는 유기동물을 잡아가는 곳인가..?,,temp_playerCAT,,,,,
+,Player,,안돼! 이러다간 집에서 더 멀어지게 생겼어!,,temp_playerCAT,,,,,
+,Player,,이 곳을 나갈 방법을 찾아봐야겠어.,,temp_playerCAT,,,,,
 Stage04_Cage_Fail,Player,TRUE,이런... 트럭이 너무 흔들려..!,,temp_playerCAT,,,,,
 ,InnerThoughts,,(집중해서 다시 시도해보자.),,temp_playerCAT,,,,,
 Stage04_006,InnerThoughts,,내가 들어가 있던 철장 속의 밥그릇이다.,,temp_playerCAT,,,,,철장 속 밥그릇
@@ -661,6 +661,9 @@ Stage04_013,Player,,(트럭 뒤쪽을 살핀다) 저 문으로 나갈 수 있을
 ,Player,,완벽해! 문이 열리면 우리 고양이들은 재빠르니까 금방 뛰어내릴 수 있을 거야!,,temp_playerCAT,,,,,
 ,Player,,모두 준비됐지? 우린 할 수 있어!,,temp_playerCAT,,,,,
 Stage04_014,또리,,좋아! 이제 준비 끝났어!,,temp_Ttoli,,,,EventSetNextTutorial,
+Stage04_015,레오,,으럇차...! 다들 뛰어내려!,,temp_Leo,,,,EventSetNextTutorial,
+Stage04_016,Player,,좋아. 또리까지 다들 무사히 탈출한 것 같아!,,temp_playerCAT,,,,,
+,Player,,트럭이 출발하기 전에 나도 빨리 뛰어야겠어!!,,temp_playerCAT,,,,EventSetNextTutorial,
 ,,,,,,,,,,
 Stage05_001,Player,,휴... 겨우 빠져나왔다!,,temp_playerCAT,,,,,
 ,Player,,또리! 레오! 다들 괜찮아?,,temp_playerCAT,,,,,
@@ -677,18 +680,17 @@ Stage05_003,Player,,아` 안 돼…!! 여기서…끝낼 수는…없어…,,tem
 Stage05_004,Player,,헉` 헉… 드디어 무사히 도착했다...,,temp_playerCAT,,,,,안전구역에 도착 후 퍼즐 조각 조사
 ,Player,,어쩌면… 이번 퍼즐 조각이 [마지막]일지도 모르겠어.\n얼른 조사해보자.,,temp_playerCAT,,,,,
 ,,,,,,,,,,
-Recall5_001,Player,,이번에 출장까지 다녀와서 그런지 너무 피곤하네...,,temp_playerHUMAN,,,,,
-,Player,,얼른 집에 가서 빨리 쉬어야겠어.,,temp_playerHUMAN,,,,,
-,Player,,응? 도로 옆에 뭔가가 있는데...?\n저게 뭐지?,,temp_playerHUMAN,,,,,
-Recall5_002,Player,,어라` 고양이가 왜 이런 곳에…?,,temp_playerHUMAN,,,,,조사 개수 2개 다 채우면 자동차 밖으로 나가게 됨.
-Recall5_003,Player,,이런... 털도 다 엉키고 상처도 있어. 얼마나 힘들었을까.,,temp_playerHUMAN,,,,,긍정적 선택지
-,Player,,그냥 지나칠 수는 없어. 내가 도와줘야 해. \n빨리 동물 병원에 데려가야겠어!,,temp_playerHUMAN,,,,,
-,YourCat,,…야옹,,temp_playerCAT,,,,,
-Recall5_004,Player,,…음...괜히 건드리지 말아야지…,,temp_playerHUMAN,,,,,부정적 선택지
-,Player,,집이나 빨리 가서 쉬어야지.,,temp_playerHUMAN,,,,,
-,YourCat,,…,,temp_playerCAT,,,,,
-Recall5_005,Monolog,,모든 게... 내가 {YourCatName}과/와 함께했던 기억들이었구나...\n{YourCatName}은...이런 나와 함께 있으면서 행복했을까?,TRUE/AUTO_DELAYED/FADE_OUT,,,,,,
-Recall5_006,Monolog,,나는 {YourCatName}을 장난처럼 데려와 놓고…\n끝내 책임도 지지 못한 나쁜 주인이었어.,TRUE/AUTO_DELAYED/FADE_OUT,,,,,,
+Recall5_001,Player,,하... 출장까지 다녀오니 정말 녹초가 되네. 어서 집에 가서 눕고 싶다...,,temp_playerHUMAN,,,,,
+,Player,,...응? 저기 길가에 저건... 뭐지?,,temp_playerHUMAN,,,,EventSetNextTutorial,
+Recall5_002,Player,,(가까이 다가간다) 잠깐... 고양이잖아? 세상에` 왜 이런 위험한 곳에 쓰러져 있는거야?!,,temp_playerHUMAN,,,,Choice_009,조사 개수 2개 다 채우면 자동차 밖으로 나가게 됨.
+Recall5_003,Player,,꼴이 말이 아니네. 털은 다 엉키고` 여기저기 상처투성이야... 얼마나 아프고 무서웠을까.,,temp_playerHUMAN,,,,,긍정적 선택지
+,Player,,안되겠다. 피곤해도 이건 그냥 못 지나가. 그래` 결심했어. 우선 가까운 동물병원부터 찾아보자.,,temp_playerHUMAN,,,,,
+,YourCat,,…야옹,,temp_playerCAT,,,,EventRecall5_GoodChoice,
+Recall5_004,Player,, ...다친 건가. 어떡하지... 하지만 나도 오늘 너무 지쳐서... 괜히 섣불리 건드렸다가 일이 커질 수도 있고...,,temp_playerHUMAN,,,,,부정적 선택지
+,Player,,...모르겠다. 나 하나쯤 없어도... 누군가 발견해서 도와주겠지. 일단은... 너무 피곤하다. 어서 집에 가자.,,temp_playerHUMAN,,,,,
+,YourCat,,…,,temp_playerCAT,,,,EventRecall5_BadChoice,
+Recall5_005,Monolog,,모든 게… 내가 {YourCatName}과 함께했던 기억들이었구나.\n그리고 이곳이… 우리가 처음 만났던 그 자리라니.\n그때의 난 서툴렀지만… 그래도 너와 함께한 시간만큼은 진심이었어.,TRUE/AUTO_DELAYED/FADE_OUT,,,,,,
+Recall5_006,Monolog,,나는 {YourCatName}을 데려왔지만… 끝내 책임지지 못했어.\n이렇게 쓰러져 있는 이곳이… 너를 처음 발견했던 자리라니.\n결국 나는… 같은 자리에서 끝을 맞이하는구나.,TRUE/AUTO_DELAYED/FADE_OUT,,,,,,
 ,,,,,,,,,,
 HappyEnding_001,InnerThoughts,,(밖에서 새가 지저귀는 소리가 들린다.),,temp_playerHUMAN,,birdChirps,HappyEnding_1,,해피 엔딩+퍼즐이 완성되고 주인공이 인간의 모습으로 돌아오게 됨+침대에서 눈을 뜨며
 ,Player,,아...눈부셔... 여긴... 내 침대잖아?,,temp_playerHUMAN,,,HappyEnding_2,EventSetNextTutorial,
@@ -707,8 +709,8 @@ HappyEnding_007,YourCat,TRUE,야옹…!,,temp_playerCAT,,catMeow,,EventSetNextTu
 HappyEnding_008,Player,,...!! {YourCatName}(이)의 울음소리가 오른쪽에서 들렸어!\n저쪽으로 빨리 가자!,TRUE,temp_playerHUMAN,,,,EventSetNextTutorial,
 HappyEnding_009,Player,TRUE,{YourCatName}아/야…!! 다행히 여기에 있었구나…!!,TRUE,temp_playerHUMAN,,,,,
 ,Player,TRUE,아…! 정말 다행이야…! 이제 우리 집으로 돌아가자!,,temp_playerHUMAN,,,,EventSetNextTutorial,
-HappyEnding_010,Monolog,,그 날` 나는 {YourCatName}을/를 데려와 돌보기 시작했다.,TRUE,temp_playerHUMAN,,,,,
-,Monolog,,그리고 트럭에서 만난 고양이들이 떠올라\n 작은 도움이라도 해보기로 했다.,,temp_playerHUMAN,,,,EventSetNextTutorial,
+HappyEnding_010,Monolog,,그 날` 나는 {YourCatName}을/를 데려와 돌보기 시작했다.,TRUE/AUTO_DELAYED,temp_playerHUMAN,,,,,
+,Monolog,,그리고 트럭에서 만난 고양이들이 떠올라\n 작은 도움이라도 해보기로 했다.,AUTO_DELAYED,temp_playerHUMAN,,,,EventSetNextTutorial,
 HappyEnding_011,Player,,오늘은…이 보호센터에 봉사 신청을 했지.\n얼른 들어가자!,,temp_playerHUMAN,,,,EventSetNextTutorial,집으로 함께 돌아간 후 보호센터 앞에 선 주인공 컷씬
 HappyEnding_012,Player,,오늘 할 일은…화장실 치워주고 밥 주기구나.,,temp_playerHUMAN,,,,,
 ,Player,,먼저 화장실부터 치워보자!\n고양이 화장실을 오른쪽에 있네.,,temp_playerHUMAN,,,,EventSetNextTutorial,
@@ -717,7 +719,7 @@ HappyEnding_013,Player,,읏챠…! 보호소에 유기묘가 많아서 그런지
 HappyEnding_014,Player,,대용량 사료 포대라서 그런지 우리집에 있는 것보다 엄청 크네...,,temp_playerHUMAN,,,,EventSetNextTutorial,
 HappyEnding_015,Player,,고양이들이 맛있게 잘 먹었으면 좋겠네…,,temp_playerHUMAN,,,,,밥 상호작용
 ,Player,,얘들아` 맛있게 많이 먹어라!,,temp_playerHUMAN,,,,EventSetNextTutorial,
-HappyEnding_016,Player,,유기묘들이 행복해 하는 모습을 보니까...나도 같이 행복해지네!,,temp_playerHUMAN,,,,EventSetNextTutorial,
+HappyEnding_016,Player,TRUE,유기묘들이 행복해 하는 모습을 보니까...나도 같이 행복해지네!,,temp_playerHUMAN,,,,EventSetNextTutorial,
 HappyEnding_017,Monolog,,고양이의 작은 습성 하나조차 몰랐던 나였지만…\n이제는 귀 기울이고` 지켜내며` 끝까지 사랑할 거야.,AUTO_DELAYED/FADE_OUT,temp_playerHUMAN,,,,EventSetNextTutorial,
 ,,,,,,,,,,
 BadEnding_001,Player,,말도 안 돼… 또 이 도로?,,temp_playerCAT,,,,,화이트 아웃 발생 후 그대로 고양이의 모습인 주인공.
@@ -734,7 +736,7 @@ BadEnding_009,Player,TRUE,정말 나는 큰 잘못을 저질렀구나…,AUTO_DE
 BadEnding_010,Player,TRUE,{YourCatName}…그 아이에게 해선 안 될 짓을 했어…,TRUE/AUTO_DELAYED,temp_playerCAT,,,,EventSetNextTutorial,이후 길거리를 떠돌며 유기묘의 삶을 계속하는 컷씬
 BadEnding_011,InnerThoughts,,그렇게 나는 차가운 길바닥 위에서 밤을 새워 떠돌았다.,AUTO_DELAYED,temp_playerCAT,,,BadEnding_1,,
 ,InnerThoughts,,사람 발소리만 스치고` 내 발자국만 끝없이 늘어갔다.,AUTO_DELAYED,temp_playerCAT,,,BadEnding_1,EventSetNextTutorial,
-BadEnding_012,InnerThoughts,,숨을 곳을 찾아 전전하다가 들개에게 쫓기기도 했다.,AUTO_DELAYED,temp_playerCAT,,,BadEnding_2,,
+BadEnding_012,InnerThoughts,,숨을 곳을 찾아 떠돌다가 들개에게 쫓기기도 했다.,AUTO_DELAYED,temp_playerCAT,,,BadEnding_2,,
 ,InnerThoughts,,물려 넘어지고` 상처를 끌고 겨우 달아났다.,AUTO_DELAYED,temp_playerCAT,,,BadEnding_2,EventSetNextTutorial,
 BadEnding_013,InnerThoughts,,배고픔을 견디지 못해 쓰레기통을 뒤지곤 했다.,AUTO_DELAYED,temp_playerCAT,,,BadEnding_3,,
 ,InnerThoughts,,남은 건 비린 냄새뿐…\n외로움 속에서 내 잘못만 끝없이 떠올랐다.,AUTO_DELAYED,temp_playerCAT,,,BadEnding_3,EventSetNextTutorial,

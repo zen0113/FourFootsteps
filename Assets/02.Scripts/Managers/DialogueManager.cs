@@ -682,6 +682,8 @@ public class DialogueManager : MonoBehaviour
 
     public void OnDialoguePanelClick()
     {
+        if (choicesContainer[dialogueType.ToInt()].childCount > 0) return;
+
         if (!isDialogueActive || isAuto || isCutsceneFadingToBlack) return;
 
         if (isTyping)
@@ -748,17 +750,60 @@ public class DialogueManager : MonoBehaviour
     private void DisplayChoices(string choiceID)
     {
         if (choicesContainer.Length <= dialogueType.ToInt()) return;
+
+        // 기존 선택지들 제거
         foreach (Transform child in choicesContainer[dialogueType.ToInt()])
         {
             Destroy(child.gameObject);
         }
+
         List<ChoiceLine> choiceLines = choices[choiceID].Lines;
+
         foreach (ChoiceLine choiceLine in choiceLines)
         {
             var choiceButton = Instantiate(choicePrefab, choicesContainer[dialogueType.ToInt()]).GetComponent<Button>();
             var choiceText = choiceButton.GetComponentInChildren<TextMeshProUGUI>();
             choiceText.text = choiceLine.GetScript();
-            choiceButton.onClick.AddListener(() => OnChoiceSelected(choiceLine)); // ChoiceLine 전체를 전달
+
+            // 자식 오브젝트에서 "LockIcon"을 찾아 우선 비활성화
+            Transform lockIcon = choiceButton.transform.Find("LockIcon");
+            if (lockIcon != null)
+            {
+                lockIcon.gameObject.SetActive(false);
+            }
+
+            bool isLocked = false;
+            // choiceLine에 RequiredResponsibility 값이 0보다 큰 경우에만 조건을 확인
+            if (choiceLine.RequiredResponsibility > 0)
+            {
+                // GameManager에서 현재 책임지수 가져오기
+                int currentResponsibility = (int)GameManager.Instance.GetVariable("ResponsibilityScore");
+
+                Debug.Log($"선택지: '{choiceLine.GetScript()}', 필요 책임지수: {choiceLine.RequiredResponsibility}, 현재 책임지수: {currentResponsibility}");
+
+                // 현재 책임지수가 요구되는 책임지수보다 낮은지 확인
+                if (currentResponsibility < choiceLine.RequiredResponsibility)
+                {
+                    isLocked = true;
+                }
+            }
+
+
+            // 잠금 상태에 따라 버튼 상호작용 및 아이콘 표시 결정
+            if (isLocked)
+            {
+                choiceButton.interactable = false; // 버튼 비활성화
+                if (lockIcon != null)
+                {
+                    lockIcon.gameObject.SetActive(true); // 잠금 아이콘 활성화
+                }
+            }
+            else
+            {
+                choiceButton.interactable = true; // 버튼 활성화
+                                                  // 버튼이 활성화된 경우에만 클릭 이벤트 리스너 추가
+                choiceButton.onClick.AddListener(() => OnChoiceSelected(choiceLine));
+            }
         }
     }
 

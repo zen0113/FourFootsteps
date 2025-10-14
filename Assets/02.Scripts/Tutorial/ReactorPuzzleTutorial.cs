@@ -227,7 +227,6 @@ public class ReactorPuzzleTutorial : TutorialBase
             SpeechBubbleController.Instance.FadeOutBubble();
         }
 
-        ToggleVehicleEffects(true);
         isCompleted = true;
     }
 

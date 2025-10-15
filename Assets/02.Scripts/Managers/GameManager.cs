@@ -168,18 +168,16 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public void LoadTitleSceneWithDelayed(bool withDelayed)
-    {
-        if (withDelayed)
-            Invoke("LoadTitleScene", 3f);
-        else
-            LoadTitleScene();
-    }
-
-    private void LoadTitleScene()
+    public void LoadTitleScene()
     {
         SceneLoader.Instance.LoadScene("TitleScene");
     }
+
+    public void StartEndingCredit()
+    {
+        StartCoroutine(EndingCredit.Instance.StartEndingCredit());
+    }
+
 
     // Variable 값 설정
     public void SetVariable(string variableName, object value)
@@ -281,7 +279,8 @@ public class GameManager : MonoBehaviour
             "CanStartCleaningMinigame",
             "CurrentMemoryPuzzleCount",
             "MemoryPuzzleStates",
-            "CleanedObjectCount"
+            "CleanedObjectCount",
+            "CanInvesigatingRecallObject"
         });
 
         foreach (var item in variables)

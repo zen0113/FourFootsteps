@@ -12837,7 +12837,7 @@ MonoBehaviour:
   - sceneName: Ending_Bad
     bgmIndex1: 9
     bgmIndex2: 5
-    bgm1VolumeMultiplier: 0.5
+    bgm1VolumeMultiplier: 0.35
     bgm2VolumeMultiplier: 0.8
     autoPlay: 0
     syncStart: 1
@@ -12845,7 +12845,7 @@ MonoBehaviour:
   - sceneName: Ending_Happy
     bgmIndex1: 10
     bgmIndex2: 1
-    bgm1VolumeMultiplier: 0.5
+    bgm1VolumeMultiplier: 0.35
     bgm2VolumeMultiplier: 1
     autoPlay: 0
     syncStart: 1
@@ -16242,7 +16242,7 @@ GameObject:
   - component: {fileID: 1823244547}
   - component: {fileID: 1823244548}
   m_Layer: 0
-  m_Name: _LoadTitleScene
+  m_Name: _Ending Credit
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -16276,14 +16276,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   executedEvents:
-  - eventName: Load Title Scene
+  - eventName: Start EndingCredit
     unityEvent:
       m_PersistentCalls:
         m_Calls:
         - m_Target: {fileID: 576505466}
           m_TargetAssemblyTypeName: GameManager, Assembly-CSharp
-          m_MethodName: LoadTitleSceneWithDelayed
-          m_Mode: 6
+          m_MethodName: StartEndingCredit
+          m_Mode: 1
           m_Arguments:
             m_ObjectArgument: {fileID: 0}
             m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
@@ -18577,7 +18577,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5543039565309483218, guid: 66542d5616022d34f9417133611193b8, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

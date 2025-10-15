@@ -19,11 +19,14 @@ public class RoadVehicle : MonoBehaviour
     public float endY = -10f;
 
     [Header("Visual Effect Settings")]
+    [Tooltip("차량 스프라이트 목록 (랜덤 선택)")]
+    public Sprite[] vehicleSprites;
+    
     [Tooltip("최소 크기 (멀리 있을 때)")]
     public float minScale = 0.3f;
     
     [Tooltip("최대 크기 (가까이 있을 때)")]
-    public float maxScale = 1.5f;
+    public float maxScale = 1f;
     
     [Tooltip("최소 투명도 (멀리 있을 때)")]
     [Range(0f, 1f)]
@@ -48,6 +51,18 @@ public class RoadVehicle : MonoBehaviour
     void Start()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
+        
+        // 차량 스프라이트 랜덤 선택
+        if (vehicleSprites != null && vehicleSprites.Length > 0)
+        {
+            int randomIndex = Random.Range(0, vehicleSprites.Length);
+            spriteRenderer.sprite = vehicleSprites[randomIndex];
+            Debug.Log($"[RoadVehicle] 차량 스프라이트 선택: {randomIndex + 1}/{vehicleSprites.Length}");
+        }
+        else
+        {
+            Debug.LogWarning("[RoadVehicle] 차량 스프라이트가 설정되지 않았습니다!");
+        }
         
         // 시작 위치 설정
         Vector3 pos = transform.position;

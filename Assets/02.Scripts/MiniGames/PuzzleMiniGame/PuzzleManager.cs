@@ -52,8 +52,7 @@ public class PuzzleManager : MonoBehaviour
     private void Start()
     {
         int score = (int)GameManager.Instance.GetVariable("ResponsibilityScore");
-        // 해피엔딩 테스트용
-        score = 3;
+
         isBadEnding = (score < 3) ? true : false;
         ResponsibilityScore = score;
         UIManager.Instance.SetAllUI(false);

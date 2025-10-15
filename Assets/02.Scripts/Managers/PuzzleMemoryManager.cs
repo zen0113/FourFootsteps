@@ -255,9 +255,15 @@ public class PuzzleMemoryManager : MonoBehaviour
 
         GameManager.Instance.SetVariable("CurrentMemoryPuzzleCount", num);
         var puzzleStates = GameManager.Instance.GetVariable("MemoryPuzzleStates") as Dictionary<int, bool>;
+
+        int score = 0;
         for (int i = 0; i < num; i++)
         {
             puzzleStates[i] = rand.Next(2) == 0;
+            if (puzzleStates[i])
+                ++score;
         }
+        GameManager.Instance.SetVariable("ResponsibilityScore", score);
+        ResultManager.Instance.Test();
     }
 }

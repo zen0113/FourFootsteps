@@ -66,7 +66,7 @@ public class ResultManager : MonoBehaviour
 
     public void Test()
     {
-        GameManager.Instance.IncrementVariable("ResponsibilityScore",3);
+        //GameManager.Instance.IncrementVariable("ResponsibilityScore",3);
         ResponsibilityManager.Instance.ChangeResponsibilityGauge();
     }
 

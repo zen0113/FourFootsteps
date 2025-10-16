@@ -191,6 +191,10 @@ public class ResultManager : MonoBehaviour
             case "Result_GetMemoryPuzzle":
                 Debug.Log("Execute [Result_GetMemoryPuzzle]");
                 executableObjects["MemoryPuzzle"].ExecuteAction();
+
+                // 엎드리는 모션 재생
+                PlayerCatMovement.Instance.ForceCrouch = true;
+
                 // 비동기 대기(애니메이션 끝날 때까지)
                 while ((bool)GameManager.Instance.GetVariable("isPuzzleMoving"))
                     yield return null;

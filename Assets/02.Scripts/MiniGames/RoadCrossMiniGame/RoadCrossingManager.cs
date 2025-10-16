@@ -37,6 +37,15 @@ public class RoadCrossingManager : MonoBehaviour
     
     [Tooltip("차량 생성 시작 대기 시간")]
     public float initialSpawnDelay = 1f;
+    
+    [Tooltip("한 번에 생성할 차량 최소 개수")]
+    public int minVehiclesPerSpawn = 4;
+    
+    [Tooltip("한 번에 생성할 차량 최대 개수")]
+    public int maxVehiclesPerSpawn = 5;
+    
+    [Tooltip("플레이어 근처 차선 개수 (가까운 차선에서만 생성)")]
+    public int nearbyLaneCount = 5;
 
     [Header("Crow Attack Settings")]
     [Tooltip("까마귀 자동 스폰 사용 (트리거 방식 사용 시 체크 해제)")]
@@ -106,9 +115,12 @@ public class RoadCrossingManager : MonoBehaviour
         if (vehicleSpawnCoroutine != null) StopCoroutine(vehicleSpawnCoroutine);
         vehicleSpawnCoroutine = StartCoroutine(VehicleSpawnLoop());
 
-        // 까마귀 공격 시작
-        if (crowAttackCoroutine != null) StopCoroutine(crowAttackCoroutine);
-        crowAttackCoroutine = StartCoroutine(CrowAttackLoop());
+        // 까마귀 자동 스폰 사용 시에만 시작
+        if (useAutoCrowSpawn)
+        {
+            if (crowAttackCoroutine != null) StopCoroutine(crowAttackCoroutine);
+            crowAttackCoroutine = StartCoroutine(CrowAttackLoop());
+        }
 
         Debug.Log("[RoadCrossing] 미니게임 시작!");
     }
@@ -144,7 +156,7 @@ public class RoadCrossingManager : MonoBehaviour
     }
 
     /// <summary>
-    /// 랜덤 차선에 차량 생성
+    /// 랜덤 차선에 차량 생성 (여러 대 동시 생성)
     /// </summary>
     void SpawnVehicle()
     {
@@ -160,19 +172,38 @@ public class RoadCrossingManager : MonoBehaviour
             return;
         }
 
-        // 랜덤 차선 선택
-        int randomIndex = Random.Range(0, lanes.Length);
-        Transform selectedLane = lanes[randomIndex];
-
-        // 차량 생성
-        GameObject vehicle = Instantiate(vehiclePrefab, selectedLane.position, Quaternion.identity);
+        // 한 번에 생성할 차량 개수 결정
+        int vehicleCount = Random.Range(minVehiclesPerSpawn, maxVehiclesPerSpawn + 1);
         
-        // 차량에 차선 X좌표 전달
-        RoadVehicle vehicleScript = vehicle.GetComponent<RoadVehicle>();
-        if (vehicleScript != null)
+        // 사용 가능한 차선 목록 생성
+        List<int> availableLanes = new List<int>();
+        for (int i = 0; i < lanes.Length; i++)
         {
-            vehicleScript.SetLaneX(selectedLane.position.x);
+            availableLanes.Add(i);
         }
+
+        // 차량 개수만큼 랜덤 차선에서 생성
+        for (int i = 0; i < vehicleCount && availableLanes.Count > 0; i++)
+        {
+            // 랜덤 차선 선택
+            int randomIndex = Random.Range(0, availableLanes.Count);
+            int selectedLaneIndex = availableLanes[randomIndex];
+            availableLanes.RemoveAt(randomIndex); // 중복 방지
+            
+            Transform selectedLane = lanes[selectedLaneIndex];
+
+            // 차량 생성
+            GameObject vehicle = Instantiate(vehiclePrefab, selectedLane.position, Quaternion.identity);
+            
+            // 차량에 차선 X좌표 전달
+            RoadVehicle vehicleScript = vehicle.GetComponent<RoadVehicle>();
+            if (vehicleScript != null)
+            {
+                vehicleScript.SetLaneX(selectedLane.position.x);
+            }
+        }
+        
+        Debug.Log($"[RoadCrossing] 차량 {vehicleCount}대 생성");
     }
 
     /// <summary>

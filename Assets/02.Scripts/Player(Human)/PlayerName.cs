@@ -78,7 +78,13 @@ public class PlayerName : MonoBehaviour
         CheckName_Panel.SetActive(true);
 
         //“ㅁㅁ”으로 확정하시겠습니까?
-        CheckNameText.text = $"'{nameOfPlayer}'(으)로 확정하시겠습니까?";
+        string checkGuide = "{nameOfPlayer}(으)로 확정하시겠습니까?";
+        checkGuide= KoreanJosa.Apply(
+            checkGuide,
+            ("nameOfPlayer", nameOfPlayer)
+        );
+
+        CheckNameText.text = checkGuide;
     }
 
     // 이름 체크 패널에서 아니오 버튼 누르면
@@ -93,6 +99,35 @@ public class PlayerName : MonoBehaviour
 
         inputField.text = null;
         saveName = null;
+    }
+
+    // 프롤로그의 고양이 이름 설정 후 예 버튼
+    public void NextPrologueStep()
+    {
+        if (playerType == PlayerType.Human) return;
+
+        StartCoroutine(SetNameCanvas(false));
+    }
+
+    public IEnumerator SetNameCanvas(bool toVisible)
+    {
+        if (playerType == PlayerType.Human) yield break;
+
+        CanvasGroup canvasGroup = GetComponent<CanvasGroup>();
+        float duration = 1f;
+
+        if (toVisible)
+        {
+            gameObject.SetActive(toVisible);
+            yield return UIManager.Instance.FadeCanvasGroup(canvasGroup, toVisible, duration);
+        }
+        else
+        {
+            yield return UIManager.Instance.FadeCanvasGroup(canvasGroup, toVisible, duration);
+            StartCoroutine(PrologueManager.Instance.ProceedToNextStep());
+            gameObject.SetActive(toVisible);
+        }
+
     }
 
 }

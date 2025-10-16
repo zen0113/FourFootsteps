@@ -18,6 +18,9 @@ public class GuideTutorialStep : TutorialBase
 
     public override void Enter()
     {
+        guideTitle = ProcessPlaceholders(guideTitle);
+        guideDescription = ProcessPlaceholders(guideDescription);
+
         GuideUIController.Instance?.ShowGuide(guideTitle, guideDescription);
         hasRequestedNext = false;
 
@@ -75,5 +78,25 @@ public class GuideTutorialStep : TutorialBase
             StopCoroutine(autoNextCoroutine);
             autoNextCoroutine = null;
         }
+    }
+
+
+    // 단순하게 {YourCatName} 부분 바꾸는 것만 추가
+    private string ProcessPlaceholders(string originalString)
+    {
+        string yourCatName = (GameManager.Instance.GetVariable("YourCatName") as string) ?? "";
+
+        string modifiedString = originalString.Replace("\\n", "\n")
+                       .Replace("`", ",")
+                       .Replace("", "")
+                       .Replace("\u0008", "");
+
+        // 한 번에 모든 패턴(괄호/슬래시/단일조사/단독)을 처리
+        modifiedString = KoreanJosa.Apply(
+            modifiedString,
+            ("YourCatName", yourCatName)
+        );
+
+        return modifiedString;
     }
 }

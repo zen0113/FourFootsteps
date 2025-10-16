@@ -1,6 +1,6 @@
 using System.Collections;
 using UnityEngine;
-using System; // System 네임스페이스 추가
+using System;
 
 public class CatAutoMover : MonoBehaviour
 {
@@ -40,6 +40,7 @@ public class CatAutoMover : MonoBehaviour
     public bool IsMoving => isMoving;
 
     private float currentSpeed; // 가변 속도(보간 대상)
+    private Vector2 _desiredVelocity; // 초당 속도 (Update에서 계산, FixedUpdate에서 적용)
 
     private enum MoveState { Idle, Walking, Dashing }
     private MoveState state = MoveState.Idle;
@@ -68,6 +69,7 @@ public class CatAutoMover : MonoBehaviour
         SetAnim(false, false);
         isMoving = false;
         state = MoveState.Idle;
+        _desiredVelocity = Vector2.zero;
     }
 
     /// <summary> 걷기/기본 이동 시작(상황에 따라 대쉬 전환 가능) </summary>
@@ -79,9 +81,7 @@ public class CatAutoMover : MonoBehaviour
         currentSpeed = 0f; // 가속 시작점
         SetAnim(moving: true, dashing: false);
         lastWalkSoundTime = Time.time; // 이동 시작 시 바로 소리 재생을 위해 초기화
-        PlayFootstepIfDue(true); // 이동 시작 시 걷는 소리 바로 재생
-        //animator?.SetBool("Moving", true); // 이동 시작 시 애니메이션 설정
-        //PlayWalkSound(); // 이동 시작 시 걷는 소리 바로 재생
+        PlayFootstepIfDue(true);       // 이동 시작 시 걷는 소리 바로 재생
     }
 
     /// <summary> 시작부터 대쉬로 이동(필요 시 막판에 걷기/뛰기로 전환) </summary>
@@ -102,6 +102,7 @@ public class CatAutoMover : MonoBehaviour
         isMoving = false;
         state = MoveState.Idle;
         currentSpeed = 0f;
+        _desiredVelocity = Vector2.zero;
         audioSource.Stop();
         SetAnim(false, false);
     }
@@ -168,32 +169,15 @@ public class CatAutoMover : MonoBehaviour
         Vector2 toTarget = (Vector2)(targetPoint.position - transform.position);
         float distance = toTarget.magnitude;
 
+        // 도착 처리(ArriveStep 내부에서 스냅만 수행; 이동은 FixedUpdate에서)
         if (arrivingLock || distance <= stopDistance)
         {
             ArriveStep(toTarget, distance);
+            _desiredVelocity = Vector2.zero;
             return;
         }
 
-        //if (distance <= stopDistance)
-        //{
-        //    // 부드러운 감속
-        //    if (Mathf.Abs(currentSpeed) > 0.01f)
-        //    {
-        //        currentSpeed = Mathf.MoveTowards(currentSpeed, 0f, decel * Time.deltaTime);
-        //        Translate(currentSpeed, toTarget);
-        //        return;
-        //    }
-
-        //    // 완전 정지
-        //    isMoving = false;
-        //    state = MoveState.Idle;
-        //    audioSource.Stop();
-        //    SetAnim(false, false);
-        //    OnArrived?.Invoke();
-        //    return;
-        //}
-
-        // 방향 전환
+        // 방향 전환(좌/우 플립)
         if (toTarget.x > 0) spriteRenderer.flipX = false;
         else if (toTarget.x < 0) spriteRenderer.flipX = true;
 
@@ -218,20 +202,33 @@ public class CatAutoMover : MonoBehaviour
             SetAnim(moving: true, dashing: false);
         }
 
-        // 상태 결정 이후(Translate 전에) 파라미터 싱크
+        // 애니메이터 파라미터 싱크
         SyncAnimatorParams();
 
-        // 목표 속도 & 가감속
+        // 목표 속도 & 가감속 (초당 속도 계산)
         float targetSpeed = (state == MoveState.Dashing) ? dashSpeed : moveSpeed;
         float a = (Mathf.Abs(targetSpeed) > Mathf.Abs(currentSpeed)) ? accel : decel;
         currentSpeed = Mathf.MoveTowards(currentSpeed, targetSpeed, a * Time.deltaTime);
 
-        // 실제 이동
-        //Translate(currentSpeed, toTarget);
-        MoveBy(toTarget.normalized * (currentSpeed * Time.deltaTime));
+        // 초당 속도만 저장 (여기서 dt 곱하지 않음)
+        _desiredVelocity = toTarget.normalized * currentSpeed;
+
+        // Rigidbody를 쓰지 않는 경우에만 여기서 이동
+        if (!(useRigidbodyMotion && rb != null))
+        {
+            transform.Translate(_desiredVelocity * Time.deltaTime, Space.World);
+        }
 
         // 발소리
         PlayFootstepIfDue(false);
+    }
+
+    private void FixedUpdate()
+    {
+        if (useRigidbodyMotion && rb != null && isMoving && targetPoint != null && !arrivingLock)
+        {
+            rb.MovePosition(rb.position + _desiredVelocity * Time.fixedDeltaTime);
+        }
     }
 
     void SyncAnimatorParams()
@@ -248,13 +245,13 @@ public class CatAutoMover : MonoBehaviour
         animator.SetBool(_hShift, state == MoveState.Dashing);
         animator.SetBool(_hJump, false); // 오토무브 구간에서는 점프 안씀
 
-        // 아래 두 줄은 “보조용” (그래프가 Dash/Moving 불리언을 보지 않는다면 없어도 됨)
+        // Dash일 때 Moving=false, Walk일 때만 Moving=true
         animator.SetBool("Dash", state == MoveState.Dashing);
-        animator.SetBool("Moving", state != MoveState.Idle);
+        animator.SetBool("Moving", state == MoveState.Walking);
     }
 
 
-    // 오버슈트 방지 + 감속 + 스냅 + 완료 처리
+    // 오버슈트 방지: 여기선 감속과 스냅/완료만 담당 (이동은 FixedUpdate가 처리)
     private void ArriveStep(Vector2 toTarget, float distance)
     {
         arrivingLock = true;
@@ -262,23 +259,13 @@ public class CatAutoMover : MonoBehaviour
         // 감속
         currentSpeed = Mathf.MoveTowards(currentSpeed, 0f, decel * Time.deltaTime);
 
-        // 이번 프레임 이동량(오버슈트 방지)
-        float step = currentSpeed * Time.deltaTime;
-        float travel = Mathf.Min(step, distance); // 목표를 넘지 않도록 clamp
-
-        // 이동
-        if (travel > 0f)
-            MoveBy(toTarget.normalized * travel);
-
         // 스냅 & 종료 조건
         if (currentSpeed <= 0.01f || distance <= arriveSnapDistance)
         {
-            // 스냅(정확히 고정)
             Vector3 snap = targetPoint.position;
             if (useRigidbodyMotion && rb != null) rb.MovePosition(snap);
             else transform.position = snap;
 
-            // 완료
             isMoving = false;
             state = MoveState.Idle;
             arrivingLock = false;
@@ -287,28 +274,27 @@ public class CatAutoMover : MonoBehaviour
             SetAnim(false, false);
             OnArrived?.Invoke();
         }
+        // 조건을 아직 못 채웠으면, 다음 프레임까지 arrivingLock을 유지하여 이동 계산을 멈춤
     }
 
-    // Transform 대신 RB2D.MovePosition 우선 사용(있으면)
-    private void MoveBy(Vector2 delta)
-    {
-        if (useRigidbodyMotion && rb != null)
-            rb.MovePosition(rb.position + delta);
-        else
-            transform.Translate(delta, Space.World);
-    }
+    //// Transform 대신 RB2D.MovePosition 우선 사용(있으면)
+    //private void MoveBy(Vector2 delta)
+    //{
+    //    if (useRigidbodyMotion && rb != null)
+    //        rb.MovePosition(rb.position + delta);
+    //    else
+    //        transform.Translate(delta, Space.World);
+    //}
 
-    private void Translate(float speed, Vector2 toTarget)
-    {
-        Vector2 dir = toTarget.normalized;
-        transform.Translate(dir * speed * Time.deltaTime, Space.World);
-    }
+    //private void Translate(float speed, Vector2 toTarget)
+    //{
+    //    Vector2 dir = toTarget.normalized;
+    //    transform.Translate(dir * speed * Time.deltaTime, Space.World);
+    //}
 
     private void SetAnim(bool moving, bool dashing)
     {
         if (animator == null) return;
-        animator.SetBool("Moving", moving);
-        animator.SetBool("Dash", dashing);
         if (!moving && !dashing)
         {
             animator.SetBool("Crouch", false);

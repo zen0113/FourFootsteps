@@ -451,7 +451,7 @@ MonoBehaviour:
   spriteGlowEffect: {fileID: 0}
   isOneTimeOnly: 0
   keyImage: {fileID: 0}
-  requiredCondition: 
+  requiredCondition: C_CanInvesigatingRecall
 --- !u!1 &37538892 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4135296550664430820, guid: fcc937e4cda6d8c4d8de70f5c23e9268, type: 3}
@@ -1641,7 +1641,7 @@ MonoBehaviour:
   spriteGlowEffect: {fileID: 0}
   isOneTimeOnly: 0
   keyImage: {fileID: 0}
-  requiredCondition: 
+  requiredCondition: C_CanInvesigatingRecall
 --- !u!61 &301281596
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -3110,7 +3110,7 @@ MonoBehaviour:
   spriteGlowEffect: {fileID: 0}
   isOneTimeOnly: 0
   keyImage: {fileID: 0}
-  requiredCondition: 
+  requiredCondition: C_CanInvesigatingRecall
 --- !u!61 &753901809
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -3797,6 +3797,7 @@ MonoBehaviour:
   activateObjects: []
   hideObject: {fileID: 0}
   interactionImageDisplay: {fileID: 1357602825}
+  isHintMaintained: 0
 --- !u!1 &940554979
 GameObject:
   m_ObjectHideFlags: 0
@@ -4253,7 +4254,7 @@ MonoBehaviour:
   spriteGlowEffect: {fileID: 0}
   isOneTimeOnly: 0
   keyImage: {fileID: 0}
-  requiredCondition: 
+  requiredCondition: C_CanInvesigatingRecall
 --- !u!61 &951356394
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -4923,7 +4924,7 @@ MonoBehaviour:
   spriteGlowEffect: {fileID: 0}
   isOneTimeOnly: 0
   keyImage: {fileID: 0}
-  requiredCondition: 
+  requiredCondition: C_CanInvesigatingRecall
 --- !u!61 &1030194744
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -5173,6 +5174,7 @@ MonoBehaviour:
   activateObjects: []
   hideObject: {fileID: 0}
   interactionImageDisplay: {fileID: 1309625827}
+  isHintMaintained: 0
 --- !u!61 &1085233549
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -5677,11 +5679,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1019008681}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!224 &1233281571 stripped
-RectTransform:
-  m_CorrespondingSourceObject: {fileID: 5462265599879523924, guid: fcc937e4cda6d8c4d8de70f5c23e9268, type: 3}
-  m_PrefabInstance: {fileID: 428481945}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1237725891
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -6457,7 +6454,7 @@ MonoBehaviour:
   spriteGlowEffect: {fileID: 0}
   isOneTimeOnly: 0
   keyImage: {fileID: 0}
-  requiredCondition: 
+  requiredCondition: C_CanInvesigatingRecall
 --- !u!61 &1387158205
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -6959,7 +6956,7 @@ MonoBehaviour:
   spriteGlowEffect: {fileID: 0}
   isOneTimeOnly: 0
   keyImage: {fileID: 0}
-  requiredCondition: 
+  requiredCondition: C_CanInvesigatingRecall
 --- !u!61 &1431219419
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -8130,7 +8127,8 @@ MonoBehaviour:
   - {fileID: 349682566}
   - {fileID: 1196543935}
   - {fileID: 964033064}
-  nextSceneName: RecallScene3
+  nextSceneName: StageScene2
+  currentIndex: -1
 --- !u!4 &1703816156
 Transform:
   m_ObjectHideFlags: 0
@@ -8416,7 +8414,7 @@ MonoBehaviour:
   spriteGlowEffect: {fileID: 0}
   isOneTimeOnly: 0
   keyImage: {fileID: 0}
-  requiredCondition: 
+  requiredCondition: C_CanInvesigatingRecall
 --- !u!61 &1769555273
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -8580,6 +8578,7 @@ MonoBehaviour:
   activateObjects: []
   hideObject: {fileID: 115183254}
   interactionImageDisplay: {fileID: 1460304447}
+  isHintMaintained: 0
 --- !u!61 &1802929049
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -8759,213 +8758,6 @@ MonoBehaviour:
   catFreeRoam: {fileID: 940554980}
   destinationPoint: {fileID: 190147189}
   arrivalDistance: 2
---- !u!1 &1926407355
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1926407357}
-  - component: {fileID: 1926407356}
-  m_Layer: 0
-  m_Name: ToastTextSpawner
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1926407356
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1926407355}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 84c61fd204c6d144194c68eddb1cc7a0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  toastPrefab: {fileID: 2208031083558113381, guid: 63b48124017c20d438d9929451db2072, type: 3}
-  toastParent: {fileID: 1233281571}
-  duration: 3
-  jitterX: {x: -12, y: 12}
-  positiveTextColor: {r: 0, g: 0, b: 0, a: 1}
-  positiveBgColor: {r: 1, g: 1, b: 1, a: 0.85}
-  riseOffsetUp: {x: 0, y: 60}
-  alphaUp:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 0
-      outSlope: 8
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    - serializedVersion: 3
-      time: 0.12
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    - serializedVersion: 3
-      time: 0.8
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    - serializedVersion: 3
-      time: 1
-      value: 0
-      inSlope: -8
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  scaleUp:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0.85
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    - serializedVersion: 3
-      time: 0.15
-      value: 1.1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    - serializedVersion: 3
-      time: 1
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  negativeTextColor: {r: 1, g: 0, b: 0, a: 1}
-  negativeBgColor: {r: 1, g: 1, b: 1, a: 0.85}
-  riseOffsetDown: {x: 0, y: -60}
-  alphaDown:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 0
-      outSlope: 9
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    - serializedVersion: 3
-      time: 0.1
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    - serializedVersion: 3
-      time: 0.7
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    - serializedVersion: 3
-      time: 0.95
-      value: 0
-      inSlope: -9
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  scaleDown:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 1.05
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    - serializedVersion: 3
-      time: 0.2
-      value: 0.95
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    - serializedVersion: 3
-      time: 1
-      value: 0.95
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  autoToggleLayer: 0
-  layerOffDelay: 0.25
-  initialPool: 2
---- !u!4 &1926407357
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1926407355}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 880.6951, y: 505.79745, z: -3.9874892}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1938240643
 GameObject:
   m_ObjectHideFlags: 0
@@ -9087,7 +8879,7 @@ MonoBehaviour:
   spriteGlowEffect: {fileID: 0}
   isOneTimeOnly: 0
   keyImage: {fileID: 0}
-  requiredCondition: 
+  requiredCondition: C_CanInvesigatingRecall
 --- !u!61 &1938240648
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -9748,6 +9540,7 @@ MonoBehaviour:
   - {fileID: 940554979}
   hideObject: {fileID: 115183254}
   interactionImageDisplay: {fileID: 1297945174}
+  isHintMaintained: 0
 --- !u!61 &2083716875
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -10204,4 +9997,3 @@ SceneRoots:
   - {fileID: 1944179198}
   - {fileID: 1063920877}
   - {fileID: 1019008681}
-  - {fileID: 1926407357}

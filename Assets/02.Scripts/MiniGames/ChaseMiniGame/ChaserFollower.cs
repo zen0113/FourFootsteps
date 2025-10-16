@@ -61,7 +61,7 @@ public class ChaserFollower : MonoBehaviour
     public enum Phase { Chasing, Bird }
     public Phase phase;
 
-    private int birdTutoIndex = 10, chasingTutoIndex = 11;
+    private int birdTutoIndex = 11, chasingTutoIndex = 12;
 
     void CheckPhase()
     {

@@ -9,6 +9,7 @@ public class SuspicionMeter : MonoBehaviour
 {
     [Header("Refs")]
     [SerializeField] private StealthSettingsSO settings;
+    private StealthSettingsSO _settings;                 // 런타임 복제본
 
     [Header("UI")]
     public GameObject suspicionGaugeGroup;
@@ -24,6 +25,8 @@ public class SuspicionMeter : MonoBehaviour
             Debug.LogWarning("[CatStealthController] StealthSettings가 지정되지 않았습니다. 기본값으로 동작합니다.");
             settings = ScriptableObject.CreateInstance<StealthSettingsSO>();
         }
+        _settings = Instantiate(settings); // 공유 SO 상태오염 방지
+        _settings.ResetRuntime();
         OnReachedMax += CaughtByKid;
     }
 

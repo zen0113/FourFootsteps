@@ -69,7 +69,6 @@ public class GameManager : MonoBehaviour
             {
                 new SceneData("TitleScene"),
                 new SceneData("SetPlayerName"),
-                new SceneData("SetCatName"),
                 new SceneData("Prologue"),
                 new SceneData("StageScene1"),
                 new SceneData("RecallScene1", true),
@@ -174,6 +173,12 @@ public class GameManager : MonoBehaviour
         SceneLoader.Instance.LoadScene("TitleScene");
     }
 
+    public void StartEndingCredit()
+    {
+        StartCoroutine(EndingCredit.Instance.StartEndingCredit());
+    }
+
+
     // Variable 값 설정
     public void SetVariable(string variableName, object value)
     {
@@ -274,7 +279,8 @@ public class GameManager : MonoBehaviour
             "CanStartCleaningMinigame",
             "CurrentMemoryPuzzleCount",
             "MemoryPuzzleStates",
-            "CleanedObjectCount"
+            "CleanedObjectCount",
+            "CanInvesigatingRecallObject"
         });
 
         foreach (var item in variables)

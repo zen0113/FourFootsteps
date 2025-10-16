@@ -6,6 +6,7 @@ public class HideObject : MonoBehaviour
 {
     [Header("Refs")]
     [SerializeField] private StealthSettingsSO settings;
+    private StealthSettingsSO _settings;                 // 런타임 복제본
 
     [Header("Anchor (optional)")]
     [Tooltip("플레이어를 정렬할 기준점 (미지정 시 자기 Transform 사용)")]
@@ -40,6 +41,14 @@ public class HideObject : MonoBehaviour
             var t = transform.Find("Key Icon");
             if (t) keyPrompt = t.gameObject;
         }
+
+        if (!settings)
+        {
+            Debug.LogWarning("[CatStealthController] StealthSettings가 지정되지 않았습니다. 기본값으로 동작합니다.");
+            settings = ScriptableObject.CreateInstance<StealthSettingsSO>();
+        }
+        _settings = Instantiate(settings); // 공유 SO 상태오염 방지
+        _settings.ResetRuntime();
     }
     private void Start()
     {
@@ -85,7 +94,7 @@ public class HideObject : MonoBehaviour
     public void SetHidingAlpha(bool isActive)
     {
         if (isActive)
-            StartCoroutine(ChangeAlphaValue(settings.HidingAlphaValue));
+            StartCoroutine(ChangeAlphaValue(_settings.HidingAlphaValue));
         else
             StartCoroutine(ChangeAlphaValue(1f));
     }

@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -95,10 +96,27 @@ public class AudioZoneEffect : MonoBehaviour
         // BGMVolumeSettings 객체를 생성하여 전달
         BGMVolumeSettings initialBGM1Settings = new BGMVolumeSettings { volumeMultiplier = defaultBGM1Multiplier };
         BGMVolumeSettings initialBGM2Settings = new BGMVolumeSettings { volumeMultiplier = defaultBGM2Multiplier };
-        ApplyVolumeSettingsToBGMs(initialBGM1Settings, initialBGM2Settings);
-
+        //ApplyVolumeSettingsToBGMs(initialBGM1Settings, initialBGM2Settings);
+        StartCoroutine(ApplyInitialVolumesWhenReady());
 
         nextCheckTime = Time.time; // 즉시 첫 체크 실행
+    }
+
+    private IEnumerator ApplyInitialVolumesWhenReady()
+    {
+        // 1) SoundPlayer 인스턴스가 뜰 때까지
+        yield return new WaitUntil(() => SoundPlayer.Instance != null);
+
+        // 2) (최대 2초) 실제 등록(activeBGMPlayers)이 될 때까지 대기
+        float timeout = 2f;
+        while (timeout > 0f && SoundPlayer.Instance.activeBGMPlayers.Count == 0)
+        {
+            timeout -= Time.unscaledDeltaTime;
+            yield return null;
+        }
+
+        // 3) 등록이 끝났다면, 현재 실제 플레이어와 매칭된 인덱스로 페이드 적용
+        ApplyVolumesToCurrentPlayers(defaultBGM1Multiplier, defaultBGM2Multiplier);
     }
 
     private void InitializeComponents()
@@ -140,18 +158,19 @@ public class AudioZoneEffect : MonoBehaviour
     {
         if (playerTransform == null) return;
 
+        // 아직 SoundPlayer가 준비되지 않았거나, BGM 등록이 끝나지 않았다면 대기
+        if (SoundPlayer.Instance == null) return;
+        if (SoundPlayer.Instance.activeBGMPlayers.Count == 0) return;
+
+        // 현재 재생 중인 BGM 인덱스 최신화(디버그/확인용)
+        currentPlayingBGMIndexes = SoundPlayer.Instance.GetCurrentBGMs();
+
+        // 플레이어가 들어가 있는 존 탐색
         AudioZone playerInZone = null;
-
-        // 현재 재생 중인 BGM 인덱스 가져오기 (매번 체크)
-        if (SoundPlayer.Instance != null)
-        {
-            currentPlayingBGMIndexes = SoundPlayer.Instance.GetCurrentBGMs();
-        }
-
         // 각 오디오 존 체크
         foreach (var zone in audioZones)
         {
-            if (zone.triggerZone == null) continue;
+            if (zone?.triggerZone == null) continue;
 
             if (zone.triggerZone.OverlapPoint(playerTransform.position))
             {
@@ -160,24 +179,25 @@ public class AudioZoneEffect : MonoBehaviour
             }
         }
 
-        // 플레이어가 새로운 존에 들어갔거나, 존에서 벗어났을 때만 볼륨 변경 이벤트 발생
-        if (playerInZone != currentActiveZone)
-        {
-            currentActiveZone = playerInZone;
+        // 존 변동이 있을 때만 처리(중복 트리거 방지)
+        if (playerInZone == currentActiveZone) return;
 
-            if (currentActiveZone != null)
-            {
-                Debug.Log($"Player entered zone: {currentActiveZone.zoneName}");
-                ApplyVolumeSettingsToBGMs(currentActiveZone.bgm1Settings, currentActiveZone.bgm2Settings);
-            }
-            else
-            {
-                Debug.Log("Player exited all zones, returning to default BGM volume.");
-                // 존을 벗어났을 때 SoundPlayer에서 가져온 기본 값으로 돌아갑니다.
-                BGMVolumeSettings default1 = new BGMVolumeSettings { volumeMultiplier = defaultBGM1Multiplier };
-                BGMVolumeSettings default2 = new BGMVolumeSettings { volumeMultiplier = defaultBGM2Multiplier };
-                ApplyVolumeSettingsToBGMs(default1, default2);
-            }
+        currentActiveZone = playerInZone;
+
+        if (currentActiveZone != null)
+        {
+            // 존 진입: 실제 플레이어(플레이어1/2)에 매핑된 인덱스 기준으로 페이드 트리거
+            Debug.Log($"Player entered zone: {currentActiveZone.zoneName}");
+            ApplyVolumesToCurrentPlayers(
+                currentActiveZone.bgm1Settings?.volumeMultiplier ?? defaultBGM1Multiplier,
+                currentActiveZone.bgm2Settings?.volumeMultiplier ?? defaultBGM2Multiplier
+            );
+        }
+        else
+        {
+            // 존 이탈: 씬의 기본값으로 복귀 (역시 실제 플레이어 매핑 기준)
+            Debug.Log("Player exited all zones, returning to default BGM volume.");
+            ApplyVolumesToCurrentPlayers(defaultBGM1Multiplier, defaultBGM2Multiplier);
         }
     }
 
@@ -217,57 +237,35 @@ public class AudioZoneEffect : MonoBehaviour
             Debug.Log("AudioZoneEffect: Default BGM2 index is not set. Skipping BGM2 volume adjustment.");
         }
     }
-    //private void ApplyVolumeSettingsToBGMs(BGMVolumeSettings bgm1Settings, BGMVolumeSettings bgm2Settings)
-    //{
-    //    // bgmAudioSources[0]에 해당하는 BGM의 인덱스를 찾아서 볼륨 조절
-    //    if (SoundPlayer.Instance != null && SoundPlayer.Instance.GetBGMPlayers().Count > 0)
-    //    {
-    //        AudioSource player1Source = SoundPlayer.Instance.GetBGMPlayers()[0];
-    //        int? bgm1Index = null;
-    //        foreach (var entry in SoundPlayer.Instance.activeBGMPlayers) // 여기서 인덱스를 다시 찾음
-    //        {
-    //            if (entry.Value.source == player1Source)
-    //            {
-    //                bgm1Index = entry.Key;
-    //                break;
-    //            }
-    //        }
 
-    //        if (bgm1Index.HasValue)
-    //        {
-    //            AudioEventSystem.TriggerBGMVolumeFade(bgm1Index.Value, bgm1Settings.volumeMultiplier, transitionDuration);
-    //        }
-    //        else
-    //        {
-    //            Debug.Log("AudioZoneEffect: BGM1 player is not currently playing any assigned BGM.");
-    //        }
-    //    }
+    private void ApplyVolumesToCurrentPlayers(float bgm1Multiplier, float bgm2Multiplier)
+    {
+        if (SoundPlayer.Instance == null) return;
 
-    //    // bgmAudioSources[1]에 해당하는 BGM의 인덱스를 찾아서 볼륨 조절
-    //    if (SoundPlayer.Instance != null && SoundPlayer.Instance.GetBGMPlayers().Count > 1)
-    //    {
-    //        AudioSource player2Source = SoundPlayer.Instance.GetBGMPlayers()[1];
-    //        int? bgm2Index = null;
-    //        foreach (var entry in SoundPlayer.Instance.activeBGMPlayers) // 여기서 인덱스를 다시 찾음
-    //        {
-    //            if (entry.Value.source == player2Source)
-    //            {
-    //                bgm2Index = entry.Key;
-    //                break;
-    //            }
-    //        }
+        var players = SoundPlayer.Instance.GetBGMPlayers();
+        if (players == null || players.Count == 0) return;
 
-    //        if (bgm2Index.HasValue)
-    //        {
-    //            AudioEventSystem.TriggerBGMVolumeFade(bgm2Index.Value, bgm2Settings.volumeMultiplier, transitionDuration);
-    //        }
-    //        else
-    //        {
-    //            // 현재 SoundPlayer의 BGM2 플레이어에 재생 중인 BGM이 없는 경우
-    //            Debug.Log("AudioZoneEffect: BGM2 player is not currently playing any assigned BGM.");
-    //        }
-    //    }
-    //}
+        int? idx1 = FindIndexBySource(players[0]);
+        int? idx2 = (players.Count > 1) ? FindIndexBySource(players[1]) : null;
+
+        if (idx1.HasValue)
+            AudioEventSystem.TriggerBGMVolumeFade(idx1.Value, bgm1Multiplier, transitionDuration);
+
+        if (idx2.HasValue)
+            AudioEventSystem.TriggerBGMVolumeFade(idx2.Value, bgm2Multiplier, transitionDuration);
+    }
+
+    private int? FindIndexBySource(AudioSource src)
+    {
+        if (src == null || SoundPlayer.Instance == null) return null;
+
+        foreach (var kv in SoundPlayer.Instance.activeBGMPlayers)
+        {
+            if (kv.Value.source == src) return kv.Key;
+        }
+        return null;
+    }
+
 
     private BGMVolumeSettings CloneBGMVolumeSettings(BGMVolumeSettings original)
     {
@@ -327,6 +325,31 @@ public class AudioZoneEffect : MonoBehaviour
         }
         return "Outside";
     }
+
+    private void TriggerFadeSafely(int index, float multiplier, float duration)
+    {
+        StartCoroutine(Co_TriggerFadeSafely(index, multiplier, duration));
+    }
+
+    private IEnumerator Co_TriggerFadeSafely(int index, float multiplier, float duration)
+    {
+        for (int i = 0; i < 5; i++) // 최대 5프레임 대기
+        {
+            if (SoundPlayer.Instance != null &&
+                SoundPlayer.Instance.activeBGMPlayers.ContainsKey(index))
+            {
+                AudioEventSystem.TriggerBGMVolumeFade(index, multiplier, duration);
+                yield break;
+            }
+            yield return null;
+        }
+        // 실패 시에는 실제 플레이어 매핑으로 대체 트리거
+        ApplyVolumesToCurrentPlayers(
+            index == defaultBGM1Index ? multiplier : defaultBGM1Multiplier,
+            index == defaultBGM2Index ? multiplier : defaultBGM2Multiplier
+        );
+    }
+
 
     // 기즈모로 존 시각화
     private void OnDrawGizmos()

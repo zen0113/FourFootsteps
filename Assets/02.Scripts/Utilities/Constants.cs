@@ -63,7 +63,10 @@ public static class Constants
     public const int
         Sound_WormholeActived = 1,
         Sound_FrontDoorOpenAndClose = 2,
-        Sound_RoomDoorOpenAndClose = 3;
+        Sound_RoomDoorOpenAndClose = 3,
+        Sound_birdChirps = 4,
+        Sound_catMeow = 5,
+        Sound_catMeow2 = 6;
 
 
 

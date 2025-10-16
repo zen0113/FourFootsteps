@@ -56,7 +56,7 @@ public class ToastTextSpawner : MonoBehaviour
     );
 
     [Header("Layer Auto Toggle")]
-    [SerializeField] private bool autoToggleLayer = false;     // 계속 켜둘거면 false
+    [SerializeField] private bool autoToggleLayer = true;     // 계속 켜둘거면 false
     [SerializeField] private float layerOffDelay = 0.25f;
 
     [Header("Pooling")]
@@ -95,7 +95,7 @@ public class ToastTextSpawner : MonoBehaviour
             pool.Enqueue(CreateInstance());
 
         // 항상 켜둘 거면 아래는 건드릴 필요 X
-        // if (autoToggleLayer) toastParent.gameObject.SetActive(false);
+        if (autoToggleLayer) toastParent.gameObject.SetActive(false);
     }
 
     // ----------------- Pooling -----------------

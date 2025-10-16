@@ -52,6 +52,7 @@ public class PuzzleManager : MonoBehaviour
     private void Start()
     {
         int score = (int)GameManager.Instance.GetVariable("ResponsibilityScore");
+
         isBadEnding = (score < 3) ? true : false;
         ResponsibilityScore = score;
         UIManager.Instance.SetAllUI(false);
@@ -71,7 +72,7 @@ public class PuzzleManager : MonoBehaviour
         // 반짝 FX
         //if (completeFX) completeFX.Play();
         // 효과음
-        //if (sfxComplete) AudioSource.PlayClipAtPoint(sfxComplete, Camera.main.transform.position, 1f);
+        if (sfxComplete) AudioSource.PlayClipAtPoint(sfxComplete, Camera.main.transform.position, 0.6f);
 
         completed = true;
         StartCoroutine(UIManager.Instance.FadeCanvasGroup(PuzzleExplainCanvas, false, 1f));
@@ -185,6 +186,4 @@ public class PuzzleManager : MonoBehaviour
             }
         }
     }
-
-
 }

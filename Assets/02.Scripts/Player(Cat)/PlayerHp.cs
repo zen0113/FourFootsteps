@@ -51,9 +51,18 @@ public class PlayerHp : MonoBehaviour
     }
 
     // create 5 hearts on screen on Player UI Canvas 
+    // 이게 매 스테이지마다 계속 Start때마다 호출되어서
+    // 스테이지1->회상1->스테이지2 에 왔을 때 UI의 HP가 5개->10개로 불어나있는 오류 발생
+    // Destroy(child.gameObject); 으로 UI에 남아있는 하트 삭제 후 생성되게 함
     public void CreateHearts()
     {
         int heartCount = currentHp;
+
+        if (heartParent.transform.childCount > 0)
+        {
+            foreach(Transform child in heartParent.transform)
+                Destroy(child.gameObject);
+        }
 
         // create heart on screen by creating instances of heart prefab under heart parent
         for (int i = 0; i < heartCount; i++)

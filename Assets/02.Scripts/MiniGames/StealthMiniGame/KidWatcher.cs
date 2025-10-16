@@ -2,6 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using static UnityEditor.PlayerSettings;
+using static UnityEditor.UIElements.CurveField;
 
 public class KidWatcher : MonoBehaviour
 {
@@ -11,6 +13,8 @@ public class KidWatcher : MonoBehaviour
 
     [Header("Refs")]
     [SerializeField] private StealthSettingsSO settings;
+    private StealthSettingsSO _settings;                 // 런타임 복제본
+
     public Transform player;
     public RectTransform kidsRectTransform;
     public Image kidsImage;
@@ -20,6 +24,11 @@ public class KidWatcher : MonoBehaviour
     [SerializeField] private CameraShake cameraShake;
     [SerializeField] private GameObject StageBlockingWall;
     [SerializeField] private ObjectSfxController sfxController;
+    [SerializeField] private Canvas StealthCanvas;
+    [SerializeField] private Camera mainCamera;
+
+    public float smoothTime = 0.15f;
+    private float _velX;
 
     public bool isWatching { get; private set; }
 
@@ -33,6 +42,9 @@ public class KidWatcher : MonoBehaviour
         if (Instance == null) Instance = this;
         else { Destroy(gameObject); return; }
 
+        _settings = Instantiate(settings); // 공유 SO 상태오염 방지
+        _settings.ResetRuntime();
+
         isPlaying = false;
 
         cameraShake = Camera.main.GetComponent<CameraShake>();
@@ -45,13 +57,13 @@ public class KidWatcher : MonoBehaviour
         player = GameObject.FindWithTag("Player").GetComponent<Transform>();
 
         float maxDistance =Vector2.Distance(goal_Transform.position, player.position);
-        settings.maxDistance = maxDistance;
+        _settings.maxDistance = maxDistance;
         Debug.Log(maxDistance);
-    }
 
-    private void Start()
-    {
-        gameObject.SetActive(false);
+        if(StealthCanvas==null) StealthCanvas=GetComponent<Canvas>();
+        StealthCanvas.renderMode = UnityEngine.RenderMode.WorldSpace;
+
+        if (mainCamera == null) mainCamera = Camera.main;
     }
 
     public void StartStealthGame()
@@ -62,6 +74,10 @@ public class KidWatcher : MonoBehaviour
         StartCoroutine(RandomWatchLoop());
         if (meter) meter.OnReachedMax += HandleCaught;
         meter.ResetMeter();
+
+        Vector3 canvasPos = StealthCanvas.transform.position;
+        canvasPos.x = player.position.x;
+        StealthCanvas.transform.position = canvasPos;
     }
 
     //void OnDisable()
@@ -76,12 +92,13 @@ public class KidWatcher : MonoBehaviour
         if (!player|| !isPlaying) return;
 
         // 1) 거리 기반 kids 이미지 스케일
+        float d, t;
         if (kidsRectTransform)
         {
-            float d = Vector2.Distance(goal_Transform.position, player.position);
-            float t = Mathf.InverseLerp(settings.maxDistance, settings.minDistance, d); // 가까울수록 1
-            float target = Mathf.Lerp(settings.scaleAtMax, settings.scaleAtMin, t);
-            float next = Mathf.Lerp(kidsRectTransform.localScale.x, target, Time.deltaTime * settings.scaleSmooth);
+            d = Vector2.Distance(goal_Transform.position, player.position);
+            t = Mathf.InverseLerp(_settings.maxDistance, _settings.minDistance, d); // 가까울수록 1
+            float target = Mathf.Lerp(_settings.scaleAtMax, _settings.scaleAtMin, t);
+            float next = Mathf.Lerp(kidsRectTransform.localScale.x, target, Time.deltaTime * _settings.scaleSmooth);
             kidsRectTransform.localScale = new Vector3(next, next, 1f);
         }
 
@@ -91,16 +108,62 @@ public class KidWatcher : MonoBehaviour
             float perSec = EvaluateSuspicionPerSecond();
             meter.ApplyDelta(perSec * Time.deltaTime);
         }
+
     }
+
+    private float _autoDMax = -1f; // 첫 프레임의 d를 저장
+    [SerializeField] private float nearDistance = 3f; // "가까움"으로 보는 기준 (씬 스케일에 맞게)
+
+    private void LateUpdate()
+    {
+        if (!StealthCanvas || !isPlaying || !player) return;
+        var cam = mainCamera;
+
+        float halfW = cam.orthographicSize * cam.aspect;
+        float leftLX = -halfW;
+        float rightLX = halfW;
+
+        float edgeRatio = 0.6f; // 0.0=센터, 1.0=완전 끝
+        float innerLeft = Mathf.Lerp(0f, leftLX, edgeRatio);  // leftLX는 음수 → 0쪽으로 당겨짐
+        float innerRight = Mathf.Lerp(0f, rightLX, edgeRatio);  // rightLX는 양수 → 0쪽으로 당겨짐
+
+        // 거리
+        float d = Vector2.Distance(goal_Transform.position, player.position);
+
+        // 오토 dMax (첫 프레임 캡쳐)
+        if (_autoDMax < 0f) _autoDMax = Mathf.Max(d, nearDistance + 0.01f);
+
+        float dMin = nearDistance;
+        float dMax = _autoDMax;
+
+        // 멀리=0, 가까이=1
+        float t = 1f - Mathf.InverseLerp(dMin, dMax, d);
+        t = Mathf.Clamp01(t);
+
+        // 좌/우 반전(미러링) 보정
+        if (StealthCanvas.transform.lossyScale.x < 0f)
+            (leftLX, rightLX) = (rightLX, leftLX);
+
+        // 멀리(0)=오른쪽, 가까이(1)=왼쪽 → 즉시 스냅
+        float targetLocalX = Mathf.Lerp(innerRight, innerLeft, t);
+
+        var lp = StealthCanvas.transform.localPosition;
+        lp.x = targetLocalX;
+        StealthCanvas.transform.localPosition = lp;
+
+        //Debug.Log($"d:{d:F2} t:{t:F2} dMin:{dMin:F2} dMax:{dMax:F2} left:{leftLX:F2} right:{rightLX:F2} lp.x:{lp.x:F2}");
+    }
+    
+
 
     IEnumerator RandomWatchLoop()
     {
         while (isRandomWatchLooping)
         {
             // Idle
-            yield return new WaitForSeconds(Random.Range(settings.idleInterval.x, settings.idleInterval.y));
+            yield return new WaitForSeconds(Random.Range(_settings.idleInterval.x, _settings.idleInterval.y));
             // Watch
-            float dur = Random.Range(settings.watchDuration.x, settings.watchDuration.y);
+            float dur = Random.Range(_settings.watchDuration.x, _settings.watchDuration.y);
             SetWatching(true);
             yield return new WaitForSeconds(dur);
             SetWatching(false);
@@ -131,17 +194,17 @@ public class KidWatcher : MonoBehaviour
         bool playerHidden = stealth && stealth.IsHiding;
         bool inGrace = stealth && stealth.IsInGrace;
 
-        if (inGrace) return -settings.decayPerSecond; // 면책: 무조건 감소
+        if (inGrace) return -_settings.decayPerSecond; // 면책: 무조건 감소
 
         if (isWatching && !playerHidden)
         {
             // 가까울수록 더 많이 오른다
             float d = Vector2.Distance(goal_Transform.position, player.position);
-            float norm = Mathf.InverseLerp(settings.maxDistance, settings.minDistance, d); // 0~1 (가까울수록 1)
-            float weight = settings.proximityFactor.Evaluate(norm);
-            return Mathf.Max(0f, settings.gainPerSecond * weight);
+            float norm = Mathf.InverseLerp(_settings.maxDistance, _settings.minDistance, d); // 0~1 (가까울수록 1)
+            float weight = _settings.proximityFactor.Evaluate(norm);
+            return Mathf.Max(0f, _settings.gainPerSecond * weight);
         }
-        return -settings.decayPerSecond;
+        return -_settings.decayPerSecond;
     }
 
     void HandleCaught()
@@ -155,9 +218,18 @@ public class KidWatcher : MonoBehaviour
         // 발각 연출
         // 은신 비네팅 효과 사라지게
         StealthSFX.Instance.CaughtByKidFX();
+
+        // 카메라 Shake 효과 전에 카메라의 자식 오브젝트로 Canvas 넣어둔 거 풀기
+        // 로컬 좌표를 월드 좌표로 변환
+        Vector3 worldPos = transform.TransformPoint(this.transform.localPosition);
+
+        this.transform.SetParent(null);
+        this.transform.position = worldPos;
+
         // 카메라 shake에 아이들이 저기 고양이다!! 다이얼로그[Stage03_004] 재생
         cameraShake.enabled = true;
         cameraShake.ShakeAndDisable(0.5f, 0.25f);
+        isPlaying = false;
         DialogueManager.Instance.StartDialogue(StealthEndDialogueID);
         //cameraShake.enabled = false;
         // 이벤트 훅 해제

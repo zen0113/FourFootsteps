@@ -8079,6 +8079,7 @@ MonoBehaviour:
   ladderSnapDistance: 0.3
   boxInteractingPower: 1.2
   crouchReleaseGrace: 0.12
+  processingBadEnding: 0
 --- !u!61 &507170961
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -8499,25 +8500,6 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 4135296550664430820, guid: fcc937e4cda6d8c4d8de70f5c23e9268, type: 3}
   m_PrefabInstance: {fileID: 1355391952}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &528647025
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 528647024}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fdbe5dd65af26754991aa47c527aa042, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  sceneDescriptionText: {fileID: 1015557797}
-  sceneTextDataList:
-  - sceneName: RecallScene1
-    sceneDescription: "\uC9D1 \uC548"
-  - sceneName: StageScene1
-    sceneDescription: "\uB4B7\uACE8\uBAA9"
-  defaultText: "\uC7A5\uC18C"
 --- !u!1 &529157326
 GameObject:
   m_ObjectHideFlags: 0
@@ -10878,6 +10860,7 @@ MonoBehaviour:
   - {fileID: 1815929521}
   - {fileID: 1017680138}
   nextSceneName: 
+  currentIndex: -1
 --- !u!4 &704732298
 Transform:
   m_ObjectHideFlags: 0
@@ -11675,7 +11658,7 @@ MonoBehaviour:
   keyImage: {fileID: 0}
   requiredCondition: 
   puzzleId: 1
-  puzzleObject: {fileID: 0}
+  puzzleObject: {fileID: 217499486}
   puzzleBagButton: {fileID: 0}
   durationTime: 2
   animationCurve:
@@ -15343,17 +15326,6 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!114 &1015557797 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 1962937416038355469, guid: fcc937e4cda6d8c4d8de70f5c23e9268, type: 3}
-  m_PrefabInstance: {fileID: 1355391952}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &1017680136
 GameObject:
   m_ObjectHideFlags: 0
@@ -15403,6 +15375,7 @@ MonoBehaviour:
   birdMover: {fileID: 514821359}
   destinationPoint: {fileID: 596595812}
   IsInfiniteFlying: 0
+  waitForMovementEnd: 0
 --- !u!50 &1017680139
 Rigidbody2D:
   serializedVersion: 4
@@ -18682,6 +18655,7 @@ MonoBehaviour:
   birdMover: {fileID: 514821359}
   destinationPoint: {fileID: 243751440}
   IsInfiniteFlying: 0
+  waitForMovementEnd: 0
 --- !u!50 &1296386976
 Rigidbody2D:
   serializedVersion: 4
@@ -19751,10 +19725,7 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 4135296550664430820, guid: fcc937e4cda6d8c4d8de70f5c23e9268, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 528647025}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: fcc937e4cda6d8c4d8de70f5c23e9268, type: 3}
 --- !u!1 &1363435008
 GameObject:
@@ -28219,6 +28190,7 @@ MonoBehaviour:
   birdMover: {fileID: 514821359}
   destinationPoint: {fileID: 1668984064}
   IsInfiniteFlying: 0
+  waitForMovementEnd: 0
 --- !u!50 &1709752410
 Rigidbody2D:
   serializedVersion: 4
@@ -32911,6 +32883,7 @@ MonoBehaviour:
   birdMover: {fileID: 514821359}
   destinationPoint: {fileID: 1125910786}
   IsInfiniteFlying: 0
+  waitForMovementEnd: 0
 --- !u!50 &2048891003
 Rigidbody2D:
   serializedVersion: 4

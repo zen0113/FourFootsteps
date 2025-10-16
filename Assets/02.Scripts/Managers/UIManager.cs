@@ -158,14 +158,16 @@ public class UIManager : MonoBehaviour
         // Debug.Log("[PuzzleBagButtonBinder] FootprintsOfMemory Canvas 프리팹을 씬에 생성했습니다.");
     }
 
-    public void StartWhiteOut(bool isEnding)
+    // StartWhiteOut과 StartBlackOut, StartBlackIn은 TutorialController에서
+    // Unity Event Code Executor Tutorial로 호출하여 사용하기 위한 메소드들
+    public void StartWhiteOutIn(bool isEnding)
     {
         // 중복 실행 방지
         if (fadeOutRoutine != null) StopCoroutine(fadeOutRoutine);
 
         fadeOutRoutine = StartCoroutine(WhiteOutFlow(false, isEnding));
     }
-    public void StartBlackOut(bool isEnding)
+    public void StartBlackOutIn(bool isEnding)
     {
         // 중복 실행 방지
         if (fadeOutRoutine != null) StopCoroutine(fadeOutRoutine);
@@ -173,16 +175,45 @@ public class UIManager : MonoBehaviour
         fadeOutRoutine = StartCoroutine(WhiteOutFlow(true, isEnding));
     }
 
-    private IEnumerator WhiteOutFlow(bool isBlack,bool isEnding)
+    public void StartBlackIn(bool isEnding)
     {
-        if(isBlack)
-            yield return StartCoroutine(OnFade(dialogueCoverPanel, 0, 1, 2f, true, 2f, 0f));
-        else
-            yield return StartCoroutine(OnFade(null, 0, 1, 2f, true, 2f, 0f, false));
+        // 중복 실행 방지
+        if (fadeOutRoutine != null) StopCoroutine(fadeOutRoutine);
 
-        if(isEnding)
-            TutorialController.Instance.SetNextTutorial();
-        fadeOutRoutine = null;
+        bool isFadeIn = true;
+        fadeOutRoutine = StartCoroutine(WhiteOutFlow(true, isEnding, isFadeIn));
+    }
+
+    private IEnumerator WhiteOutFlow(bool isBlack,bool isEnding, bool isFadeIn=false)
+    {
+        // 공통 파라미터
+        const float fadeDuration = 2f;
+        const bool holdAtEnd = true;
+        const float holdSeconds = 2f;
+        const float preDelay = 0f;
+
+        try
+        {
+            if (isFadeIn)
+            {
+                // 어두움(1) → 밝음(0)
+                yield return StartCoroutine(OnFade(dialogueCoverPanel, 1f, 0f, fadeDuration));
+            }
+            else
+            {
+                // 밝음(0) → 어두움(1), 마지막 불린 인자만 isBlack에 따라 달라짐
+                bool lastFlag = isBlack; // 기존 코드: isBlack일 때 true, 아니면 false
+                yield return StartCoroutine(OnFade(dialogueCoverPanel, 0f, 1f, fadeDuration, holdAtEnd, holdSeconds, preDelay, lastFlag));
+            }
+
+            if (isEnding)
+                TutorialController.Instance.SetNextTutorial();
+        }
+        finally
+        {
+            // 루틴 상태 정리
+            fadeOutRoutine = null;
+        }
     }
 
     /// <summary> 변수 설명
@@ -204,6 +235,8 @@ public class UIManager : MonoBehaviour
         Color newColor = fadeObject.color;
         if (!Black)
             newColor = Color.white;
+        else
+            newColor = Color.black;
         newColor.a = start;
         fadeObject.color = newColor;
 

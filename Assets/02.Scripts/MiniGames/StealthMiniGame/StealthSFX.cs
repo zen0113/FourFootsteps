@@ -9,6 +9,8 @@ public class StealthSFX : MonoBehaviour
 
     [Header("Refs")]
     [SerializeField] private StealthSettingsSO settings;
+    private StealthSettingsSO _settings;                 // 런타임 복제본
+
     [SerializeField] private Camera mainCamera;
 
     [Header("UI")]
@@ -44,6 +46,8 @@ public class StealthSFX : MonoBehaviour
             Debug.LogWarning("[CatStealthController] StealthSettings가 지정되지 않았습니다. 기본값으로 동작합니다.");
             settings = ScriptableObject.CreateInstance<StealthSettingsSO>();
         }
+        _settings = Instantiate(settings); // 공유 SO 상태오염 방지
+        _settings.ResetRuntime();
     }
 
     public void DisconnectEvent()
@@ -92,7 +96,7 @@ public class StealthSFX : MonoBehaviour
 
         // 카메라 줌 (기존 코루틴 정리 후 시작)
         if (camCo != null) StopCoroutine(camCo);
-        camCo = StartCoroutine(ChangeCameraSize(settings.enterHideSize));
+        camCo = StartCoroutine(ChangeCameraSize(_settings.enterHideSize));
 
         // UI 연출 (하나의 통로로 관리)
         if (uiCo != null) StopCoroutine(uiCo);
@@ -119,7 +123,7 @@ public class StealthSFX : MonoBehaviour
 
         // 카메라 줌 (기존 코루틴 정리 후 시작)
         if (camCo != null) StopCoroutine(camCo);
-        camCo = StartCoroutine(ChangeCameraSize(settings.exitHideSize));
+        camCo = StartCoroutine(ChangeCameraSize(_settings.exitHideSize));
 
         if (uiCo != null) StopCoroutine(uiCo);
         UIManager.Instance.SetBlinkHidingCoroutine(false);
@@ -130,7 +134,7 @@ public class StealthSFX : MonoBehaviour
     {
         StartCoroutine(FadeSFXCoroutine(0.8f, 0f, 1f, 0f));
         SoundPlayer.Instance.StopAllBGM();
-        //StartCoroutine(ChangeCameraSize(settings.exitHideSize));
+        //StartCoroutine(ChangeCameraSize(_settings.exitHideSize));
         UIManager.Instance.SetBlinkHidingCoroutine(false);
         StartCoroutine(UIManager.Instance.HidingCoroutine(false));
     }
@@ -160,7 +164,7 @@ public class StealthSFX : MonoBehaviour
     IEnumerator ChangeCameraSize(float finalValue)
     {
         float elapsedTime = 0f;
-        float duration = settings.sizeDuration;
+        float duration = _settings.sizeDuration;
         float startValue = mainCamera.orthographicSize;
 
         while (elapsedTime < duration)

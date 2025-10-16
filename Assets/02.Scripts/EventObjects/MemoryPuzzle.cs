@@ -24,7 +24,7 @@ public class MemoryPuzzle : EventObject, IResultExecutable
         base.Start();
         if (!string.IsNullOrEmpty(eventId))
         {
-            ResultManager.Instance.RegisterExecutable(eventId, this);
+            ResultManager.Instance.RegisterExecutable("MemoryPuzzle", this);
         }
         else
         {
@@ -32,7 +32,8 @@ public class MemoryPuzzle : EventObject, IResultExecutable
             Debug.LogWarning($"'{gameObject.name}' 오브젝트의 eventId가 비어있어 ResultManager에 등록할 수 없습니다.");
         }
 
-        puzzleObject = this.gameObject;
+        if (puzzleObject == null)
+            puzzleObject = this.gameObject;
 
         if (puzzleBagButton == null)
         {

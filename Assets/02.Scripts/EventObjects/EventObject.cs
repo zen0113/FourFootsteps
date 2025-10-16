@@ -8,32 +8,51 @@ public class EventObject : MonoBehaviour
     protected SpriteGlow.SpriteGlowEffect spriteGlowEffect;
 
     [Header("One Time Investigation Settings")]
-    [SerializeField]
-    private bool isOneTimeOnly = false; // 한번만 조사 가능한지 설정
-    [SerializeField]
-    private GameObject keyImage; // 키 이미지 오브젝트 (E키 UI 등)
+    [SerializeField] private bool isOneTimeOnly = false; // 한번만 조사 가능한지 설정
+    [SerializeField] private GameObject keyImage; // 키 이미지 오브젝트 (E키 UI 등)
     private bool hasBeenInvestigated = false; // 이미 조사했는지 상태 저장
+
     [Header("Interaction Condition")]
-    [SerializeField]
-    private string requiredCondition;
+    [SerializeField] private string requiredCondition;
 
     // 플레이어가 오브젝트 범위 내에 있는지 확인하는 변수
     protected bool _isPlayerInRange = false;
 
-    protected void Start()
+    protected virtual void Start()
     {
-        if (gameObject.GetComponent<SpriteGlow.SpriteGlowEffect>() != null)
+        if (!spriteGlowEffect)
         {
-            spriteGlowEffect = gameObject.GetComponent<SpriteGlow.SpriteGlowEffect>();
-            spriteGlowEffect.enabled = false;
+            spriteGlowEffect = GetComponent<SpriteGlow.SpriteGlowEffect>();
         }
+        // 시작 시 Glow는 Off
+        SetGlow(false);
 
-        // 키 이미지 초기화 (시작 시 비활성화)
+        // 키 이미지 초기화
+        SetKeyImageActive(false);
+    }
+
+    // 비활성화 해도 플레이어가 영역내에 있으면
+    // 키 이미지가 뜨는게 부자연스러움
+    // => 비활성화 시, Key의 InteractionImageDisplay 컴포넌트 비활성화.
+    // eventObejct 활성화 시, Key의 InteractionImageDisplay 컴포넌트 다시 활성화.
+    protected void OnDisable()
+    {
         if (keyImage != null)
         {
-            keyImage.SetActive(false);
+            var comp = keyImage.GetComponent<InteractionImageDisplay>();
+            if (comp) comp.enabled = false;
         }
     }
+
+    protected void OnEnable()
+    {
+        if (keyImage != null)
+        {
+            var comp = keyImage.GetComponent<InteractionImageDisplay>();
+            if (comp) comp.enabled = true;
+        }
+    }
+
 
     protected void Investigate()
     {
@@ -46,10 +65,7 @@ public class EventObject : MonoBehaviour
             hasBeenInvestigated = true;
 
             // 키 이미지가 있으면 비활성화
-            if (keyImage != null)
-            {
-                keyImage.SetActive(false);
-            }
+            SetKeyImageActive(false);
         }
     }
 
@@ -76,10 +92,7 @@ public class EventObject : MonoBehaviour
         }
     }
 
-    public string GetEventId()
-    {
-        return eventId;
-    }
+    public string GetEventId() => eventId;
 
     // 조사 가능 상태인지 확인하는 메서드 (외부에서 호출 가능)
     public bool CanBeInvestigated()
@@ -95,10 +108,7 @@ public class EventObject : MonoBehaviour
         hasBeenInvestigated = false;
 
         // 키 이미지가 있으면 다시 활성화 가능하도록 설정
-        if (keyImage != null)
-        {
-            keyImage.SetActive(false); // 리셋 시에는 비활성화 상태로 시작
-        }
+        SetKeyImageActive(false);
     }
 
     // 회상 씬에서 조사 가능한지 확인하는 메서드
@@ -121,97 +131,60 @@ public class EventObject : MonoBehaviour
         return ConditionManager.Instance.IsCondition(requiredCondition);
     }
 
+    // Glow를 켜고 끄는 실제 동작은 여기서만 처리
+    protected virtual void SetGlow(bool enabled)
+    {
+        if (spriteGlowEffect) spriteGlowEffect.enabled = enabled;
+    }
+
+    // Key 이미지 표시/비표시
+    protected virtual void SetKeyImageActive(bool enabled)
+    {
+        if (keyImage) keyImage.SetActive(enabled);
+    }
+
+    // ───── 트리거 로직 ─────
     // 플레이어가 트리거에 들어왔을 때
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.CompareTag("Player"))
-        {
-            // 회상 씬에서 조사 불가능하면 리턴
-            if (!CanInteractInRecallScene())
-                return;
+        if (!other.CompareTag("Player")) return;
 
-            // 한번만 조사 가능한 설정이고 이미 조사했으면 글로우 효과 비활성화
-            if (isOneTimeOnly && hasBeenInvestigated)
-                return;
+        // 회상 씬에서 조사 불가능하면 리턴
+        if (!CanInteractInRecallScene()) return;
+        // 한번만 조사 가능한 설정이고 이미 조사했으면 글로우 효과 비활성화
+        if (isOneTimeOnly && hasBeenInvestigated) return;
 
-            if (gameObject.GetComponent<SpriteGlow.SpriteGlowEffect>() != null)
-                spriteGlowEffect.enabled = true;
-
-            // 키 이미지가 있으면 활성화
-            if (keyImage != null)
-            {
-                keyImage.SetActive(true);
-            }
-
-            _isPlayerInRange = true; // 플레이어가 범위에 들어옴
-        }
+        SetGlow(true);
+        SetKeyImageActive(true);    // 키 이미지가 있으면 활성화
+        _isPlayerInRange = true; // 플레이어가 범위에 들어옴
     }
 
     private void OnTriggerStay2D(Collider2D other)
     {
-        if (other.CompareTag("Player"))
+        if (!other.CompareTag("Player")) return;
+
+        // 회상 씬에서 조사 불가능하면 리턴
+        // Or 한번만 조사 가능한 설정이고 이미 조사했으면 상호작용 해제
+        if (!CanInteractInRecallScene() || (isOneTimeOnly && hasBeenInvestigated))
         {
-            // 회상 씬에서 조사 불가능하면 리턴
-            if (!CanInteractInRecallScene())
-            {
-                // 조사 불가능한 상태가 되면 상호작용 해제
-                if (gameObject.GetComponent<SpriteGlow.SpriteGlowEffect>() != null)
-                    spriteGlowEffect.enabled = false;
-
-                // 키 이미지가 있으면 비활성화
-                if (keyImage != null)
-                {
-                    keyImage.SetActive(false);
-                }
-
-                _isPlayerInRange = false;
-                return;
-            }
-
-            // 한번만 조사 가능한 설정이고 이미 조사했으면 상호작용 해제
-            if (isOneTimeOnly && hasBeenInvestigated)
-            {
-                if (gameObject.GetComponent<SpriteGlow.SpriteGlowEffect>() != null)
-                    spriteGlowEffect.enabled = false;
-
-                // 키 이미지가 있으면 비활성화
-                if (keyImage != null)
-                {
-                    keyImage.SetActive(false);
-                }
-
-                _isPlayerInRange = false;
-                return;
-            }
-
-            if (gameObject.GetComponent<SpriteGlow.SpriteGlowEffect>() != null)
-                spriteGlowEffect.enabled = true;
-
-            // 키 이미지가 있으면 활성화
-            if (keyImage != null)
-            {
-                keyImage.SetActive(true);
-            }
-
-            _isPlayerInRange = true;
+            SetGlow(false);
+            SetKeyImageActive(false);
+            _isPlayerInRange = false;
+            return;
         }
+
+        SetGlow(true);
+        SetKeyImageActive(true);
+        _isPlayerInRange = true;
     }
 
     // 플레이어가 트리거에서 나갔을 때
     private void OnTriggerExit2D(Collider2D other)
     {
-        if (other.CompareTag("Player"))
-        {
-            if (gameObject.GetComponent<SpriteGlow.SpriteGlowEffect>() != null)
-                spriteGlowEffect.enabled = false;
+        if (!other.CompareTag("Player")) return;
 
-            // 키 이미지가 있으면 비활성화
-            if (keyImage != null)
-            {
-                keyImage.SetActive(false);
-            }
-
-            _isPlayerInRange = false; // 플레이어가 범위에서 벗어남
-        }
+        SetGlow(false);
+        SetKeyImageActive(false);   // 키 이미지가 있으면 비활성화
+        _isPlayerInRange = false;   // 플레이어가 범위에서 벗어남
     }
 }

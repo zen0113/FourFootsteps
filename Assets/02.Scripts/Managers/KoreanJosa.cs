@@ -46,6 +46,7 @@ public static class KoreanJosa
         return hasJong ? parts[0] : parts[1];
     }
 
+    private static string PickAaYa(bool hasJong) => hasJong ? "아" : "야";
     private static string PickEulReul(bool hasJong) => hasJong ? "을" : "를";
     private static string PickEunNeun(bool hasJong) => hasJong ? "은" : "는";
     private static string PickIGa(bool hasJong) => hasJong ? "이" : "가";
@@ -62,8 +63,8 @@ public static class KoreanJosa
     /// 실제 이름의 받침 규칙에 맞춰 자동 치환.
     /// 지원 패턴:
     ///   1) {Var}(이)가, {Var}(은)는, {Var}(을)를, {Var}(과)와, {Var}(으)로
-    ///   2) {Var}은/는, {Var}이/가, {Var}을/를, {Var}과/와
-    ///   3) {Var}은, {Var}는, {Var}이, {Var}가, {Var}을, {Var}를, {Var}과, {Var}와, {Var}으로, {Var}로
+    ///   2) {Var}은/는, {Var}이/가, {Var}을/를, {Var}과/와, {Var}아/야
+    ///   3) {Var}은, {Var}는, {Var}이, {Var}가, {Var}을, {Var}를, {Var}과, {Var}와, {Var}으로, {Var}로, {Var}아, {Var}야
     ///   4) {Var} 단독
     /// </summary>
     public static string Apply(string text, params (string varToken, string value)[] vars)
@@ -106,13 +107,14 @@ public static class KoreanJosa
             // 2) 슬래시 패턴 (멀티 음절 우선)
             text = Regex.Replace(
                 text,
-                $@"\{{{varToken}\}}(이랑/랑|이/가|은/는|을/를|과/와)",
+                $@"\{{{varToken}\}}(이랑/랑|아/야|이/가|은/는|을/를|과/와)",
                 m =>
                 {
                     string pair = m.Groups[1].Value;
                     string picked = pair switch
                     {
                         "이랑/랑" => PickIRangRang(hasJong),
+                        "아/야" => PickAaYa(hasJong),
                         "이/가" => PickIGa(hasJong),
                         "은/는" => PickEunNeun(hasJong),
                         "을/를" => PickEulReul(hasJong),
@@ -125,7 +127,7 @@ public static class KoreanJosa
             // 3) 단일 조사 패턴 (멀티 음절 먼저, 그리고 '이|가'는 뒤가 '랑'이면 매칭 금지)
             text = Regex.Replace(
                 text,
-                $@"\{{{varToken}\}}(이랑|랑|으로|로|은|는|을|를|과|와|이(?!랑)|가(?!랑))",
+                $@"\{{{varToken}\}}(이랑|랑|으로|로|아|야|은|는|을|를|과|와|이(?!랑)|가(?!랑))",
                 m =>
                 {
                     string j = m.Groups[1].Value;
@@ -134,6 +136,7 @@ public static class KoreanJosa
                         "이랑" => PickIRangRang(hasJong),
                         "랑" => PickIRangRang(hasJong),
                         "으로" or "로" => PickEuroRo(hasJong, rieul),
+                        "아" or "야" => PickAaYa(hasJong),
                         "은" or "는" => PickEunNeun(hasJong),
                         "을" or "를" => PickEulReul(hasJong),
                         "과" or "와" => PickGwaWa(hasJong),

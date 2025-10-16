@@ -244,6 +244,29 @@ public class SoundPlayer : MonoBehaviour
         }
     }
 
+    // autoPlay false인 거 tutorial Manager에서 알맞은 타이밍에 재생함 
+    public void PlaySceneBGMNotAuto()
+    {
+        string sceneName = SceneManager.GetActiveScene().name;
+        SceneBGMSetting sceneSetting = null;
+        foreach (var setting in sceneBGMSettings)
+        {
+            if (setting.sceneName == sceneName)
+            {
+                sceneSetting = setting;
+                break;
+            }
+        }
+
+        if (sceneSetting != null && !sceneSetting.autoPlay)
+        {
+            ChangeDualBGM(sceneSetting.bgmIndex1, sceneSetting.bgmIndex2,
+                            sceneSetting.bgm1VolumeMultiplier, sceneSetting.bgm2VolumeMultiplier,
+                            sceneSetting.syncStart, sceneSetting.bgm2Delay);
+        }
+    }
+
+
     /// <summary>
     /// 마스터 볼륨을 변경하고 모든 오디오 소스에 적용합니다.
     /// </summary>
@@ -456,16 +479,60 @@ public class SoundPlayer : MonoBehaviour
             return;
         }
 
-        if (activeBGMPlayers.TryGetValue(bgmIndex, out var entry))
+        // 딕셔너리에서 엔트리 찾기
+        if (!activeBGMPlayers.TryGetValue(bgmIndex, out var entry))
         {
-            float actualTargetVolume = masterBGMVolume * targetVolumeMultiplier;
-            bgmFadeCoroutines.Add(StartCoroutine(FadeVolumeCoroutine(entry.source, actualTargetVolume, duration, delay, bgmIndex, targetVolumeMultiplier)));
+            // 폴백: 같은 클립을 재생 중인 소스를 탐색
+            var targetClip = bgmClips[bgmIndex];
+            bool found = false;
+            foreach (var kv in activeBGMPlayers)
+            {
+                var s = kv.Value.source;
+                if (s != null && s.isPlaying && s.clip == targetClip)
+                {
+                    entry = kv.Value; // ValueTuple 복사
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found)
+            {
+                Debug.LogWarning($"BGM with index {bgmIndex} is not currently active. Cannot fade its volume.");
+                return;
+            }
         }
-        else
+
+        // 여기서 null 비교는 튜플 자체가 아니라, 내부의 참조형(AudioSource)로
+        if (entry.source == null)
         {
-            Debug.LogWarning($"BGM with index {bgmIndex} is not currently active. Cannot fade its volume.");
+            Debug.LogWarning($"BGM entry for index {bgmIndex} has no AudioSource.");
+            return;
         }
+
+        float actualTargetVolume = masterBGMVolume * Mathf.Clamp01(targetVolumeMultiplier);
+        bgmFadeCoroutines.Add(StartCoroutine(
+            FadeVolumeCoroutine(entry.source, actualTargetVolume, duration, delay, bgmIndex, targetVolumeMultiplier)));
     }
+    //public void FadeBGMVolume(int bgmIndex, float targetVolumeMultiplier, float duration, float delay = 0f)
+    //{
+    //    if (bgmIndex < 0 || bgmIndex >= bgmClips.Length)
+    //    {
+    //        Debug.LogWarning($"Invalid BGM index: {bgmIndex}");
+    //        return;
+    //    }
+
+    //    if (activeBGMPlayers.TryGetValue(bgmIndex, out var entry))
+    //    {
+    //        float actualTargetVolume = masterBGMVolume * targetVolumeMultiplier;
+    //        bgmFadeCoroutines.Add(StartCoroutine(FadeVolumeCoroutine(entry.source, actualTargetVolume, duration, delay, bgmIndex, targetVolumeMultiplier)));
+    //    }
+    //    else
+    //    {
+    //        Debug.LogWarning($"BGM with index {bgmIndex} is not currently active. Cannot fade its volume.");
+    //    }
+    //}
+
 
     private IEnumerator FadeVolumeCoroutine(AudioSource player, float targetVolume, float duration, float delay, int bgmIndex, float newVolumeMultiplier)
     {
@@ -567,6 +634,10 @@ public class SoundPlayer : MonoBehaviour
     private IEnumerator FadeInCoroutine(AudioSource player, AudioClip clip, float targetVolume, float duration, float delay, int bgmIndex, float volumeMultiplier)
     {
         if (delay > 0f) yield return new WaitForSeconds(delay);
+
+        // (추가) 사전 등록: 볼륨은 일단 0 기준으로
+        RemoveBGMPlayerFromActive(player);
+        activeBGMPlayers[bgmIndex] = (player, volumeMultiplier); // ← 이 줄 추가
 
         // 현재 클립이 재생하려는 클립과 다를 경우에만 정지하고 새로 설정
         // 또는 플레이어가 정지 상태일 경우 새로 설정

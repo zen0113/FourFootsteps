@@ -6,7 +6,6 @@ using static UnityEngine.GraphicsBuffer;
 public class MemoryPuzzle : EventObject, IResultExecutable
 {
     [Header("puzzle setting")]
-    public string puzzleId;
     [SerializeField] 
     private GameObject puzzleObject;
     [SerializeField]

@@ -76,10 +76,10 @@ public class PuzzlePieceDropTutorial : TutorialBase
                 memoryPuzzle.eventId = eventId;
             }
 
-            if (!string.IsNullOrEmpty(puzzleId))
-            {
-                memoryPuzzle.puzzleId = puzzleId;
-            }
+            //if (!string.IsNullOrEmpty(puzzleId))
+            //{
+            //    memoryPuzzle.puzzleId = puzzleId;
+            //}
         }
         else
         {

@@ -3,7 +3,7 @@ using UnityEngine;
 
 /// <summary>
 /// 까마귀 낙하 공격을 처리
-/// 경고 표시(반원 + 아이콘) → 날아오기 → 호버링 → 낙하 공격 순서로 진행
+/// 트리거 방식: 지정된 위치에서 시작 → 경고 → 지정된 위치로 낙하
 /// </summary>
 [RequireComponent(typeof(Rigidbody2D))]
 [RequireComponent(typeof(SpriteRenderer))]
@@ -55,19 +55,9 @@ public class RoadCrow : MonoBehaviour
     [Tooltip("크기 변화 최대값")]
     public float maxScaleMultiplier = 1.1f;
 
-    [Header("Flight Animation")]
-    [Tooltip("까마귀 대기 위치 (경고 위치 기준 오프셋)")]
-    public Vector2 waitOffset = new Vector2(8f, 6f);
-    
-    [Tooltip("낙하 시작 시 수평 속도")]
-    public float horizontalSpeed = 5f;
-    
-    [Tooltip("낙하 가속도 (중력처럼)")]
-    public float fallAcceleration = 15f;
-
     [Header("Attack Settings")]
     [Tooltip("낙하 속도")]
-    public float fallSpeed = 8f;
+    public float fallSpeed = 10f;
     
     [Tooltip("충돌 데미지")]
     public int damage = 1;
@@ -86,78 +76,140 @@ public class RoadCrow : MonoBehaviour
     private SpriteRenderer circleRenderer;
     private SpriteRenderer iconRenderer;
     
-    private bool isWarningPhase = true;
+    private bool isWaiting = true;
+    private bool isWarningPhase = false;
     private bool isAttacking = false;
     private bool hasHitPlayer = false;
     private float warningTimer = 0f;
-    private Vector2 targetGroundPosition;
-    private Vector2 waitPosition;
-    private float currentFallSpeed = 0f;
+    
+    // 트리거에서 설정하는 위치들
+    private Vector2 crowStartPosition;      // 까마귀 시작 위치
+    private Vector2 attackTargetPosition;   // 경고 및 낙하 목표 위치
+    private bool isInitialized = false;
 
-    void Start()
+    void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
         crowRenderer = GetComponent<SpriteRenderer>();
         
+        if (rb == null)
+        {
+            Debug.LogError("[RoadCrow] Rigidbody2D를 찾을 수 없습니다!");
+        }
+        
+        if (crowRenderer == null)
+        {
+            Debug.LogError("[RoadCrow] SpriteRenderer를 찾을 수 없습니다!");
+        }
+        
         // 물리 설정
-        rb.gravityScale = 0;
-        rb.velocity = Vector2.zero;
-        rb.isKinematic = true;
+        if (rb != null)
+        {
+            rb.gravityScale = 0;
+            rb.velocity = Vector2.zero;
+            rb.isKinematic = true;
+        }
         
-        // 경고가 표시될 위치 저장 (현재 생성된 위치 = 도로 위치)
-        targetGroundPosition = transform.position;
+        // 까마귀 비활성화 (초기화될 때까지)
+        if (crowRenderer != null)
+        {
+            crowRenderer.enabled = false;
+        }
         
-        // 까마귀 대기 위치 계산
-        waitPosition = targetGroundPosition + waitOffset;
-        
-        // 까마귀를 대기 위치에 바로 배치
-        transform.position = waitPosition;
-        
-        // 까마귀 활성화 (처음부터 보이게)
-        crowRenderer.enabled = true;
-        
-        Debug.Log($"[RoadCrow] 까마귀 대기 중 - 대기 위치: {waitPosition}, 목표: {targetGroundPosition}");
-        
-        // 경고 표시 생성 (도로 위치에 생성)
-        CreateWarningDisplay();
-        
+        Debug.Log("[RoadCrow] Awake 완료");
+    }
+
+    void Start()
+    {
         // 최대 생존 시간 후 자동 제거
         Destroy(gameObject, maxLifeTime);
+        
+        Debug.Log("[RoadCrow] Start 완료");
     }
 
     void Update()
     {
-        if (isWarningPhase)
+        // 초기화되지 않았으면 아무것도 안 함
+        if (!isInitialized) return;
+
+        if (isWaiting)
         {
-            // 경고 단계 (까마귀는 대기 위치에서 대기)
+            // 대기 중 - 아무것도 안 함
+        }
+        else if (isWarningPhase)
+        {
+            // 경고 단계
             UpdateWarningAnimation();
             
             warningTimer += Time.deltaTime;
             if (warningTimer >= warningDuration)
             {
-                // 경고 종료, 낙하 공격 시작
+                // 경고 종료, 낙하 시작
                 StartAttack();
             }
         }
         else if (isAttacking)
         {
-            // 포물선 낙하 (수평 이동 + 가속 낙하)
-            currentFallSpeed += fallAcceleration * Time.deltaTime;
-            Vector2 velocity = new Vector2(-horizontalSpeed, -currentFallSpeed);
-            rb.velocity = velocity;
+            // 낙하 - 목표 지점으로 직선 낙하
+            Vector2 direction = (attackTargetPosition - (Vector2)transform.position).normalized;
+            rb.velocity = direction * fallSpeed;
         }
     }
 
     /// <summary>
-    /// 경고 표시 생성 (반원 + 아이콘) - 도로 위치에 생성
+    /// 트리거에서 호출: 까마귀 초기화 및 시작
+    /// </summary>
+    public void Initialize(Vector2 startPos, Vector2 targetPos)
+    {
+        // 컴포넌트가 없으면 가져오기
+        if (rb == null) rb = GetComponent<Rigidbody2D>();
+        if (crowRenderer == null) crowRenderer = GetComponent<SpriteRenderer>();
+        
+        crowStartPosition = startPos;
+        attackTargetPosition = targetPos;
+        
+        // 까마귀를 시작 위치에 배치
+        transform.position = crowStartPosition;
+        
+        // 까마귀 활성화
+        if (crowRenderer != null)
+        {
+            crowRenderer.enabled = true;
+        }
+        else
+        {
+            Debug.LogError("[RoadCrow] SpriteRenderer를 찾을 수 없습니다!");
+            return;
+        }
+        
+        // 물리 설정
+        if (rb != null)
+        {
+            rb.gravityScale = 0;
+            rb.velocity = Vector2.zero;
+            rb.isKinematic = true;
+        }
+        
+        isInitialized = true;
+        isWaiting = false;
+        isWarningPhase = true;
+        
+        // 경고 표시 생성 (목표 위치에)
+        CreateWarningDisplay();
+        
+        Debug.Log($"[RoadCrow] 초기화 완료 - 시작: {startPos}, 목표: {targetPos}");
+    }
+
+    /// <summary>
+    /// 경고 표시 생성 - 목표 위치(attackTargetPosition)에 생성
     /// </summary>
     void CreateWarningDisplay()
     {
-        // 반원 오브젝트 생성 (도로 위치에)
+        // 반원 오브젝트 생성
         if (warningCircleSprite != null)
         {
             warningCircleObj = new GameObject("WarningCircle");
-            warningCircleObj.transform.position = targetGroundPosition;
+            warningCircleObj.transform.position = attackTargetPosition;
             warningCircleObj.transform.localScale = circleScale;
             
             circleRenderer = warningCircleObj.AddComponent<SpriteRenderer>();
@@ -165,11 +217,11 @@ public class RoadCrow : MonoBehaviour
             circleRenderer.sortingOrder = circleSortingOrder;
         }
         
-        // 아이콘 오브젝트 생성 (도로 위치에)
+        // 아이콘 오브젝트 생성
         if (warningIconSprite != null)
         {
             warningIconObj = new GameObject("WarningIcon");
-            warningIconObj.transform.position = targetGroundPosition + iconOffset;
+            warningIconObj.transform.position = attackTargetPosition + iconOffset;
             warningIconObj.transform.localScale = iconScale;
             
             iconRenderer = warningIconObj.AddComponent<SpriteRenderer>();
@@ -183,9 +235,8 @@ public class RoadCrow : MonoBehaviour
     /// </summary>
     void UpdateWarningAnimation()
     {
-        float t = (Mathf.Sin(Time.time * blinkSpeed) + 1f) * 0.5f; // 0~1 사이 값
+        float t = (Mathf.Sin(Time.time * blinkSpeed) + 1f) * 0.5f;
         
-        // 반원 애니메이션
         if (circleRenderer != null)
         {
             Color color = circleRenderer.color;
@@ -199,7 +250,6 @@ public class RoadCrow : MonoBehaviour
             }
         }
         
-        // 아이콘 애니메이션 (반원과 동기화)
         if (iconRenderer != null)
         {
             Color color = iconRenderer.color;
@@ -215,7 +265,7 @@ public class RoadCrow : MonoBehaviour
     }
 
     /// <summary>
-    /// 포물선 낙하 공격 시작
+    /// 낙하 공격 시작
     /// </summary>
     void StartAttack()
     {
@@ -228,12 +278,9 @@ public class RoadCrow : MonoBehaviour
         
         // 물리 활성화
         rb.isKinematic = false;
-        rb.gravityScale = 0; // 직접 속도 제어
+        rb.gravityScale = 0;
         
-        // 초기 낙하 속도 설정
-        currentFallSpeed = 0f;
-        
-        Debug.Log($"[RoadCrow] 포물선 낙하 시작! 위치: {transform.position}");
+        Debug.Log($"[RoadCrow] 낙하 시작! 현재: {transform.position}, 목표: {attackTargetPosition}");
     }
 
     /// <summary>
@@ -241,15 +288,14 @@ public class RoadCrow : MonoBehaviour
     /// </summary>
     void OnTriggerEnter2D(Collider2D collision)
     {
-        // 경고 단계에서는 충돌 처리 안 함
-        if (isWarningPhase) return;
+        // 공격 중이 아니면 충돌 처리 안 함
+        if (!isAttacking) return;
         
         // 플레이어와 충돌
         if (collision.CompareTag("Player") && !hasHitPlayer)
         {
             hasHitPlayer = true;
 
-            // 플레이어에게 데미지
             PlayerHp playerHp = collision.GetComponent<PlayerHp>();
             if (playerHp != null)
             {
@@ -257,7 +303,6 @@ public class RoadCrow : MonoBehaviour
                 Debug.Log("[RoadCrow] 플레이어와 충돌! 데미지 적용");
             }
 
-            // 까마귀 제거
             Destroy(gameObject);
         }
         // 지면과 충돌
@@ -268,33 +313,21 @@ public class RoadCrow : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// 씬 뷰에서 경고 위치와 까마귀 위치 시각화
-    /// </summary>
     void OnDrawGizmos()
     {
-        if (Application.isPlaying)
+        if (isInitialized && Application.isPlaying)
         {
-            if (isWarningPhase)
-            {
-                // 경고 위치 표시 (노란색 원)
-                Gizmos.color = Color.yellow;
-                Gizmos.DrawWireSphere(targetGroundPosition, 0.5f);
-                
-                // 까마귀 대기 위치 표시 (빨간색)
-                Gizmos.color = Color.red;
-                Gizmos.DrawWireSphere(waitPosition, 0.4f);
-                
-                // 대기 위치에서 경고 위치로 화살표
-                Gizmos.color = Color.cyan;
-                Gizmos.DrawLine(waitPosition, targetGroundPosition);
-            }
-            else if (isAttacking)
-            {
-                // 낙하 경로 표시 (마젠타색)
-                Gizmos.color = Color.magenta;
-                Gizmos.DrawLine(transform.position, transform.position + new Vector3(-2f, -5f, 0f));
-            }
+            // 시작 위치 (파란색)
+            Gizmos.color = Color.blue;
+            Gizmos.DrawWireSphere(crowStartPosition, 0.5f);
+            
+            // 목표 위치 (빨간색)
+            Gizmos.color = Color.red;
+            Gizmos.DrawWireSphere(attackTargetPosition, 0.5f);
+            
+            // 경로 (시안색)
+            Gizmos.color = Color.cyan;
+            Gizmos.DrawLine(crowStartPosition, attackTargetPosition);
         }
     }
 }

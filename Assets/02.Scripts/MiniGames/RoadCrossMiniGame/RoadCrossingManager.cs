@@ -39,6 +39,9 @@ public class RoadCrossingManager : MonoBehaviour
     public float initialSpawnDelay = 1f;
 
     [Header("Crow Attack Settings")]
+    [Tooltip("까마귀 자동 스폰 사용 (트리거 방식 사용 시 체크 해제)")]
+    public bool useAutoCrowSpawn = false;
+    
     [Tooltip("까마귀 프리팹 (경고 표시 포함)")]
     public GameObject crowPrefab;
     

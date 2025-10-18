@@ -192,20 +192,22 @@ public class DustCleaningEvent : EventObject
         }
     }
 
-    private void OnTriggerEnter2D(Collider2D other)
+    protected override void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.CompareTag("Player"))
+        base.OnTriggerEnter2D(other);
+
+        if (_isPlayerInRange)
         {
-            _isPlayerInRange = true;
             _playerMovement = other.GetComponent<PlayerHumanMovement>();
         }
     }
 
-    private void OnTriggerExit2D(Collider2D other)
+    protected override void OnTriggerExit2D(Collider2D other)
     {
-        if (other.CompareTag("Player"))
+        base.OnTriggerExit2D(other);
+
+        if (other.CompareTag("Player")) 
         {
-            _isPlayerInRange = false;
             _playerMovement = null;
         }
     }

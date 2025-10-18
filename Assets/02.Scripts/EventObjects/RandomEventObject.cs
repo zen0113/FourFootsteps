@@ -8,10 +8,8 @@ public class RandomEventObject : EventObject
     [SerializeField]
     private List<string> randomDialogueIds = new List<string>();
 
-    // 플레이어가 오브젝트 범위 내에 있는지 확인하는 변수
-    private bool _isPlayerInRange = false;
 
-    protected new void Update()
+    protected new void Update() 
     {
         // 다이얼로그 진행 중일 때는 조사 금지
         if (DialogueManager.Instance.isDialogueActive)
@@ -21,10 +19,9 @@ public class RandomEventObject : EventObject
         if (!CanInteractInRecallScene())
             return;
 
-        // 조사 조건: 플레이어가 범위 내에 있고 E키를 눌렀을 때
         if (randomDialogueIds.Count > 0
             && EventManager.Instance
-            && _isPlayerInRange
+            && _isPlayerInRange 
             && Input.GetKeyDown(KeyCode.E))
         {
             TriggerRandomDialogue();
@@ -46,8 +43,7 @@ public class RandomEventObject : EventObject
         Debug.Log($"Random Dialogue Triggered: {selectedDialogueId}");
     }
 
-    // 회상 씬에서 조사 가능한지 확인하는 메서드
-    private bool CanInteractInRecallScene()
+    protected override bool CanInteractInRecallScene()
     {
         if (RecallManager.Instance == null)
             return true;
@@ -76,52 +72,4 @@ public class RandomEventObject : EventObject
         randomDialogueIds = new List<string>(dialogueIds);
     }
 
-    // 플레이어가 트리거에 들어왔을 때
-    private void OnTriggerEnter2D(Collider2D other)
-    {
-        if (other.CompareTag("Player"))
-        {
-            // 회상 씬에서 조사 불가능하면 리턴
-            if (!CanInteractInRecallScene())
-                return;
-
-            if (gameObject.GetComponent<SpriteGlow.SpriteGlowEffect>() != null)
-                spriteGlowEffect.enabled = true;
-
-            _isPlayerInRange = true; // 플레이어가 범위에 들어옴
-        }
-    }
-
-    private void OnTriggerStay2D(Collider2D other)
-    {
-        if (other.CompareTag("Player"))
-        {
-            // 회상 씬에서 조사 불가능하면 리턴
-            if (!CanInteractInRecallScene())
-            {
-                // 조사 불가능한 상태가 되면 상호작용 해제
-                if (gameObject.GetComponent<SpriteGlow.SpriteGlowEffect>() != null)
-                    spriteGlowEffect.enabled = false;
-                _isPlayerInRange = false;
-                return;
-            }
-
-            if (gameObject.GetComponent<SpriteGlow.SpriteGlowEffect>() != null)
-                spriteGlowEffect.enabled = true;
-
-            _isPlayerInRange = true;
-        }
-    }
-
-    // 플레이어가 트리거에서 나갔을 때
-    private void OnTriggerExit2D(Collider2D other)
-    {
-        if (other.CompareTag("Player"))
-        {
-            if (gameObject.GetComponent<SpriteGlow.SpriteGlowEffect>() != null)
-                spriteGlowEffect.enabled = false;
-
-            _isPlayerInRange = false; // 플레이어가 범위에서 벗어남
-        }
-    }
 }

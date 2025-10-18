@@ -145,7 +145,7 @@ public class EventObject : MonoBehaviour
 
     // ───── 트리거 로직 ─────
     // 플레이어가 트리거에 들어왔을 때
-    private void OnTriggerEnter2D(Collider2D other)
+    protected virtual void OnTriggerEnter2D(Collider2D other)
     {
         if (!other.CompareTag("Player")) return;
 
@@ -159,7 +159,7 @@ public class EventObject : MonoBehaviour
         _isPlayerInRange = true; // 플레이어가 범위에 들어옴
     }
 
-    private void OnTriggerStay2D(Collider2D other)
+    protected virtual void OnTriggerStay2D(Collider2D other)
     {
         if (!other.CompareTag("Player")) return;
 
@@ -179,7 +179,7 @@ public class EventObject : MonoBehaviour
     }
 
     // 플레이어가 트리거에서 나갔을 때
-    private void OnTriggerExit2D(Collider2D other)
+    protected virtual void OnTriggerExit2D(Collider2D other)
     {
         if (!other.CompareTag("Player")) return;
 

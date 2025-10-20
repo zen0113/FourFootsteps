@@ -34,7 +34,7 @@ public class DustCleaningEvent : EventObject
 
     private Coroutine _cursorAnimationCoroutine;
     private bool _isMinigameFinished = false;
-    private PlayerHumanMovement _playerMovement;
+    // [삭제] private PlayerHumanMovement _playerMovement; // 클래스 멤버 변수 제거
 
     private void Awake()
     {
@@ -97,16 +97,28 @@ public class DustCleaningEvent : EventObject
     {
         _isEventActive = true;
 
+        // [수정] 이벤트 시작 시점에 플레이어를 확실하게 찾습니다.
+        PlayerHumanMovement currentPlayer = FindObjectOfType<PlayerHumanMovement>();
+
+        // [수정] 플레이어를 못 찾았을 경우를 대비한 방어 코드
+        if (currentPlayer == null)
+        {
+            Debug.LogError("EventFlow: PlayerHumanMovement를 찾을 수 없습니다!");
+            _isEventActive = false;
+            yield break; // 코루틴 즉시 종료
+        }
 
         // --- 시작 대화 구간 (기본 커서) ---
         EventManager.Instance.CallEvent(startDialogueId);
         yield return new WaitUntil(() => !DialogueManager.Instance.isDialogueActive);
 
         // --- 미니게임 구간 (빗자루 커서) ---
-        SetupMinigame();
+        // [수정] 찾은 플레이어(currentPlayer)를 SetupMinigame에 전달합니다.
+        SetupMinigame(currentPlayer);
         yield return new WaitUntil(() => _activeDustObjects.Count == 0);
 
-        _playerMovement?.BlockMiniGameInput(false);
+        // [수정] _playerMovement 대신 지역 변수인 currentPlayer를 사용합니다.
+        currentPlayer?.BlockMiniGameInput(false);
         _isMinigameRunning = false; // 커서 제어 로직 비활성화
         if (_cursorAnimationCoroutine != null)
         {
@@ -132,9 +144,11 @@ public class DustCleaningEvent : EventObject
         _isEventActive = false;
     }
 
-    private void SetupMinigame()
+    // [수정] PlayerHumanMovement를 파라미터로 받도록 변경합니다.
+    private void SetupMinigame(PlayerHumanMovement player)
     {
-        _playerMovement?.BlockMiniGameInput(true);
+        // [수정] _playerMovement 대신 전달받은 player 파라미터를 사용합니다.
+        player?.BlockMiniGameInput(true);
         _isMinigameRunning = true;
 
         cleaningCanvas.SetActive(true);
@@ -196,19 +210,13 @@ public class DustCleaningEvent : EventObject
     {
         base.OnTriggerEnter2D(other);
 
-        if (_isPlayerInRange)
-        {
-            _playerMovement = other.GetComponent<PlayerHumanMovement>();
-        }
+        // [삭제] _playerMovement 관련 로직을 모두 지웁니다.
     }
 
     protected override void OnTriggerExit2D(Collider2D other)
     {
         base.OnTriggerExit2D(other);
 
-        if (other.CompareTag("Player")) 
-        {
-            _playerMovement = null;
-        }
+        // [삭제] _playerMovement 관련 로직을 모두 지웁니다.
     }
 }

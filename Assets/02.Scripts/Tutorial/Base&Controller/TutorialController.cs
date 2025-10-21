@@ -11,7 +11,6 @@ public class TutorialController : MonoBehaviour
     private List<TutorialBase> tutorials;
     [SerializeField]
     private string nextSceneName = "";
-    // [SerializeField] // 이제 인스펙터에서 수동으로 할당할 필요가 없습니다.
     private GameObject black; // 자동으로 찾을 GameObject
 
     private TutorialBase currentTutorial = null;

@@ -26,7 +26,7 @@ public class RoadVehicle : MonoBehaviour
     public float minScale = 0.3f;
     
     [Tooltip("최대 크기 (가까이 있을 때)")]
-    public float maxScale = 1f;
+    public float maxScale = 1.5f;
     
     [Tooltip("최소 투명도 (멀리 있을 때)")]
     [Range(0f, 1f)]
@@ -40,13 +40,22 @@ public class RoadVehicle : MonoBehaviour
     public float fullVisibilityY = 2f;
 
     [Header("Collision Settings")]
+    [Tooltip("충돌을 활성화할 Y 위치 (이 지점부터 충돌 가능)")]
+    public float collisionEnableY = 5f;
+    
+    [Tooltip("헤드라이트 오브젝트 (자식 오브젝트)")]
+    public GameObject headlights;
+    
+    [Header("Collision Settings")]
     [Tooltip("충돌 데미지")]
     public int damage = 1;
 
     // 내부 변수
     private float laneX; // 고정된 차선 X 좌표
     private SpriteRenderer spriteRenderer;
-    private bool hasHitPlayer = false; // 플레이어와 충돌했는지 여부
+    private bool hasHitPlayer = false;
+    private Collider2D vehicleCollider;
+    private bool collisionEnabled = false;
 
     void Start()
     {

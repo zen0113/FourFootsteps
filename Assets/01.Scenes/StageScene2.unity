@@ -20357,7 +20357,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 1
+  m_SortingOrder: 0
   m_Sprite: {fileID: 21300000, guid: 59bd3e07e01f1a948b462c508ce043ce, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -28540,6 +28540,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4165055646274308526, guid: df843dd1c9db88343a97c21b05d19594, type: 3}
       propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6310540648468389677, guid: df843dd1c9db88343a97c21b05d19594, type: 3}
+      propertyPath: isActivated
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6310540648468389677, guid: df843dd1c9db88343a97c21b05d19594, type: 3}
@@ -41653,6 +41657,8 @@ MonoBehaviour:
   invincibilityDuration: 1.5
   isInvincible: 0
   cameraShake: {fileID: 0}
+  useGameOverScene: 0
+  restartDelay: 1.5
 --- !u!114 &1840977448
 MonoBehaviour:
   m_ObjectHideFlags: 0

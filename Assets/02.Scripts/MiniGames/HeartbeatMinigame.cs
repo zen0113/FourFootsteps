@@ -301,29 +301,52 @@ public class HeartbeatMinigame : MonoBehaviour
     private void CalculateAccuracyAndEnd()
     {
         int matchedPixels = 0;
-        int totalTargetPixels = 0;
+        // int totalTargetPixels = 0; // <- 이 변수를 사용하지 않습니다.
+
+        // "중요한" 픽셀, 즉 기준선(baseline)에서 벗어난 픽셀만 카운트합니다.
+        int totalSignificantTargetPixels = 0;
+        int baselineY = drawingHeight / 2; // 중앙 기준선 Y 좌표
+
+        // 부동소수점 오차를 감안한 기준선 임계값
+        const float baselineThreshold = 0.1f;
 
         for (int x = 0; x < drawingWidth; x++)
         {
-            float targetY = GetTargetYAtX(x);
+            // 현재 x 좌표를 0.0 ~ gameDuration 사이의 시간 값으로 변환
+            float time = (float)x / drawingWidth * gameDuration;
 
-            // 해당 x 좌표에 목표 라인이 있는지 확인
-            if (targetY >= 0)
+            // 픽셀 검색(GetTargetYAtX) 대신, 원본 데이터로 정확한 목표 Y값 계산
+            float targetY = GetTargetYAtTime(time);
+
+            // 목표 Y값이 기준선에서 벗어났는지(즉, "중요한" 부분인지) 확인
+            bool isTargetSignificant = Mathf.Abs(targetY - baselineY) > baselineThreshold;
+
+            if (isTargetSignificant)
             {
-                totalTargetPixels++;
-                // 플레이어가 그린 라인이 있는지 확인
-                int playerY = GetPlayerYAtX(x);
+                // "중요한" 픽셀이므로 전체 점수(분모)에 추가
+                totalSignificantTargetPixels++;
+
+                // 이제, 플레이어가 이 x좌표에 그림을 그렸는지 확인
+                int playerY = GetPlayerYAtX(x); // 플레이어가 그린 Y값
                 if (playerY >= 0)
                 {
+                    // 플레이어가 그린 위치가 목표 위치와 허용 오차(matchTolerance) 내에 있는지 확인
                     if (Mathf.Abs(playerY - targetY) <= matchTolerance)
                     {
-                        matchedPixels++;
+                        matchedPixels++; // 맞췄음!
                     }
                 }
             }
         }
 
-        float accuracy = (totalTargetPixels > 0) ? ((float)matchedPixels / totalTargetPixels) * 100f : 0f;
+        // 정확도 계산 방식을 (맞춘 픽셀 / "중요한" 픽셀 총합)으로 변경
+        float accuracy = (totalSignificantTargetPixels > 0) ?
+                         ((float)matchedPixels / totalSignificantTargetPixels) * 100f :
+                         0f;
+
+        // totalSignificantTargetPixels가 0인 경우는 (이론상) 파형이 아예 일직선일 때뿐이며, 
+        // 이 경우 0%가 맞습니다.
+
         bool success = accuracy >= successThreshold;
 
         EndMinigame(success, accuracy);

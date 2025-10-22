@@ -246,7 +246,7 @@ Recall2_Bad_104,의사,,예방접종과 심장사상충 약은 오늘 생략하�
 ,의사,,길고양이는 야외 질병에 노출되어 있었을 가능성이 높거든요. 상담만이라도 다시 오세요.,,temp_Vet,,,,,
 ,Player,,네… 감사합니다.,,temp_playerHUMAN,,,,,
 ,,,,,,,,,,
-Stage02_010,Player,,(깜빡` 눈을 뜬다...),,temp_playerCAT,,,,,
+Stage02_010,InnerThoughts,,(깜빡` 눈을 뜬다...),,temp_playerCAT,,,,,
 ,Player,,방금… {YourCatName}이랑 병원에 왔던 때가 떠올랐어.  ,TRUE,temp_playerCAT,,,,,
 ,Player,,…아직도 그 순간이 이렇게 생생하네.,,temp_playerCAT,,,,,
 ,Player,,앗` 이제 슬슬 해가 지려고 하네?!,,temp_playerCAT,,,,,
@@ -667,17 +667,17 @@ Stage04_015,레오,,으럇차...! 다들 뛰어내려!,,temp_Leo,,,,EventSetNext
 Stage04_016,Player,,좋아. 또리까지 다들 무사히 탈출한 것 같아!,,temp_playerCAT,,,,,
 ,Player,,트럭이 출발하기 전에 나도 빨리 뛰어야겠어!!,,temp_playerCAT,,,,EventSetNextTutorial,
 ,,,,,,,,,,
-Stage05_001,Player,,휴... 겨우 빠져나왔다!,,temp_playerCAT,,,,,
-,Player,,또리! 레오! 다들 괜찮아?,,temp_playerCAT,,,,,
-,Player,,(주위를 둘러본다) ...어? 다들 어디 간 거야?,,temp_playerCAT,,,,,
-,Player,,윽! (다리를 절뚝인다) 다리가... 잘 안 움직여져... \n트럭이 갑자기 출발하는 바람에 착지를 제대로 못했나 봐...,,temp_playerCAT,,,,,
-,Player,,다른 애들은 먼저 뛰어내려서 어디론가 도망갔나...,,temp_playerCAT,,,,,
-,Player,,여기가 어딘지도 모르겠고... 어떻게 다시 만날 수 있을까...,,temp_playerCAT,,,,,
-,Player,,이번에도 난 혼자구나... 여기에서 어떻게 돌아가지...?,,temp_playerCAT,,,,,하얀 새가 날아가며 퍼즐 조각을 건너편 인도에 떨어뜨리고 감.
+Stage05_001,Player,TRUE,휴... 겨우 빠져나왔다!,,temp_playerCAT,,,,,
+,Player,TRUE,또리! 레오! 다들 괜찮아?,,temp_playerCAT,,,,,
+,Player,TRUE,(주위를 둘러본다) ...어? 다들 어디 간 거야?,,temp_playerCAT,,,,,
+,Player,TRUE,윽! (다리를 절뚝인다) 다리가... 잘 안 움직여져... \n트럭이 갑자기 출발하는 바람에 착지를 제대로 못했나 봐...,,temp_playerCAT,,,,,
+,Player,TRUE,다른 애들은 먼저 뛰어내려서 어디론가 도망갔나...,,temp_playerCAT,,,,,
+,Player,TRUE,여기가 어딘지도 모르겠고... 어떻게 다시 만날 수 있을까...,,temp_playerCAT,,,,,
+,Player,TRUE,이번에도 난 혼자구나... 여기에서 어떻게 돌아가지...?,,temp_playerCAT,,,,EventSetNextTutorial,하얀 새가 날아가며 퍼즐 조각을 건너편 인도에 떨어뜨리고 감.
 Stage05_002,Player,,하얀 새가…대체 어디까지 날아가는 거야…?!,,temp_playerCAT,,,,,
 ,Player,,저기까지 가라고…? 하긴 지금 여긴 도로 한복판이라서 위험하네.,,temp_playerCAT,,,,,
 ,Player,,윽…아까 다리를 다쳐서 그런지 빠르게는 못 움직이겠어. 점프도 힘들고…,,temp_playerCAT,,,,,
-,Player,,차들이 이렇게 빨리 지나가는구나... 한 번 잘못 뛰면 끝이야.\n사람일 때는 몰랐던 이 무력감... {YourCatName}도 이런 기분이었을까?,TRUE,temp_playerCAT,,,,,
+,Player,,차들이 이렇게 빨리 지나가는구나... 한 번 잘못 뛰면 끝이야.\n사람일 때는 몰랐던 이 무력감... {YourCatName}도 이런 기분이었을까?,TRUE,temp_playerCAT,,,,EventSetNextTutorial,
 Stage05_003,Player,,아` 안 돼…!! 여기서…끝낼 수는…없어…,,temp_playerCAT,,,,,하트가 0으로 다 닳았을 경우
 Stage05_004,Player,,헉` 헉… 드디어 무사히 도착했다...,,temp_playerCAT,,,,,안전구역에 도착 후 퍼즐 조각 조사
 ,Player,,어쩌면… 이번 퍼즐 조각이 [마지막]일지도 모르겠어.\n얼른 조사해보자.,,temp_playerCAT,,,,,
@@ -685,12 +685,12 @@ Stage05_004,Player,,헉` 헉… 드디어 무사히 도착했다...,,temp_player
 Recall5_001,Player,,하... 출장까지 다녀오니 정말 녹초가 되네. 어서 집에 가서 눕고 싶다...,,temp_playerHUMAN,,,,,
 ,Player,,...응? 저기 길가에 저건... 뭐지?,,temp_playerHUMAN,,,,EventSetNextTutorial,
 Recall5_002,Player,,(가까이 다가간다) 잠깐... 고양이잖아? 세상에` 왜 이런 위험한 곳에 쓰러져 있는거야?!,,temp_playerHUMAN,,,,Choice_009,조사 개수 2개 다 채우면 자동차 밖으로 나가게 됨.
-Recall5_003,Player,,꼴이 말이 아니네. 털은 다 엉키고` 여기저기 상처투성이야... 얼마나 아프고 무서웠을까.,,temp_playerHUMAN,,,,,긍정적 선택지
-,Player,,안되겠다. 피곤해도 이건 그냥 못 지나가. 그래` 결심했어. 우선 가까운 동물병원부터 찾아보자.,,temp_playerHUMAN,,,,,
-,YourCat,,…야옹,,temp_playerCAT,,,,EventRecall5_GoodChoice,
-Recall5_004,Player,, ...다친 건가. 어떡하지... 하지만 나도 오늘 너무 지쳐서... 괜히 섣불리 건드렸다가 일이 커질 수도 있고...,,temp_playerHUMAN,,,,,부정적 선택지
-,Player,,...모르겠다. 나 하나쯤 없어도... 누군가 발견해서 도와주겠지. 일단은... 너무 피곤하다. 어서 집에 가자.,,temp_playerHUMAN,,,,,
-,YourCat,,…,,temp_playerCAT,,,,EventRecall5_BadChoice,
+Recall5_003,Player,TRUE,꼴이 말이 아니네. 털은 다 엉키고` \n여기저기 상처투성이야... \n얼마나 아프고 무서웠을까.,,temp_playerHUMAN,,,,,긍정적 선택지
+,Player,TRUE,안되겠다. 피곤해도 이건 그냥 못 지나가. \n그래` 결심했어. 우선 가까운 동물병원부터 찾아보자.,,temp_playerHUMAN,,,,,
+,YourCat,TRUE,…야옹,,temp_playerCAT,,,,EventRecall5_GoodChoice,
+Recall5_004,Player,TRUE, ...다친 건가. 어떡하지... 하지만 나도 오늘 너무 지쳐서... \n괜히 섣불리 건드렸다가 일이 커질 수도 있고...,,temp_playerHUMAN,,,,,부정적 선택지
+,Player,TRUE,...모르겠다. 나 하나쯤 없어도... 누군가 발견해서 도와주겠지. \n일단은... 너무 피곤하다. 어서 집에 가자.,,temp_playerHUMAN,,,,,
+,YourCat,TRUE,…,,temp_playerCAT,,,,EventRecall5_BadChoice,
 Recall5_005,Monolog,,모든 게… 내가 {YourCatName}과 함께했던 기억들이었구나.\n그리고 이곳이… 우리가 처음 만났던 그 자리라니.\n그때의 난 서툴렀지만… 그래도 너와 함께한 시간만큼은 진심이었어.,TRUE/AUTO_DELAYED/FADE_OUT,,,,,,
 Recall5_006,Monolog,,나는 {YourCatName}을 데려왔지만… 끝내 책임지지 못했어.\n이렇게 쓰러져 있는 이곳이… 너를 처음 발견했던 자리라니.\n결국 나는… 같은 자리에서 끝을 맞이하는구나.,TRUE/AUTO_DELAYED/FADE_OUT,,,,,,
 ,,,,,,,,,,
@@ -724,7 +724,7 @@ HappyEnding_015,Player,,고양이들이 맛있게 잘 먹었으면 좋겠네…,
 HappyEnding_016,Player,TRUE,유기묘들이 행복해 하는 모습을 보니까...나도 같이 행복해지네!,,temp_playerHUMAN,,,,EventSetNextTutorial,
 HappyEnding_017,Monolog,,고양이의 작은 습성 하나조차 몰랐던 나였지만…\n이제는 귀 기울이고` 지켜내며` 끝까지 사랑할 거야.,AUTO_DELAYED/FADE_OUT,temp_playerHUMAN,,,,EventSetNextTutorial,
 ,,,,,,,,,,
-BadEnding_001,Player,,말도 안 돼… 또 이 도로?,,temp_playerCAT,,,,,화이트 아웃 발생 후 그대로 고양이의 모습인 주인공.
+BadEnding_001,Player,,말도 안 돼… 또 이 골목?,,temp_playerCAT,,,,,화이트 아웃 발생 후 그대로 고양이의 모습인 주인공.
 ,Player,,분명… 돌아왔을 거라 생각했는데…\n왜 다시 고양이야… 왜…,,temp_playerCAT,,,,,
 ,Player,,…하. 결국… 변한 건 없구나.\n앞으로… 어디로 가야 하지…,,temp_playerCAT,,,,EventSetNextTutorial,
 BadEnding_002,Player,TRUE,언제까지…계속 고양이의 몸으로 살아야 하는 걸까…,AUTO_DELAYED,temp_playerCAT,,,,EventSetNextTutorial,조금씩 이동할 때마다 나오는 반성 독백

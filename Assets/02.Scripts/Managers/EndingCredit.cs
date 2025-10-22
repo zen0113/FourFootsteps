@@ -33,6 +33,7 @@ public class EndingCredit : MonoBehaviour
     // backgroundSprites[0]은 해피엔딩때 크레딧 배경
     // backgroundSprites[1]은 배드엔딩때 크레딧 배경
     [SerializeField] private Sprite[] backgroundSprites;
+
     string animationName = "EndingCredit_Moving";
     string happyEndingSceneName = "Ending_Happy";
     bool isHappyEnding = false;
@@ -61,10 +62,7 @@ public class EndingCredit : MonoBehaviour
         canvasGroup.alpha = 0f;
         animator.speed = 0f;
 
-        if (isHappyEnding)
-            backgroundImage.sprite = backgroundSprites[happyBG];
-        else
-            backgroundImage.sprite = backgroundSprites[badBG];
+        backgroundImage.sprite = (isHappyEnding) ? backgroundSprites[happyBG] : backgroundSprites[badBG];
     }
 
     // 엔딩크레딧 연출 시작

@@ -69,6 +69,13 @@ public class PuzzleManager : MonoBehaviour
 
     IEnumerator Complete()
     {
+        // 아래 3줄은 씬별로 엔딩 테스트하려고 추가
+        // 빌드 시, 이 부분은 삭제
+        int score = (int)GameManager.Instance.GetVariable("ResponsibilityScore");
+
+        isBadEnding = (score < 3) ? true : false;
+        ResponsibilityScore = score;
+
         // 반짝 FX
         //if (completeFX) completeFX.Play();
         // 효과음

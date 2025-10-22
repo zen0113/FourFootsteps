@@ -1325,9 +1325,9 @@ MonoBehaviour:
     unityEvent:
       m_PersistentCalls:
         m_Calls:
-        - m_Target: {fileID: 0}
-          m_TargetAssemblyTypeName: SoundPlayer, Assembly-CSharp
-          m_MethodName: PlaySceneBGMNotAuto
+        - m_Target: {fileID: 11400000, guid: 7be35646946d8c84ebc0f40d0e091ced, type: 2}
+          m_TargetAssemblyTypeName: ServiceCallAction, Assembly-CSharp
+          m_MethodName: Execute
           m_Mode: 1
           m_Arguments:
             m_ObjectArgument: {fileID: 0}
@@ -3818,17 +3818,6 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!114 &249899404 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 1394963342017423906, guid: fcc937e4cda6d8c4d8de70f5c23e9268, type: 3}
-  m_PrefabInstance: {fileID: 249899399}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 817d4cdafc58f524489fee3f83781f85, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1001 &256838536
@@ -9015,10 +9004,10 @@ MonoBehaviour:
     unityEvent:
       m_PersistentCalls:
         m_Calls:
-        - m_Target: {fileID: 249899404}
-          m_TargetAssemblyTypeName: UIManager, Assembly-CSharp
-          m_MethodName: StartWhiteOutIn
-          m_Mode: 6
+        - m_Target: {fileID: 11400000, guid: 1223636e3b822ca42818252c0a18388f, type: 2}
+          m_TargetAssemblyTypeName: ServiceCallAction, Assembly-CSharp
+          m_MethodName: Execute
+          m_Mode: 1
           m_Arguments:
             m_ObjectArgument: {fileID: 0}
             m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
@@ -9197,10 +9186,10 @@ MonoBehaviour:
     unityEvent:
       m_PersistentCalls:
         m_Calls:
-        - m_Target: {fileID: 249899404}
-          m_TargetAssemblyTypeName: UIManager, Assembly-CSharp
-          m_MethodName: StartBlackOutIn
-          m_Mode: 6
+        - m_Target: {fileID: 11400000, guid: e856144d2fc510c40bc28ae2431c492a, type: 2}
+          m_TargetAssemblyTypeName: ServiceCallAction, Assembly-CSharp
+          m_MethodName: Execute
+          m_Mode: 1
           m_Arguments:
             m_ObjectArgument: {fileID: 0}
             m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
@@ -10211,9 +10200,17 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2258836089456854518, guid: 812ea34453182064fbfc8895af10e429, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5539792126288546738, guid: 812ea34453182064fbfc8895af10e429, type: 3}
       propertyPath: m_Name
       value: Sound Player
+      objectReference: {fileID: 0}
+    - target: {fileID: 5539792126288546738, guid: 812ea34453182064fbfc8895af10e429, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -11990,10 +11987,10 @@ MonoBehaviour:
     unityEvent:
       m_PersistentCalls:
         m_Calls:
-        - m_Target: {fileID: 249899404}
-          m_TargetAssemblyTypeName: UIManager, Assembly-CSharp
-          m_MethodName: StartBlackOutIn
-          m_Mode: 6
+        - m_Target: {fileID: 11400000, guid: e856144d2fc510c40bc28ae2431c492a, type: 2}
+          m_TargetAssemblyTypeName: ServiceCallAction, Assembly-CSharp
+          m_MethodName: Execute
+          m_Mode: 1
           m_Arguments:
             m_ObjectArgument: {fileID: 0}
             m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
@@ -20366,10 +20363,10 @@ MonoBehaviour:
             m_StringArgument: 
             m_BoolArgument: 0
           m_CallState: 2
-        - m_Target: {fileID: 2067428417}
-          m_TargetAssemblyTypeName: SceneUITextManager, Assembly-CSharp
-          m_MethodName: ResetSceneText
-          m_Mode: 5
+        - m_Target: {fileID: 11400000, guid: 13f96517694183e44a10703fa12792ed, type: 2}
+          m_TargetAssemblyTypeName: ServiceCallAction, Assembly-CSharp
+          m_MethodName: Execute
+          m_Mode: 1
           m_Arguments:
             m_ObjectArgument: {fileID: 0}
             m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
@@ -27419,9 +27416,9 @@ MonoBehaviour:
     unityEvent:
       m_PersistentCalls:
         m_Calls:
-        - m_Target: {fileID: 576505466}
-          m_TargetAssemblyTypeName: GameManager, Assembly-CSharp
-          m_MethodName: StartEndingCredit
+        - m_Target: {fileID: 11400000, guid: 248678c539ecd144293a6d606f8b4af4, type: 2}
+          m_TargetAssemblyTypeName: ServiceCallAction, Assembly-CSharp
+          m_MethodName: Execute
           m_Mode: 1
           m_Arguments:
             m_ObjectArgument: {fileID: 0}
@@ -29767,10 +29764,10 @@ MonoBehaviour:
     unityEvent:
       m_PersistentCalls:
         m_Calls:
-        - m_Target: {fileID: 249899404}
-          m_TargetAssemblyTypeName: UIManager, Assembly-CSharp
-          m_MethodName: StartBlackIn
-          m_Mode: 6
+        - m_Target: {fileID: 11400000, guid: 98d0d00a3838e114d876261a04d7c969, type: 2}
+          m_TargetAssemblyTypeName: ServiceCallAction, Assembly-CSharp
+          m_MethodName: Execute
+          m_Mode: 1
           m_Arguments:
             m_ObjectArgument: {fileID: 0}
             m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
@@ -31279,10 +31276,10 @@ MonoBehaviour:
             m_StringArgument: 
             m_BoolArgument: 0
           m_CallState: 2
-        - m_Target: {fileID: 2067428417}
-          m_TargetAssemblyTypeName: SceneUITextManager, Assembly-CSharp
-          m_MethodName: ResetSceneText
-          m_Mode: 5
+        - m_Target: {fileID: 11400000, guid: 31a8fa3639d537646b82028749db9f3a, type: 2}
+          m_TargetAssemblyTypeName: ServiceCallAction, Assembly-CSharp
+          m_MethodName: Execute
+          m_Mode: 1
           m_Arguments:
             m_ObjectArgument: {fileID: 0}
             m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
@@ -31637,14 +31634,14 @@ MonoBehaviour:
             m_StringArgument: 
             m_BoolArgument: 1
           m_CallState: 2
-  - eventName: Start Black OutIn
+  - eventName: Start Black In
     unityEvent:
       m_PersistentCalls:
         m_Calls:
-        - m_Target: {fileID: 249899404}
-          m_TargetAssemblyTypeName: UIManager, Assembly-CSharp
-          m_MethodName: StartBlackIn
-          m_Mode: 6
+        - m_Target: {fileID: 11400000, guid: 98d0d00a3838e114d876261a04d7c969, type: 2}
+          m_TargetAssemblyTypeName: ServiceCallAction, Assembly-CSharp
+          m_MethodName: Execute
+          m_Mode: 1
           m_Arguments:
             m_ObjectArgument: {fileID: 0}
             m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
@@ -31657,10 +31654,10 @@ MonoBehaviour:
     unityEvent:
       m_PersistentCalls:
         m_Calls:
-        - m_Target: {fileID: 249899404}
-          m_TargetAssemblyTypeName: UIManager, Assembly-CSharp
-          m_MethodName: SetAllUI
-          m_Mode: 6
+        - m_Target: {fileID: 11400000, guid: fe0df7ead24acbf439d33859dc1bf771, type: 2}
+          m_TargetAssemblyTypeName: ServiceCallAction, Assembly-CSharp
+          m_MethodName: Execute
+          m_Mode: 1
           m_Arguments:
             m_ObjectArgument: {fileID: 0}
             m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
@@ -31861,17 +31858,6 @@ MonoBehaviour:
   titleText: {fileID: 1307590533}
   descriptionText: {fileID: 1307590532}
   fadeDuration: 0.2
---- !u!114 &2067428417 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 797649647900630600, guid: fcc937e4cda6d8c4d8de70f5c23e9268, type: 3}
-  m_PrefabInstance: {fileID: 249899399}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fdbe5dd65af26754991aa47c527aa042, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1001 &2073113680
 PrefabInstance:
   m_ObjectHideFlags: 0

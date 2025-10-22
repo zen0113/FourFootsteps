@@ -27,8 +27,8 @@ public class ResponsibilityManager : MonoBehaviour
 
     void Start()
     {
-        UIManager.Instance.SetUI(eUIGameObjectName.ResponsibilityGroup, true);
-        UIManager.Instance.SetUI(eUIGameObjectName.ResponsibilityGauge, true);
+        //UIManager.Instance.SetUI(eUIGameObjectName.ResponsibilityGroup, true);
+        //UIManager.Instance.SetUI(eUIGameObjectName.ResponsibilityGauge, true);
 
         responsibilityGaugeGroup = UIManager.Instance.GetUI(eUIGameObjectName.ResponsibilityGroup);
         responsibilitySlider = UIManager.Instance.responsibilitySlider;

@@ -27,6 +27,9 @@ public class DialogueManager : MonoBehaviour
     private bool lastHadCutscene = false;        // 직전 프레임(또는 현재 라인)에서 컷씬이 있었는지
     private bool isCoverTransitioning = false;   // 커버 페이드 중인지(중복 방지)
 
+    // 스킵 전용 상태
+    private bool isSkippingToLast = false;
+
     // 커버 페이드 시간 (요구대로 2초)
     [SerializeField] private float coverFadeDuration = 2f;
 
@@ -300,9 +303,7 @@ public class DialogueManager : MonoBehaviour
         {
             if (string.IsNullOrWhiteSpace(cutSceneID))
             {
-                //currentCutSceneImage.color = new Color(1, 1, 1, 0);
-                // 여기서는 바로 지우지 않음!
-                // 다음 이동 시점(ProceedToNext)에서 커버 트랜지션으로 처리
+                // 비우는 처리는 CoverTransitionThen에서 일괄 정리
                 continue;
             }
             else
@@ -310,15 +311,30 @@ public class DialogueManager : MonoBehaviour
                 switch (cutSceneID)
                 {
                     case "BLACK":
-                        // CutScene Image의 Color 값을 WHITE에서 BLACK으로 서서히 바꿈
-                        StartCoroutine(FadeToBlack(currentCutSceneImage, 2f));
-                        lastHadCutscene = true;
+                        // [변경] 스킵 상황에선 '즉시' 검은 화면으로
+                        if (isSkippingToLast)
+                        {
+                            if (currentCutSceneImage)
+                            {
+                                currentCutSceneImage.sprite = null;
+                                currentCutSceneImage.color = Color.black;
+                            }
+                            isCutsceneFadingToBlack = false; // 혹시 true였다면 해제
+                            lastHadCutscene = true;
+                        }
+                        else
+                        {
+                            StartCoroutine(FadeToBlack(currentCutSceneImage, 2f));
+                            lastHadCutscene = true;
+                        }
                         break;
 
                     default:
                         var cutSceneSprite = Resources.Load<Sprite>($"Art/CutScenes/{cutSceneID}");
                         currentCutSceneImage.sprite = cutSceneSprite;
-                        currentCutSceneImage.color = new Color(1, 1, 1, 1);
+
+                        // [보강] 스킵 시엔 즉시 반영 보장
+                        currentCutSceneImage.color = Color.white;
                         lastHadCutscene = true;
                         break;
                 }
@@ -336,12 +352,13 @@ public class DialogueManager : MonoBehaviour
 
         while (elapsed < duration)
         {
+            // 스킵 도중 강제 중지될 수 있음 → 그 경우 플래그가 false로 이미 내려갈 것.
             targetImage.color = Color.Lerp(startColor, endColor, elapsed / duration);
             elapsed += Time.deltaTime;
             yield return null;
         }
 
-        targetImage.color = endColor; // 보정
+        targetImage.color = endColor;
         isCutsceneFadingToBlack = false;
     }
 
@@ -623,33 +640,83 @@ public class DialogueManager : MonoBehaviour
 
     public void SkipButtonClick()
     {
-        if (isCutsceneFadingToBlack) return;
+        // 스킵은 '막혀있는 상태를 해제'해야 하므로, 진행 중 페이드여도 막지 않아야 함.
+        // if (isCutsceneFadingToBlack) return;  // <-- 이 가드는 제거.
 
+        // 1) 스킵 모드 진입
+        isSkippingToLast = true;
+
+        // 2) 모든 코루틴 중지 및 플래그 초기화
         StopAllCoroutines();
-
-        // 타자 소리 정지
         SoundPlayer.Instance.UISoundPlay_LOOP(0, false);
+        isTyping = false;
 
-        dialogues[currentDialogueID].SetCurrentLineIndex(dialogues[currentDialogueID].Lines.Count - 2);
-        StartCoroutine(SkipDialogue());
+        // 진행 중이던 페이드 상태 강제 해제
+        isCutsceneFadingToBlack = false;
+        isCoverTransitioning = false;
+
+        // 3) 스킵 텍스트 끄기
+        foreach (GameObject skip in skipText)
+            skip.SetActive(false);
+
+        // 4) 마지막 라인으로 직접 점프 + 표시
+        int lastIndex = dialogues[currentDialogueID].Lines.Count - 1;
+        dialogues[currentDialogueID].SetCurrentLineIndex(lastIndex);
+        DialogueLine lastLine = dialogues[currentDialogueID].Lines[lastIndex];
+
+        // 마지막 라인 즉시 출력(효과 플래그 재설정 포함)
+        DisplayDialogueLine(lastLine);
+
+        // 타이핑 없이 문장 즉시 완성
+        CompleteSentence();
+
+        // 자동 진행/페이드 아웃 등을 여기서 수행 (TypeSentence tail 공용화)
+        StartCoroutine(AfterLineFullyShownRoutine());
+
+        // 5) 스킵 모드 종료
+        isSkippingToLast = false;
     }
 
-    private IEnumerator SkipDialogue()
+
+    private IEnumerator AfterLineFullyShownRoutine()
     {
-        ProceedToNext();
-
-        while (!isTyping) yield return null;
-
-        CompleteSentence();
+        // FAST 되돌림
         if (isFast)
         {
-            typeSpeed *= 1.75f; // 타이핑 속도 되돌려 놓기
+            typeSpeed *= 1.75f;
             isFast = false;
         }
-        if (isAuto) isAuto = false;
 
-        OnDialoguePanelClick();
+        // AUTO / AUTO_DELAYED / FADE_OUT 처리
+        if (isAuto)
+        {
+            // 타이핑이 끝난 뒤 대기 (스킵 경로에선 이미 끝)
+            while (isTyping) yield return null;
+
+            if (isAutoDelayed)
+                yield return new WaitForSeconds(2f);
+
+            if (isFadeOut)
+                yield return StartCoroutine(FadeInOutScriptText(1f, 0f));
+
+            // 플래그 리셋
+            isAuto = false;
+            isAutoDelayed = false;
+            isFadeOut = false;
+
+            // 다음으로 자동 진행
+            OnDialoguePanelClick();
+
+            // 스킵 텍스트 복구(디자인에 따라 유지/제거)
+            foreach (GameObject skip in skipText)
+                skip.SetActive(true);
+
+            // (선택) 말풍선/타입에 따라 컬러 복구
+            if (dialogueType == DialogueType.PLAYER_TALKING || dialogueType == DialogueType.NPC)
+                scriptText[dialogueType.ToInt()].color = Color.black;
+        }
     }
+
 
     // ---------------------------------------------- Script methods ----------------------------------------------
     private void ProceedToNext()
@@ -690,38 +757,6 @@ public class DialogueManager : MonoBehaviour
         // 컷씬 전환 필요 없다면 기존처럼 바로 진행
         ProceedToNextCore(currentDialogueLineIndex, next,
                           willGoToEvent, willGoToChoice, willGoToOtherDialogue, willGoToNextLine);
-
-        //if (EventManager.Instance.events.ContainsKey(next))  // Event인 경우
-        //{
-        //    EndDialogue();
-        //    EventManager.Instance.CallEvent(next);
-        //}
-        //if (dialogues.ContainsKey(next))  // Dialogue인 경우
-        //{
-        //    EndDialogue();
-        //    StartDialogue(next);
-        //}
-        //else if (string.IsNullOrWhiteSpace(next))  // 빈칸인 경우 다음 줄(대사)로 이동
-        //{
-        //    currentDialogueLineIndex++;
-
-        //    if (currentDialogueLineIndex >= dialogues[currentDialogueID].Lines.Count)
-        //    {
-        //        EndDialogue();  // 더 이상 DialogueLine이 존재하지 않으면 대화 종료
-        //        return;
-        //    }
-        //    else if (currentDialogueLineIndex == dialogues[currentDialogueID].Lines.Count - 1)
-        //    {
-        //        foreach (GameObject skip in skipText) skip.SetActive(false); //  다이얼로그의 마지막 대사는 스킵 불가능
-        //    }
-        //    dialogues[currentDialogueID].SetCurrentLineIndex(currentDialogueLineIndex);
-        //    DialogueLine nextDialogueLine = dialogues[currentDialogueID].Lines[currentDialogueLineIndex];
-        //    DisplayDialogueLine(nextDialogueLine);
-        //}
-        //else if (choices.ContainsKey(next)) // Choice인 경우
-        //{
-        //    DisplayChoices(next);
-        //}
     }
 
 
@@ -840,40 +875,8 @@ public class DialogueManager : MonoBehaviour
         SoundPlayer.Instance.UISoundPlay_LOOP(0, false);
 
         isTyping = false;
-        //if (teddyBearIcons.Length > dialogueType.ToInt()) teddyBearIcons[dialogueType.ToInt()].SetActive(true);
 
-        if (isFast)
-        {
-            typeSpeed *= 1.75f; // 타이핑 속도 되돌려 놓기
-            isFast = false;
-        }
-        if (isAuto)
-        {
-            while (isTyping) yield return null;
-            //yield return new WaitForSeconds(0.25f);
-
-            // AUTO 타입에 따라 분기
-            if (isAutoDelayed)
-                yield return new WaitForSeconds(2f);  // 2초 대기 후 넘어감
-
-            if (isFadeOut)
-            {
-                // FadeOut 코루틴이 완료될 때까지 기다림
-                yield return StartCoroutine(FadeInOutScriptText(1f, 0f));
-            }
-
-            isAuto = false;
-            isAutoDelayed = false;
-            isFadeOut = false;
-
-            OnDialoguePanelClick(); // 자동으로 넘어감
-
-            foreach (GameObject skip in skipText) skip.SetActive(true);
-
-            // script text 알파값 원상복구
-            if (dialogueType == DialogueType.PLAYER_TALKING || dialogueType == DialogueType.NPC)
-                scriptText[dialogueType.ToInt()].color = Color.black;
-        }
+        yield return StartCoroutine(AfterLineFullyShownRoutine());
     }
     // 스크립트 Fade In / Out 코루틴
     // start:0, end:1 -> 투명했던 text가 점점 불투명해짐

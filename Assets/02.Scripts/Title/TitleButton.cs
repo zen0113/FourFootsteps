@@ -8,4 +8,10 @@ public class TitleButton : MonoBehaviour
     {
         SceneLoader.Instance.LoadScene(GameManager.Instance.GetNextSceneData().sceneName);
     }
+
+
+    public void TestLoadScene(string testLoadSceneName)
+    {
+        SceneLoader.Instance.LoadScene(testLoadSceneName);
+    }
 }

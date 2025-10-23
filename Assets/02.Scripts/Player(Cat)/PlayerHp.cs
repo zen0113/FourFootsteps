@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement; 
 
 public class PlayerHp : MonoBehaviour
 {
@@ -25,6 +26,10 @@ public class PlayerHp : MonoBehaviour
 
     [Header("Camera Shake Effect")]
     [SerializeField] private CameraShake cameraShake;
+
+    [Header("Game Over Settings")] // 추가
+    [SerializeField] private bool useGameOverScene = false; // false면 스테이지 재시작, true면 GameOver 씬
+    [SerializeField] private float restartDelay = 1.5f; // 재시작 전 대기 시간
 
     private bool isGameOverLoading = false;
 
@@ -176,7 +181,7 @@ public class PlayerHp : MonoBehaviour
     //    //healthText.text = $"x {currentHealth}";
     //}
 
-    private void Die()
+   private void Die()
     {
         isGameOverLoading = true;
 
@@ -188,8 +193,59 @@ public class PlayerHp : MonoBehaviour
         DialogueManager.Instance.EndDialogue();
 
         Debug.Log("플레이어 사망!");
-        // 페이드 인 효과와 함께 게임오버 씬 로드
-        SceneLoader.Instance.LoadScene("GameOver");
+
+        // useGameOverScene이 true면 GameOver 씬으로, false면 현재 스테이지 재시작
+        if (useGameOverScene)
+        {
+            // 페이드 인 효과와 함께 게임오버 씬 로드
+            SceneLoader.Instance.LoadScene("GameOver");
+        }
+        else
+        {
+            // 현재 스테이지를 재시작
+            StartCoroutine(RestartCurrentStage());
+        }
+    }
+
+    // 추가된 메서드: 현재 스테이지 재시작
+    private IEnumerator RestartCurrentStage()
+    {
+        // 플레이어 동작 중지
+        var catMovement = GetComponent<PlayerCatMovement>();
+        var autoRunner = GetComponent<PlayerAutoRunner>();
+        
+        if (catMovement != null) catMovement.enabled = false;
+        if (autoRunner != null) autoRunner.enabled = false;
+        
+        // 물리 처리 중지
+        var rb = GetComponent<Rigidbody2D>();
+        if (rb != null)
+        {
+            rb.velocity = Vector2.zero;
+            rb.isKinematic = true;
+        }
+
+
+        // 지정된 시간만큼 대기
+        yield return new WaitForSeconds(restartDelay);
+
+        // GameManager의 변수들 리셋 (HP를 최대치로)
+        GameManager.Instance.SetVariable("CurrentHP", maxHp);
+        GameManager.Instance.SetVariable("MaxHP", maxHp);
+
+        // 현재 씬을 다시 로드
+        string currentSceneName = SceneManager.GetActiveScene().name;
+        
+        // SceneLoader를 사용하여 페이드 효과와 함께 재로드
+        if (SceneLoader.Instance != null)
+        {
+            SceneLoader.Instance.LoadScene(currentSceneName);
+        }
+        else
+        {
+            // SceneLoader가 없으면 직접 로드
+            SceneManager.LoadScene(currentSceneName);
+        }
     }
 
     // 외부 접근용 프로퍼티

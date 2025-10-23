@@ -125,7 +125,7 @@ public class GeneratorMinigameUI : MonoBehaviour
             Debug.Log("CircularTimer 비활성화 유지");
         }
 
-        UpdateInstructionText("발전기 수리 중...");
+        UpdateInstructionText("잠금장치 푸는 중...");
 
         StartCoroutine(MinigameLoop());
     }
@@ -243,7 +243,7 @@ public class GeneratorMinigameUI : MonoBehaviour
 
         if (isActive)
         {
-            UpdateInstructionText("발전기 수리 중...");
+            UpdateInstructionText("잠금장치 푸는 중...");
         }
     }
 
@@ -400,7 +400,7 @@ public class GeneratorMinigameUI : MonoBehaviour
         if (generatorCompleteSound != null)
         {
             PlaySound(generatorCompleteSound);
-            Debug.Log("[GeneratorMinigameUI] 발전기 수리 완료 효과음 재생");
+            //Debug.Log("[GeneratorMinigameUI] 잠금장치 해제제 효과음 재생");
         }
 
         if (generatorSpriteRenderer != null)
@@ -408,7 +408,7 @@ public class GeneratorMinigameUI : MonoBehaviour
             if (generatorRepairedSprite != null)
             {
                 generatorSpriteRenderer.sprite = generatorRepairedSprite;
-                Debug.Log("[GeneratorMinigameUI] 발전기 스프라이트 변경 완료");
+                //Debug.Log("[GeneratorMinigameUI] 철장장 스프라이트 변경 완료");
             }
             else
             {
@@ -416,7 +416,7 @@ public class GeneratorMinigameUI : MonoBehaviour
             }
 
             generatorSpriteRenderer.sortingOrder = repairedSortingOrder;
-            Debug.Log($"[GeneratorMinigameUI] 발전기 Sorting Order 변경: {originalSortingOrder} → {repairedSortingOrder}");
+           // Debug.Log($"[GeneratorMinigameUI] 발전기 Sorting Order 변경: {originalSortingOrder} → {repairedSortingOrder}");
         }
         else
         {

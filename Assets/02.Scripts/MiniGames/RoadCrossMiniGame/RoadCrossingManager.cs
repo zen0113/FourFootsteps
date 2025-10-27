@@ -143,14 +143,6 @@ public class RoadCrossingManager : MonoBehaviour
         if (vehicleSpawnCoroutine != null) StopCoroutine(vehicleSpawnCoroutine);
         if (crowAttackCoroutine != null) StopCoroutine(crowAttackCoroutine);
 
-        // 플레이어의 달리기와 점프 다시 활성화
-        var catMovement = player.GetComponent<PlayerCatMovement>();
-        if (catMovement != null)
-        {
-            catMovement.SetRunEnabled(true);
-            catMovement.SetJumpEnabled(true);
-            Debug.Log("[RoadCrossing] 달리기와 점프 다시 활성화!");
-        }
 
         Debug.Log("[RoadCrossing] 미니게임 종료!");
     }
@@ -292,6 +284,28 @@ public class RoadCrossingManager : MonoBehaviour
     void OnGameClear()
     {
         Debug.Log("[RoadCrossing] 미니게임 클리어!");
+        
+        // 플레이어 달리기와 점프만 비활성화 (걷기는 가능)
+        var catMovement = player.GetComponent<PlayerCatMovement>();
+        if (catMovement != null)
+        {
+            catMovement.SetRunEnabled(false);           // 달리기 차단
+            catMovement.SetJumpEnabled(false);          // 점프 차단
+            Debug.Log("[RoadCrossing] 달리기와 점프 차단 유지! (걷기는 가능)");
+        }
+        
+        // 씬 UI 텍스트를 "골목길"로 변경
+        SceneUITextManager sceneTextManager = FindObjectOfType<SceneUITextManager>();
+        if (sceneTextManager != null)
+        {
+            sceneTextManager.ResetSceneText("골목길");
+            Debug.Log("[RoadCrossing] 씬 텍스트를 '골목길'로 변경!");
+        }
+        else
+        {
+            Debug.LogWarning("[RoadCrossing] SceneUITextManager를 찾을 수 없습니다!");
+        }
+        
         EndGame();
         
         // 여기에 클리어 후 처리 추가 가능

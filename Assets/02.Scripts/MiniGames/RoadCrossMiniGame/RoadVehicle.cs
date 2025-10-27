@@ -88,11 +88,11 @@ public class RoadVehicle : MonoBehaviour
         {
             int randomIndex = Random.Range(0, vehicleSprites.Length);
             spriteRenderer.sprite = vehicleSprites[randomIndex];
-            Debug.Log($"[RoadVehicle] 차량 스프라이트 선택: {randomIndex + 1}/{vehicleSprites.Length}");
+            //Debug.Log($"[RoadVehicle] 차량 스프라이트 선택: {randomIndex + 1}/{vehicleSprites.Length}");
         }
         else
         {
-            Debug.LogWarning("[RoadVehicle] 차량 스프라이트가 설정되지 않았습니다!");
+            //Debug.LogWarning("[RoadVehicle] 차량 스프라이트가 설정되지 않았습니다!");
         }
         
         // 시작 위치 설정
@@ -175,7 +175,7 @@ public class RoadVehicle : MonoBehaviour
         if (headlights != null)
         {
             headlights.SetActive(true);
-            Debug.Log("[RoadVehicle] 헤드라이트 켜짐!");
+            //Debug.Log("[RoadVehicle] 헤드라이트 켜짐!");
         }
     }
     
@@ -190,7 +190,7 @@ public class RoadVehicle : MonoBehaviour
         if (vehicleCollider != null)
         {
             vehicleCollider.enabled = true;
-            Debug.Log("[RoadVehicle] 충돌 활성화!");
+            //Debug.Log("[RoadVehicle] 충돌 활성화!");
         }
     }
 

@@ -209,7 +209,7 @@ public class RoadCrossingManager : MonoBehaviour
             }
         }
         
-        Debug.Log($"[RoadCrossing] 차량 {vehicleCount}대 생성");
+        //Debug.Log($"[RoadCrossing] 차량 {vehicleCount}대 생성");
     }
 
     /// <summary>

@@ -18281,6 +18281,7 @@ MonoBehaviour:
   jumpPower: 6
   crouchPower: 3
   isJumpingBlocked: 0
+  isRunningBlocked: 0
   dashParticle: {fileID: 119782926}
   dashParticleOffset: {x: -2.4, y: -2.6, z: 0}
   walkEmissionRate: 3
@@ -23631,11 +23632,19 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 368937530081398687, guid: cd2491cf4637fd345bb6cc70c9d9d285, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 368937530081398687, guid: cd2491cf4637fd345bb6cc70c9d9d285, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2572495679632208948, guid: cd2491cf4637fd345bb6cc70c9d9d285, type: 3}
       propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4445890506998115010, guid: cd2491cf4637fd345bb6cc70c9d9d285, type: 3}
+      propertyPath: m_FillAmount
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5643661011394918403, guid: cd2491cf4637fd345bb6cc70c9d9d285, type: 3}

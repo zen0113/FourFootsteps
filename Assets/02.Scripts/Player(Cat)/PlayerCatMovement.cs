@@ -30,6 +30,13 @@ public class PlayerCatMovement : MonoBehaviour
         get => isJumpingBlocked;
         set => isJumpingBlocked = value;
     }
+    // 달리기 불가능 변수 추가
+    [SerializeField] private bool isRunningBlocked = false;
+    public bool IsRunningBlocked
+    {
+        get => isRunningBlocked;
+        set => isRunningBlocked = value;
+    }
 
     // 파티클 시스템 (발자국 효과)
     [Header("파티클 시스템")]
@@ -391,7 +398,7 @@ public class PlayerCatMovement : MonoBehaviour
 
         // 일반 상태 처리 (이동, 점프, 대시)
         isDashing = Input.GetKey(KeyCode.LeftShift) && !(boxInteraction != null && boxInteraction.IsInteracting)
-            && !processingBadEnding;
+            && !processingBadEnding&& !isRunningBlocked;
         bool isJumping = !isOnGround;
 
         if (isDashing && hasHorizontalInput)
@@ -443,7 +450,8 @@ public class PlayerCatMovement : MonoBehaviour
         bool shiftDown = Input.GetKey(KeyCode.LeftShift)
                                  && !isCrouching
                                  && !isClimbing
-                                 && !blocked;
+                                 && !blocked
+                                 && !isRunningBlocked;
 
         // 속도: 입력 기반이 전이 안정적 (물리 미끄러짐 영향 적음)
         float hInput = blocked ? 0f : Mathf.Abs(Input.GetAxisRaw("Horizontal"));
@@ -866,7 +874,7 @@ public class PlayerCatMovement : MonoBehaviour
             // 웅크린 상태일 때
             currentPower = crouchPower;
         }
-        else if (Input.GetKey(KeyCode.LeftShift) && !isCrouching && !isInteractingWithBox&&!processingBadEnding)
+        else if (Input.GetKey(KeyCode.LeftShift) && !isCrouching && !isInteractingWithBox&& !processingBadEnding && !isRunningBlocked)
         {
             // 대시 상태일 때 (웅크리거나 박스 상호작용 중이 아닐 때만)
             currentPower = dashPower;
@@ -1366,5 +1374,23 @@ public class PlayerCatMovement : MonoBehaviour
             animator.SetBool("Crouching", false);
         }
         StopDashParticle();
+    }
+
+    /// <summary>
+    /// 달리기 활성화/비활성화 설정
+    /// </summary>
+    public void SetRunEnabled(bool enabled)
+    {
+        isRunningBlocked = !enabled;
+        Debug.Log($"[PlayerCatMovement] 달리기 {(enabled ? "활성화" : "비활성화")}");
+    }
+
+    /// <summary>
+    /// 점프 활성화/비활성화 설정
+    /// </summary>
+    public void SetJumpEnabled(bool enabled)
+    {
+        isJumpingBlocked = !enabled;
+        Debug.Log($"[PlayerCatMovement] 점프 {(enabled ? "활성화" : "비활성화")}");
     }
 }

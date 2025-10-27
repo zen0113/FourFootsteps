@@ -9861,6 +9861,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 797649647900630600, guid: fcc937e4cda6d8c4d8de70f5c23e9268, type: 3}
+      propertyPath: defaultText
+      value: "\uB3C4\uB85C"
+      objectReference: {fileID: 0}
     - target: {fileID: 2176935556791448408, guid: fcc937e4cda6d8c4d8de70f5c23e9268, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -29534,6 +29538,7 @@ MonoBehaviour:
   jumpPower: 6
   crouchPower: 3
   isJumpingBlocked: 0
+  isRunningBlocked: 0
   dashParticle: {fileID: 255540007}
   dashParticleOffset: {x: -2.4, y: -2.6, z: 0}
   walkEmissionRate: 3

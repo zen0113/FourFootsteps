@@ -109,6 +109,11 @@ public class RoadCrossingManager : MonoBehaviour
         if (catMovement != null)
         {
             catMovement.SetMiniGameInputBlocked(false);
+            
+            // 달리기와 점프 비활성화
+            catMovement.SetRunEnabled(false);
+            catMovement.SetJumpEnabled(false);
+            Debug.Log("[RoadCrossing] 달리기와 점프 비활성화!");
         }
 
         // 차량 스폰 시작
@@ -137,6 +142,15 @@ public class RoadCrossingManager : MonoBehaviour
         // 모든 코루틴 정지
         if (vehicleSpawnCoroutine != null) StopCoroutine(vehicleSpawnCoroutine);
         if (crowAttackCoroutine != null) StopCoroutine(crowAttackCoroutine);
+
+        // 플레이어의 달리기와 점프 다시 활성화
+        var catMovement = player.GetComponent<PlayerCatMovement>();
+        if (catMovement != null)
+        {
+            catMovement.SetRunEnabled(true);
+            catMovement.SetJumpEnabled(true);
+            Debug.Log("[RoadCrossing] 달리기와 점프 다시 활성화!");
+        }
 
         Debug.Log("[RoadCrossing] 미니게임 종료!");
     }

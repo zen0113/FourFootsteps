@@ -43,12 +43,26 @@ public class RoadVehicle : MonoBehaviour
     [Tooltip("충돌을 활성화할 Y 위치 (이 지점부터 충돌 가능)")]
     public float collisionEnableY = 5f;
     
+    [Header("Headlight Settings")]
     [Tooltip("헤드라이트 오브젝트 (자식 오브젝트)")]
     public GameObject headlights;
     
-    [Header("Collision Settings")]
+    [Tooltip("헤드라이트를 활성화할 Y 위치")]
+    public float headlightEnableY = 7f;
+    
+    [Header("Damage Settings")]
     [Tooltip("충돌 데미지")]
     public int damage = 1;
+    
+    [Tooltip("충돌 후 투명도 (0~1, 완전 투명=0)")]
+    [Range(0f, 1f)]
+    public float ghostAlpha = 0.15f;
+    
+    [Tooltip("고스트 모드로 전환되는 속도")]
+    public float ghostTransitionSpeed = 2f;
+    
+    [Tooltip("충돌 후 Sorting Order")]
+    public int ghostSortingOrder = 3;
 
     // 내부 변수
     private float laneX; // 고정된 차선 X 좌표
@@ -56,10 +70,18 @@ public class RoadVehicle : MonoBehaviour
     private bool hasHitPlayer = false;
     private Collider2D vehicleCollider;
     private bool collisionEnabled = false;
+    private bool headlightEnabled = false;
+    private float targetAlpha; // 목표 투명도
+    private bool isGhostMode = false; // 고스트 모드 (충돌 후)
+    private int originalSortingOrder; // 원래 Sorting Order 저장
 
     void Start()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
+        vehicleCollider = GetComponent<Collider2D>();
+        
+        // 원래 Sorting Order 저장
+        originalSortingOrder = spriteRenderer.sortingOrder;
         
         // 차량 스프라이트 랜덤 선택
         if (vehicleSprites != null && vehicleSprites.Length > 0)
@@ -84,6 +106,19 @@ public class RoadVehicle : MonoBehaviour
         Color initialColor = spriteRenderer.color;
         initialColor.a = minAlpha;
         spriteRenderer.color = initialColor;
+        targetAlpha = minAlpha;
+        
+        // 헤드라이트 초기 비활성화
+        if (headlights != null)
+        {
+            headlights.SetActive(false);
+        }
+        
+        // 콜라이더 초기 비활성화
+        if (vehicleCollider != null)
+        {
+            vehicleCollider.enabled = false;
+        }
     }
 
     void Update()
@@ -95,6 +130,18 @@ public class RoadVehicle : MonoBehaviour
         Vector3 pos = transform.position;
         pos.x = laneX;
         transform.position = pos;
+        
+        // 헤드라이트 활성화 체크
+        if (!headlightEnabled && transform.position.y <= headlightEnableY)
+        {
+            EnableHeadlight();
+        }
+        
+        // 충돌 활성화 체크
+        if (!collisionEnabled && transform.position.y <= collisionEnableY)
+        {
+            EnableCollision();
+        }
         
         // 원근 효과 적용
         ApplyPerspectiveEffect();
@@ -116,6 +163,36 @@ public class RoadVehicle : MonoBehaviour
         pos.x = laneX;
         transform.position = pos;
     }
+    
+    /// <summary>
+    /// 헤드라이트 활성화
+    /// </summary>
+    void EnableHeadlight()
+    {
+        headlightEnabled = true;
+        
+        // 헤드라이트 활성화
+        if (headlights != null)
+        {
+            headlights.SetActive(true);
+            Debug.Log("[RoadVehicle] 헤드라이트 켜짐!");
+        }
+    }
+    
+    /// <summary>
+    /// 충돌 활성화
+    /// </summary>
+    void EnableCollision()
+    {
+        collisionEnabled = true;
+        
+        // 콜라이더 활성화
+        if (vehicleCollider != null)
+        {
+            vehicleCollider.enabled = true;
+            Debug.Log("[RoadVehicle] 충돌 활성화!");
+        }
+    }
 
     /// <summary>
     /// 원근 효과 적용 (크기와 투명도 조절)
@@ -129,23 +206,55 @@ public class RoadVehicle : MonoBehaviour
         float scale = Mathf.Lerp(minScale, maxScale, progress);
         transform.localScale = Vector3.one * scale;
         
-        // 투명도 조절 (fullVisibilityY 이후로는 완전히 불투명)
-        float alpha;
-        if (transform.position.y <= fullVisibilityY)
+        // 투명도 조절
+        if (!isGhostMode)
         {
-            // fullVisibilityY 이하에서는 완전히 불투명 (알파값 1)
-            alpha = maxAlpha;
+            // 일반 모드: 원근감에 따른 투명도
+            if (transform.position.y <= fullVisibilityY)
+            {
+                targetAlpha = maxAlpha;
+            }
+            else
+            {
+                float alphaProgress = Mathf.InverseLerp(startY, fullVisibilityY, transform.position.y);
+                targetAlpha = Mathf.Lerp(minAlpha, maxAlpha, alphaProgress);
+            }
         }
         else
         {
-            // fullVisibilityY 위에서는 startY ~ fullVisibilityY 구간에서 투명도 변화
-            float alphaProgress = Mathf.InverseLerp(startY, fullVisibilityY, transform.position.y);
-            alpha = Mathf.Lerp(minAlpha, maxAlpha, alphaProgress);
+            // 고스트 모드: 고정된 반투명 상태
+            targetAlpha = ghostAlpha;
         }
         
+        // 부드럽게 투명도 전환
         Color color = spriteRenderer.color;
-        color.a = alpha;
+        color.a = Mathf.Lerp(color.a, targetAlpha, Time.deltaTime * ghostTransitionSpeed);
         spriteRenderer.color = color;
+    }
+    
+    /// <summary>
+    /// 고스트 모드 활성화 (충돌 후)
+    /// </summary>
+    void EnableGhostMode()
+    {
+        isGhostMode = true;
+        
+        // Sorting Order 변경 (플레이어 뒤로)
+        spriteRenderer.sortingOrder = ghostSortingOrder;
+        
+        // 콜라이더 비활성화 (더 이상 충돌 안 함)
+        if (vehicleCollider != null)
+        {
+            vehicleCollider.enabled = false;
+        }
+        
+        // 헤드라이트 비활성화 (선택사항)
+        if (headlights != null)
+        {
+            headlights.SetActive(false);
+        }
+        
+        Debug.Log($"[RoadVehicle] 고스트 모드 활성화! 플레이어를 통과합니다. (Order: {ghostSortingOrder})");
     }
 
     /// <summary>
@@ -168,8 +277,8 @@ public class RoadVehicle : MonoBehaviour
                 Debug.Log("[RoadVehicle] 플레이어와 충돌! 데미지 적용");
             }
 
-            // 차량 제거
-            Destroy(gameObject);
+            // 차량을 고스트 모드로 전환 (사라지지 않고 반투명하게)
+            EnableGhostMode();
         }
     }
 
@@ -182,5 +291,15 @@ public class RoadVehicle : MonoBehaviour
         Vector3 startPos = new Vector3(transform.position.x, startY, 0);
         Vector3 endPos = new Vector3(transform.position.x, endY, 0);
         Gizmos.DrawLine(startPos, endPos);
+        
+        // 헤드라이트 활성화 지점 표시
+        Gizmos.color = Color.cyan;
+        Vector3 headlightPos = new Vector3(transform.position.x, headlightEnableY, 0);
+        Gizmos.DrawWireSphere(headlightPos, 0.5f);
+        
+        // 충돌 활성화 지점 표시
+        Gizmos.color = Color.yellow;
+        Vector3 collisionPos = new Vector3(transform.position.x, collisionEnableY, 0);
+        Gizmos.DrawWireSphere(collisionPos, 0.5f);
     }
 }

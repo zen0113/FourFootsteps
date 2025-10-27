@@ -188,7 +188,9 @@ public class RoadCrow : MonoBehaviour
             // 낙하 - 애니메이션 계속 재생
             // 목표 지점으로 직선 낙하
             Vector2 direction = (attackTargetPosition - (Vector2)transform.position).normalized;
-            rb.velocity = direction * fallSpeed;
+            
+            // Transform으로 직접 이동 (Kinematic이므로 velocity 대신)
+            transform.position += (Vector3)(direction * fallSpeed * Time.deltaTime);
             
             // 목표 지점에 가까워졌는지 체크 (충돌이 안 될 경우 대비)
             float distanceToTarget = Vector2.Distance(transform.position, attackTargetPosition);
@@ -391,11 +393,12 @@ public class RoadCrow : MonoBehaviour
         if (warningCircleObj != null) Destroy(warningCircleObj);
         if (warningIconObj != null) Destroy(warningIconObj);
         
-        // 물리 활성화 - Kinematic을 false로!
-        rb.isKinematic = false;
+        // Kinematic 유지 (애니메이션을 위해)
+        rb.isKinematic = true;
         rb.gravityScale = 0;
+        rb.velocity = Vector2.zero;
         
-        Debug.Log($"[RoadCrow] 낙하 시작! 현재: {transform.position}, 목표: {attackTargetPosition}, Kinematic: {rb.isKinematic}");
+        Debug.Log($"[RoadCrow] 낙하 시작! 현재: {transform.position}, 목표: {attackTargetPosition}");
     }
 
     /// <summary>

@@ -82,69 +82,69 @@ public class HeartbeatMinigame : MonoBehaviour
         // 똘이 (활발함): 가끔 더 강하게 뜀
         catWaveformParameters["Ttoli"] = new WaveformParameters
         {
-            minAmplitude = 55f,
-            maxAmplitude = 75f,
-            minDip = 25f,
-            maxDip = 35f,
-            minInterval = 0.8f,
-            maxInterval = 1.1f,
-            peakWidth = 0.1f,
-            specialBeatChance = 0.2f, // 20% 확률로 특별한 박동
-            minSpecialAmplitude = 90f,
-            maxSpecialAmplitude = 100f, // 더 강하게
-            minSpecialDip = 40f,
-            maxSpecialDip = 50f
+            minAmplitude = 60f,  
+            maxAmplitude = 85f, 
+            minDip = 50f,  
+            maxDip = 80f, 
+            minInterval = 0.5f,
+            maxInterval = 1.3f,
+            peakWidth = 0.4f,
+            specialBeatChance = 0.2f,
+            minSpecialAmplitude = 100f, 
+            maxSpecialAmplitude = 110f, 
+            minSpecialDip = 35f,  
+            maxSpecialDip = 45f   
         };
 
         // 레오 (강렬함): 더 자주, 훨씬 강렬하게 뜀
         catWaveformParameters["Leo"] = new WaveformParameters
         {
-            minAmplitude = 80f,
-            maxAmplitude = 100f,
-            minDip = 50f,
-            maxDip = 60f,
-            minInterval = 0.6f,
-            maxInterval = 0.9f,
-            peakWidth = 0.08f,
-            specialBeatChance = 0.3f, // 30% 확률
-            minSpecialAmplitude = 110f,
-            maxSpecialAmplitude = 120f, // 훨씬 강하게
-            minSpecialDip = 60f,
-            maxSpecialDip = 70f
+            minAmplitude = 85f,  
+            maxAmplitude = 110f, 
+            minDip = 70f, 
+            maxDip = 80f, 
+            minInterval = 0.4f,
+            maxInterval = 1.0f,
+            peakWidth = 0.2f,
+            specialBeatChance = 0.3f,
+            minSpecialAmplitude = 125f, 
+            maxSpecialAmplitude = 140f, 
+            minSpecialDip = 55f, 
+            maxSpecialDip = 65f   
         };
 
-        // 복실이 (그리움): 가끔 박동을 건너뛰는 듯 약하게 뜀
+        // 복실이 (그리움): 가끔 박동을 건너뛰는 듯 약하게 뜀 (빈도 증가)
         catWaveformParameters["Bogsil"] = new WaveformParameters
         {
-            minAmplitude = 35f,
-            maxAmplitude = 50f,
-            minDip = 10f,
-            maxDip = 15f,
-            minInterval = 1.4f,
-            maxInterval = 1.8f,
-            peakWidth = 0.2f,
-            specialBeatChance = 0.25f, // 25% 확률
-            minSpecialAmplitude = 15f,
-            maxSpecialAmplitude = 25f, // 더 약하게
-            minSpecialDip = 5f,
-            maxSpecialDip = 10f
+            minAmplitude = 65f,
+            maxAmplitude = 85f,
+            minDip = 20f,
+            maxDip = 40f,
+            minInterval = 0.8f,
+            maxInterval = 1.6f,
+            peakWidth = 0.8f,
+            specialBeatChance = 0.25f,
+            minSpecialAmplitude = 70f, 
+            maxSpecialAmplitude = 90f, 
+            minSpecialDip = 2f,
+            maxSpecialDip = 8f
         };
 
-        // 미야 (절망): 거의 멈출 것처럼 매우 불안정하게 뜀
+        // 미야 (절망): 거의 멈출 것처럼 매우 불안정하게 뜀 (빈도 증가)
         catWaveformParameters["Miya"] = new WaveformParameters
         {
-            minAmplitude = 10f,
-            maxAmplitude = 20f,
-            minDip = 2f,
-            maxDip = 8f,
-            minInterval = 1.8f,
-            maxInterval = 2.5f,
+            minAmplitude = 50f, 
+            maxAmplitude = 70f, 
+            minDip = 5f,
+            maxDip = 30f,
+            minInterval = 0.7f,
+            maxInterval = 2.2f,
             peakWidth = 0.15f,
-            specialBeatChance = 0.4f, // 40% 확률로 불안정
-            minSpecialAmplitude = 25f,
-            maxSpecialAmplitude = 35f, // 갑자기 조금 강해지거나
-            minSpecialDip = 0f,
-            maxSpecialDip = 5f // 거의 평탄하게 지나감
+            specialBeatChance = 0.4f,
+            minSpecialAmplitude = 80f, 
+            maxSpecialAmplitude = 100f,
+            minSpecialDip = 10f,
+            maxSpecialDip = 40f
         };
     }
 
@@ -247,7 +247,7 @@ public class HeartbeatMinigame : MonoBehaviour
         targetLineImage.gameObject.SetActive(true);
         playerLineImage.gameObject.SetActive(false);
 
-        if (feedbackText != null) { feedbackText.text = "패턴을 기억하세요!"; feedbackText.gameObject.SetActive(true); }
+        if (feedbackText != null) { feedbackText.text = "마음의 소리를 기억하세요!"; feedbackText.gameObject.SetActive(true); }
 
         yield return new WaitForSeconds(showPatternTime);
 
@@ -258,7 +258,7 @@ public class HeartbeatMinigame : MonoBehaviour
         playerLineImage.sprite = CreateSpriteFromTexture(playerTexture);
         playerLineImage.gameObject.SetActive(true);
 
-        if (feedbackText != null) { feedbackText.text = "가이드라인을 따라 그리세요!"; }
+        if (feedbackText != null) { feedbackText.text = "가이드라인을 따라 그리세요! 정확도 80% 이상이어야지 성공합니다."; }
 
         isDrawingAllowed = true;
     }

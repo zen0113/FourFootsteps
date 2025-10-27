@@ -8088,6 +8088,8 @@ MonoBehaviour:
   invincibilityDuration: 1.5
   isInvincible: 0
   cameraShake: {fileID: 0}
+  useGameOverScene: 0
+  restartDelay: 1.5
 --- !u!114 &507170960
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8105,6 +8107,7 @@ MonoBehaviour:
   jumpPower: 6
   crouchPower: 3
   isJumpingBlocked: 0
+  isRunningBlocked: 0
   dashParticle: {fileID: 1697761239}
   dashParticleOffset: {x: -2.4, y: -2.6, z: 0}
   walkEmissionRate: 3
@@ -14423,20 +14426,52 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 507170960}
     - target: {fileID: 3581971394635853906, guid: b2a7b04b0ea72be40a356d8756e18ce2, type: 3}
+      propertyPath: stageSprites.Array.size
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 3581971394635853906, guid: b2a7b04b0ea72be40a356d8756e18ce2, type: 3}
+      propertyPath: stageMilestones.Array.size
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 3581971394635853906, guid: b2a7b04b0ea72be40a356d8756e18ce2, type: 3}
+      propertyPath: stageSprites.Array.data[0]
+      value: 
+      objectReference: {fileID: 21300000, guid: 3f89a41c86a77ea41b6f47701d18dac9, type: 3}
+    - target: {fileID: 3581971394635853906, guid: b2a7b04b0ea72be40a356d8756e18ce2, type: 3}
+      propertyPath: stageSprites.Array.data[1]
+      value: 
+      objectReference: {fileID: 21300000, guid: 0ec3a9d8a8f48394493fbed9bfc6f52b, type: 3}
+    - target: {fileID: 3581971394635853906, guid: b2a7b04b0ea72be40a356d8756e18ce2, type: 3}
+      propertyPath: stageSprites.Array.data[2]
+      value: 
+      objectReference: {fileID: 21300000, guid: 98ffd9a98c6591543a35fc938f8291ab, type: 3}
+    - target: {fileID: 3581971394635853906, guid: b2a7b04b0ea72be40a356d8756e18ce2, type: 3}
+      propertyPath: stageSprites.Array.data[3]
+      value: 
+      objectReference: {fileID: 21300000, guid: dd055d504bb55464eb370e264d226d77, type: 3}
+    - target: {fileID: 3581971394635853906, guid: b2a7b04b0ea72be40a356d8756e18ce2, type: 3}
+      propertyPath: stageSprites.Array.data[4]
+      value: 
+      objectReference: {fileID: 21300000, guid: 341f587581419f64b81763a7e4c7e1f3, type: 3}
+    - target: {fileID: 3581971394635853906, guid: b2a7b04b0ea72be40a356d8756e18ce2, type: 3}
       propertyPath: stageMilestones.Array.data[0]
-      value: 20
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3581971394635853906, guid: b2a7b04b0ea72be40a356d8756e18ce2, type: 3}
       propertyPath: stageMilestones.Array.data[1]
-      value: 30
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 3581971394635853906, guid: b2a7b04b0ea72be40a356d8756e18ce2, type: 3}
       propertyPath: stageMilestones.Array.data[2]
-      value: 40
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 3581971394635853906, guid: b2a7b04b0ea72be40a356d8756e18ce2, type: 3}
       propertyPath: stageMilestones.Array.data[3]
-      value: 50
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 3581971394635853906, guid: b2a7b04b0ea72be40a356d8756e18ce2, type: 3}
+      propertyPath: stageMilestones.Array.data[4]
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 4984486257384893302, guid: b2a7b04b0ea72be40a356d8756e18ce2, type: 3}
       propertyPath: m_fontAsset

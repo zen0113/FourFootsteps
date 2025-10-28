@@ -91,6 +91,11 @@ public class PlayerHumanMovement : MonoBehaviour
         }
     }
 
+    public void SetPlayerHoldingCat(bool isActive)
+    {
+        animator.SetBool("With_Cat", isActive);
+    }
+
     void UpdateAudioState(float horizontalInput)
     {
         if (isDashing)

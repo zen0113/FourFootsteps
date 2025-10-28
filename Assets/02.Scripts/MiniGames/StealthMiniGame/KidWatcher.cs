@@ -58,9 +58,9 @@ public class KidWatcher : MonoBehaviour
 
         float maxDistance =Vector2.Distance(goal_Transform.position, player.position);
         _settings.maxDistance = maxDistance;
-        Debug.Log(maxDistance);
+        Debug.Log($"은신 maxDistance: {maxDistance}");
 
-        if(StealthCanvas==null) StealthCanvas=GetComponent<Canvas>();
+        if (StealthCanvas==null) StealthCanvas=GetComponent<Canvas>();
         StealthCanvas.renderMode = UnityEngine.RenderMode.WorldSpace;
 
         if (mainCamera == null) mainCamera = Camera.main;

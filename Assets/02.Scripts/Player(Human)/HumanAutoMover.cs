@@ -48,12 +48,17 @@ public class HumanAutoMover : MonoBehaviour
         animator.SetBool("Holding_Carrier", isHoldingCarrier);
     }
 
-    public void StartMoving(Transform destination, bool isHoldingCarrier = false)
+    public void StartMoving(Transform destination, bool isHoldingCarrier = false, bool isWithCat = false)
     {
         targetPoint = destination;
         isMoving = true;
-        animator?.SetBool("Moving", true); // 이동 시작 시 애니메이션 설정
-        animator?.SetBool("Holding_Carrier", isHoldingCarrier);
+        if(isWithCat)
+            animator?.SetBool("With_Cat", true);
+        else
+        {
+            animator?.SetBool("Moving", true); // 이동 시작 시 애니메이션 설정
+            animator?.SetBool("Holding_Carrier", isHoldingCarrier);
+        }
         lastWalkSoundTime = Time.time; // 이동 시작 시 바로 소리 재생을 위해 초기화
         PlayWalkSound(); // 이동 시작 시 걷는 소리 바로 재생
         humanMovement?.BlockMiniGameInput(true);
@@ -145,7 +150,7 @@ public class HumanAutoMover : MonoBehaviour
         _runtimeTarget.position = targetPos;
 
         // 이동 시작
-        StartMoving(_runtimeTarget);
+        StartMoving(_runtimeTarget, false, true);
     }
 
     private void Update()

@@ -91,6 +91,11 @@ public class PlayerHumanMovement : MonoBehaviour
         }
     }
 
+    public void SetPlayerHoldingCat(bool isActive)
+    {
+        animator.SetBool("With_Cat", isActive);
+    }
+
     void UpdateAudioState(float horizontalInput)
     {
         if (isDashing)
@@ -165,6 +170,11 @@ public class PlayerHumanMovement : MonoBehaviour
         {
             isCrouching = false;
         }
+    }
+
+    public void SetCrouch(bool isActice)
+    {
+        isCrouching = isActice;
     }
 
     public void BlockMiniGameInput(bool isBlocked)

@@ -114,6 +114,8 @@ public class ChaserFollower : MonoBehaviour
 
     void SwitchToReturnHome() { state = State.ReturnHome; }
 
+    public bool chaserCatchPlayer = false;
+
     void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -133,6 +135,10 @@ public class ChaserFollower : MonoBehaviour
         yLock = transform.position.y;                // y 고정
         tNoise = Random.value * 10f;
         isStartChasing = false;
+    }
+    private void Start()
+    {
+        chaserCatchPlayer = false;
     }
 
     private void OnEnable()
@@ -299,9 +305,11 @@ public class ChaserFollower : MonoBehaviour
     private void EnterCatchMode()
     {
         OnCatchMode?.Invoke();
+        if (isThrower) GetComponent<ChaserThrower>().enabled = false;
         chasingToCatch = true;
 
-        if (col != null) col.isTrigger = false; // 실제 충돌로 전환
+        //if (col != null) col.isTrigger = false; // 실제 충돌로 전환
+        if (col != null) col.isTrigger = true;
         Vector2 dir = (playerRunner.transform.position - transform.position).normalized;
         rb.velocity = dir * catchSpeed;
     }
@@ -318,10 +326,15 @@ public class ChaserFollower : MonoBehaviour
     private void ChaseGame_GameOver()
     {
         Debug.Log("추격 게임 : 추격자한테 잡힘[게임오버]");
-        sfxController.StopLoop(1f);
-        StealthSFX.Instance.StopEnterSFX();
-        CatStealthController.Instance.Chase_GameOver();
-        EventManager.Instance.CallEvent(gameOverEventID);
+        chaserCatchPlayer = true;
+
+        if (isThrower)
+        {
+            sfxController.StopLoop(1f);
+            StealthSFX.Instance.StopEnterSFX();
+            CatStealthController.Instance.Chase_GameOver();
+            EventManager.Instance.CallEvent(gameOverEventID);
+        }
 
         this.enabled = false;
     }

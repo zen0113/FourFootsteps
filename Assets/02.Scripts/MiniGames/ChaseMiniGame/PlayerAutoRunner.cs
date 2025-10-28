@@ -55,7 +55,7 @@ public class PlayerAutoRunner : MonoBehaviour
 
     // === HideObject 도착/정지 상태 ===
     [Header("HideObject Stop")]
-    [SerializeField] private string hideTag = "HideObject";
+    [SerializeField] private string objName = "Chase_Goal Area";
     [SerializeField] private float xDampOnStop = 40f; // 정지 시 X속도 빠르게 0으로
 
     bool wasAtHide = false;
@@ -240,7 +240,8 @@ public class PlayerAutoRunner : MonoBehaviour
             // Bird에 '진입'하는 순간: 무적 ON (한 번만)
             if (prevPhase != ChaserFollower.Phase.Bird && curr == ChaserFollower.Phase.Bird)
             {
-                playerHp.isInvincible = true;
+                playerHp.SetChasePhaseInvincible(true);
+                //playerHp.isInvincible = true;
 
                 SyncAnimatorParams();
                 prevPhase = curr;
@@ -251,8 +252,9 @@ public class PlayerAutoRunner : MonoBehaviour
             if (!turnedOffOnce && prevPhase == ChaserFollower.Phase.Bird && curr == ChaserFollower.Phase.Chasing)
             {
                 Debug.Log("Bird 대사 끝. 무적 해제");
-                if (playerHp.isInvincible)
-                    playerHp.isInvincible = false;
+                //if (playerHp.isInvincible)
+                //    playerHp.isInvincible = false;
+                playerHp.SetChasePhaseInvincible(false);
                 turnedOffOnce = true;
             }
 
@@ -359,6 +361,7 @@ public class PlayerAutoRunner : MonoBehaviour
     IEnumerator FinishChase()
     {
         sTriggeredOnce = true;
+        chaseFinished = true;
 
         if (!playerHp.isInvincible)
             playerHp.isInvincible = true;
@@ -369,12 +372,10 @@ public class PlayerAutoRunner : MonoBehaviour
         if (SFX) SFX.PlayEnterSFX(5f);
         if (catStealth) catStealth.Chase_StartEnter(lastHide);
 
-        chaseFinished = true;
-
         yield return new WaitForSeconds(3f);
 
         Chase_Goal_Block.SetActive(true);
-        this.enabled = false;
+        //this.enabled = false;
     }
 
 
@@ -439,7 +440,7 @@ public class PlayerAutoRunner : MonoBehaviour
     void OnTriggerEnter2D(Collider2D other)
     {
         if (!kidsFollower.isStartChasing) return;
-        if (!other || !other.CompareTag(hideTag)) return;
+        if (!other || other.name!=objName) return;
 
         lastHide = other.GetComponent<HideObject>();
 

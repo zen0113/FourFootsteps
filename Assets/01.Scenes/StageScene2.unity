@@ -33530,6 +33530,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 2005794168960133892, guid: fdb7939a7ed342f499dd72947b6b21c4, type: 3}
+      propertyPath: m_SortingOrder
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 4810767868315011043, guid: fdb7939a7ed342f499dd72947b6b21c4, type: 3}
       propertyPath: m_LocalPosition.y
       value: -4.95
@@ -33542,6 +33546,10 @@ PrefabInstance:
       propertyPath: chainFallPoint
       value: 
       objectReference: {fileID: 1114964496}
+    - target: {fileID: 8497814714462885509, guid: fdb7939a7ed342f499dd72947b6b21c4, type: 3}
+      propertyPath: chainBreakSound
+      value: 
+      objectReference: {fileID: 8300000, guid: 85f2c7d03daa1d64d9d82aa7c4d10bbc, type: 3}
     - target: {fileID: 8854939053311323476, guid: fdb7939a7ed342f499dd72947b6b21c4, type: 3}
       propertyPath: m_LocalScale.x
       value: 0.6
@@ -41676,6 +41684,7 @@ MonoBehaviour:
   jumpPower: 6
   crouchPower: 3
   isJumpingBlocked: 0
+  isRunningBlocked: 0
   dashParticle: {fileID: 2113533547}
   dashParticleOffset: {x: -2.4, y: -2.6, z: 0}
   walkEmissionRate: 3

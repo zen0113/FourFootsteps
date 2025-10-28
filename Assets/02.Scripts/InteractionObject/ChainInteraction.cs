@@ -9,6 +9,9 @@ public class ChainInteraction : MonoBehaviour
     [SerializeField] private GameObject chainVisual;             // 사슬 시각적 오브젝트 (회색 박스)
     [SerializeField] private AudioClip chainBreakSound;         // 사슬 끊어지는 소리
     
+    [Header("사운드 설정")]
+    [SerializeField] private float soundDuration = 4f;          // 사운드 재생 시간 (기본값 4초)
+    
     [Header("이펙트 설정")]
     [SerializeField] private ParticleSystem breakEffect;        // 사슬 끊어지는 파티클 (선택사항)
     [SerializeField] private float breakAnimationTime = 0.5f;   // 끊어지는 애니메이션 시간
@@ -23,6 +26,7 @@ public class ChainInteraction : MonoBehaviour
     private bool isChainBroken = false;                          // 사슬이 끊어졌는지 여부
     private bool playerInRange = false;                          // 플레이어가 범위 내에 있는지
     private AudioSource audioSource;                            // 오디오 소스
+    private Coroutine soundCoroutine;                           // 사운드 코루틴 참조
     
     // Sprite Glow 효과
     private SpriteGlow.SpriteGlowEffect spriteGlowEffect;       // Sprite Glow 컴포넌트
@@ -126,10 +130,10 @@ public class ChainInteraction : MonoBehaviour
         Debug.Log("사슬을 끊었습니다!");
         isChainBroken = true;
         
-        // 사운드 재생
+        // 사운드 재생 (4초만 재생되도록)
         if (chainBreakSound != null && audioSource != null)
         {
-            audioSource.PlayOneShot(chainBreakSound);
+            soundCoroutine = StartCoroutine(PlaySoundWithDuration(chainBreakSound, soundDuration));
         }
         
         // 파티클 효과 재생
@@ -153,6 +157,29 @@ public class ChainInteraction : MonoBehaviour
             spriteGlowEffect.enabled = false;
             Debug.Log("사슬이 끊어져서 Sprite Glow 영구 비활성화");
         }
+    }
+    
+    // 사운드를 특정 시간 동안만 재생하는 코루틴
+    private IEnumerator PlaySoundWithDuration(AudioClip clip, float duration)
+    {
+        // AudioClip 설정 및 재생 시작
+        audioSource.clip = clip;
+        audioSource.Play();
+        
+        Debug.Log($"체인 브레이크 사운드 재생 시작 (최대 {duration}초)");
+        
+        // 지정된 시간만큼 대기
+        yield return new WaitForSeconds(duration);
+        
+        // 사운드가 아직 재생 중이면 중지
+        if (audioSource.isPlaying)
+        {
+            audioSource.Stop();
+            Debug.Log($"체인 브레이크 사운드 중지 ({duration}초 경과)");
+        }
+        
+        // AudioClip 클리어 (선택사항)
+        audioSource.clip = null;
     }
     
     private IEnumerator ChainBreakAnimation()
@@ -326,6 +353,22 @@ public class ChainInteraction : MonoBehaviour
         {
             playerInRange = false;
             ShowInteractionUI(false);
+        }
+    }
+    
+    // 오브젝트가 파괴될 때 사운드 중지
+    private void OnDestroy()
+    {
+        // 코루틴이 실행 중이면 중지
+        if (soundCoroutine != null)
+        {
+            StopCoroutine(soundCoroutine);
+        }
+        
+        // 사운드가 재생 중이면 중지
+        if (audioSource != null && audioSource.isPlaying)
+        {
+            audioSource.Stop();
         }
     }
     

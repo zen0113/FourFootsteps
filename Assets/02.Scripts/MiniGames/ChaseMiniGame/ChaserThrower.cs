@@ -108,7 +108,7 @@ public class ChaserThrower : MonoBehaviour
 
     private IEnumerator Loop()
     {
-        while (running)
+        while (running&& !chaser.chaserCatchPlayer)
         {
             // 새 페이즈에서는 던지지 않음
             if (chaser.phase == ChaserFollower.Phase.Bird|| !pool.IsPlaying)

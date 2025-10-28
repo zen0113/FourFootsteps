@@ -33,6 +33,9 @@ public class PlayerHp : MonoBehaviour
 
     private bool isGameOverLoading = false;
 
+    // Stage3의 Chase 페이즈의 무적용 변수
+    private bool isChasePhaseInvincible = false;
+
     private void Awake()
     {
         // GameManager가 Title에서 부터 있게 만들면 밑의 두줄로 되게 하기
@@ -53,6 +56,8 @@ public class PlayerHp : MonoBehaviour
         currentHp = maxHp;
         CreateHearts();
         cameraShake.enabled = false;
+
+        isChasePhaseInvincible = false;
     }
 
     // create 5 hearts on screen on Player UI Canvas 
@@ -129,9 +134,16 @@ public class PlayerHp : MonoBehaviour
         StartCoroutine(UIManager.Instance.WarningCoroutine());
     }
 
+    
+    public void SetChasePhaseInvincible(bool isActive)
+    {
+        isChasePhaseInvincible = isActive;
+    }
+
+
     public void TakeDamage(int damage)
     {
-        if (isInvincible || isGameOverLoading) return; // 무적 상태면 데미지 무시
+        if (isInvincible || isGameOverLoading|| isChasePhaseInvincible) return; // 무적 상태면 데미지 무시
 
         currentHp -= damage;
         currentHp = Mathf.Clamp(currentHp, 0, maxHp);

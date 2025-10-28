@@ -377,8 +377,9 @@ public class ResultManager : MonoBehaviour
                     Debug.LogError("Failed to setup chase camera!");
                     break;
                 }
+                player.GetComponent<SpriteRenderer>().flipX = false;
                 // 화면 페이드 인
-                yield return UIManager.Instance.OnFade(null, 1, 0, FINAL_FADE_TIME);
+                StartCoroutine(UIManager.Instance.OnFade(null, 1, 0, FINAL_FADE_TIME));
                 // 튜토리얼 진행
                 TutorialController.Instance?.SetNextTutorial();
                 break;

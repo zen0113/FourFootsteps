@@ -167,6 +167,11 @@ public class PlayerHumanMovement : MonoBehaviour
         }
     }
 
+    public void SetCrouch(bool isActice)
+    {
+        isCrouching = isActice;
+    }
+
     public void BlockMiniGameInput(bool isBlocked)
     {
         isMiniGameInputBlocked = isBlocked;

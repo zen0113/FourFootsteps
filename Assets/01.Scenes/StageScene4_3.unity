@@ -14699,86 +14699,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: Bubble UI Canvas
       objectReference: {fileID: 0}
-    - target: {fileID: 6459963979678327824, guid: 98c41c54a90ba8847851431d749bfce8, type: 3}
-      propertyPath: m_IsActive
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 6644824931612207529, guid: 98c41c54a90ba8847851431d749bfce8, type: 3}
-      propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
-    m_RemovedComponents:
-    - {fileID: 5193846650660849121, guid: 98c41c54a90ba8847851431d749bfce8, type: 3}
+    m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 6459963979678327824, guid: 98c41c54a90ba8847851431d749bfce8, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 700605003}
-    - targetCorrespondingSourceObject: {fileID: 6644824931612207529, guid: 98c41c54a90ba8847851431d749bfce8, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 700605004}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 98c41c54a90ba8847851431d749bfce8, type: 3}
---- !u!1 &700604999 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 6459963979678327824, guid: 98c41c54a90ba8847851431d749bfce8, type: 3}
-  m_PrefabInstance: {fileID: 700604998}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &700605000 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 6588328753197231395, guid: 98c41c54a90ba8847851431d749bfce8, type: 3}
-  m_PrefabInstance: {fileID: 700604998}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!1 &700605001 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 6644824931612207529, guid: 98c41c54a90ba8847851431d749bfce8, type: 3}
-  m_PrefabInstance: {fileID: 700604998}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &700605002 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 9039564971510762844, guid: 98c41c54a90ba8847851431d749bfce8, type: 3}
-  m_PrefabInstance: {fileID: 700604998}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!114 &700605003
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 700604999}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6af9de45b7d08d9429836e2ae6c4a3d9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  bubbleCanvasGroup: {fileID: 700605004}
-  faceImage: {fileID: 700605002}
-  messageText: {fileID: 700605000}
-  fadeDuration: 0.3
---- !u!225 &700605004
-CanvasGroup:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 700605001}
-  m_Enabled: 1
-  m_Alpha: 1
-  m_Interactable: 1
-  m_BlocksRaycasts: 1
-  m_IgnoreParentGroups: 0
 --- !u!1 &703355923
 GameObject:
   m_ObjectHideFlags: 0
@@ -18860,6 +18785,7 @@ MonoBehaviour:
   jumpPower: 6
   crouchPower: 3
   isJumpingBlocked: 0
+  isRunningBlocked: 0
   dashParticle: {fileID: 398065168}
   dashParticleOffset: {x: -2.4, y: -2.6, z: 0}
   walkEmissionRate: 3

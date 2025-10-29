@@ -5,6 +5,7 @@ using System.Collections;
 /// 화면 암전, 효과음, 오브젝트 상태 변경, 플레이어 위치 이동 등
 /// 복합적인 연출을 하나의 튜토리얼 단계로 실행하는 스크립트입니다.
 /// </summary>
+[RequireComponent(typeof(AudioSource))]
 public class SceneTransitionTutorial : TutorialBase
 {
     [Header("연출 설정")]
@@ -25,11 +26,19 @@ public class SceneTransitionTutorial : TutorialBase
 
     private bool isCompleted = false;
     private PlayerCatMovement playerMovement;
+    private AudioSource audioSource;
 
     public override void Enter()
     {
         Debug.Log("[SceneTransitionTutorial] 연출 시퀀스 시작.");
         isCompleted = false;
+
+        // AudioSource 컴포넌트를 가져옵니다.
+        audioSource = GetComponent<AudioSource>();
+        // 씬이 시작될 때 자동으로 재생되지 않도록 설정
+        audioSource.playOnAwake = false;
+        // 2D 사운드로 설정
+        audioSource.spatialBlend = 0;
 
         playerMovement = FindObjectOfType<PlayerCatMovement>();
 
@@ -57,7 +66,9 @@ public class SceneTransitionTutorial : TutorialBase
         // --- 2. 효과음 재생 및 대기 ---
         if (transitionSound != null)
         {
-            AudioSource.PlayClipAtPoint(transitionSound, Camera.main.transform.position);
+            audioSource.clip = transitionSound;
+            audioSource.Play();
+
             float waitTime = soundWaitDuration > 0 ? soundWaitDuration : transitionSound.length;
             yield return new WaitForSeconds(waitTime);
         }
@@ -120,6 +131,11 @@ public class SceneTransitionTutorial : TutorialBase
         if (playerMovement != null)
         {
             playerMovement.SetMiniGameInputBlocked(false);
+        }
+
+        if (audioSource != null && audioSource.isPlaying)
+        {
+            audioSource.Stop();
         }
     }
 }

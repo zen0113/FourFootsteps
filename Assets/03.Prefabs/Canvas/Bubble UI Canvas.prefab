@@ -221,7 +221,7 @@ GameObject:
   - component: {fileID: 2565153947319917227}
   - component: {fileID: 5950798375238566057}
   - component: {fileID: 2300962993034550386}
-  - component: {fileID: 5193846650660849121}
+  - component: {fileID: 8204844118404006474}
   m_Layer: 5
   m_Name: Bubble UI Canvas
   m_TagString: Untagged
@@ -312,18 +312,22 @@ MonoBehaviour:
   m_BlockingMask:
     serializedVersion: 2
     m_Bits: 4294967295
---- !u!225 &5193846650660849121
-CanvasGroup:
+--- !u!114 &8204844118404006474
+MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6459963979678327824}
   m_Enabled: 1
-  m_Alpha: 1
-  m_Interactable: 1
-  m_BlocksRaycasts: 1
-  m_IgnoreParentGroups: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6af9de45b7d08d9429836e2ae6c4a3d9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  bubbleCanvasGroup: {fileID: 6402580643036304371}
+  faceImage: {fileID: 9039564971510762844}
+  messageText: {fileID: 6588328753197231395}
+  fadeDuration: 0.3
 --- !u!1 &6644824931612207529
 GameObject:
   m_ObjectHideFlags: 0
@@ -335,13 +339,14 @@ GameObject:
   - component: {fileID: 2385206410923129944}
   - component: {fileID: 185912065847244051}
   - component: {fileID: 1917225301744933174}
+  - component: {fileID: 6402580643036304371}
   m_Layer: 5
   m_Name: Bubble UI
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &2385206410923129944
 RectTransform:
   m_ObjectHideFlags: 0
@@ -401,3 +406,15 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!225 &6402580643036304371
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6644824931612207529}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0

@@ -17,11 +17,9 @@ public class SleepEffectTutorialStep : TutorialBase
     [SerializeField] private Color fadeColor = Color.black;
     [SerializeField] private AnimationCurve fadeCurve = AnimationCurve.EaseInOut(0, 0, 1, 1);
 
-    // 새롭게 추가된 부분: 페이드 효과 완료 후 나타낼 오브젝트
     [Header("페이드 완료 후 나타낼 오브젝트")]
-    [SerializeField] private GameObject objectToShowAfterFade;
+    private GameObject objectToShowAfterFade;
 
-    // 새롭게 추가된 부분: UI 숨김 설정
     [Header("UI 숨김 설정")]
     [SerializeField] private bool useFadeOutForUI = true; // GuideUIController 페이드 아웃 사용 여부
 
@@ -55,9 +53,27 @@ public class SleepEffectTutorialStep : TutorialBase
             StopCoroutine(sleepEffectCoroutine);
         }
 
-        currentTutorialController = FindObjectOfType<TutorialController>();
+        currentTutorialController = TutorialController.Instance;
 
-        // 새롭게 추가된 부분: GuideUIController 숨김 처리
+        if (currentTutorialController != null && currentTutorialController.BlackFadeObject != null)
+        {
+            // 컨트롤러에서 찾은 'black' 오브젝트를 'objectToShowAfterFade'에 할당
+            objectToShowAfterFade = currentTutorialController.BlackFadeObject;
+            Debug.Log($"[SleepEffectTutorialStep] 'objectToShowAfterFade'에 TutorialController의 '{objectToShowAfterFade.name}'를 성공적으로 할당했습니다.");
+        }
+        else
+        {
+            if (currentTutorialController == null)
+            {
+                Debug.LogWarning("[SleepEffectTutorialStep] TutorialController.Instance를 찾을 수 없습니다.");
+            }
+            else
+            {
+                Debug.LogWarning("[SleepEffectTutorialStep] TutorialController.Instance.BlackFadeObject가 null입니다.");
+            }
+        }
+
+        // GuideUIController의 가이드 UI 숨기기
         if (GuideUIController.Instance != null) // GuideUIController의 싱글톤은 유지
         {
             if (useFadeOutForUI)
@@ -86,7 +102,7 @@ public class SleepEffectTutorialStep : TutorialBase
 
     public override void Execute(TutorialController controller)
     {
-        // 실행 중 특별한 로직이 필요하면 여기에 추가
+
     }
 
     public override void Exit()
@@ -112,7 +128,7 @@ public class SleepEffectTutorialStep : TutorialBase
         // 효과 초기화
         SetupEffects();
 
-        // 오브젝트를 처음에 비활성화하여 숨깁니다.
+        // 오브젝트를 처음에 비활성화
         if (objectToShowAfterFade != null)
         {
             objectToShowAfterFade.SetActive(false);

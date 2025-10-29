@@ -30,15 +30,34 @@ public class SettingsUIController : MonoBehaviour
     private void OnEnable()
     {
         AudioEventSystem.OnMasterVolumeChanged += HandleMasterVolumeChanged;
-        // 설정 패널이 활성화될 때마다 현재 SoundPlayer의 볼륨을 불러와 슬라이더에 반영
-        // 이렇게 하면 SoundPlayer가 DontDestroyOnLoad로 씬 전환 시에도 볼륨을 유지할 수 있음
+
+        // 설정 패널이 활성화될 때마다 현재 볼륨을 기준으로
+        // original (취소용) 볼륨과 temp (확인용) 볼륨을 *모두* 초기화
         if (SoundPlayer.Instance != null)
         {
-            bgmVolumeSlider?.SetValueWithoutNotify(SoundPlayer.Instance.GetBGMVolume());
-            sfxVolumeSlider?.SetValueWithoutNotify(SoundPlayer.Instance.GetSFXVolume());
-            // OpenSettings()에서 original 볼륨을 저장하기 전에 최신 값을 반영하도록
+            // 1. SoundPlayer에서 현재 볼륨을 가져와 originalBGMVolume에 저장
             originalBGMVolume = SoundPlayer.Instance.GetBGMVolume();
             originalSFXVolume = SoundPlayer.Instance.GetSFXVolume();
+
+            // 2. 슬라이더 값을 SoundPlayer의 현재 값으로 (알림 없이) 업데이트
+            bgmVolumeSlider?.SetValueWithoutNotify(originalBGMVolume);
+            sfxVolumeSlider?.SetValueWithoutNotify(originalSFXVolume);
+
+            // 3. temp 볼륨을 현재 볼륨 (original)으로 초기화
+            tempBGMVolume = originalBGMVolume;
+            tempSFXVolume = originalSFXVolume;
+        }
+        else
+        {
+            // SoundPlayer가 없는 비상 상황 처리
+            originalBGMVolume = bgmVolumeSlider != null ? bgmVolumeSlider.value : defaultBGMVolume;
+            originalSFXVolume = sfxVolumeSlider != null ? sfxVolumeSlider.value : defaultSFXVolume;
+
+            // temp 볼륨도 동일하게 초기화
+            tempBGMVolume = originalBGMVolume;
+            tempSFXVolume = originalSFXVolume;
+
+            Debug.LogWarning("SoundPlayer.Instance not found. Initializing temp/original volumes from slider.", this);
         }
     }
 
@@ -58,7 +77,6 @@ public class SettingsUIController : MonoBehaviour
             sfxVolumeSlider.SetValueWithoutNotify(sfxVol);
         }
     }
-    // --- End of OnEnable / OnDisable / HandleMasterVolumeChanged ---
 
     private void Start()
     {
@@ -146,30 +164,14 @@ public class SettingsUIController : MonoBehaviour
     /// <summary>
     /// 설정 창을 열고 현재 볼륨 값을 임시 저장합니다.
     /// </summary>
+    /// <summary>
+    /// 설정 창을 엽니다. (주로 PauseManager에서 SetActive(true)로 호출됨)
+    /// </summary>
     public void OpenSettings()
     {
         if (settingsPanel != null)
         {
             settingsPanel.SetActive(true);
-
-            // 중요: original 볼륨은 SoundPlayer의 현재 마스터 볼륨에서 가져오는 것이 가장 정확합니다.
-            // 슬라이더 값이 실시간으로 변경될 수 있기 때문에 슬라이더 값을 직접 가져오는 것보다 안전합니다.
-            if (SoundPlayer.Instance != null)
-            {
-                originalBGMVolume = SoundPlayer.Instance.GetBGMVolume();
-                originalSFXVolume = SoundPlayer.Instance.GetSFXVolume();
-            }
-            else
-            {
-                // SoundPlayer가 없다면 현재 슬라이더 값을 사용 (백업)
-                originalBGMVolume = bgmVolumeSlider != null ? bgmVolumeSlider.value : defaultBGMVolume;
-                originalSFXVolume = sfxVolumeSlider != null ? sfxVolumeSlider.value : defaultSFXVolume;
-                Debug.LogWarning("SoundPlayer.Instance not found when opening settings. Using slider values as original.", this);
-            }
-
-            // 임시 볼륨은 현재 슬라이더 값으로 초기화 (바로 조절 시작 위함)
-            tempBGMVolume = bgmVolumeSlider != null ? bgmVolumeSlider.value : originalBGMVolume;
-            tempSFXVolume = sfxVolumeSlider != null ? sfxVolumeSlider.value : originalSFXVolume;
         }
         else
         {

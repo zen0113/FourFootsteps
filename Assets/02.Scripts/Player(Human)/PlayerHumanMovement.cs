@@ -16,6 +16,10 @@ public class PlayerHumanMovement : MonoBehaviour
     [Header("웅크리기")]
     [SerializeField] private bool isCrouching = false;
 
+    [Header("상태")]
+    private bool isHoldingCat = false;
+    private bool isHoldingCarrier = false;
+
     [Header("효과음")]
     [SerializeField] private AudioClip footstepSound;
     [SerializeField] private float walkSoundInterval = 0.5f;
@@ -61,7 +65,7 @@ public class PlayerHumanMovement : MonoBehaviour
 
         // 상태 및 애니메이션 업데이트
         Crouch();
-        isDashing = Input.GetKey(KeyCode.LeftShift) && !isCrouching && horizontalInput != 0;
+        isDashing = Input.GetKey(KeyCode.LeftShift) && !isCrouching && horizontalInput != 0 && !isHoldingCat && !isHoldingCarrier;
         UpdateAnimationState(horizontalInput);
 
         // 이동 처리
@@ -93,7 +97,36 @@ public class PlayerHumanMovement : MonoBehaviour
 
     public void SetPlayerHoldingCat(bool isActive)
     {
+        isHoldingCat = isActive;
         animator.SetBool("With_Cat", isActive);
+
+        if (isActive)
+        {
+            // 캐리어 들기 상태 강제 해제
+            isHoldingCarrier = false;
+            animator.SetBool("Holding_Carrier", false);
+
+            // 웅크리기 상태 강제 해제
+            isCrouching = false;
+            animator.SetBool("Crouch", false);
+        }
+    }
+
+    public void SetPlayerHoldingCarrier(bool isActive)
+    {
+        isHoldingCarrier = isActive;
+        animator.SetBool("Holding_Carrier", isActive);
+
+        if (isActive)
+        {
+            // 고양이 들기 상태 강제 해제
+            isHoldingCat = false;
+            animator.SetBool("With_Cat", false);
+
+            // 웅크리기 상태 강제 해제
+            isCrouching = false;
+            animator.SetBool("Crouch", false);
+        }
     }
 
     void UpdateAudioState(float horizontalInput)
@@ -162,7 +195,7 @@ public class PlayerHumanMovement : MonoBehaviour
 
     void Crouch()
     {
-        if (Input.GetKeyDown(KeyCode.S))
+        if (Input.GetKeyDown(KeyCode.S) && !isHoldingCat && !isHoldingCarrier)
         {
             isCrouching = true;
         }

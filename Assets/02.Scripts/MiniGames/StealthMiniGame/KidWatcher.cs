@@ -1,9 +1,6 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using static UnityEditor.PlayerSettings;
-using static UnityEditor.UIElements.CurveField;
 
 public class KidWatcher : MonoBehaviour
 {

@@ -7,7 +7,7 @@ using UnityEngine.SceneManagement;
 // 씬 전환 시 로딩 화면을 보여주는 싱글턴 클래스
 public class SceneLoader : MonoBehaviour
 {
-    private float fadeInOutTime = 2f;
+    private float fadeInOutTime = 1f;
 
     // 싱글턴 인스턴스
     protected static SceneLoader instance;

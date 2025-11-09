@@ -7,7 +7,7 @@ using UnityEngine.SceneManagement;
 // 씬 전환 시 로딩 화면을 보여주는 싱글턴 클래스
 public class SceneLoader : MonoBehaviour
 {
-    private float fadeInOutTime = 1f;
+    private float fadeInOutTime = 2f;
 
     // 싱글턴 인스턴스
     protected static SceneLoader instance;
@@ -27,9 +27,18 @@ public class SceneLoader : MonoBehaviour
 
     [SerializeField] private CanvasGroup sceneLoaderCanvasGroup;
     [SerializeField] private List<GameObject> loadingPuzzlePieces = new List<GameObject>();
+    // 회상에서 스테이지로 넘어갈 때 하얀 퍼즐 트랜지션 사용
+    [SerializeField] private List<GameObject> loadingPuzzlePiecesWhite = new List<GameObject>();
+    [SerializeField] private GameObject CatAnimUI;
     //[SerializeField] private Image progressBar;
 
     private string loadSceneName;
+    private string previousSceneName;
+
+    private const string STAGE_SCENE_NAME = "StageScene";
+    private const string RECALL_SCENE_NAME = "RecallScene";
+    private const string ENDING_SCENE_NAME = "Ending";
+    private bool isFading = false;
 
     // Resources 폴더에서 SceneLoader 프리팹을 생성
     public static SceneLoader Create()
@@ -53,6 +62,7 @@ public class SceneLoader : MonoBehaviour
     {
         GameManager.Instance.StartSceneLoad();
 
+        previousSceneName = SceneManager.GetActiveScene().name;
         gameObject.SetActive(true);
         loadSceneName = sceneName;
         SceneManager.sceneLoaded += OnSceneLoaded;
@@ -62,7 +72,8 @@ public class SceneLoader : MonoBehaviour
     // 씬 비동기 로드 및 진행률 표시
     private IEnumerator Load(string sceneName)
     {
-        yield return StartCoroutine(Fade(true));
+        StartFadeCoroutine(true);
+        yield return new WaitWhile(()=>isFading);
 
         AsyncOperation op = SceneManager.LoadSceneAsync(sceneName);
         op.allowSceneActivation = false;
@@ -84,7 +95,8 @@ public class SceneLoader : MonoBehaviour
     {
         if (scene.name == loadSceneName)
         {
-            StartCoroutine(Fade(false));
+            StartFadeCoroutine(false);
+
             SceneManager.sceneLoaded -= OnSceneLoaded;
 
             GameManager.Instance.FinishSceneLoad();
@@ -97,79 +109,91 @@ public class SceneLoader : MonoBehaviour
         }
     }
 
-    // CanvasGroup도 알파값 조정
-    //private IEnumerator Fade(bool isFadeIn)
-    //{
-    //    // 0~(퍼즐개수-1)까지 리스트 만들고 셔플
-    //    List<int> indices = Enumerable.Range(0, loadingPuzzlePieces.Count).ToList();
-    //    System.Random rand = new System.Random();
-    //    for (int i = indices.Count - 1; i > 0; i--)
-    //    {
-    //        int j = rand.Next(i + 1);
-    //        (indices[i], indices[j]) = (indices[j], indices[i]);
-    //    }
 
-    //    // 한 퍼즐당 대략 실행 간격 계산
-    //    float interval = fadeInOutTime / loadingPuzzlePieces.Count;
-    //    float timer = 0f;
-
-    //    // 알파 시작/끝 값 설정
-    //    float startAlpha = isFadeIn ? 0f : 1f;
-    //    float endAlpha = isFadeIn ? 1f : 0f;
-    //    sceneLoaderCanvasGroup.alpha = startAlpha;
-
-    //    while (timer < fadeInOutTime)
-    //    {
-    //        yield return null;
-    //        timer += Time.unscaledDeltaTime;
-
-    //        // 알파 값 보간 (부드럽게 전환)
-    //        sceneLoaderCanvasGroup.alpha = Mathf.Lerp(startAlpha, endAlpha, timer / fadeInOutTime);
-
-    //        // 특정 간격마다 랜덤 순서의 퍼즐 조각 켜기/끄기
-    //        int pieceIndex = Mathf.FloorToInt(timer / interval);
-    //        if (pieceIndex < indices.Count)
-    //        {
-    //            int idx = indices[pieceIndex];
-    //            if (loadingPuzzlePieces[idx] != null)
-    //                loadingPuzzlePieces[idx].SetActive(isFadeIn);
-    //        }
-    //    }
-
-    //    // 알파 최종값으로 설정
-    //    sceneLoaderCanvasGroup.alpha = endAlpha;
-
-    //    if (!isFadeIn)
-    //    {
-    //        gameObject.SetActive(false);
-    //    }
-    //}
-
-    // 퍼즐 피스만
-    private IEnumerator Fade(bool isFadeIn)
+    // --------------단순 Fade인 경우--------------
+    // previousSceneName이 TitleScene||Prologue 일 때
+    // previousSceneName과 loadSceneName 둘다 string에 “StageScene” 문자열 포함일때
+    // --------------퍼즐 피스 Fade인 경우--------------
+    // previousSceneName이 TitleScene||Prologue 아닐 때
+    // (previousSceneName에 “StageScene” 문자열 포함 AND loadSceneName에 “RecallScene” 문자열 포함) OR 
+    // (previousSceneName에 “RecallScene” 문자열 포함 AND loadSceneName에 “StageScene” 문자열 포함)
+    // loadSceneName.Contains("Ending") 일 때
+    private void StartFadeCoroutine(bool isFadein)
     {
-        // 0~(퍼즐개수-1)까지 리스트 만들고 셔플
-        List<int> indices = Enumerable.Range(0, loadingPuzzlePieces.Count).ToList();
-        System.Random rand = new System.Random();
-        for (int i = indices.Count - 1; i > 0; i--)
+        bool isFromTitleOrPrologue = previousSceneName == "TitleScene" || previousSceneName == "Prologue";
+        bool isStageToStage = previousSceneName.Contains(STAGE_SCENE_NAME) && loadSceneName.Contains(STAGE_SCENE_NAME);
+        bool isStageRecallTransition = (previousSceneName.Contains(STAGE_SCENE_NAME) && loadSceneName.Contains(RECALL_SCENE_NAME))
+                                       || (previousSceneName.Contains(RECALL_SCENE_NAME) && loadSceneName.Contains(STAGE_SCENE_NAME));
+        bool isToEnding = loadSceneName.Contains(ENDING_SCENE_NAME);
+
+        if (!isFromTitleOrPrologue && (isStageRecallTransition || isToEnding))
         {
-            int j = rand.Next(i + 1);
-            (indices[i], indices[j]) = (indices[j], indices[i]);
+            // 퍼즐 피스 Fade
+            StartCoroutine(PuzzleFade(isFadein));
+            Debug.Log($"퍼즐 피스 Fade 실행 : {loadSceneName}");
+        }
+        else if (isFromTitleOrPrologue || isStageToStage)
+        {
+            // 단순 고양이 애니 Fade
+            StartCoroutine(CatAnimFade(isFadein));
+            Debug.Log($"단순 고양이 애니 Fade 실행 : {loadSceneName}");
+        }
+        else
+        {
+            Debug.LogWarning($"Unexpected scene transition: {previousSceneName} -> {loadSceneName}");
+            StartCoroutine(CatAnimFade(isFadein)); // 기본 동작
+        }
+    }
+
+    // 단순 고양이 애니메이션 Fade
+    private IEnumerator CatAnimFade(bool isFadeIn)
+    {
+        isFading = true;
+        float timer = 0f;
+        float startAlpha = isFadeIn ? 0f : 1f;
+        float endAlpha = isFadeIn ? 1f : 0f;
+        if (isFadeIn) CatAnimUI.SetActive(true);
+
+        while (timer <= fadeInOutTime)
+        {
+            yield return null;
+            //timer += Time.unscaledDeltaTime * 2f;
+            timer += Time.unscaledDeltaTime;
+            sceneLoaderCanvasGroup.alpha = Mathf.Lerp(startAlpha, endAlpha, timer);
         }
 
+        if (!isFadeIn)
+        {
+            CatAnimUI.SetActive(false);
+            gameObject.SetActive(false);
+        }
+        isFading = false;
+    }
+
+    // 퍼즐 피스 Fade
+    private IEnumerator PuzzleFade(bool isFadeIn)
+    {
+        isFading = true;
+        bool isRecallToStage = previousSceneName.Contains(RECALL_SCENE_NAME);
+        sceneLoaderCanvasGroup.alpha = 1f;
+        // 사용할 퍼즐 리스트 선택
+        List<GameObject> targetPuzzles = isRecallToStage ? loadingPuzzlePiecesWhite : loadingPuzzlePieces;
+
+        // 0~(퍼즐개수-1)까지 리스트 만들고 셔플
+        List<int> indices = Enumerable.Range(0, targetPuzzles.Count).ToList();
+        ShuffleList(indices);
+
         // 한 퍼즐당 대략 실행 간격 계산
-        float interval = fadeInOutTime / loadingPuzzlePieces.Count;
-        float timer = 0f;
+        float interval = fadeInOutTime / targetPuzzles.Count;
 
         foreach (int idx in indices)
         {
-            // 한 스텝마다 interval만큼 기다리며 순차적으로 랜덤 순서 실행
-            if (loadingPuzzlePieces[idx] != null)
+            // null 체크 후 활성화
+            if (targetPuzzles[idx] != null)
             {
-                loadingPuzzlePieces[idx].SetActive(isFadeIn);
+                targetPuzzles[idx].SetActive(isFadeIn);
             }
 
-            timer += interval;
             yield return new WaitForSecondsRealtime(interval);
         }
 
@@ -178,13 +202,26 @@ public class SceneLoader : MonoBehaviour
         {
             gameObject.SetActive(false);
         }
+        isFading = false;
     }
 
+    // 셔플 로직 분리
+    private void ShuffleList<T>(List<T> list)
+    {
+        System.Random rand = new System.Random();
+        for (int i = list.Count - 1; i > 0; i--)
+        {
+            int j = rand.Next(i + 1);
+            (list[i], list[j]) = (list[j], list[i]);
+        }
+    }
+
+    
 
     //    // -------------------------------에디터에서 오브젝트 70개 자동할당-----------------------------------
     //    // 실행 시 쓰이진 않음! 에디터에서 편의용으로 둔것
     //    [Header("검색 규칙")]
-    //    [SerializeField] private string layerPrefix = "레이어";
+    //    [SerializeField] private string layerPrefix = "layer";
     //    [SerializeField] private int minIndex = 0;
     //    [SerializeField] private int maxIndex = 69;
 
@@ -231,8 +268,8 @@ public class SceneLoader : MonoBehaviour
     //        });
 
     //        // 결과 반영
-    //        loadingPuzzlePieces.Clear();
-    //        loadingPuzzlePieces.AddRange(found);
+    //        loadingPuzzlePiecesWhite.Clear();
+    //        loadingPuzzlePiecesWhite.AddRange(found);
 
     //        // 프리팹/씬 변경사항 저장 표시
     //#if UNITY_EDITOR

@@ -208,7 +208,7 @@ public class SleepEffectTutorialStep : TutorialBase
         GameObject canvasGO = new GameObject("SleepFadeCanvas");
         fadeCanvas = canvasGO.AddComponent<Canvas>();
         fadeCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
-        fadeCanvas.sortingOrder = 1000; // 최상위에 렌더링
+        fadeCanvas.sortingOrder = 10; // 최상위에 렌더링
 
         CanvasScaler scaler = canvasGO.AddComponent<CanvasScaler>();
         scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
@@ -221,6 +221,7 @@ public class SleepEffectTutorialStep : TutorialBase
         imageGO.transform.SetParent(fadeCanvas.transform, false);
 
         fadeImage = imageGO.AddComponent<Image>();
+        fadeImage.sprite = null;
         fadeImage.color = new Color(fadeColor.r, fadeColor.g, fadeColor.b, 0f); // 초기에는 투명
 
         // 전체 화면을 덮도록 설정

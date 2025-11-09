@@ -57,18 +57,34 @@ public class UIManager : MonoBehaviour
 
     private Coroutine fadeOutRoutine;
 
+    //private void Awake()
+    //{
+    //    if (Instance == null)
+    //    {
+    //        Instance = this;
+    //        DontDestroyOnLoad(gameObject);
+    //    }
+    //    else
+    //        Destroy(gameObject);
+
+    //    AddUIGameObjects();
+
+    //    RegisterPuzzleBagButtonEvent();
+    //    SetAllUI(false);
+    //}
     private void Awake()
     {
-        if (Instance == null)
+        // 중복 인스턴스 체크를 먼저
+        if (Instance != null && Instance != this)
         {
-            Instance = this;
-            DontDestroyOnLoad(gameObject);
-        }
-        else
             Destroy(gameObject);
+            return; // 즉시 종료하여 나머지 코드 실행 방지
+        }
+
+        Instance = this;
+        DontDestroyOnLoad(gameObject);
 
         AddUIGameObjects();
-
         RegisterPuzzleBagButtonEvent();
         SetAllUI(false);
     }
@@ -125,6 +141,7 @@ public class UIManager : MonoBehaviour
                     Debug.LogWarning("[PuzzleBagButtonBinder] PuzzleMemoryManager.Instance가 null입니다.");
             });
         }
+        Debug.Log($"[button.onClick.GetPersistentEventCount()] : {button.onClick.GetPersistentEventCount()}");
     }
 
     private void EnsureFootprintsCanvasExists()

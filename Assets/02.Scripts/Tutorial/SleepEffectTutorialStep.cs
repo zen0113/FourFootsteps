@@ -33,11 +33,17 @@ public class SleepEffectTutorialStep : TutorialBase
     private Image fadeImage;
 
     // 카메라 일렁임용 머티리얼
-    private Material waveMaterial;
+    [SerializeField] private Material waveMaterial;
     private Camera mainCamera;
 
     // 원래 카메라 위치를 저장하기 위한 변수
     private Vector3 originalCameraPosition;
+
+    private void Awake()
+    {
+        // 일렁임 효과용 셰이더 생성 (간단한 버전)
+        CreateWaveMaterial();
+    }
 
     public override void Enter()
     {
@@ -178,9 +184,6 @@ public class SleepEffectTutorialStep : TutorialBase
             originalCameraPosition = mainCamera.transform.position;
         }
 
-        // 일렁임 효과용 셰이더 생성 (간단한 버전)
-        CreateWaveMaterial();
-
         // 페이드 효과용 UI 생성
         CreateFadeCanvas();
     }
@@ -188,18 +191,15 @@ public class SleepEffectTutorialStep : TutorialBase
     private void CreateWaveMaterial()
     {
         // 간단한 일렁임 셰이더를 사용하는 머티리얼 생성
-        Shader waveShader = Shader.Find("Hidden/WaveDistortion"); // Hidden/WaveDistortion 셰이더는 예시입니다. 실제 프로젝트에 맞게 사용하세요.
-        if (waveShader == null)
+        Material sleepMat = Resources.Load<Material>("SleepMat");
+        if (sleepMat != null)
         {
-            // 기본 셰이더가 없으면 Unlit/Texture 사용
-            waveShader = Shader.Find("Unlit/Texture");
-            if (waveShader == null)
-            {
-                Debug.LogWarning("[SleepEffectTutorialStep] 'Hidden/WaveDistortion' 또는 'Unlit/Texture' 셰이더를 찾을 수 없습니다. 일렁임 효과가 제대로 작동하지 않을 수 있습니다.");
-                return;
-            }
+            waveMaterial = new Material(sleepMat.shader);
         }
-        waveMaterial = new Material(waveShader);
+        else
+        {
+            Debug.LogError("SleepMat을 찾을 수 없습니다!");
+        }
     }
 
     private void CreateFadeCanvas()

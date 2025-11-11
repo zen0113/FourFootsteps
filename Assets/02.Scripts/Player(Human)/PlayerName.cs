@@ -12,21 +12,22 @@ public class PlayerName : MonoBehaviour
     }
 
     [SerializeField] private PlayerType playerType;
-    public string nameOfPlayer;
-    public string saveName;
+    [SerializeField] private string nameOfPlayer;
+    [SerializeField] private string saveName;
 
     [Header("UI Components")]
-    public TMP_InputField inputField;
-    public TextMeshProUGUI warningText;
-    public TextMeshProUGUI loadedNameText;
-    public TextMeshProUGUI CheckNameText;
+    [SerializeField] private TMP_InputField inputField;
+    [SerializeField] private TextMeshProUGUI warningText;
+    [SerializeField] private TextMeshProUGUI loadedNameText;
+    [SerializeField] private TextMeshProUGUI CheckNameText;
 
     [Header("Panel Components")]
-    public GameObject SetName_Panel;
-    public GameObject CheckName_Panel;
-
+    [SerializeField] private GameObject SetName_Panel;
+    [SerializeField] private GameObject CheckName_Panel;
+    [SerializeField] private CanvasGroup NameSettingCG;
 
     private string variableKey => playerType == PlayerType.Human ? "PlayerName" : "YourCatName";
+    private const float WAITING_SECONDS = 2f;
 
     void Start()
     {
@@ -77,7 +78,7 @@ public class PlayerName : MonoBehaviour
         SetName_Panel.SetActive(false);
         CheckName_Panel.SetActive(true);
 
-        //“ㅁㅁ”으로 확정하시겠습니까?
+        // ㅁㅁ으로 확정하시겠습니까?
         string checkGuide = "{nameOfPlayer}(으)로 확정하시겠습니까?";
         checkGuide= KoreanJosa.Apply(
             checkGuide,
@@ -123,11 +124,16 @@ public class PlayerName : MonoBehaviour
         }
         else
         {
+            // 이름 설정 패널 투명도 1->0
+            yield return UIManager.Instance.FadeCanvasGroup(NameSettingCG, toVisible, duration);
+
+            // 고양이 이름 설정된 화면 WAITING_SECONDS 동안 볼 수 있게 대기함.
+            yield return new WaitForSeconds(WAITING_SECONDS);
+
             yield return UIManager.Instance.FadeCanvasGroup(canvasGroup, toVisible, duration);
             StartCoroutine(PrologueManager.Instance.ProceedToNextStep());
             gameObject.SetActive(toVisible);
         }
 
     }
-
 }

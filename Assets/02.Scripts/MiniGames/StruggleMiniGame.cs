@@ -363,6 +363,11 @@ public class StruggleMiniGame : MonoBehaviour
         // 카메라 흔들림 효과
         if (cameraShake != null)
         {
+            // 쉐이크가 작동하려면 enabled가 true여야 합니다.
+            if (!cameraShake.enabled)
+            {
+                cameraShake.enabled = true;
+            }
             cameraShake.Shake(0.4f, 0.25f);
         }
     }

@@ -170,6 +170,51 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    public void ResetVariables()
+    {
+        string[] variableLines = variablesCSV.text.Split('\n');
+
+        for (int i = 1; i < variableLines.Length; i++)
+        {
+            if (string.IsNullOrWhiteSpace(variableLines[i]))
+                continue;
+
+            string[] fields = variableLines[i].Split(',');
+
+            string variableName = fields[0].Trim();
+            string variableValue = fields[1].Trim();
+            string variableType = fields[2].Trim();
+            string variableReset = fields[3].Trim();
+
+            //// 엔딩 때 초기화하지 않을 변수들은 제외
+            //if (variableReset == "FALSE") continue;
+
+            switch (variableType)
+            {
+                case "int":
+                    variables[variableName] = int.Parse(variableValue);
+                    break;
+                case "bool":
+                    variables[variableName] = bool.Parse(variableValue);
+                    break;
+                case "string":
+                    variables[variableName] = variableValue;
+                    break;
+                case "dict:int-bool":
+                    int count = int.Parse(variableValue);
+                    Dictionary<int, bool> dict = new Dictionary<int, bool>();
+                    for (int j = 0; j < count; j++)
+                        dict.Add(j, false); // 초기값 전부 false\
+                    variables[variableName] = dict;
+                    break;
+                default:
+                    Debug.Log("Unknown variable type: " + variableType);
+                    break;
+            }
+        }
+    }
+
+
     public void LoadTitleScene()
     {
         SceneLoader.Instance.LoadScene("TitleScene");

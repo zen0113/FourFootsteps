@@ -428,11 +428,12 @@ public class RoadCrow : MonoBehaviour
             Debug.Log("[RoadCrow] 콜라이더 비활성화");
         }
         
-        // 애니메이터 비활성화 (애니메이션이 flipX를 덮어쓰는 것 방지)
+        // 애니메이터는 활성화 유지 (탈출 중에도 애니메이션 계속 재생)
+        // flipX는 LateUpdate에서 제어하므로 문제 없음
         if (animator != null)
         {
-            animator.enabled = false;
-            Debug.Log("[RoadCrow] 애니메이터 비활성화 (flipX 보호)");
+            animator.enabled = true;
+            Debug.Log("[RoadCrow] 애니메이터 활성화 - 탈출 중 애니메이션 계속 재생");
         }
         
         // 목표 투명도 설정

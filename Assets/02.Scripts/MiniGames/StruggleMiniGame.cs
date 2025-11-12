@@ -34,7 +34,7 @@ public class StruggleMiniGame : MonoBehaviour
     private int currentStage = 0; // 현재 단계
 
     [Header("연출")] 
-    public CameraShake cameraShake; // 카메라 흔들림
+    public CameraShakeMinigame cameraShake; // 카메라 흔들림
     public AudioSource sfxMiss; // 헛딧음 효과음
     public AudioSource sfxStep; // 발걸음 성공 효과음
     public AudioSource sfxFinalStep; // 최종 성공 효과음

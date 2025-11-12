@@ -15,6 +15,9 @@ public class WalkingMiniGameTutorial : TutorialBase
     [Header("자동 진행 설정")]
     [SerializeField] private bool autoProgressOnComplete = true; // 완료 시 자동으로 다음 튜토리얼 진행
 
+    [Header("카메라 설정")]
+    [SerializeField] private CameraShakeMinigame cameraShake; // CameraShakeMinigame 스크립트
+    [SerializeField] private FollowCamera followCamera;     // FollowCamera 스크립트
 
     private TutorialController tutorialController;
     private bool miniGameStarted = false;
@@ -80,6 +83,21 @@ public class WalkingMiniGameTutorial : TutorialBase
 
     public override void Exit()
     {
+        // 모든 미니게임이 끝났으므로 카메라 설정을 원래대로 복원합니다.
+        Debug.Log("[WalkingMiniGameTutorial] 걷기 미니게임 종료. 카메라 설정 복원.");
+        if (cameraShake != null)
+        {
+            Debug.Log("[WalkingMiniGameTutorial] CameraShake 중지 및 비활성화");
+            cameraShake.StopShake(); // 진행 중인 쉐이크 즉시 중지
+            cameraShake.enabled = false; // 쉐이크 스크립트 비활성화
+        }
+
+        if (followCamera != null)
+        {
+            Debug.Log("[WalkingMiniGameTutorial] FollowCamera 활성화");
+            followCamera.enabled = true; // 카메라 팔로우 기능 다시 활성화
+        }
+
         // 이벤트 해제 ...
         if (miniGame != null)
         {

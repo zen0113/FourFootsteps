@@ -10,9 +10,6 @@ public class DarknessTapMinigameTutorial : TutorialBase
     [Header("시작 전 다이얼로그)")]
     [SerializeField] private string startDialogueID = ""; // 미니게임 시작 전 다이얼로그
 
-    [Header("시작 시 UI 설정")]
-    [SerializeField] private GameObject uiToHideOnStart; // 튜토리얼 시작 시 비활성화할 UI
-
     [Header("카메라 설정")]
     [SerializeField] private CameraShakeMinigame cameraShake; // CameraShakeMinigame 스크립트
     [SerializeField] private FollowCamera followCamera;     // FollowCamera 스크립트
@@ -24,6 +21,7 @@ public class DarknessTapMinigameTutorial : TutorialBase
     private bool miniGameStarted = false;
     private bool miniGameCompleted = false;
     private bool hasProgressed = false;
+    private GameObject playerUICanvas; // 자동으로 찾은 Player UI Canvas 저장
 
     public override void Enter()
     {
@@ -53,11 +51,8 @@ public class DarknessTapMinigameTutorial : TutorialBase
 
         Debug.Log("[DarknessTapMinigameTutorial] 어둠 걷어내기 미니게임 튜토리얼 시작");
 
-        // 튜토리얼 시작 시 지정된 UI가 있다면 비활성화합니다.
-        if (uiToHideOnStart != null)
-        {
-            uiToHideOnStart.SetActive(false);
-        }
+        // Player UI Canvas를 자동으로 찾아서 비활성화
+        FindAndDisablePauseUI();
 
         tutorialController = FindObjectOfType<TutorialController>();
         miniGameStarted = false;
@@ -108,6 +103,45 @@ public class DarknessTapMinigameTutorial : TutorialBase
 
         StopAllCoroutines();
     }
+
+    /// <summary>
+    /// Player UI Canvas를 자동으로 찾아서 비활성화합니다.
+    /// </summary>
+    private void FindAndDisablePauseUI()
+    {
+        // 이미 찾은 경우 재사용
+        if (playerUICanvas == null)
+        {
+            // GameObject.Find는 활성화된 오브젝트만 찾으므로, 모든 Canvas를 검색
+            Canvas[] allCanvases = Resources.FindObjectsOfTypeAll<Canvas>();
+
+            foreach (Canvas canvas in allCanvases)
+            {
+                if (canvas.gameObject.name == "Player UI Canvas")
+                {
+                    playerUICanvas = canvas.gameObject;
+                    break;
+                }
+            }
+
+            // 찾지 못한 경우 일반 GameObject.Find 시도
+            if (playerUICanvas == null)
+            {
+                playerUICanvas = GameObject.Find("Player UI Canvas");
+            }
+        }
+
+        if (playerUICanvas != null)
+        {
+            Debug.Log("[DarknessTapMinigameTutorial] Player UI Canvas를 찾아서 비활성화합니다.");
+            playerUICanvas.SetActive(false);
+        }
+        else
+        {
+            Debug.LogWarning("[DarknessTapMinigameTutorial] Player UI Canvas를 찾을 수 없습니다!");
+        }
+    }
+
 
     private IEnumerator StartWithDialogue()
     {

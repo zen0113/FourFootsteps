@@ -34,6 +34,9 @@ public class SoundPlayer : MonoBehaviour
     private const int SOUND_TYPING = 0; // 타이핑 사운드 인덱스
     private const int SOUND_CLICK = 1; // 클릭 사운드 인덱스
 
+    // 일시정지 시 멈췄던 SFX 목록을 저장하기 위한 리스트
+    private List<AudioSource> sfxSourcesPausedByManager = new List<AudioSource>();
+
     [System.Serializable]
     public class SceneBGMSetting
     {
@@ -58,6 +61,9 @@ public class SoundPlayer : MonoBehaviour
             DontDestroyOnLoad(gameObject);
             SceneManager.sceneLoaded += OnSceneLoaded;
             AudioEventSystem.OnBGMVolumeFade += FadeBGMVolume;
+
+            PauseManager.OnPauseToggled += HandlePauseToggled;
+
             InitializeAudioSources();
         }
         else
@@ -78,6 +84,8 @@ public class SoundPlayer : MonoBehaviour
         {
             SceneManager.sceneLoaded -= OnSceneLoaded;
             AudioEventSystem.OnBGMVolumeFade -= FadeBGMVolume;
+
+            PauseManager.OnPauseToggled -= HandlePauseToggled;
         }
     }
 
@@ -135,7 +143,6 @@ public class SoundPlayer : MonoBehaviour
                     GameObject uiPlayerGo = new GameObject($"UISoundPlayer_{i}");
                     uiPlayerGo.transform.SetParent(this.transform); // SoundPlayer의 자식으로 설정
                     uiPlayers[i] = uiPlayerGo.AddComponent<UISoundPlayer>();
-                    // 수정된 라인: uiPlayerGo에 AudioSource를 추가하도록 변경
                     uiPlayers[i].Initialize(uiPlayerGo.AddComponent<AudioSource>(), masterSFXVolume);
                 }
             }
@@ -146,7 +153,6 @@ public class SoundPlayer : MonoBehaviour
             {
                 if (player != null && player.AudioSource == null)
                 {
-                    // 수정된 라인: UISoundPlayer의 GameObject에 AudioSource를 추가하도록 변경
                     player.Initialize(player.gameObject.AddComponent<AudioSource>(), masterSFXVolume);
                 }
                 else if (player != null)
@@ -1081,5 +1087,66 @@ public class SoundPlayer : MonoBehaviour
     public float GetSFXVolume()
     {
         return masterSFXVolume;
+    }
+
+    private void HandlePauseToggled(bool isPaused)
+    {
+        if (isPaused)
+        {
+            // --- 일시정지 ---
+            sfxSourcesPausedByManager.Clear(); // 목록 초기화
+
+            // 1. typingSoundPlayer
+            if (typingSoundPlayer != null && typingSoundPlayer.isPlaying)
+            {
+                typingSoundPlayer.Pause();
+                sfxSourcesPausedByManager.Add(typingSoundPlayer);
+            }
+
+            // 2. uiSoundLoopPlayers
+            foreach (var source in uiSoundLoopPlayers)
+            {
+                if (source != null && source.isPlaying)
+                {
+                    source.Pause();
+                    sfxSourcesPausedByManager.Add(source);
+                }
+            }
+
+            // 3. uiPlayers (단발성 SFX)
+            foreach (var uiPlayer in uiPlayers)
+            {
+                if (uiPlayer != null && uiPlayer.AudioSource != null && uiPlayer.AudioSource.isPlaying)
+                {
+                    // UISoundPlayer는 PlayOneShot을 사용할 수 있으므로, Pause()가 필요합니다.
+                    uiPlayer.AudioSource.Pause();
+                    sfxSourcesPausedByManager.Add(uiPlayer.AudioSource);
+                }
+            }
+
+            // 4. sceneSFXAudioSources (씬에서 찾은 SFX)
+            foreach (var source in sceneSFXAudioSources)
+            {
+                // 씬에서 파괴되었을 수 있으므로 null 체크 필수
+                if (source != null && source.isPlaying)
+                {
+                    source.Pause();
+                    sfxSourcesPausedByManager.Add(source);
+                }
+            }
+        }
+        else
+        {
+            // --- 재개 ---
+            foreach (var source in sfxSourcesPausedByManager)
+            {
+                // AudioSource가 그 사이에 파괴되거나 씬이 바뀌었을 수 있으므로 null 체크
+                if (source != null)
+                {
+                    source.UnPause();
+                }
+            }
+            sfxSourcesPausedByManager.Clear(); // 목록 비우기
+        }
     }
 }

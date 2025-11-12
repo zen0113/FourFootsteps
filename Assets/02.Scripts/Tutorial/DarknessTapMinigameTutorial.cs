@@ -1,4 +1,5 @@
 using System.Collections;
+using UnityEditor.Rendering.LookDev;
 using UnityEngine;
 
 public class DarknessTapMinigameTutorial : TutorialBase
@@ -11,6 +12,7 @@ public class DarknessTapMinigameTutorial : TutorialBase
 
     [Header("시작 시 UI 설정")]
     [SerializeField] private GameObject uiToHideOnStart; // 튜토리얼 시작 시 비활성화할 UI
+    public CameraShake cameraShake; // 카메라 흔들림
 
     [Header("자동 진행 설정")]
     [SerializeField] private bool autoProgressOnComplete = true; // 완료 시 자동으로 다음 튜토리얼 진행
@@ -25,6 +27,16 @@ public class DarknessTapMinigameTutorial : TutorialBase
         if (PlayerCatMovement.Instance != null)
         {
             PlayerCatMovement.Instance.SetMiniGameInputBlocked(true);
+        }
+
+        if (cameraShake != null)
+        {
+            cameraShake.enabled = true;
+            Debug.Log("[StruggleMiniGame] 카메라 쉐이크 활성화");
+        }
+        else
+        {
+            Debug.LogWarning("[StruggleMiniGame] CameraShake가 할당되지 않았습니다!");
         }
 
         Debug.Log("[DarknessTapMinigameTutorial] 어둠 걷어내기 미니게임 튜토리얼 시작");

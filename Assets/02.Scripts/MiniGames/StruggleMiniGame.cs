@@ -104,6 +104,8 @@ public class StruggleMiniGame : MonoBehaviour
         {
             miniGameCanvasGroup.alpha = 0f;
         }
+
+        
         miniGameUI.SetActive(false);
     }
 
@@ -205,13 +207,15 @@ public class StruggleMiniGame : MonoBehaviour
             playerMovement.SetMiniGameInputBlocked(true); // 미니게임 중 플레이어 입력 차단
             playerMovement.ForceCrouch = true; // 플레이어 강제 웅크리기
 
-            // [수정] 미니게임이 진행되는 동안 Space 키(점프) 입력을 확실하게 차단합니다.
+            // 미니게임이 진행되는 동안 Space 키(점프) 입력을 확실하게 차단
             playerMovement.IsJumpingBlocked = true;
         }
         else
         {
             Debug.LogWarning("[StruggleMiniGame] PlayerCatMovement가 할당되지 않았습니다!");
         }
+
+        
 
         // UI 활성화 (투명 상태)는 여기서 바로 진행하여 페이드 인 준비
         miniGameUI.SetActive(true);

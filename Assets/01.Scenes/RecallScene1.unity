@@ -535,7 +535,7 @@ GameObject:
   - component: {fileID: 71284289}
   - component: {fileID: 71284290}
   m_Layer: 0
-  m_Name: 14_RecallSequence
+  m_Name: 15_RecallSequence
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1551,7 +1551,7 @@ GameObject:
   - component: {fileID: 349682567}
   - component: {fileID: 349682566}
   m_Layer: 0
-  m_Name: 15_QuestShow
+  m_Name: 16_QuestShow
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4030,7 +4030,7 @@ GameObject:
   - component: {fileID: 964033065}
   - component: {fileID: 964033064}
   m_Layer: 0
-  m_Name: 17_Sleep
+  m_Name: 18_Sleep
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4492,28 +4492,14 @@ GameObject:
   - component: {fileID: 1078587007}
   - component: {fileID: 1078587006}
   - component: {fileID: 1078587005}
-  - component: {fileID: 1078587004}
+  - component: {fileID: 1078587008}
   m_Layer: 0
-  m_Name: 10_QuestHIde
+  m_Name: 10_HoldingCat
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1078587004
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1078587003}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 58301455b913f07429afb454c2e0ebb7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  useFadeOut: 0
-  autoNextDelay: 0.2
 --- !u!61 &1078587005
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -4601,6 +4587,18 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1703816156}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1078587008
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1078587003}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3e83c1194c16ea9469e22f66df2376cd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1085233546
 GameObject:
   m_ObjectHideFlags: 0
@@ -4812,7 +4810,7 @@ GameObject:
   - component: {fileID: 1196543934}
   - component: {fileID: 1196543935}
   m_Layer: 0
-  m_Name: 16_RecallSequence
+  m_Name: 17_RecallSequence
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6602,6 +6600,124 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 234750420348647165, guid: 436f0b291bf251d42ad5dfabcdcd5c40, type: 3}
   m_PrefabInstance: {fileID: 39582829}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1554568140
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1554568144}
+  - component: {fileID: 1554568143}
+  - component: {fileID: 1554568142}
+  - component: {fileID: 1554568141}
+  m_Layer: 0
+  m_Name: 13_StopHoldingCat
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1554568141
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1554568140}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b9a3da21aa2eea442a98ecf30c52ced8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!61 &1554568142
+BoxCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1554568140}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: 0, y: -0.92867875}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0, y: 0}
+    oldSize: {x: 0, y: 0}
+    newSize: {x: 0, y: 0}
+    adaptiveTilingThreshold: 0
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  serializedVersion: 2
+  m_Size: {x: 1, y: 2.8573575}
+  m_EdgeRadius: 0
+--- !u!50 &1554568143
+Rigidbody2D:
+  serializedVersion: 4
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1554568140}
+  m_BodyType: 2
+  m_Simulated: 1
+  m_UseFullKinematicContacts: 0
+  m_UseAutoMass: 0
+  m_Mass: 1
+  m_LinearDrag: 0
+  m_AngularDrag: 0.05
+  m_GravityScale: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_Interpolate: 0
+  m_SleepingMode: 1
+  m_CollisionDetection: 0
+  m_Constraints: 0
+--- !u!4 &1554568144
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1554568140}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1703816156}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1560263879
 GameObject:
   m_ObjectHideFlags: 0
@@ -6615,7 +6731,7 @@ GameObject:
   - component: {fileID: 1560263881}
   - component: {fileID: 1560263880}
   m_Layer: 0
-  m_Name: 13_QuestHIde
+  m_Name: 14_QuestHIde
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -7264,9 +7380,10 @@ MonoBehaviour:
   - {fileID: 537201571}
   - {fileID: 2025927088}
   - {fileID: 1802929048}
-  - {fileID: 1078587004}
+  - {fileID: 1078587008}
   - {fileID: 1518902431}
   - {fileID: 1085233548}
+  - {fileID: 1554568141}
   - {fileID: 1560263880}
   - {fileID: 71284290}
   - {fileID: 349682566}
@@ -7302,6 +7419,7 @@ Transform:
   - {fileID: 1078587007}
   - {fileID: 1518902434}
   - {fileID: 1085233547}
+  - {fileID: 1554568144}
   - {fileID: 1560263883}
   - {fileID: 71284289}
   - {fileID: 846193776}

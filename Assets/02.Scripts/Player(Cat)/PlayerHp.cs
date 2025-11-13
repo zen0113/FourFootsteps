@@ -200,6 +200,9 @@ public class PlayerHp : MonoBehaviour
         // UI 비활성화
         UIManager.Instance.SetUI(eUIGameObjectName.CatVersionUIGroup, false);
         UIManager.Instance.SetUI(eUIGameObjectName.HumanVersionUIGroup, false);
+        UIManager.Instance.SetUI(eUIGameObjectName.PuzzleBagButton, false);
+        UIManager.Instance.SetUI(eUIGameObjectName.PlaceUI, false);
+        UIManager.Instance.SetUI(eUIGameObjectName.ResponsibilityGroup, false);
 
         // 다이얼로그 재생 중이면 끝냄
         DialogueManager.Instance.EndDialogue();

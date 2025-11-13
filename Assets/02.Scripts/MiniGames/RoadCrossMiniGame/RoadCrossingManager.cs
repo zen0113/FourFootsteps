@@ -5,6 +5,7 @@ using UnityEngine;
 /// <summary>
 /// 도로 횡단 미니게임의 전체 흐름을 관리하는 매니저
 /// 차량 스폰, 까마귀 공격, 게임 시작/종료를 담당
+/// 각 라인의 각도를 개별 조정 가능
 /// </summary>
 public class RoadCrossingManager : MonoBehaviour
 {
@@ -24,6 +25,9 @@ public class RoadCrossingManager : MonoBehaviour
     [Header("Lane Settings")]
     [Tooltip("각 차선의 위치를 나타내는 Transform 배열")]
     public Transform[] lanes;
+    
+    [Tooltip("각 차선의 회전 각도 (도 단위, Z축 회전)")]
+    public float[] laneRotations;
     
     [Tooltip("씬 뷰에서 차선 위치 시각화")]
     public bool showLaneGizmos = true;
@@ -86,6 +90,12 @@ public class RoadCrossingManager : MonoBehaviour
             player = GameObject.FindGameObjectWithTag("Player");
         }
 
+        // laneRotations 배열 초기화 (lanes와 길이 동기화)
+        if (lanes != null && (laneRotations == null || laneRotations.Length != lanes.Length))
+        {
+            laneRotations = new float[lanes.Length];
+        }
+
         StartGame();
     }
 
@@ -143,7 +153,6 @@ public class RoadCrossingManager : MonoBehaviour
         if (vehicleSpawnCoroutine != null) StopCoroutine(vehicleSpawnCoroutine);
         if (crowAttackCoroutine != null) StopCoroutine(crowAttackCoroutine);
 
-
         Debug.Log("[RoadCrossing] 미니게임 종료!");
     }
 
@@ -163,6 +172,7 @@ public class RoadCrossingManager : MonoBehaviour
 
     /// <summary>
     /// 랜덤 차선에 차량 생성 (여러 대 동시 생성)
+    /// 각 차선의 각도 정보 전달
     /// </summary>
     void SpawnVehicle()
     {
@@ -197,15 +207,17 @@ public class RoadCrossingManager : MonoBehaviour
             availableLanes.RemoveAt(randomIndex); // 중복 방지
             
             Transform selectedLane = lanes[selectedLaneIndex];
+            float laneRotation = laneRotations[selectedLaneIndex];
 
             // 차량 생성
             GameObject vehicle = Instantiate(vehiclePrefab, selectedLane.position, Quaternion.identity);
             
-            // 차량에 차선 X좌표 전달
+            // 차량에 차선 X좌표와 각도 전달
             RoadVehicle vehicleScript = vehicle.GetComponent<RoadVehicle>();
             if (vehicleScript != null)
             {
                 vehicleScript.SetLaneX(selectedLane.position.x);
+                vehicleScript.SetLaneRotation(laneRotation); // 라인 각도 전달
             }
         }
         
@@ -314,6 +326,7 @@ public class RoadCrossingManager : MonoBehaviour
 
     /// <summary>
     /// 씬 뷰에서 차선과 도로 영역 시각화
+    /// 각 라인의 각도를 시각적으로 표현
     /// </summary>
     void OnDrawGizmos()
     {
@@ -331,16 +344,25 @@ public class RoadCrossingManager : MonoBehaviour
         );
         Gizmos.DrawWireCube(center, size);
 
-        // 차선 위치 표시 (노란색)
+        // 차선 위치와 각도 표시 (노란색)
         if (showLaneGizmos && lanes != null)
         {
             Gizmos.color = Color.yellow;
-            foreach (Transform lane in lanes)
+            for (int i = 0; i < lanes.Length; i++)
             {
-                if (lane != null)
+                if (lanes[i] != null)
                 {
-                    Gizmos.DrawWireSphere(lane.position, 0.3f);
-                    Gizmos.DrawLine(lane.position, lane.position + Vector3.down * 20f);
+                    // 차선 중심점
+                    Gizmos.DrawWireSphere(lanes[i].position, 0.3f);
+                    
+                    // 각도에 맞춘 라인 그리기 (20유닛 길이)
+                    float rotation = (laneRotations != null && i < laneRotations.Length) ? laneRotations[i] : 0f;
+                    float radians = rotation * Mathf.Deg2Rad;
+                    
+                    // 차량이 이동할 실제 방향 표시 (아래쪽으로 진행)
+                    Vector3 movementDirection = new Vector3(Mathf.Sin(radians), -Mathf.Cos(radians), 0f).normalized;
+                    Vector3 lineEnd = lanes[i].position + movementDirection * 20f;
+                    Gizmos.DrawLine(lanes[i].position, lineEnd);
                 }
             }
         }

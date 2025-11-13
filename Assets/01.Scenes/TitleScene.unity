@@ -618,7 +618,7 @@ GameObject:
   - component: {fileID: 263534161}
   - component: {fileID: 263534160}
   m_Layer: 0
-  m_Name: SceneLoader
+  m_Name: LobbyManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -636,6 +636,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d492fcbf86773d048b5f1b7fd38987db, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isUsabilityTest: 1
+  LoadGameButton: {fileID: 1982030129}
 --- !u!4 &263534161
 Transform:
   m_ObjectHideFlags: 0
@@ -1752,7 +1754,7 @@ GameObject:
   - component: {fileID: 694642036}
   - component: {fileID: 694642035}
   m_Layer: 5
-  m_Name: Button
+  m_Name: Debug_GoToBadEnding
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2917,7 +2919,7 @@ GameObject:
   - component: {fileID: 1083932302}
   - component: {fileID: 1083932303}
   m_Layer: 5
-  m_Name: Buttons
+  m_Name: Lobby Buttons
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -9615,7 +9617,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1982030130
 RectTransform:
   m_ObjectHideFlags: 0
@@ -9631,9 +9633,9 @@ RectTransform:
   - {fileID: 506083080}
   m_Father: {fileID: 1083932302}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 250, y: -150}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 500, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1982030131
@@ -9743,7 +9745,7 @@ GameObject:
   - component: {fileID: 2017331815}
   - component: {fileID: 2017331814}
   m_Layer: 5
-  m_Name: Button (1)
+  m_Name: Debug_GoToHappyEnding
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

@@ -2,8 +2,22 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class TitleButton : MonoBehaviour
+public class LobbyManager : MonoBehaviour
 {
+    public bool isUsabilityTest = false;
+
+    [Header("Lobby UI Components")]
+    [SerializeField] private GameObject LoadGameButton;
+
+
+    private void Awake()
+    {
+        if (isUsabilityTest)
+            LoadGameButton.SetActive(false);
+
+    }
+
+
     public void LoadNextScene()
     {
         SceneLoader.Instance.LoadScene(GameManager.Instance.GetNextSceneData().sceneName);

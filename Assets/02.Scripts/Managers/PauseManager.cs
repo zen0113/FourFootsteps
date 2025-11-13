@@ -74,6 +74,16 @@ public class PauseManager : MonoBehaviour
         if (DialogueManager.Instance.isDialogueActive)
             DialogueManager.Instance.ForceAbortDialogue();
 
+        // 씬을 떠나기 전에 인게임 UI(PlayerUICanvas 등)를 명시적으로 비활성화합니다.
+        if (UIManager.Instance != null)
+        {
+            UIManager.Instance.SetUI(eUIGameObjectName.CatVersionUIGroup, false);
+            UIManager.Instance.SetUI(eUIGameObjectName.HumanVersionUIGroup, false);
+            UIManager.Instance.SetUI(eUIGameObjectName.PuzzleBagButton, false);
+            UIManager.Instance.SetUI(eUIGameObjectName.PlaceUI, false);
+            UIManager.Instance.SetUI(eUIGameObjectName.ResponsibilityGroup, false);
+        }
+
         Time.timeScale = 1f;
         SceneLoader.Instance.LoadScene("TitleScene");
     }

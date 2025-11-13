@@ -1,20 +1,20 @@
 using UnityEngine;
 
 /// <summary>
-/// 현실적인 도르레 시스템 - 분리된 플랫폼과 작동
+/// 현실적인 도르레 시스템 - 분리된 플랫폼과 작동 (PhysicsObject 우선권 잠금 버전)
 /// </summary>
 public class PulleySystem : MonoBehaviour
 {
     [Header("플랫폼 설정")]
     [SerializeField] private PulleyPlatform platformA;
     [SerializeField] private PulleyPlatform platformB;
-    
+
     [Header("도르레 물리 설정")]
     [SerializeField] private float maxHeight = 4f;
     [SerializeField] private float minHeight = -4f;
     [SerializeField] private float weightThreshold = 0.1f;
     [SerializeField] private bool enableDebugLogs = true;
-    
+
     [Header("상태 모니터링 (읽기 전용)")]
     [SerializeField] private ObjectType platformA_Priority = ObjectType.Empty;
     [SerializeField] private ObjectType platformB_Priority = ObjectType.Empty;
@@ -22,157 +22,144 @@ public class PulleySystem : MonoBehaviour
     [SerializeField] private float platformB_Weight = 0f;
     [SerializeField] private string currentState = "Idle";
     [SerializeField] private string lastAction = "None";
-    
+
+    // ✅ 추가: 현재 우선권을 가진 플랫폼 (오브젝트가 올라간 쪽)
+    private PulleyPlatform activePlatform = null;
+
     private void Start()
     {
-        // 플랫폼 찾기 (분리된 플랫폼들을 찾아야 함)
         if (platformA == null || platformB == null)
-        {
             AutoFindPlatforms();
-        }
-        
+
         if (platformA == null || platformB == null)
         {
             Debug.LogError("PulleySystem: 플랫폼 A 또는 B가 설정되지 않았습니다!");
             return;
         }
-        
-        // 초기 위치 설정
+
         SetupInitialPositions();
-        
-        // 이벤트 연결
+
         platformA.OnPriorityChanged += OnPlatformAChanged;
         platformB.OnPriorityChanged += OnPlatformBChanged;
-        
+
         platformA.OnMoveComplete += OnPlatformMoveComplete;
         platformB.OnMoveComplete += OnPlatformMoveComplete;
-        
-        // 초기 상태 평가
+
         EvaluateSystemState();
-        
+
         if (enableDebugLogs)
             Debug.Log("✓ 현실적인 PulleySystem 초기화 완료 (분리된 플랫폼)");
     }
-    
+
     private void Update()
     {
-        // ★ 추가: 매 프레임 상태 재평가 (이동 중에도 물체 제거 감지)
         EvaluateSystemState();
     }
-    
+
     private void SetupInitialPositions()
     {
         platformA.SetInitialHeight(0f);
         platformB.SetInitialHeight(0f);
-        
-        if (enableDebugLogs)
-            Debug.Log("초기 위치 설정: 두 플랫폼 모두 높이 0에서 시작");
     }
-    
+
     private void AutoFindPlatforms()
     {
-        // 씬 전체에서 PulleyPlatform 찾기 (이제 자식이 아니므로)
         PulleyPlatform[] allPlatforms = FindObjectsOfType<PulleyPlatform>();
-        
         if (allPlatforms.Length >= 2)
         {
-            // 가장 가까운 두 개의 플랫폼을 선택
-            float minDistance = float.MaxValue;
-            PulleyPlatform closestA = null, closestB = null;
-            
-            for (int i = 0; i < allPlatforms.Length; i++)
-            {
-                for (int j = i + 1; j < allPlatforms.Length; j++)
-                {
-                    float distanceA = Vector3.Distance(transform.position, allPlatforms[i].transform.position);
-                    float distanceB = Vector3.Distance(transform.position, allPlatforms[j].transform.position);
-                    float totalDistance = distanceA + distanceB;
-                    
-                    if (totalDistance < minDistance)
-                    {
-                        minDistance = totalDistance;
-                        closestA = allPlatforms[i];
-                        closestB = allPlatforms[j];
-                    }
-                }
-            }
-            
-            platformA = closestA;
-            platformB = closestB;
-            
-            if (enableDebugLogs)
-                Debug.Log($"✓ 자동으로 가장 가까운 플랫폼 감지됨: A={platformA.name}, B={platformB.name}");
-        }
-        else
-        {
-            Debug.LogError($"PulleySystem: 2개의 PulleyPlatform이 필요합니다. (현재 {allPlatforms.Length}개 발견)");
+            platformA = allPlatforms[0];
+            platformB = allPlatforms[1];
         }
     }
-    
+
     private void OnPlatformAChanged(PulleyPlatform platform, ObjectType priority, float weight)
     {
         platformA_Priority = priority;
         platformA_Weight = weight;
-        
-        if (enableDebugLogs)
-            Debug.Log($"[PlatformA] Priority: {priority}, Weight: {weight:F1}");
-        
-        EvaluateSystemState();
+        HandlePriorityChange(platformA, priority);
     }
-    
+
     private void OnPlatformBChanged(PulleyPlatform platform, ObjectType priority, float weight)
     {
         platformB_Priority = priority;
         platformB_Weight = weight;
-        
+        HandlePriorityChange(platformB, priority);
+    }
+
+    /// <summary>
+    /// ✅ 핵심: 이벤트 우선권 잠금 처리
+    /// </summary>
+    private void HandlePriorityChange(PulleyPlatform source, ObjectType priority)
+    {
         if (enableDebugLogs)
-            Debug.Log($"[PlatformB] Priority: {priority}, Weight: {weight:F1}");
-        
+            Debug.Log($"[HandlePriorityChange] {source.name}: {priority}");
+
+        // 🔒 현재 오브젝트가 올라간 쪽이 active라면, 그게 유지되는 한 무시
+        if (activePlatform != null && activePlatform != source)
+        {
+            if (activePlatform.CurrentPriority == ObjectType.PhysicsObject)
+            {
+                if (enableDebugLogs)
+                    Debug.Log($"🚫 {source.name} 이벤트 무시됨 — {activePlatform.name}에 오브젝트가 우선권 유지 중");
+                return;
+            }
+        }
+
+        // 🟢 오브젝트가 새로 감지된 경우, 무조건 그쪽이 우선권을 가져감
+        if (priority == ObjectType.PhysicsObject)
+        {
+            activePlatform = source;
+            if (enableDebugLogs)
+                Debug.Log($"🔒 우선권 설정: {activePlatform.name} (PhysicsObject)");
+        }
+
+        // 🟡 오브젝트가 내려가서 감지 해제된 경우 → lock 해제
+        if (activePlatform == source && priority == ObjectType.Empty)
+        {
+            if (enableDebugLogs)
+                Debug.Log($"🔓 우선권 해제: {source.name}");
+            activePlatform = null;
+        }
+
+        // 시스템 재평가
         EvaluateSystemState();
     }
-    
+
     private void OnPlatformMoveComplete(PulleyPlatform platform)
     {
         if (enableDebugLogs)
-            Debug.Log($"✓ 플랫폼 이동 완료: {platform.name} (높이: {platform.CurrentHeight:F1})");
+            Debug.Log($"✓ 플랫폼 이동 완료: {platform.name}");
     }
-    
+
     private void EvaluateSystemState()
     {
-        if (platformA.IsMoving || platformB.IsMoving)
+        if (platformA == null || platformB == null) return;
+
+        if (activePlatform != null)
         {
-            currentState = "Moving";
-            // ★ 중요: 이동 중에도 계속 상태 체크
-            ApplyRealisticPulleyPhysics();
+            // 🔒 activePlatform이 설정되어 있으면 오브젝트 쪽 유지
+            if (activePlatform == platformA)
+                MovePlatformsToExtremes(minHeight, maxHeight, $"{activePlatform.name} locked (PhysicsObject)");
+            else
+                MovePlatformsToExtremes(maxHeight, minHeight, $"{activePlatform.name} locked (PhysicsObject)");
             return;
         }
-        
-        // 현재 상태 디버깅
-        if (enableDebugLogs)
-        {
-            Debug.Log($"[EvaluateSystemState] A: {platformA_Priority}({platformA_Weight:F1}) | B: {platformB_Priority}({platformB_Weight:F1})");
-        }
-        
+
+        // 평상시 로직 (우선권 없을 때만)
         ApplyRealisticPulleyPhysics();
     }
-    
+
     private void ApplyRealisticPulleyPhysics()
     {
         bool hasWeightA = platformA_Priority != ObjectType.Empty;
         bool hasWeightB = platformB_Priority != ObjectType.Empty;
-        
-        if (enableDebugLogs)
-        {
-            Debug.Log($"[ApplyRealisticPulleyPhysics] A:{platformA_Priority}({platformA_Weight:F1}) | B:{platformB_Priority}({platformB_Weight:F1})");
-        }
-        
+
         if (!hasWeightA && !hasWeightB)
         {
-            // 둘 다 비어있으면 평형 상태(중간 위치)로 복귀
-            MovePlatformsToBalance("Both platforms empty - returning to balance");
+            MovePlatformsToBalance("Both empty");
             return;
         }
-        
+
         if (hasWeightA && !hasWeightB)
         {
             MovePlatformsToExtremes(minHeight, maxHeight, "Only A has weight");
@@ -186,177 +173,50 @@ public class PulleySystem : MonoBehaviour
             CompareWeightsAndMove();
         }
     }
-    
+
     private void CompareWeightsAndMove()
     {
         if (platformA_Priority > platformB_Priority)
-        {
-            MovePlatformsToExtremes(minHeight, maxHeight, "A has higher priority");
-        }
+            MovePlatformsToExtremes(minHeight, maxHeight, "A higher priority");
         else if (platformB_Priority > platformA_Priority)
-        {
-            MovePlatformsToExtremes(maxHeight, minHeight, "B has higher priority");
-        }
+            MovePlatformsToExtremes(maxHeight, minHeight, "B higher priority");
         else
-        {
             HandleSameTypeComparison();
-        }
     }
-    
+
     private void HandleSameTypeComparison()
     {
-        float weightDifference = platformA_Weight - platformB_Weight;
-        
-        if (Mathf.Abs(weightDifference) <= weightThreshold)
+        float diff = platformA_Weight - platformB_Weight;
+        if (Mathf.Abs(diff) <= weightThreshold)
         {
-            // 무게 차이가 임계값 이하 → 평형 상태로 복귀
-            MovePlatformsToBalance($"Weights are balanced (A:{platformA_Weight:F1} vs B:{platformB_Weight:F1})");
+            MovePlatformsToBalance("Balanced weights");
         }
-        else if (weightDifference > 0)
+        else if (diff > 0)
         {
-            // A가 더 무거움 → A는 바닥으로, B는 최대 높이로
-            MovePlatformsToExtremes(minHeight, maxHeight, $"A is heavier ({platformA_Weight:F1} vs {platformB_Weight:F1})");
+            MovePlatformsToExtremes(minHeight, maxHeight, "A heavier");
         }
         else
         {
-            // B가 더 무거움 → B는 바닥으로, A는 최대 높이로
-            MovePlatformsToExtremes(maxHeight, minHeight, $"B is heavier ({platformB_Weight:F1} vs {platformA_Weight:F1})");
+            MovePlatformsToExtremes(maxHeight, minHeight, "B heavier");
         }
     }
-    
-    private void MovePlatformsToExtremes(float targetHeightA, float targetHeightB, string reason)
+
+    private void MovePlatformsToExtremes(float a, float b, string reason)
     {
-        if (Mathf.Abs(platformA.CurrentHeight - targetHeightA) < 0.1f && 
-            Mathf.Abs(platformB.CurrentHeight - targetHeightB) < 0.1f)
-        {
-            currentState = $"Already in correct position - {reason}";
-            return;
-        }
-        
-        // 도르레 제약 조건 확인
-        float totalHeight = targetHeightA + targetHeightB;
-        if (Mathf.Abs(totalHeight) > 0.1f)
-        {
-            float adjustment = -totalHeight / 2f;
-            targetHeightA += adjustment;
-            targetHeightB += adjustment;
-        }
-        
-        targetHeightA = Mathf.Clamp(targetHeightA, minHeight, maxHeight);
-        targetHeightB = Mathf.Clamp(targetHeightB, minHeight, maxHeight);
-        
-        platformA.MoveToHeight(targetHeightA);
-        platformB.MoveToHeight(targetHeightB);
-        
-        currentState = $"Moving to extremes - {reason}";
-        lastAction = $"A→{targetHeightA:F1}, B→{targetHeightB:F1}";
-        
-        if (enableDebugLogs)
-        {
-            Debug.Log($"🔼 도르레 이동: {reason}");
-            Debug.Log($"  A: {platformA.CurrentHeight:F1} → {targetHeightA:F1}");
-            Debug.Log($"  B: {platformB.CurrentHeight:F1} → {targetHeightB:F1}");
-        }
+        platformA.MoveToHeight(a);
+        platformB.MoveToHeight(b);
+        currentState = reason;
+        lastAction = $"A→{a:F1}, B→{b:F1}";
     }
-    
-    /// <summary>
-    /// 플랫폼들을 평형 상태(중간 위치)로 이동
-    /// </summary>
+
     private void MovePlatformsToBalance(string reason)
     {
-        float targetHeightA = 0f; // 평형 위치
-        float targetHeightB = 0f; // 평형 위치
-        
-        if (enableDebugLogs)
-            Debug.Log($"[MovePlatformsToBalance] A현재: {platformA.CurrentHeight:F1}, B현재: {platformB.CurrentHeight:F1}");
-        
-        // 이미 평형 상태에 있으면 이동하지 않음
-        if (Mathf.Abs(platformA.CurrentHeight - targetHeightA) < 0.1f && 
-            Mathf.Abs(platformB.CurrentHeight - targetHeightB) < 0.1f)
-        {
-            currentState = $"Already balanced - {reason}";
-            if (enableDebugLogs)
-                Debug.Log($"⚖️  이미 평형 상태입니다 - {reason}");
-            return;
-        }
-        
-        // 평형 위치로 이동
-        platformA.MoveToHeight(targetHeightA);
-        platformB.MoveToHeight(targetHeightB);
-        
-        currentState = $"Moving to balance - {reason}";
-        lastAction = $"A→{targetHeightA:F1}, B→{targetHeightB:F1}";
-        
-        if (enableDebugLogs)
-        {
-            Debug.Log($"⚖️  도르레 평형 복귀: {reason}");
-            Debug.Log($"  A: {platformA.CurrentHeight:F1} → {targetHeightA:F1}");
-            Debug.Log($"  B: {platformB.CurrentHeight:F1} → {targetHeightB:F1}");
-        }
+        platformA.MoveToHeight(0);
+        platformB.MoveToHeight(0);
+        currentState = reason;
+        lastAction = "Balance";
     }
-    
-    public bool IsSystemMoving()
-    {
-        return platformA.IsMoving || platformB.IsMoving;
-    }
-    
-    public void ForceStopAllMovement()
-    {
-        platformA.StopMovement();
-        platformB.StopMovement();
-        currentState = "Force Stopped";
-    }
-    
-    public void ResetToCenter()
-    {
-        platformA.MoveToHeight(0f);
-        platformB.MoveToHeight(0f);
-        currentState = "Resetting to Center";
-    }
-    
-    [ContextMenu("Force Re-evaluate")]
-    public void ForceReevaluate()
-    {
-        EvaluateSystemState();
-    }
-    
-    [ContextMenu("Print System Status")]
-    public void PrintSystemStatus()
-    {
-        Debug.Log($"=== Realistic Pulley System Status ===");
-        Debug.Log($"Platform A: Priority={platformA_Priority}, Weight={platformA_Weight:F1}, Height={platformA.CurrentHeight:F1}");
-        Debug.Log($"Platform B: Priority={platformB_Priority}, Weight={platformB_Weight:F1}, Height={platformB.CurrentHeight:F1}");
-        Debug.Log($"Current State: {currentState}");
-        Debug.Log($"Last Action: {lastAction}");
-        Debug.Log($"System Moving: {IsSystemMoving()}");
-    }
-    
-    private void OnDrawGizmos()
-    {
-        // 도르레 중심점
-        Gizmos.color = Color.white;
-        Gizmos.DrawWireSphere(transform.position, 0.3f);
-        
-        if (platformA != null && platformB != null)
-        {
-            // 밧줄 시각화
-            Gizmos.color = IsSystemMoving() ? Color.red : Color.cyan;
-            Gizmos.DrawLine(platformA.transform.position, transform.position);
-            Gizmos.DrawLine(transform.position, platformB.transform.position);
-            
-            // 도르레 휠
-            Gizmos.color = Color.yellow;
-            Gizmos.DrawWireSphere(transform.position, 0.5f);
-        }
-        
-        // 상태 표시
-        #if UNITY_EDITOR
-        UnityEditor.Handles.color = Color.white;
-        UnityEditor.Handles.Label(transform.position + Vector3.up * 1.5f, 
-            $"Pulley System\n{currentState}\n{lastAction}");
-        #endif
-    }
-    
+
     private void OnDestroy()
     {
         if (platformA != null)
@@ -364,7 +224,6 @@ public class PulleySystem : MonoBehaviour
             platformA.OnPriorityChanged -= OnPlatformAChanged;
             platformA.OnMoveComplete -= OnPlatformMoveComplete;
         }
-        
         if (platformB != null)
         {
             platformB.OnPriorityChanged -= OnPlatformBChanged;

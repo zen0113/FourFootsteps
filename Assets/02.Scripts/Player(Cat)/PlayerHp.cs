@@ -243,6 +243,20 @@ public class PlayerHp : MonoBehaviour
             rb.isKinematic = true;
         }
 
+        Animator animator = GetComponent<Animator>();
+        if (animator != null)
+        {
+            // 다른 모든 활성 상태를 false로 설정하여 충돌 방지
+            animator.SetBool("Moving", false);
+            animator.SetBool("Dash", false);
+            // animator.SetBool("Jump", false); // Jump는 Bool이 아닐 수 있으므로 확인 필요 (PlayerCatMovement에 Jump Bool이 없음)
+            animator.SetBool("Climbing", false);
+            animator.SetBool("Crouching", false); // 웅크린 채 이동 (false)
+
+            // 'idle crouch' 상태 (Crouch)를 true로 설정
+            animator.SetBool("Crouch", true);
+        }
+
 
         // 지정된 시간만큼 대기
         yield return new WaitForSeconds(restartDelay);

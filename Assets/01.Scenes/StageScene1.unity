@@ -4362,7 +4362,7 @@ Transform:
   m_GameObject: {fileID: 243751439}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 100.5, y: -1.2, z: 0}
+  m_LocalPosition: {x: 100.5, y: -1.03, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -8447,11 +8447,6 @@ Transform:
   - {fileID: 92058313}
   m_Father: {fileID: 504103550}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &528647024 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 4135296550664430820, guid: fcc937e4cda6d8c4d8de70f5c23e9268, type: 3}
-  m_PrefabInstance: {fileID: 1355391952}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &529157326
 GameObject:
   m_ObjectHideFlags: 0
@@ -8871,7 +8866,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   miniGame: {fileID: 73345466}
   startDialogueID: Stage01_001
-  uiToHideOnStart: {fileID: 528647024}
   cameraShake: {fileID: 206797103}
   followCamera: {fileID: 206797095}
   autoProgressOnComplete: 1
@@ -10038,7 +10032,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   miniGame: {fileID: 574428819}
   startDialogueID: Stage01_002
-  uiToShowOnComplete: {fileID: 528647024}
   autoProgressOnComplete: 1
   cameraShake: {fileID: 206797103}
   followCamera: {fileID: 206797095}

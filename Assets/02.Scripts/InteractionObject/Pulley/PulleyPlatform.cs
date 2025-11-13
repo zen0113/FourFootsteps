@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 /// <summary>
 /// 도르레 시스템의 개별 플랫폼을 관리하는 컴포넌트 (완전 월드 좌표 고정 버전)
@@ -21,9 +22,14 @@ public class PulleyPlatform : MonoBehaviour
     private ObjectDetector detector;
     private PulleySystem parentSystem;
     private Coroutine moveCoroutine;
+    private Collider2D platformCollider;
     
     // 완전히 고정된 월드 좌표
     private Vector3 absoluteWorldPosition;
+    
+    // ★ 추가: 플랫폼 위의 오브젝트들
+    private List<Transform> objectsOnPlatform = new List<Transform>();
+    private Vector3 lastPlatformPosition;
     
     // 상태 정보
     public ObjectType CurrentPriority { get; private set; } = ObjectType.Empty;
@@ -38,28 +44,23 @@ public class PulleyPlatform : MonoBehaviour
     
     private void Awake()
     {
-        // 부모에서 완전히 분리하여 월드 루트에 배치
         DetachFromParent();
-        
-        // 에디터에서 설정한 원래 위치를 절대 좌표로 저장 (가장 중요!)
         absoluteWorldPosition = transform.position;
+        platformCollider = GetComponent<Collider2D>();
+        lastPlatformPosition = transform.position;
     }
     
     private void Start()
     {
-        // 에디터에서 설정된 원래 위치를 절대 월드 좌표로 사용
-        // (Start에서 transform.position을 사용하지 않음)
         if (absoluteWorldPosition == Vector3.zero)
         {
-            // Awake에서 설정되지 않았다면 현재 위치 사용
             absoluteWorldPosition = transform.position;
         }
         currentHeight = 0f;
         targetHeight = 0f;
         
-        // 컴포넌트 찾기
         detector = GetComponentInChildren<ObjectDetector>();
-        parentSystem = FindObjectOfType<PulleySystem>(); // 부모 관계 없이 찾기
+        parentSystem = FindObjectOfType<PulleySystem>();
         
         if (detector == null)
         {
@@ -67,7 +68,6 @@ public class PulleyPlatform : MonoBehaviour
             return;
         }
         
-        // 이벤트 연결
         detector.OnPriorityChanged += OnDetectorPriorityChanged;
         
         Debug.Log($"PulleyPlatform({platformName}) 절대 월드 좌표 고정: {absoluteWorldPosition}");
@@ -75,15 +75,12 @@ public class PulleyPlatform : MonoBehaviour
     
     private void DetachFromParent()
     {
-        // 현재 월드 위치 저장
         Vector3 worldPos = transform.position;
         Vector3 worldRotation = transform.eulerAngles;
         Vector3 worldScale = transform.lossyScale;
         
-        // 부모에서 분리
         transform.SetParent(null);
         
-        // 월드 좌표 그대로 유지
         transform.position = worldPos;
         transform.eulerAngles = worldRotation;
         transform.localScale = worldScale;
@@ -93,7 +90,6 @@ public class PulleyPlatform : MonoBehaviour
     
     private void LateUpdate()
     {
-        // 매 프레임 강제로 월드 좌표 고정 (다른 시스템의 영향 차단)
         if (!isMoving)
         {
             Vector3 expectedPos = absoluteWorldPosition + Vector3.up * currentHeight;
@@ -110,23 +106,26 @@ public class PulleyPlatform : MonoBehaviour
         CurrentPriority = priority;
         CurrentWeight = weight;
         
-        // 부모 시스템에 변경 사항 알림
         OnPriorityChanged?.Invoke(this, priority, weight);
     }
     
     /// <summary>
-    /// 특정 높이로 이동 (완전 절대 월드 좌표 기반)
+    /// 특정 높이로 이동
     /// </summary>
     public void MoveToHeight(float height)
     {
-        if (Mathf.Approximately(currentHeight, height))
+        if (isMoving && Mathf.Approximately(targetHeight, height))
+        {
+            return;
+        }
+        
+        if (!isMoving && Mathf.Approximately(currentHeight, height))
         {
             return;
         }
         
         targetHeight = height;
         
-        // 기존 이동 중지
         if (moveCoroutine != null)
         {
             StopCoroutine(moveCoroutine);
@@ -138,11 +137,17 @@ public class PulleyPlatform : MonoBehaviour
     private IEnumerator MovePlatformCoroutine()
     {
         isMoving = true;
+        lastPlatformPosition = transform.position;
+        
+        // ★ 1. 플랫폼 위의 오브젝트 수집
+        CollectObjectsOnPlatform();
+        
+        // ★ 2. 모든 오브젝트와 Ground의 충돌을 무시
+        IgnoreGroundCollision(true);
         
         float startHeight = currentHeight;
         float distance = Mathf.Abs(targetHeight - startHeight);
         
-        // 이동 시간 계산
         float duration = distance / moveSpeed;
         float elapsed = 0f;
         
@@ -151,28 +156,100 @@ public class PulleyPlatform : MonoBehaviour
             elapsed += Time.deltaTime;
             float progress = elapsed / duration;
             
-            // 애니메이션 커브 적용
             float curveValue = moveCurve.Evaluate(progress);
             
-            // 높이 보간
             currentHeight = Mathf.Lerp(startHeight, targetHeight, curveValue);
             
-            // 절대 월드 좌표로 위치 설정
             Vector3 newPosition = absoluteWorldPosition + Vector3.up * currentHeight;
+            Vector3 platformDelta = newPosition - transform.position;
+            
             transform.position = newPosition;
+            
+            // ★ 3. 플랫폼과 함께 오브젝트도 이동
+            MoveObjectsWithPlatform(platformDelta);
             
             yield return null;
         }
         
-        // 최종 위치 설정
         currentHeight = targetHeight;
         transform.position = absoluteWorldPosition + Vector3.up * currentHeight;
+        
+        // ★ 4. 이동 완료 후 충돌 복구
+        IgnoreGroundCollision(false);
+        
         isMoving = false;
         
-        // 이동 완료 이벤트
         OnMoveComplete?.Invoke(this);
         
         moveCoroutine = null;
+    }
+    
+    /// <summary>
+    /// ★ 플랫폼 위의 오브젝트들을 수집
+    /// </summary>
+    private void CollectObjectsOnPlatform()
+    {
+        objectsOnPlatform.Clear();
+        
+        // 플랫폼 위의 모든 오브젝트 검사
+        Collider2D[] collidersOnPlatform = Physics2D.OverlapAreaAll(
+            transform.position - new Vector3(transform.localScale.x * 0.5f, 0.5f, 0),
+            transform.position + new Vector3(transform.localScale.x * 0.5f, transform.localScale.y * 0.5f + 0.5f, 0)
+        );
+        
+        foreach (Collider2D col in collidersOnPlatform)
+        {
+            if (col.gameObject == gameObject)
+                continue;
+            
+            Rigidbody2D rb = col.GetComponent<Rigidbody2D>();
+            if (rb != null)
+            {
+                objectsOnPlatform.Add(col.transform);
+                Debug.Log($"[{platformName}] 수집: '{col.name}'");
+            }
+        }
+    }
+    
+    /// <summary>
+    /// ★ 오브젝트들과 Ground 레이어의 충돌 설정 변경
+    /// </summary>
+   private void IgnoreGroundCollision(bool ignore)
+    {
+        int groundLayer = LayerMask.NameToLayer("Ground");
+        Collider2D[] groundColliders = FindObjectsOfType<Collider2D>();
+
+        foreach (Transform objTransform in objectsOnPlatform)
+        {
+            if (objTransform == null) continue;
+
+            Collider2D objCol = objTransform.GetComponent<Collider2D>();
+            if (objCol == null) continue;
+
+            foreach (var groundCol in groundColliders)
+            {
+                if (groundCol.gameObject.layer == groundLayer)
+                {
+                    Physics2D.IgnoreCollision(objCol, groundCol, ignore);
+                }
+            }
+
+            Debug.Log($"[{platformName}] '{objTransform.name}' → Ground 충돌 {(ignore ? "무시" : "복구")}");
+        }
+    }
+    
+    /// <summary>
+    /// ★ 플랫폼과 함께 오브젝트들도 이동
+    /// </summary>
+    private void MoveObjectsWithPlatform(Vector3 delta)
+    {
+        foreach (Transform objTransform in objectsOnPlatform)
+        {
+            if (objTransform != null)
+            {
+                objTransform.position += delta;
+            }
+        }
     }
     
     public void StopMovement()
@@ -182,11 +259,14 @@ public class PulleyPlatform : MonoBehaviour
             StopCoroutine(moveCoroutine);
             moveCoroutine = null;
             isMoving = false;
+            
+            // ★ 중단 시 충돌 복구
+            IgnoreGroundCollision(false);
         }
     }
     
     /// <summary>
-    /// 초기 높이 설정 (절대 월드 좌표 기준)
+    /// 초기 높이 설정
     /// </summary>
     public void SetInitialHeight(float height)
     {
@@ -196,7 +276,7 @@ public class PulleyPlatform : MonoBehaviour
     }
     
     /// <summary>
-    /// 절대 월드 시작 위치 재설정 (에디터에서만 사용)
+    /// 절대 월드 시작 위치 재설정
     /// </summary>
     public void SetAbsoluteWorldPosition(Vector3 position)
     {
@@ -217,20 +297,16 @@ public class PulleyPlatform : MonoBehaviour
     
     private void OnDrawGizmos()
     {
-        // 절대 월드 기준점 표시
         Gizmos.color = Color.gray;
         Vector3 basePos = Application.isPlaying ? absoluteWorldPosition : transform.position;
         Gizmos.DrawWireCube(basePos, Vector3.one * 0.3f);
         
-        // 현재 위치에서 기준점으로의 연결선
         Gizmos.color = Color.yellow;
         Gizmos.DrawLine(basePos, transform.position);
         
-        // 현재 플랫폼 상태 표시
         Gizmos.color = isMoving ? Color.red : Color.green;
         Gizmos.DrawWireCube(transform.position, Vector3.one * 0.5f);
         
-        // 상태 정보 표시
         #if UNITY_EDITOR
         UnityEditor.Handles.color = Color.white;
         UnityEditor.Handles.Label(transform.position + Vector3.up * 0.8f, 
@@ -240,7 +316,6 @@ public class PulleyPlatform : MonoBehaviour
     
     private void OnDestroy()
     {
-        // 이벤트 해제
         if (detector != null)
         {
             detector.OnPriorityChanged -= OnDetectorPriorityChanged;

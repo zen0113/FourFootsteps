@@ -432,8 +432,6 @@ public class DialogueManager : MonoBehaviour
             yield return StartCoroutine(FadeCoverPanels(1f, 0f, 0.35f)); // 복귀는 짧게
     }
 
-
-
     private IEnumerator TextShakeEffectCoroutine(int dialogueType)
     {
         //isTextShaking = true;
@@ -717,6 +715,106 @@ public class DialogueManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 진행 중인 다이얼로그를 즉시 강제 종료. (타이틀 화면 복귀 등에 사용)
+    /// </summary>
+    public void ForceAbortDialogue()
+    {
+        if (!isDialogueActive)
+            return;
+
+        // 1. 모든 코루틴 중단
+        StopAllCoroutines();
+
+        // 2. 사운드 정지
+        SoundPlayer.Instance.UISoundPlay_LOOP(0, false);
+
+        // 3. 모든 상태 플래그 초기화
+        isDialogueActive = false;
+        isTyping = false;
+        isAuto = false;
+        isFast = false;
+        isAutoDelayed = false;
+        isFadeOut = false;
+        isCutsceneFadingToBlack = false;
+        isCoverTransitioning = false;
+        isSkippingToLast = false;
+        lastHadCutscene = false;
+
+        // 4. 대화 큐 비우기
+        dialogueQueue.Clear();
+
+        // 5. 현재 다이얼로그 ID 초기화
+        currentDialogueID = "";
+
+        // 6. 모든 다이얼로그 UI 비활성화
+        foreach (GameObject canvas in dialogueSet)
+        {
+            if (canvas != null)
+                canvas.SetActive(false);
+        }
+
+        // 7. 선택지 UI 정리
+        for (int i = 0; i < choicesContainer.Length; i++)
+        {
+            if (choicesContainer[i] != null)
+            {
+                foreach (Transform child in choicesContainer[i])
+                {
+                    Destroy(child.gameObject);
+                }
+            }
+        }
+
+        // 8. 스킵 텍스트 비활성화
+        foreach (GameObject skip in skipText)
+        {
+            if (skip != null)
+                skip.SetActive(false);
+        }
+
+        // 9. 커버 패널 초기화 (투명하게)
+        foreach (var cover in cutsceneCoverPanels)
+        {
+            if (cover != null)
+            {
+                cover.color = new Color(0f, 0f, 0f, 0f);
+                cover.gameObject.SetActive(false);
+            }
+        }
+
+        // 10. 컷씬 이미지 초기화
+        foreach (var img in cutSceneImages)
+        {
+            if (img != null)
+            {
+                img.color = new Color(1, 1, 1, 0);
+                img.sprite = null;
+            }
+        }
+
+        // 11. 캐릭터 이미지 초기화
+        foreach (var characterImage in characterImages)
+        {
+            if (characterImage != null)
+            {
+                characterImage.color = new Color(1, 1, 1, 0);
+                characterImage.sprite = null;
+            }
+        }
+
+        // 12. 스크립트 텍스트 초기화
+        foreach (var text in scriptText)
+        {
+            if (text != null)
+            {
+                text.text = "";
+                text.color = Color.black;
+            }
+        }
+
+        Debug.Log("[DialogueManager] 다이얼로그가 강제로 중단되었습니다.");
+    }
 
     // ---------------------------------------------- Script methods ----------------------------------------------
     private void ProceedToNext()

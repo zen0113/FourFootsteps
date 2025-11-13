@@ -265,6 +265,11 @@ public class PlayerHp : MonoBehaviour
         GameManager.Instance.SetVariable("CurrentHP", maxHp);
         GameManager.Instance.SetVariable("MaxHP", maxHp);
 
+        if (SoundPlayer.Instance != null)
+        {
+            SoundPlayer.Instance.StopAllBGM();
+        }
+
         // 현재 씬을 다시 로드
         string currentSceneName = SceneManager.GetActiveScene().name;
         

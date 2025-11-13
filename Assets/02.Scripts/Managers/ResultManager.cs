@@ -285,6 +285,13 @@ public class ResultManager : MonoBehaviour
 
             case string when resultID.StartsWith("Result_SetupAndStartMinigame"):
                 currentMinigameCat = resultID.Split('_').Last(); // "Result_SetupAndStartMinigame_Ttoli" -> "Ttoli"
+                // 이전씬에서 넘어올 때 이 오브젝트 찾지 못해서 null상태면 찾고 할당하는 코드
+                if (heartbeatMinigame == null)
+                {
+                    List<HeartbeatMinigame> minigames = new List<HeartbeatMinigame>();
+                    minigames.AddRange(FindObjectsOfType<HeartbeatMinigame>(true));
+                    heartbeatMinigame = minigames[0];
+                }
                 if (catBeatTimings.ContainsKey(currentMinigameCat))
                 {
                     heartbeatMinigame.SetupWaveform(currentMinigameCat);

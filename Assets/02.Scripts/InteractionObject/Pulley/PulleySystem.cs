@@ -51,7 +51,13 @@ public class PulleySystem : MonoBehaviour
         EvaluateSystemState();
         
         if (enableDebugLogs)
-            Debug.Log("현실적인 PulleySystem 초기화 완료 (분리된 플랫폼)");
+            Debug.Log("✓ 현실적인 PulleySystem 초기화 완료 (분리된 플랫폼)");
+    }
+    
+    private void Update()
+    {
+        // ★ 추가: 매 프레임 상태 재평가 (이동 중에도 물체 제거 감지)
+        EvaluateSystemState();
     }
     
     private void SetupInitialPositions()
@@ -95,7 +101,7 @@ public class PulleySystem : MonoBehaviour
             platformB = closestB;
             
             if (enableDebugLogs)
-                Debug.Log($"자동으로 가장 가까운 플랫폼 감지됨: A={platformA.name}, B={platformB.name}");
+                Debug.Log($"✓ 자동으로 가장 가까운 플랫폼 감지됨: A={platformA.name}, B={platformB.name}");
         }
         else
         {
@@ -107,6 +113,10 @@ public class PulleySystem : MonoBehaviour
     {
         platformA_Priority = priority;
         platformA_Weight = weight;
+        
+        if (enableDebugLogs)
+            Debug.Log($"[PlatformA] Priority: {priority}, Weight: {weight:F1}");
+        
         EvaluateSystemState();
     }
     
@@ -114,13 +124,17 @@ public class PulleySystem : MonoBehaviour
     {
         platformB_Priority = priority;
         platformB_Weight = weight;
+        
+        if (enableDebugLogs)
+            Debug.Log($"[PlatformB] Priority: {priority}, Weight: {weight:F1}");
+        
         EvaluateSystemState();
     }
     
     private void OnPlatformMoveComplete(PulleyPlatform platform)
     {
         if (enableDebugLogs)
-            Debug.Log($"플랫폼 이동 완료: {platform.name} (높이: {platform.CurrentHeight:F1})");
+            Debug.Log($"✓ 플랫폼 이동 완료: {platform.name} (높이: {platform.CurrentHeight:F1})");
     }
     
     private void EvaluateSystemState()
@@ -128,7 +142,15 @@ public class PulleySystem : MonoBehaviour
         if (platformA.IsMoving || platformB.IsMoving)
         {
             currentState = "Moving";
+            // ★ 중요: 이동 중에도 계속 상태 체크
+            ApplyRealisticPulleyPhysics();
             return;
+        }
+        
+        // 현재 상태 디버깅
+        if (enableDebugLogs)
+        {
+            Debug.Log($"[EvaluateSystemState] A: {platformA_Priority}({platformA_Weight:F1}) | B: {platformB_Priority}({platformB_Weight:F1})");
         }
         
         ApplyRealisticPulleyPhysics();
@@ -138,6 +160,11 @@ public class PulleySystem : MonoBehaviour
     {
         bool hasWeightA = platformA_Priority != ObjectType.Empty;
         bool hasWeightB = platformB_Priority != ObjectType.Empty;
+        
+        if (enableDebugLogs)
+        {
+            Debug.Log($"[ApplyRealisticPulleyPhysics] A:{platformA_Priority}({platformA_Weight:F1}) | B:{platformB_Priority}({platformB_Weight:F1})");
+        }
         
         if (!hasWeightA && !hasWeightB)
         {
@@ -226,7 +253,7 @@ public class PulleySystem : MonoBehaviour
         
         if (enableDebugLogs)
         {
-            Debug.Log($"도르레 이동: {reason}");
+            Debug.Log($"🔼 도르레 이동: {reason}");
             Debug.Log($"  A: {platformA.CurrentHeight:F1} → {targetHeightA:F1}");
             Debug.Log($"  B: {platformB.CurrentHeight:F1} → {targetHeightB:F1}");
         }
@@ -240,11 +267,16 @@ public class PulleySystem : MonoBehaviour
         float targetHeightA = 0f; // 평형 위치
         float targetHeightB = 0f; // 평형 위치
         
+        if (enableDebugLogs)
+            Debug.Log($"[MovePlatformsToBalance] A현재: {platformA.CurrentHeight:F1}, B현재: {platformB.CurrentHeight:F1}");
+        
         // 이미 평형 상태에 있으면 이동하지 않음
         if (Mathf.Abs(platformA.CurrentHeight - targetHeightA) < 0.1f && 
             Mathf.Abs(platformB.CurrentHeight - targetHeightB) < 0.1f)
         {
             currentState = $"Already balanced - {reason}";
+            if (enableDebugLogs)
+                Debug.Log($"⚖️  이미 평형 상태입니다 - {reason}");
             return;
         }
         
@@ -257,7 +289,7 @@ public class PulleySystem : MonoBehaviour
         
         if (enableDebugLogs)
         {
-            Debug.Log($"도르레 평형 복귀: {reason}");
+            Debug.Log($"⚖️  도르레 평형 복귀: {reason}");
             Debug.Log($"  A: {platformA.CurrentHeight:F1} → {targetHeightA:F1}");
             Debug.Log($"  B: {platformB.CurrentHeight:F1} → {targetHeightB:F1}");
         }

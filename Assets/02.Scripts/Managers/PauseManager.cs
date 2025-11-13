@@ -70,8 +70,12 @@ public class PauseManager : MonoBehaviour
 
     public void ConfirmExitToMain()
     {
+        // 다이얼로그 출력 중이면 취소함
+        if (DialogueManager.Instance.isDialogueActive)
+            DialogueManager.Instance.ForceAbortDialogue();
+
         Time.timeScale = 1f;
-        SceneManager.LoadScene("TitleScene");
+        SceneLoader.Instance.LoadScene("TitleScene");
     }
 
     public void CancelExit()

@@ -542,6 +542,10 @@ public class DialogueManager : MonoBehaviour
         ClearPreviousChoices();
         SetupCanvasAndSpeakerText(dialogueLine);
 
+        // MONOLOG 타입일 때 텍스트 색상을 흰색으로 설정 (알파값 1로 초기화)
+        if (dialogueType == DialogueType.MONOLOG)
+            scriptText[dialogueType.ToInt()].color = new Color(1, 1, 1, 1); 
+
         // Process placeholders and get final sentence.
         string sentence = ProcessTextEffect(dialogueLine, out bool auto, out bool fast);
         isAuto = auto;

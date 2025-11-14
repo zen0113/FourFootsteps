@@ -201,6 +201,9 @@ public class PulleyPlatform : MonoBehaviour
         {
             if (col.gameObject == gameObject)
                 continue;
+
+            if (col.CompareTag("Player"))
+                continue;
             
             Rigidbody2D rb = col.GetComponent<Rigidbody2D>();
             if (rb != null)

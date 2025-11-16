@@ -29,17 +29,16 @@ public class LobbyManager : MonoBehaviour
         SceneLoader.Instance.LoadScene(testLoadSceneName);
     }
 
-    public void ShowCaseScoreSetting()
+    public void ShowCaseScoreSetting(int score)
     {
         System.Random rand = new System.Random();
 
-        GameManager.Instance.SetVariable("CurrentMemoryPuzzleCount", 2);
+        GameManager.Instance.SetVariable("CurrentMemoryPuzzleCount", score);
         var puzzleStates = GameManager.Instance.GetVariable("MemoryPuzzleStates") as Dictionary<int, bool>;
 
-        int score = 0;
-        for (int i = 0; i < 2; i++)
+        for (int i = 0; i < score; i++)
         {
-            puzzleStates[i] = false;
+            puzzleStates[i] = true;
         }
         GameManager.Instance.SetVariable("ResponsibilityScore", score);
         ResultManager.Instance.Test();

@@ -34,7 +34,7 @@ public class DarknessTapMinigame : MonoBehaviour
     [Header("사운드 (선택사항)")]
     [SerializeField] private AudioSource audioSource;       // 오디오 소스
     [SerializeField] private AudioClip tapSound;            // 연타 사운드
-    [SerializeField] private AudioClip stageChangeSound;    // 단계 변화 사운드
+    [SerializeField] private AudioClip gameCompleteSound;   // 게임 완료 사운드 (기존 stageChangeSound 대체)
 
     [Header("게임 완료 후 상태 설정")]
     [SerializeField] private bool setCrouchAfterComplete = true;
@@ -234,8 +234,6 @@ public class DarknessTapMinigame : MonoBehaviour
             stageImage.sprite = stageSprites[stage];
             stageImage.color = Color.white;
 
-            PlayStageChangeSound();
-
             Debug.Log($"✅ 단계 {stage + 1} 이미지로 변경 성공! ({stageMilestones[stage]}번째 연타) - 스프라이트: {stageSprites[stage].name}");
         }
         else
@@ -272,6 +270,9 @@ public class DarknessTapMinigame : MonoBehaviour
         {
             instructionText.gameObject.SetActive(false);
         }
+
+        // 게임 완료 사운드 재생
+        PlayGameCompleteSound();
 
         Debug.Log("미니게임 완료!");
 
@@ -385,11 +386,11 @@ public class DarknessTapMinigame : MonoBehaviour
         }
     }
 
-    private void PlayStageChangeSound()
+    private void PlayGameCompleteSound()
     {
-        if (audioSource != null && stageChangeSound != null)
+        if (audioSource != null && gameCompleteSound != null)
         {
-            audioSource.PlayOneShot(stageChangeSound, 0.7f);
+            audioSource.PlayOneShot(gameCompleteSound, 0.7f);
         }
     }
 

@@ -12,6 +12,15 @@ public class CatFreeRoamTutorial : TutorialBase
 
     public override void Enter()
     {
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.SetVariable("CanMoving", false);
+        }
+        else
+        {
+            Debug.LogWarning("[CatFreeRoamTutorial] GameManager.Instance가 null입니다. 플레이어 이동을 제한할 수 없습니다.");
+        }
+
         if (catFreeRoam != null && destinationPoint != null)
         {
             // 자동 배회를 멈추고 특정 지점으로 이동
@@ -92,6 +101,15 @@ public class CatFreeRoamTutorial : TutorialBase
 
     public override void Exit()
     {
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.SetVariable("CanMoving", true);
+        }
+        else
+        {
+            Debug.LogWarning("[CatFreeRoamTutorial] GameManager.Instance가 null입니다. 플레이어 이동 제한을 해제할 수 없습니다.");
+        }
+
         Debug.Log("[CatFreeRoamTutorial] Exit 호출됨");
 
         // 콜백 해제 (중복 방지)

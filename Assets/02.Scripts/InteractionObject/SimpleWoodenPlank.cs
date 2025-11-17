@@ -5,6 +5,7 @@ using UnityEngine;
 public class SimpleWoodenPlank : MonoBehaviour
 {
     [Header("나무판자 설정")]
+    [SerializeField] private GameObject triggerObject;      // 판자를 부술 물체
     [SerializeField] private GameObject brokenPlankPrefab;  // 깨진 나무판자 프리팹 (선택사항)
     [SerializeField] private ParticleSystem woodParticles; // 나무 파편 파티클 (선택사항)
     [SerializeField] private AudioClip breakSound;         // 깨지는 소리 (선택사항)
@@ -14,6 +15,7 @@ public class SimpleWoodenPlank : MonoBehaviour
     [Header("구멍 생성 설정")]
     [SerializeField] private Vector2 holeSize = new Vector2(2f, 0.5f); // 구멍 크기
     [SerializeField] private bool createHoleAtImpactPoint = true;      // 충격 지점에 구멍 생성
+    [SerializeField] private float destroyDelay = 0.5f;    // 판자 제거까지의 지연시간
     
     private Collider2D plankCollider;
     private SpriteRenderer spriteRenderer;
@@ -40,13 +42,13 @@ public class SimpleWoodenPlank : MonoBehaviour
     
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        // 상자와 충돌했을 때 즉시 판자 깨기
-        if (collision.gameObject.CompareTag("Box") && !isBroken)
+        // triggerObject와 충돌했을 때 즉시 판자 깨기
+        if (triggerObject != null && collision.gameObject == triggerObject && !isBroken)
         {
             Vector3 impactPoint = collision.contacts[0].point;
             StartCoroutine(BreakPlank(impactPoint));
             
-            Debug.Log("[SimpleWoodenPlank] 상자와 충돌! 판자가 깨집니다!");
+            Debug.Log("[SimpleWoodenPlank] 지정된 물체와 충돌! 판자가 깨집니다!");
         }
     }
     
@@ -115,8 +117,8 @@ public class SimpleWoodenPlank : MonoBehaviour
         }
         else
         {
-            // 프리팹이 없으면 색상만 변경
-            spriteRenderer.color = new Color(0.4f, 0.2f, 0.1f, 0.6f);
+            // 프리팹이 없으면 스프라이트 제거
+            spriteRenderer.enabled = false;
         }
         
         // 6. 플레이어가 판자 위에 있다면 구멍으로 이동
@@ -124,6 +126,10 @@ public class SimpleWoodenPlank : MonoBehaviour
         {
             DropPlayersThrough(holePosition);
         }
+        
+        // 7. 판자 완전히 제거
+        yield return new WaitForSeconds(destroyDelay);
+        Destroy(gameObject);
     }
     
     private IEnumerator ShakePlank(float intensity, float duration)

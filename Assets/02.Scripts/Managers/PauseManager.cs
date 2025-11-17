@@ -27,7 +27,7 @@ public class PauseManager : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            // [수정됨] isPaused가 true일 때(퍼즈 중일 때)의 로직을 모두 삭제
+            // isPaused가 true일 때(퍼즈 중일 때)의 로직을 모두 삭제
             if (!isPaused) // isPaused가 false일 때(퍼즈 중이 아닐 때)만
             {
                 PauseGame(); // PauseGame()을 호출
@@ -70,8 +70,22 @@ public class PauseManager : MonoBehaviour
 
     public void ConfirmExitToMain()
     {
+        // 다이얼로그 출력 중이면 취소함
+        if (DialogueManager.Instance.isDialogueActive)
+            DialogueManager.Instance.ForceAbortDialogue();
+
+        // 씬을 떠나기 전에 인게임 UI(PlayerUICanvas 등)를 명시적으로 비활성화합니다.
+        if (UIManager.Instance != null)
+        {
+            UIManager.Instance.SetUI(eUIGameObjectName.CatVersionUIGroup, false);
+            UIManager.Instance.SetUI(eUIGameObjectName.HumanVersionUIGroup, false);
+            UIManager.Instance.SetUI(eUIGameObjectName.PuzzleBagButton, false);
+            UIManager.Instance.SetUI(eUIGameObjectName.PlaceUI, false);
+            UIManager.Instance.SetUI(eUIGameObjectName.ResponsibilityGroup, false);
+        }
+
         Time.timeScale = 1f;
-        SceneManager.LoadScene("TitleScene");
+        SceneLoader.Instance.LoadScene("TitleScene");
     }
 
     public void CancelExit()

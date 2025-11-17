@@ -4,6 +4,7 @@ using UnityEngine;
 /// <summary>
 /// 도로를 달리는 차량의 이동과 원근 효과를 처리
 /// 멀리서 작고 흐릿하게 시작해서 가까워질수록 크고 선명해짐
+/// 라인 각도에 맞춰 대각선 이동 가능
 /// </summary>
 [RequireComponent(typeof(SpriteRenderer))]
 public class RoadVehicle : MonoBehaviour
@@ -65,7 +66,9 @@ public class RoadVehicle : MonoBehaviour
     public int ghostSortingOrder = 3;
 
     // 내부 변수
-    private float laneX; // 고정된 차선 X 좌표
+    private float laneX; // 고정된 차선 X 좌표 (각도 0도 기준)
+    private float laneRotation = 0f; // 차선 각도 (도 단위)
+    private Vector3 startPosition; // 시작 위치 저장
     private SpriteRenderer spriteRenderer;
     private bool hasHitPlayer = false;
     private Collider2D vehicleCollider;
@@ -100,6 +103,7 @@ public class RoadVehicle : MonoBehaviour
         pos.y = startY;
         transform.position = pos;
         
+        startPosition = transform.position; // 시작 위치 저장
         laneX = pos.x; // 현재 X 좌표를 차선으로 설정
         
         // 초기 색상 설정 (투명도만 변경, RGB는 유지)
@@ -123,13 +127,8 @@ public class RoadVehicle : MonoBehaviour
 
     void Update()
     {
-        // Y축 이동 (차선 X는 고정)
-        transform.position += Vector3.down * moveSpeed * Time.deltaTime;
-        
-        // 차선 X 좌표 유지
-        Vector3 pos = transform.position;
-        pos.x = laneX;
-        transform.position = pos;
+        // 라인 각도에 맞춰서 이동 (대각선 이동 가능)
+        MoveAlongLane();
         
         // 헤드라이트 활성화 체크
         if (!headlightEnabled && transform.position.y <= headlightEnableY)
@@ -154,6 +153,26 @@ public class RoadVehicle : MonoBehaviour
     }
 
     /// <summary>
+    /// 라인 각도에 맞춰 이동 (대각선 이동 가능)
+    /// </summary>
+    void MoveAlongLane()
+    {
+        // 라인 각도를 라디안으로 변환
+        float radians = laneRotation * Mathf.Deg2Rad;
+        
+        // 차량이 이동할 방향 벡터
+        // 0도 = 순수 오른쪽, -90도 = 순수 아래
+        Vector3 movementDirection = new Vector3(
+            Mathf.Sin(radians),     // X는 sin으로
+            -Mathf.Cos(radians),    // Y는 -cos으로 (아래 방향)
+            0f
+        ).normalized;
+        
+        // 이동 적용
+        transform.position += movementDirection * moveSpeed * Time.deltaTime;
+    }
+
+    /// <summary>
     /// 차선 X 좌표 설정 (외부에서 호출)
     /// </summary>
     public void SetLaneX(float x)
@@ -162,6 +181,17 @@ public class RoadVehicle : MonoBehaviour
         Vector3 pos = transform.position;
         pos.x = laneX;
         transform.position = pos;
+    }
+    
+    /// <summary>
+    /// 차선 각도 설정 (외부에서 호출) - 도 단위
+    /// 0도 = 순수 오른쪽
+    /// -90도 = 순수 아래 (기본값)
+    /// -45도 = 오른쪽 아래 대각선
+    /// </summary>
+    public void SetLaneRotation(float rotation)
+    {
+        laneRotation = rotation;
     }
     
     /// <summary>
@@ -196,11 +226,19 @@ public class RoadVehicle : MonoBehaviour
 
     /// <summary>
     /// 원근 효과 적용 (크기와 투명도 조절)
+    /// 이동 거리 기반으로 진행률 계산
     /// </summary>
     void ApplyPerspectiveEffect()
     {
+        // 시작 위치에서 현재 위치까지의 이동 거리 계산
+        float distanceTraveled = Vector3.Distance(transform.position, startPosition);
+        
+        // 최대 이동 거리 (startY에서 fullVisibilityY까지 대각선 이동 거리)
+        float radians = laneRotation * Mathf.Deg2Rad;
+        float maxDistance = Mathf.Abs((startY - fullVisibilityY) / Mathf.Cos(radians));
+        
         // 진행률 계산 (0 = 시작, 1 = 끝)
-        float progress = Mathf.InverseLerp(startY, endY, transform.position.y);
+        float progress = Mathf.Clamp01(distanceTraveled / maxDistance);
         
         // 크기 조절
         float scale = Mathf.Lerp(minScale, maxScale, progress);
@@ -283,13 +321,21 @@ public class RoadVehicle : MonoBehaviour
     }
 
     /// <summary>
-    /// 씬 뷰에서 차량 이동 경로 시각화
+    /// 씬 뷰에서 차량 이동 경로 시각화 (각도 반영)
     /// </summary>
     void OnDrawGizmos()
     {
+        // 차선 이동 경로 (각도 반영)
+        float radians = laneRotation * Mathf.Deg2Rad;
+        Vector3 direction = new Vector3(
+            Mathf.Sin(radians),
+            -Mathf.Cos(radians),
+            0f
+        ).normalized;
+        
         Gizmos.color = Color.red;
         Vector3 startPos = new Vector3(transform.position.x, startY, 0);
-        Vector3 endPos = new Vector3(transform.position.x, endY, 0);
+        Vector3 endPos = startPos + direction * (startY - endY) * 2f;
         Gizmos.DrawLine(startPos, endPos);
         
         // 헤드라이트 활성화 지점 표시

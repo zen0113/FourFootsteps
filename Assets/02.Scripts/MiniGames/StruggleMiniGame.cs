@@ -10,7 +10,7 @@ public class StruggleMiniGame : MonoBehaviour
     public CanvasGroup miniGameCanvasGroup; // 페이드 효과를 위한 CanvasGroup
     public Image gaugeFillImage;
     public TextMeshProUGUI keyPromptText;
-    public TextMeshProUGUI missTextPrefab; // 헛딧음 텍스트 프리팹
+    public TextMeshProUGUI missTextPrefab; // 헛디딤 텍스트 프리팹
     public RectTransform gaugeRectTransform; // 게이지 UI의 RectTransform
 
     [Header("페이드 효과 설정")]
@@ -29,13 +29,13 @@ public class StruggleMiniGame : MonoBehaviour
     public float inactivityTime = 3f; // 비활성 시간 (초)
     public int pressCountToShowProgress = 3; // 진행사항 표시까지 필요한 키 입력 횟수
 
-    [Header("헛딧음 확률")]
+    [Header("헛디딤 확률")]
     private int[] missChances = new int[] { 20, 15, 10 }; //20, 15, 10
     private int currentStage = 0; // 현재 단계
 
     [Header("연출")] 
-    public CameraShake cameraShake; // 카메라 흔들림
-    public AudioSource sfxMiss; // 헛딧음 효과음
+    public CameraShakeMinigame cameraShake; // 카메라 흔들림
+    public AudioSource sfxMiss; // 헛디딤 효과음
     public AudioSource sfxStep; // 발걸음 성공 효과음
     public AudioSource sfxFinalStep; // 최종 성공 효과음
 
@@ -316,7 +316,7 @@ public class StruggleMiniGame : MonoBehaviour
 
         if (Random.Range(0, 100) < currentMissChance) // 랜덤 확률로 헛딧음 발생 여부 결정
         {
-            MissStep(); // 헛딧음 처리
+            MissStep(); // 헛디딤 처리
         }
         else
         {
@@ -354,7 +354,7 @@ public class StruggleMiniGame : MonoBehaviour
         gaugeFillImage.fillAmount = currentGauge / 100f; // 게이지 UI 업데이트
         gaugeFillImage.color = dangerGaugeColor; // 게이지 색상을 위험 색상으로 변경
 
-        // 헛딧음 연출
+        // 헛디딤 연출
         StartCoroutine(MissStepEffect());
 
         // 효과음 재생
@@ -363,15 +363,20 @@ public class StruggleMiniGame : MonoBehaviour
         // 카메라 흔들림 효과
         if (cameraShake != null)
         {
+            // 쉐이크가 작동하려면 enabled가 true여야 합니다.
+            if (!cameraShake.enabled)
+            {
+                cameraShake.enabled = true;
+            }
             cameraShake.Shake(0.4f, 0.25f);
         }
     }
 
     IEnumerator MissStepEffect()
     {
-        // "헛딧음!" 텍스트 프리팹 생성
+        // "헛디딤!" 텍스트 프리팹 생성
         TextMeshProUGUI missTextInstance = Instantiate(missTextPrefab, gaugeRectTransform);
-        missTextInstance.text = "헛딧음!";
+        missTextInstance.text = "헛디딤!";
         missTextInstance.color = Color.white;
 
         float fill = gaugeFillImage.fillAmount; // 0~1 사이의 값 (게이지 채움 비율)

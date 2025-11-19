@@ -150,6 +150,12 @@ public class DialogueManager : MonoBehaviour
 
         isDialogueActive = true;
 
+        // 다이얼로그 시작 시 'CanMoving'을 명시적으로 false로 설정하여 움직임을 잠금
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.SetVariable("CanMoving", false);
+        }
+
         // 대사가 2개 이상이라면 skip 버튼 활성화
         if (dialogues[dialogueID].Lines.Count > 1)
             foreach (GameObject skip in skipText)
@@ -627,6 +633,13 @@ public class DialogueManager : MonoBehaviour
     {
         SoundPlayer.Instance.UISoundPlay_LOOP(0, false);
         isDialogueActive = false;
+
+        if (GameManager.Instance != null)
+        {
+            // GameManager의 SetVariable을 사용하여 CanMoving 상태를 복구합니다.
+            GameManager.Instance.SetVariable("CanMoving", true);
+            Debug.Log("[DialogueManager] CanMoving 상태가 true로 복구되었습니다.");
+        }
 
         // 현재 타입 패널만 끄기
         dialogueSet[dialogueType.ToInt()].SetActive(false);

@@ -23,6 +23,7 @@ public class PlayerCatMovement : MonoBehaviour
     [SerializeField] private float dashPower = 8f;      // 대시 이동 속도
     [SerializeField] private float jumpPower = 5f;      // 점프 힘
     [SerializeField] private float crouchPower = 1f;    // 웅크린 상태 이동 속도
+    
     // 특정 상황 시, 점프 불가능
     [SerializeField] private bool isJumpingBlocked = false;
     public bool IsJumpingBlocked
@@ -148,6 +149,9 @@ public class PlayerCatMovement : MonoBehaviour
     // 엔딩 조작 상태
     [Header("엔딩 조작 상태")]
     public bool processingBadEnding = false;
+
+    // 애니메이션 파라미터 해쉬화 부분에 추가
+    int _hashClimbDirection = Animator.StringToHash("ClimbDirection");
 
     /// <summary>
     /// 게임 시작 시 초기화 작업
@@ -425,7 +429,6 @@ public class PlayerCatMovement : MonoBehaviour
     int _hashJump = Animator.StringToHash("Jump");
 
     // 애니메이션 파라미터 동기화
-    // 애니메이션 파라미터 동기화
     void SyncAnimatorParams()
     {
         // 입력 차단/미니게임 때는 깔끔하게 0/false로
@@ -462,6 +465,17 @@ public class PlayerCatMovement : MonoBehaviour
         animator.SetFloat(_hashSpeed, speedParam);
         animator.SetBool(_hashShift, shiftDown);
         animator.SetBool(_hashIsClimbing, isClimbing && !blocked);
+
+        // ✨ 새로 추가: 사다리 타는 중일 때 방향 정보 업데이트
+        if (isClimbing && !blocked)
+        {
+            float verticalInput = Input.GetAxisRaw("Vertical");
+            animator.SetFloat(_hashClimbDirection, verticalInput);
+        }
+        else
+        {
+            animator.SetFloat(_hashClimbDirection, 0f);
+        }
 
         // 웅크림 상태 계산
         bool jumpAnim = animator.GetBool(_hashJump);
@@ -1031,7 +1045,7 @@ public class PlayerCatMovement : MonoBehaviour
 
             // 사다리 범위 내에서만 이동 가능하도록 Y 위치 제한
             float clampedY = Mathf.Clamp(transform.position.y + moveY * Time.fixedDeltaTime,
-                                          ladderBottom + 0.2f, ladderTop - 0.2f);
+                                        ladderBottom + 0.2f, ladderTop - 0.2f);
 
             // 경계에서는 이동 불가
             if ((transform.position.y >= ladderTop - 0.2f && verticalInput > 0) ||
@@ -1043,6 +1057,9 @@ public class PlayerCatMovement : MonoBehaviour
 
         // 사다리 타기 이동 적용 (x축은 0, y축만 이동)
         rb.velocity = new Vector2(0, moveY);
+
+        // ✨ 새로 추가: 애니메이션 방향 설정
+        animator.SetFloat(_hashClimbDirection, verticalInput);
 
         // 사다리 타는 사운드 재생
         if (Mathf.Abs(verticalInput) > 0.01f && climbSound != null && Time.time - lastClimbSoundTime >= climbSoundInterval)

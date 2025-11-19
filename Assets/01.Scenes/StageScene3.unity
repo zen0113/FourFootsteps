@@ -3281,6 +3281,50 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1603071392}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &364515259
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 364515261}
+  - component: {fileID: 364515260}
+  m_Layer: 0
+  m_Name: SaveManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &364515260
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 364515259}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6e9ab237016f76e4caba5aa50f18bb17, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!4 &364515261
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 364515259}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &381317918
 GameObject:
   m_ObjectHideFlags: 0
@@ -19203,7 +19247,6 @@ MonoBehaviour:
   invincibilityDuration: 1.5
   isInvincible: 0
   cameraShake: {fileID: 0}
-  useGameOverScene: 0
   restartDelay: 1.5
 --- !u!82 &1769747964
 AudioSource:
@@ -27210,6 +27253,7 @@ SceneRoots:
   - {fileID: 1277477}
   - {fileID: 2048116370}
   - {fileID: 964312689}
+  - {fileID: 364515261}
   - {fileID: 315378611}
   - {fileID: 1108955319}
   - {fileID: 2749042912764870980}

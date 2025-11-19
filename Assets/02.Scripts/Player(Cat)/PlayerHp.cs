@@ -28,7 +28,6 @@ public class PlayerHp : MonoBehaviour
     [SerializeField] private CameraShake cameraShake;
 
     [Header("Game Over Settings")] // 추가
-    [SerializeField] private bool useGameOverScene = false; // false면 스테이지 재시작, true면 GameOver 씬
     [SerializeField] private float restartDelay = 1.5f; // 재시작 전 대기 시간
 
     private bool isGameOverLoading = false;
@@ -209,23 +208,14 @@ public class PlayerHp : MonoBehaviour
 
         Debug.Log("플레이어 사망!");
 
-        // useGameOverScene이 true면 GameOver 씬으로, false면 현재 스테이지 재시작
-        if (useGameOverScene)
+        // SoundPlayer를 통해 StageScene3 사운드 재생
+        if (SoundPlayer.Instance != null)
         {
-            // 페이드 인 효과와 함께 게임오버 씬 로드
-            SceneLoader.Instance.LoadScene("GameOver");
+            SoundPlayer.Instance.ChangeSceneBGM("StageScene3");
         }
-        else
-        {
-            // SoundPlayer를 통해 StageScene3 사운드 재생
-            if (SoundPlayer.Instance != null)
-            {
-                SoundPlayer.Instance.ChangeSceneBGM("StageScene3");
-            }
-            
-            // 현재 스테이지를 재시작
-            StartCoroutine(RestartCurrentStage());
-        }
+
+        // 현재 스테이지를 재시작
+        StartCoroutine(RestartCurrentStage());
     }
 
     // 추가된 메서드: 현재 스테이지 재시작

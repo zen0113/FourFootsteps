@@ -168,7 +168,7 @@ public class GameManager : MonoBehaviour
                     break;
             }
         }
-        //SaveManager.Instance.SaveInitGameData();
+        SaveManager.Instance.SaveInitGameData();
     }
 
     public void ResetVariables()

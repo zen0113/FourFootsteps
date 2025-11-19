@@ -74,7 +74,17 @@ public class PlayerCatMovement : MonoBehaviour
     // 점프 물리 관련
     [Header("점프 중력 보정")]
     [SerializeField] private float fallMultiplier = 2.5f;   // 떨어질 때 중력 배수 (자연스러운 점프감을 위함)
+    [SerializeField] private float lowJumpMultiplier = 2f;  // 스페이스를 일찍 뗄 때 중력 배수
     private int jumpCount = 0;                              // 현재 점프 횟수 (더블점프 구현용)
+
+    [Header("점프 개선 시스템")]
+    [SerializeField] private float jumpBufferTime = 0.15f;  // 점프 입력 버퍼 시간
+    [SerializeField] private float coyoteTime = 0.12f;      // 코요테 타임 (플랫폼에서 떨어진 후 점프 가능 시간)
+    [SerializeField] private float landingJumpDelay = 0.05f; // 착지 후 점프 가능까지의 최소 딜레이 (기존 0.1초에서 단축)
+    private float jumpBufferCounter = 0f;                   // 점프 버퍼 카운터
+    private float coyoteTimeCounter = 0f;                   // 코요테 타임 카운터
+    private bool isJumpButtonHeld = false;                  // 점프 버튼을 계속 누르고 있는지
+
 
     // 지상 감지 시스템
     [Header("지상 체크")]
@@ -285,7 +295,30 @@ public class PlayerCatMovement : MonoBehaviour
         }
 
         // 지상에 있고 떨어지는 중이면 점프 카운트 리셋
-        if (isOnGround && rb.velocity.y <= 0) jumpCount = 0;
+        if (isOnGround && rb.velocity.y <= 0) 
+        {
+            jumpCount = 0;
+            coyoteTimeCounter = coyoteTime; // 코요테 타임 리셋
+        }
+        else
+        {
+            coyoteTimeCounter -= Time.deltaTime; // 공중에 있을 때 코요테 타임 감소
+        }
+
+        // 점프 버퍼 카운터 감소
+        if (jumpBufferCounter > 0)
+        {
+            jumpBufferCounter -= Time.deltaTime;
+        }
+
+        // 점프 버튼 입력 감지 (버퍼링용)
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            jumpBufferCounter = jumpBufferTime;
+        }
+
+        // 점프 버튼을 누르고 있는지 체크 (가변 점프 높이용)
+        isJumpButtonHeld = Input.GetKey(KeyCode.Space);
 
         float horizontalInput = Input.GetAxisRaw("Horizontal");
 
@@ -951,55 +984,71 @@ public class PlayerCatMovement : MonoBehaviour
     }
 
     /// <summary>
-    /// 점프 입력 처리
-    /// 일반 점프와 더블 점프를 지원
-    /// </summary>
+/// 점프 입력 처리 - 개선 버전
+/// - 점프 버퍼링: 착지 전 입력을 기억
+/// - 코요테 타임: 플랫폼에서 떨어진 직후에도 점프 가능
+/// - 착지 딜레이 단축: 0.1초 → 0.05초
+/// </summary>
     void Jump()
     {
-        if (Time.time - lastLandingTime < 0.1f)
+            // 착지 직후 짧은 딜레이 (0.05초로 단축)
+        if (Time.time - lastLandingTime < landingJumpDelay)
         {
             return;
         }
 
         if (IsInputBlocked()) return;
-        // isOnSlope 조건 추가하여 경사면에서는 점프 못하게 변경
-        if (isJumpingBlocked || isOnSlope) return;
+        if (isJumpingBlocked) return; // 경사면 조건은 아래에서 따로 처리
+        if (isCrouching || isClimbing) return;
 
-        if (Input.GetKeyDown(KeyCode.Space) && !isCrouching && !isClimbing)
+        // 점프 가능 조건 판정 (코요테 타임 포함)
+        bool canJumpFromGround = (isOnGround || coyoteTimeCounter > 0) && !isOnSlope;
+        bool canDoubleJump = jumpCount < 2;
+
+        // 점프 버퍼가 활성화되어 있고, 점프 가능한 상태라면 점프 실행
+        if (jumpBufferCounter > 0 && (canJumpFromGround || canDoubleJump))
         {
-            // 지상에 있거나 더블 점프 가능한 상태에서만 점프
-            if (isOnGround || jumpCount < 2)
-            {
-                rb.velocity = new Vector2(rb.velocity.x, 0);       // y축 속도 초기화
-                rb.AddForce(Vector2.up * jumpPower, ForceMode2D.Impulse); // 점프 힘 적용
-                jumpCount++;
-                isOnGround = false;
-
-                animator.SetTrigger("Jump");
-
-                // 점프 시 파티클 효과
-                if (dashParticle != null)
-                {
-                    UpdateParticlePosition();
-                    if (!dashParticle.isPlaying)
-                    {
-                        dashParticle.Play();
-                    }
-                    particleEmission.rateOverTime = runEmissionRate;
-                }
-
-                // 점프 사운드 재생
-                if (jumpSound != null)
-                {
-                    audioSource.Stop();
-                    audioSource.PlayOneShot(jumpSound);
-                }
-            }
+            PerformJump();
+            jumpBufferCounter = 0; // 버퍼 소모
+            coyoteTimeCounter = 0; // 코요테 타임 소모
         }
     }
 
     /// <summary>
-    /// 점프 물리 개선 - 떨어질 때 중력을 증가시켜 자연스러운 점프감 구현
+    /// 실제 점프 실행 (중복 코드 제거용 헬퍼 함수)
+    /// </summary>
+    void PerformJump()
+    {
+        rb.velocity = new Vector2(rb.velocity.x, 0);       // y축 속도 초기화
+        rb.AddForce(Vector2.up * jumpPower, ForceMode2D.Impulse); // 점프 힘 적용
+        jumpCount++;
+        isOnGround = false;
+
+        animator.SetTrigger("Jump");
+
+        // 점프 시 파티클 효과
+        if (dashParticle != null)
+        {
+            UpdateParticlePosition();
+            if (!dashParticle.isPlaying)
+            {
+                dashParticle.Play();
+            }
+            particleEmission.rateOverTime = runEmissionRate;
+        }
+
+        // 점프 사운드 재생
+        if (jumpSound != null)
+        {
+            audioSource.Stop();
+            audioSource.PlayOneShot(jumpSound);
+        }
+    }
+
+    /// <summary>
+    /// 점프 물리 개선 - 가변 점프 높이 및 자연스러운 낙하 구현
+    /// - 스페이스를 일찍 떼면 점프가 낮아짐
+    /// - 떨어질 때 중력 증가로 자연스러운 점프감 구현
     /// </summary>
     void BetterJump()
     {
@@ -1009,6 +1058,11 @@ public class PlayerCatMovement : MonoBehaviour
         if (rb.velocity.y < 0)
         {
             rb.velocity += Vector2.up * Physics2D.gravity.y * (fallMultiplier - 1) * Time.deltaTime;
+        }
+        // 올라가는 중인데 스페이스를 떼면 점프를 낮게 (가변 점프 높이)
+        else if (rb.velocity.y > 0 && !isJumpButtonHeld)
+        {
+            rb.velocity += Vector2.up * Physics2D.gravity.y * (lowJumpMultiplier - 1) * Time.deltaTime;
         }
     }
 

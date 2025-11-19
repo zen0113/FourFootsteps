@@ -105,6 +105,16 @@ public class SceneLoader : MonoBehaviour
             {
                 // 씬이 로드된 후, 자동으로 GameManager 업데이트
                 GameManager.Instance.UpdateSceneProgress(scene.name);
+
+                if (DialogueManager.Instance != null)
+                {
+                    // 이전 씬에서 미처 끝내지 못한 대화/컷씬 코루틴을 강제 종료하고 모든 플래그를 리셋합니다.
+                    DialogueManager.Instance.ForceAbortDialogue();
+                }
+
+                // 플레이어 움직임 상태를 명시적으로 허용합니다.
+                GameManager.Instance.SetVariable("CanMoving", true);
+                Debug.Log($"[SceneLoader] 씬 로드 완료: {scene.name}, 움직임 강제 해제 및 DialogueManager 초기화 완료.");
             }
         }
     }

@@ -83,10 +83,20 @@ public class EventObject : MonoBehaviour
         if (isOneTimeOnly && hasBeenInvestigated)
             return;
 
-        // 조사 조건: 플레이어가 범위 내에 있고 E키를 눌렀을 때
+        // 1. 기본 상호작용 키 (E)
+        bool isEKeyDown = Input.GetKeyDown(KeyCode.E);
+
+        // 2. EventID에 'Door'가 포함될 경우, 추가로 W 키 허용
+        bool isWKeyDown = false;
+        if (!string.IsNullOrEmpty(eventId) && eventId.Contains("Door"))
+        {
+            isWKeyDown = Input.GetKeyDown(KeyCode.W);
+        }
+
+        // 조사 조건: 플레이어가 범위 내에 있고 (E키를 눌렀거나 'Door' 이벤트이면서 W키를 눌렀을 때)
         if (!string.IsNullOrEmpty(eventId)
             && EventManager.Instance && _isPlayerInRange
-            && Input.GetKeyDown(KeyCode.E))
+            && (isEKeyDown || isWKeyDown)) 
         {
             Investigate();
         }

@@ -97,6 +97,9 @@ public class EndingCredit : MonoBehaviour
 
         // 타이틀씬으로 이동
         GameManager.Instance.LoadTitleScene();
+
+        // 게임 데이터 초기화
+        SaveManager.Instance.LoadInitGameData();
     }
 
 

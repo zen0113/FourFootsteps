@@ -204,8 +204,8 @@ public class PlayerHp : MonoBehaviour
         UIManager.Instance.SetUI(eUIGameObjectName.PlaceUI, false);
         UIManager.Instance.SetUI(eUIGameObjectName.ResponsibilityGroup, false);
 
-        // 다이얼로그 재생 중이면 끝냄
-        DialogueManager.Instance.EndDialogue();
+        // 다이얼로그 재생 중이면 강제 중지
+        DialogueManager.Instance.ForceAbortDialogue();
 
         Debug.Log("플레이어 사망!");
 
@@ -286,6 +286,9 @@ public class PlayerHp : MonoBehaviour
             // SceneLoader가 없으면 직접 로드
             SceneManager.LoadScene(currentSceneName);
         }
+
+        // 다이얼로그 재생 중이면 강제 중지
+        DialogueManager.Instance.ForceAbortDialogue();
     }
 
     // 외부 접근용 프로퍼티

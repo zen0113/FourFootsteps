@@ -813,7 +813,7 @@ public class DialogueManager : MonoBehaviour
             if (text != null)
             {
                 text.text = "";
-                text.color = Color.black;
+                //text.color = Color.black;
             }
         }
 

@@ -4362,7 +4362,7 @@ Transform:
   m_GameObject: {fileID: 243751439}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 100.5, y: -1.03, z: 0}
+  m_LocalPosition: {x: 100.5, y: -0.34, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -6611,7 +6611,7 @@ GameObject:
   - component: {fileID: 451231542}
   - component: {fileID: 451231543}
   m_Layer: 5
-  m_Name: "\uD5DB\uB527\uC74C range"
+  m_Name: "\uD5DB\uB514\uB524 range"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -14464,7 +14464,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3581971394635853906, guid: b2a7b04b0ea72be40a356d8756e18ce2, type: 3}
       propertyPath: tapGoal
-      value: 10
+      value: 80
       objectReference: {fileID: 0}
     - target: {fileID: 3581971394635853906, guid: b2a7b04b0ea72be40a356d8756e18ce2, type: 3}
       propertyPath: m_Enabled
@@ -14474,6 +14474,14 @@ PrefabInstance:
       propertyPath: playerController
       value: 
       objectReference: {fileID: 507170960}
+    - target: {fileID: 3581971394635853906, guid: b2a7b04b0ea72be40a356d8756e18ce2, type: 3}
+      propertyPath: stageChangeSound
+      value: 
+      objectReference: {fileID: 8300000, guid: 841dbfd27baf2164aad544c3b9106c17, type: 3}
+    - target: {fileID: 3581971394635853906, guid: b2a7b04b0ea72be40a356d8756e18ce2, type: 3}
+      propertyPath: gameCompleteSound
+      value: 
+      objectReference: {fileID: 8300000, guid: 841dbfd27baf2164aad544c3b9106c17, type: 3}
     - target: {fileID: 3581971394635853906, guid: b2a7b04b0ea72be40a356d8756e18ce2, type: 3}
       propertyPath: stageSprites.Array.size
       value: 5
@@ -14508,19 +14516,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3581971394635853906, guid: b2a7b04b0ea72be40a356d8756e18ce2, type: 3}
       propertyPath: stageMilestones.Array.data[1]
-      value: 3
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 3581971394635853906, guid: b2a7b04b0ea72be40a356d8756e18ce2, type: 3}
       propertyPath: stageMilestones.Array.data[2]
-      value: 6
+      value: 20
       objectReference: {fileID: 0}
     - target: {fileID: 3581971394635853906, guid: b2a7b04b0ea72be40a356d8756e18ce2, type: 3}
       propertyPath: stageMilestones.Array.data[3]
-      value: 8
+      value: 40
       objectReference: {fileID: 0}
     - target: {fileID: 3581971394635853906, guid: b2a7b04b0ea72be40a356d8756e18ce2, type: 3}
       propertyPath: stageMilestones.Array.data[4]
-      value: 10
+      value: 60
       objectReference: {fileID: 0}
     - target: {fileID: 4984486257384893302, guid: b2a7b04b0ea72be40a356d8756e18ce2, type: 3}
       propertyPath: m_fontAsset
@@ -17253,7 +17261,7 @@ Transform:
   m_GameObject: {fileID: 1125910785}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 258.88, y: 0.86, z: 0}
+  m_LocalPosition: {x: 258.88, y: 0.74, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -17441,11 +17449,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5320455367818414341, guid: f95fc53285487a34b9bd37fddc235ee3, type: 3}
       propertyPath: m_Size.y
-      value: 5.7263956
+      value: 5.6027026
       objectReference: {fileID: 0}
     - target: {fileID: 5320455367818414341, guid: f95fc53285487a34b9bd37fddc235ee3, type: 3}
       propertyPath: m_Offset.y
-      value: -0.123197556
+      value: -0.06135106
       objectReference: {fileID: 0}
     - target: {fileID: 8201765227473353643, guid: f95fc53285487a34b9bd37fddc235ee3, type: 3}
       propertyPath: m_LocalPosition.x
@@ -17453,7 +17461,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8201765227473353643, guid: f95fc53285487a34b9bd37fddc235ee3, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -3.2675366
+      value: -3.36
       objectReference: {fileID: 0}
     - target: {fileID: 8201765227473353643, guid: f95fc53285487a34b9bd37fddc235ee3, type: 3}
       propertyPath: m_LocalPosition.z

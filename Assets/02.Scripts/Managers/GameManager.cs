@@ -168,6 +168,7 @@ public class GameManager : MonoBehaviour
                     break;
             }
         }
+        SaveManager.Instance.SaveInitGameData();
     }
 
     public void ResetVariables()
@@ -322,12 +323,12 @@ public class GameManager : MonoBehaviour
             "CurrentSceneName",
             "NextSceneName",
             "CanMoving",
-            "CanInvesigatingRecallObject",
-            "CanStartCleaningMinigame",
+            //"CanInvesigatingRecallObject",
+            //"CanStartCleaningMinigame",
             "CurrentMemoryPuzzleCount",
             "MemoryPuzzleStates",
-            "CleanedObjectCount",
-            "CanInvesigatingRecallObject"
+            //"CleanedObjectCount",
+
         });
 
         foreach (var item in variables)

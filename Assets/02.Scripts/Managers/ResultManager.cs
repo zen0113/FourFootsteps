@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using static Constants;
 using Random = UnityEngine.Random;
 
@@ -49,7 +50,6 @@ public class ResultManager : MonoBehaviour
         };
     }
 
-
     public void RegisterExecutable(string objectName, IResultExecutable executable)
     {
         Debug.Log($"registered {objectName}");
@@ -63,6 +63,45 @@ public class ResultManager : MonoBehaviour
         Debug.Log("############### unregistered all executable objects ###############");
 
         executableObjects = new Dictionary<string, IResultExecutable>();
+    }
+
+    private void OnEnable()
+    {
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    private void OnDisable()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        // 씬이 로드될 때마다 파괴된 오브젝트 제거
+        CleanupDestroyedExecutables();
+
+        // 또는 완전히 초기화
+        // executableObjects.Clear();
+    }
+
+    private void CleanupDestroyedExecutables()
+    {
+        List<string> keysToRemove = new List<string>();
+
+        foreach (var kvp in executableObjects)
+        {
+            MonoBehaviour mono = kvp.Value as MonoBehaviour;
+            if (mono == null || mono.gameObject == null)
+            {
+                keysToRemove.Add(kvp.Key);
+            }
+        }
+
+        foreach (string key in keysToRemove)
+        {
+            executableObjects.Remove(key);
+            Debug.Log($"Cleaned up destroyed executable: {key}");
+        }
     }
 
     public void ParseResults()

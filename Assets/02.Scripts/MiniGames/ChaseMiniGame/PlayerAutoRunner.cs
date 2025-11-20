@@ -14,6 +14,7 @@ public class PlayerAutoRunner : MonoBehaviour
     [SerializeField] private StealthSFX SFX;
     [SerializeField] private CatStealthController catStealth;
     [SerializeField] private ChaserFollower kidsFollower;
+    [SerializeField] private ChaserFollower dogFollower;
     [SerializeField] private GameObject Chase_Goal_Block;
     [SerializeField] private GameObject Bird;
 
@@ -354,6 +355,20 @@ public class PlayerAutoRunner : MonoBehaviour
                 audioSrc.PlayOneShot(runLoopOrStep);
                 lastFootstepTime = Time.time;
             }
+        }
+    }
+
+    public void StartDeathRoutine()
+    {
+        if (playerHp.CurrentHp <= 0)
+        {
+            // 플레이어 체력 0되면 월드 스크롤링과 체이서들 정지시킴
+            scroller?.SetPaused(true);            // 완전 일시정지
+            kidsFollower.isStartChasing = false;
+            kidsFollower.StopAnimationRunning();
+            dogFollower.isStartChasing = false;
+            dogFollower.StopAnimationRunning();
+            this.enabled = false;
         }
     }
 

@@ -208,12 +208,6 @@ public class PlayerHp : MonoBehaviour
 
         Debug.Log("플레이어 사망!");
 
-        // SoundPlayer를 통해 StageScene3 사운드 재생
-        if (SoundPlayer.Instance != null)
-        {
-            SoundPlayer.Instance.ChangeSceneBGM("StageScene3");
-        }
-
         // 현재 스테이지를 재시작
         StartCoroutine(RestartCurrentStage());
     }

@@ -333,16 +333,16 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1952264304171738701}
-  m_LocalRotation: {x: -0, y: -0, z: -0.8260857, w: -0.56354445}
+  m_LocalRotation: {x: -0, y: -0, z: -0.97983444, w: -0.19981161}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0.4, y: 0.4, z: 0.4}
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 2571595161445617750}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: -248.603}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: -203.052}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 30.3, y: -33.4}
+  m_AnchoredPosition: {x: 45.6, y: -2.1}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1516814585381299382
@@ -399,7 +399,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &2571595161445617750
 RectTransform:
   m_ObjectHideFlags: 0
@@ -438,7 +438,13 @@ MonoBehaviour:
   successZone: {fileID: 424604623385889395}
   needle: {fileID: 201630784088247745}
   successZonePresets:
-  - zRotation: -248.603
+  - zRotation: -203.052
+    startAngle: 253
+    endAngle: 118
+    positionOffset: {x: 45.6, y: -2.1}
+    showGizmo: 1
+    gizmoColor: {r: 0, g: 1, b: 0, a: 1}
+  - zRotation: -249.943
     startAngle: 113
     endAngle: 162
     positionOffset: {x: 30.3, y: -33.4}

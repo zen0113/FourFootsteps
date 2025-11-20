@@ -167,9 +167,9 @@ public class ChaserFollower : MonoBehaviour
     {
         if (isStartChasing) return;
         animator.SetBool("Moving", false);
+        sfxController.StopLoop(0.5f);
         if (isThrower) thrower.StopAll();
     }
-
 
     private void FixedUpdate()
     {

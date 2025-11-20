@@ -7,7 +7,7 @@ Prologue_002,엄마,,{PlayerName}!! 어딨어!!! ,TRUE/SHAKE/FAST,temp_mom,Angry
 ,엄마,,뭐? {PlayerName}아` 네가 고양이 키울 때 네가 다 책임지겠다고 했잖아.,TRUE,temp_mom,Angry,,Prologue_1,,
 ,엄마,,지금 고양이 똥 치우는 것도 엄마가 하고 있고 넌 지금 한 게 뭐가 있니? \n책임진다고 해놓고선 엄마한테 다 떠넘겼잖아.,,temp_mom,Angry,,Prologue_1,,
 ,엄마,,네 고양이 네가 관리 안 하고 뭐하는거니?,,temp_mom,Angry,,Prologue_1,,
-,Player,,나도 회사 때문에 바빠서 어쩔 수 없었다고!\n그리고 나도 고양이한테 밥은 챙겨주고 있어!,,temp_playerHUMAN,Angry,,Prologue_1,,
+,Player,,나도 학교 과제랑 알바 때문에 바빠서 어쩔 수 없었다고!\n그리고 나도 고양이한테 밥은 챙겨주고 있어!,,temp_playerHUMAN,Angry,,Prologue_1,,
 ,엄마,,뭐? 너 전에 얘 아프다고 병원에 데려가놓고선\n병원비 비싸다고 엄마한테 돈 빌려달라고 한 건 기억도 안 나니?,,temp_mom,Angry,,Prologue_1,,
 ,Player,,그건 엄마한테 안 빌리고 알아서 냈잖아! \n이미 지난 일을 왜 끄집어내고 그래?,,temp_playerHUMAN,Angry,,Prologue_1,,
 ,엄마,,너 그것도 적금 들던 거 무리하게 깨고 냈잖니! \n그리고 지금 엄마는 고양이 털 때문에 두드러기 난 것도 안 보이니?,,temp_mom,Angry,,Prologue_1,,
@@ -137,13 +137,14 @@ Recall2_003,의사,,{YourCatName}의 보호자님이시죠?,TRUE,temp_Vet,,,,,�
 ,의사,,하하` {YourCatName}뿐만 아니라 보호자님도 많이 긴장하신 것 같네요.,TRUE,temp_Vet,,,,,
 ,의사,,{YourCatName}아` 어디 아픈 곳 있나 보자.,TRUE,temp_Vet,,,,EventSetNextTutorial,
 Recall2_004,의사,,전체적으로 건강상태는 양호해 보이네요. 다만 물을 조금 더 자주 마실 수 있게 해주시고... 예방접종이 전혀 안 되어 있어서 오늘부터 1차 접종 시작하는 게 좋겠어요.,,temp_Vet,,,,,
-,Player,,아... 예방접종이요? 비용은 어떻게 되나요?,,temp_playerHUMAN,,,,,
-,의사,,기본 예방접종은 4만원이에요. 어린 고양이라서 2차 접종도 필요합니다.,,temp_Vet,,,,,
-,Player,,네...? 두 번 맞아야 하는 건가요?,,temp_playerHUMAN,,,,,
-,의사,,네` 어린 고양이는 2차례 기본 접종 후 매년 추가접종하시면 됩니다. 그리고 길고양이였으니 심장사상충 예방약도 먹이시는 게 안전해요.,,temp_Vet,,,,,
-,Player,,심장사상충 약은... 얼마예요?,,temp_playerHUMAN,,,,,
-,의사,,3만원입니다. 길에서 생활했던 고양이들은 기생충이나 바이러스에 감염되었을 확률이 높아요.\n지금 예방해두시면 나중에 큰 치료비를 아낄 수 있어서 오히려 경제적이에요.,,temp_Vet,,,,,
-,Player,,생각보다 비용이 너무 많이 드는데... 이제 겨우 월급날이 지났는데 감당할 수 있을까?,,temp_playerHUMAN,,,,Choice_004,
+,Player,,아... 예방접종이요? 혹시 비용이 많이 들까요?,,temp_playerHUMAN,,,,,
+,의사,,기본 예방접종은 6~8만원이에요. 아직 어린 고양이라 3주 간격으로 총 3번 맞아야 항체가 확실히 생기고` 그 뒤론 1년에 한 번만 오시면 됩니다.,,temp_Vet,,,,,
+,Player,,네...? 그걸 3번이나 다 맞아야 하는 건가요?,,temp_playerHUMAN,,,,,
+,의사,,그럼요. 기초 면역이 없으면 범백 같은 치명적인 병에 걸릴 수 있거든요. \n참` 길에서 생활했던 아이라 심장사상충 예방도 필수입니다,,temp_Vet,,,,,
+,의사,,심장사상충은 모기로 인한 전염병인데` 길고양이는 야외 노출로 감염 위험이 높아요. 예방약을 매달 먹이면 치료비를 피할 수 있어요,,temp_Vet,,,,,
+,Player,,심장사상충...이요? 그건 또 비용이 어떻게 되나요...,,temp_playerHUMAN,,,,,
+,의사,,매달 바르는 약이 1~2만 원 정도예요. \n당장은 부담될 수 있지만` 감염돼서 수술받으면 수백만 원이 들거든요. 미리 예방하는 게 훨씬 경제적이죠.,,temp_Vet,,,,,
+,Player,,생각보다 비용이 너무 많이 드는데... 이제 겨우 알바비 받은 지 며칠 안 지났는데` 이번 달 생활비 괜찮을까?,,temp_playerHUMAN,,,,Choice_004,
 Recall2_005,Player,,그래도 이제 우리 가족이 된 {YourCatName}인데…,TRUE,temp_playerHUMAN,,,,,긍정적 선택지
 ,Player,,네` 접종이랑 약 다 해주세요. 제대로 키우고 싶어요.,,temp_playerHUMAN,,,,,
 ,의사,,좋은 선택이에요. 접종부터 시작할게요.\n보호자 분은 여기서 잠시 대기해주세요,,temp_Vet,,,,,이후 의사와의 상호작용하기
@@ -170,8 +171,8 @@ Recall2_013,InnerThoughts,,동물병원 벽에 걸려 있는 TV다.\n환자 리�
 ,InnerThoughts,,[유기동물 보호소인 척하는 신종 폣숍]이 늘어나고 있다고…?\n이상한 사람들도 다 있네.. ,,temp_playerHUMAN,,,,,
 Recall2_014,InnerThoughts,,고양이용 연어맛 츄르다.,,temp_playerHUMAN,,,,,고양이용 츄르
 ,InnerThoughts,,{YourCatName}(은)는 무슨 맛을 좋아했더라…,TRUE,temp_playerHUMAN,,,,,
-Recall2_015,InnerThoughts,,‘사지 말고 입양하세요’라는 문구가 크게 쓰여 있다.  ,,temp_playerHUMAN,,,,,유기동물 포스터
-,InnerThoughts,,보호소에서 새로운 가족을 기다리는 고양이와 강아지 사진이 붙어 있다. \n입양 절차와 문의 연락처가 안내돼 있다.,,temp_playerHUMAN,,,,,
+Recall2_015,InnerThoughts,,사지 말고 입양하세요'라는 문구가 크게 쓰여 있다. 한국에는 매년 10만 마리 이상의 반려동물이 유기되고 있다고 했다,,temp_playerHUMAN,,,,,유기동물 포스터
+,InnerThoughts,,새 가족을 찾지 못한 아이들의 눈빛이 너무 슬퍼 보인다. \n입양 절차와 문의 연락처가 안내돼 있다.,,temp_playerHUMAN,,,,,
 ,InnerThoughts,,{YourCatName}을(를) 만난 게… 우연이 아니라 꼭 필요한 인연 같아.,TRUE,temp_playerHUMAN,,,,,
 Recall2_016,InnerThoughts,,유기동물 구조 기부함이네.,,temp_playerHUMAN,,,,,기부함
 ,InnerThoughts,,솔직히` 예전엔 이런 거 그냥 지나쳤는데…,,temp_playerHUMAN,,,,,
@@ -283,7 +284,7 @@ Stage03_009,Player,,(손끝이 스치자` 어렴풋이 기억이 번져온다)  
 ,Player,,…아… 이건… ,,temp_playerCAT,,,,,
 ,Player,,(눈꺼풀이 무거워지며` 기억 속으로 스르륵 빠져든다)  ,,temp_playerCAT,,,,,
 ,,,,,,,,,,
-Recall3_001,Player,,하… 오늘 야근도 있었고 몸이 천근만근이네.,,temp_playerHUMAN,,,,,
+Recall3_001,Player,,하… 오늘 팀플 야작도 있었고 알바까지 하느라 몸이 천근만근이네.,,temp_playerHUMAN,,,,,
 ,Player,,샤워하고 침대에 엎어지고 싶다…,,temp_playerHUMAN,,,,EventSetNextTutorial,
 Recall3_002,InnerThoughts,,발끝에 무언가 툭 부딪혔다.,,temp_playerHUMAN,,,,,변경 전:(발치에서 무언가 툭—) …응? 밥그릇?
 ,Player,,설마 아무도 밥 안 챙겨줬던 거야?,,temp_playerHUMAN,,,,,
@@ -469,7 +470,7 @@ Stage04_005,Player,,흠… 이 [철장 잠금장치]` 생각보다 헐거운 것
 Stage04_Cage_Success,Player,TRUE,(찰칵-) 드디어...!,,temp_playerCAT,,,,,
 ,Player,TRUE,철장 문이 열렸어. 이제 나갈 수 있어!,,temp_playerCAT,,,,,
 ,InnerThoughts,,주위를 둘러보니 철장과 철장안에 고양이들이 보인다.,,temp_playerCAT,,,,,
-,Player,,길에 돌아다니는 유기 동물을 잡아가는 트럭인 건가..?,,temp_playerCAT,,,,,변경 전:여기는 길에 돌아다니는 유기동물을 잡아가는 곳인가..?
+,Player,,이 철장... 보호소로 가는 트럭인가? 일정 기간 내에 입양되지 못하면 안락사될 수도 있다던데...,,temp_playerCAT,,,,,변경 전:여기는 길에 돌아다니는 유기동물을 잡아가는 곳인가..?
 ,Player,,안돼! 이러다간 집에서 더 멀어지게 생겼어!,,temp_playerCAT,,,,,
 ,Player,,이곳을 나갈 방법을 찾아봐야겠어.,,temp_playerCAT,,,,,
 Stage04_Cage_Fail,Player,TRUE,이런... 트럭이 너무 흔들려..!,,temp_playerCAT,,,,,
@@ -491,9 +492,9 @@ Stage04_011,Player,,위쪽 작은 창문을 통해 운전자의 시야가 같이
 ,Player,,빨간불일 때 트럭에서 탈출할 수 있으면 좋을 텐데... 신호가 걸릴 때 누군가 내게 알려준다면 여기서 나갈 수 있을 거야!,,temp_playerCAT,,,,EventSetNextTutorial,변경 전:빨간불일 때 트럭에서 탈출할 수 있으면 좋을 텐데... 신호가 걸릴 때 누군가 나한테  알려줄 수만 있다면...
 Stage04_Generic_Wait,InnerThoughts,,아직 다른 고양이들과도 이야기해봐야 할 것 같아.,,temp_playerCAT,,,,,
 Stage04_Generic_Persuaded,InnerThoughts,,모든 고양이들을 설득해야해!,,temp_playerCAT,,,,,
-Stage04_Monologue_001,Player,,(트럭 문은 다이얼로 잠겨있고` 신호등에서 멈출 때가 기회...),,temp_playerCAT,,,,,
-,Player,,(내 힘만으로는 이 트럭을 탈출할 수 없어... 저 아이들의 도움이 필요해.),,temp_playerCAT,,,,,
-,Player,,(이 아이들과 다시 한번 이야기해보자.),,temp_playerCAT,,,,,
+Stage04_Monologue_001,InnerThoughts,,트럭 문은 다이얼로 잠겨있고` 신호등에서 멈출 때가 기회...,,temp_playerCAT,,,,,
+,InnerThoughts,,내 힘만으로는 이 트럭을 탈출할 수 없어... 저 아이들의 도움이 필요해.,,temp_playerCAT,,,,,
+,Player,,이 아이들과 다시 한번 이야기해보자.,,temp_playerCAT,,,,,
 Stage04_Ttoli_High_001,Player,,저기` 넌 이름이 뭐야? ,,temp_playerCAT,,,,,
 ,또리,,훌쩍... 넌 누구야? 나 집에 가야 하는데... 여긴 어디야? 너무 무서워...,,temp_Ttoli,,,,,
 ,Player,,난 {PlayerName}. 여긴... 나도 잘 모르겠어. 하지만 우리가 함께 있으면 괜찮을 거야.,TRUE,temp_playerCAT,,,,,
@@ -533,7 +534,7 @@ Stage04_Ttoli_Low_Fail_001,InnerThoughts,,(아직도 너무 무서워하고 있�
 Stage04_Leo_High_001,Player,,(얼굴에 있는 흉터들이 눈에 띈다...) 많이 다쳤었나 봐. 괜찮아?,,temp_playerCAT,,,,,
 ,레오,,...뭐야? 쳐다보지 마.,,temp_Leo,,,,,
 ,Player,,난 {PlayerName}. 넌 어쩌다 여기에 잡혔어?,TRUE,temp_playerCAT,,,,,
-,레오,,...버려졌어. 너무 사납다고. 할퀴고 깨무는 게 싫대.,,temp_Leo,,,,,
+,레오,,...버려졌어. 사납다고. 사냥 놀이를 제대로 못 해서 힘이 넘쳤던 것뿐인데... 그냥 무작정 할퀸다고 싫어했어.,,temp_Leo,,,,,
 ,Player,,그건... 그건 사나운 게 아니잖아. 그냥 고양이들이 노는 방식인데...,,temp_playerCAT,,,,,
 ,레오,,...!,,temp_Leo,,,,,
 ,Player,,그들이 너를 이해하려고 하지 않았던 거야. 네 잘못이 아니라고.,,temp_playerCAT,,,,,

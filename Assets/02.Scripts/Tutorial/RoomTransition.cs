@@ -49,12 +49,12 @@ public class RoomTransitionTutorial : TutorialBase
 
     private void Update()
     {
-        // E키 입력 체크 (튜토리얼이 활성화된 상태에서만)
+        // E/W 키 입력 체크 (튜토리얼이 활성화된 상태에서만)
         if (interactionImageDisplay != null &&
-            interactionImageDisplay.IsPlayerInArea() &&
-            !isTransitioning &&
-            !isInteracting &&
-            Input.GetKeyDown(KeyCode.E))
+        interactionImageDisplay.IsPlayerInArea() &&
+        !isTransitioning &&
+        !isInteracting &&
+        (Input.GetKeyDown(KeyCode.E) || Input.GetKeyDown(KeyCode.W)))
         {
             OnPlayerInteract();
         }

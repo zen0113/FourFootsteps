@@ -19,7 +19,7 @@ public class PlatformActivationTrigger : MonoBehaviour
     [SerializeField] private bool debugMode = false;
     
     [Header("활성화 조건")]
-    [SerializeField] private bool isActivated = false; // 활성화 상태 (사슬이 끊어졌는지)
+    private bool isActivated = false; // 활성화 상태 (사슬이 끊어졌는지)
     
     /// <summary>
     /// 트리거 활성화 상태 확인용 프로퍼티
@@ -31,6 +31,7 @@ public class PlatformActivationTrigger : MonoBehaviour
     
     private void Awake()
     {
+   
         SetupTriggerCollider();
     }
     

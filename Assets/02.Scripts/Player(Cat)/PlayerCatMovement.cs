@@ -21,7 +21,7 @@ public class PlayerCatMovement : MonoBehaviour
     [Header("이동 및 점프")]
     [SerializeField] private float movePower = 2f;      // 기본 이동 속도
     [SerializeField] private float dashPower = 8f;      // 대시 이동 속도
-    [SerializeField] private float jumpPower = 5f;      // 점프 힘
+    [SerializeField] private float jumpPower = 7f;      // 점프 힘
     [SerializeField] private float crouchPower = 1f;    // 웅크린 상태 이동 속도
     
     // 특정 상황 시, 점프 불가능

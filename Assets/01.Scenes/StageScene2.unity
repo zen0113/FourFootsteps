@@ -27430,7 +27430,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6310540648468389677, guid: df843dd1c9db88343a97c21b05d19594, type: 3}
       propertyPath: isActivated
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6310540648468389677, guid: df843dd1c9db88343a97c21b05d19594, type: 3}
       propertyPath: targetObjects.Array.size
@@ -31978,6 +31978,10 @@ PrefabInstance:
       propertyPath: chainBreakSound
       value: 
       objectReference: {fileID: 8300000, guid: 85f2c7d03daa1d64d9d82aa7c4d10bbc, type: 3}
+    - target: {fileID: 8497814714462885509, guid: fdb7939a7ed342f499dd72947b6b21c4, type: 3}
+      propertyPath: linkedPlatformTrigger
+      value: 
+      objectReference: {fileID: 1774824572}
     - target: {fileID: 8854939053311323476, guid: fdb7939a7ed342f499dd72947b6b21c4, type: 3}
       propertyPath: m_LocalScale.x
       value: 0.6
@@ -37988,6 +37992,17 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!114 &1774824572 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6310540648468389677, guid: df843dd1c9db88343a97c21b05d19594, type: 3}
+  m_PrefabInstance: {fileID: 1295280230}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6658f8d2dc9a3e745b8ada49f617e839, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1782945994
 GameObject:
   m_ObjectHideFlags: 0
@@ -39681,7 +39696,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   movePower: 4
   dashPower: 6
-  jumpPower: 6
+  jumpPower: 7
   crouchPower: 3
   isJumpingBlocked: 0
   isRunningBlocked: 0
@@ -39701,6 +39716,10 @@ MonoBehaviour:
   crouchSoundInterval: 0.5
   landingSoundDelay: 0.3
   fallMultiplier: 4.5
+  lowJumpMultiplier: 2
+  jumpBufferTime: 0.15
+  coyoteTime: 0.12
+  landingJumpDelay: 0.05
   groundCheck: {fileID: 1220997975}
   groundCheckRadius: 0.2
   groundMask:

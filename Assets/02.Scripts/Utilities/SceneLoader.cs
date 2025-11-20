@@ -26,11 +26,9 @@ public class SceneLoader : MonoBehaviour
     }
 
     [SerializeField] private CanvasGroup sceneLoaderCanvasGroup;
-    [SerializeField] private List<GameObject> loadingPuzzlePieces = new List<GameObject>();
-    // 회상에서 스테이지로 넘어갈 때 하얀 퍼즐 트랜지션 사용
     [SerializeField] private List<GameObject> loadingPuzzlePiecesWhite = new List<GameObject>();
     [SerializeField] private GameObject CatAnimUI;
-    //[SerializeField] private Image progressBar;
+    private SpriteRenderer[] puzzleRenderers;
 
     private string loadSceneName;
     private string previousSceneName;
@@ -51,10 +49,14 @@ public class SceneLoader : MonoBehaviour
         if (Instance != this)
         {
             Destroy(gameObject);
-            return;
         }
 
         DontDestroyOnLoad(gameObject);
+
+        puzzleRenderers = loadingPuzzlePiecesWhite
+           .Select(p => p.GetComponent<SpriteRenderer>())
+           .ToArray();
+        return;
     }
 
     // 씬 로드를 시작
@@ -176,22 +178,24 @@ public class SceneLoader : MonoBehaviour
         isFading = true;
         bool isRecallToStage = previousSceneName.Contains(RECALL_SCENE_NAME);
         sceneLoaderCanvasGroup.alpha = 1f;
-        // 사용할 퍼즐 리스트 선택
-        List<GameObject> targetPuzzles = isRecallToStage ? loadingPuzzlePiecesWhite : loadingPuzzlePieces;
+
+        Color targetColor = isRecallToStage ? Color.white : Color.black;
+        foreach (var renderer in puzzleRenderers)
+            renderer.color = targetColor;
 
         // 0~(퍼즐개수-1)까지 리스트 만들고 셔플
-        List<int> indices = Enumerable.Range(0, targetPuzzles.Count).ToList();
+        List<int> indices = Enumerable.Range(0, loadingPuzzlePiecesWhite.Count).ToList();
         ShuffleList(indices);
 
         // 한 퍼즐당 대략 실행 간격 계산
-        float interval = fadeInOutTime / targetPuzzles.Count;
+        float interval = fadeInOutTime / loadingPuzzlePiecesWhite.Count;
 
         foreach (int idx in indices)
         {
             // null 체크 후 활성화
-            if (targetPuzzles[idx] != null)
+            if (loadingPuzzlePiecesWhite[idx] != null)
             {
-                targetPuzzles[idx].SetActive(isFadeIn);
+                loadingPuzzlePiecesWhite[idx].SetActive(isFadeIn);
             }
 
             yield return new WaitForSecondsRealtime(interval);
@@ -216,12 +220,12 @@ public class SceneLoader : MonoBehaviour
         }
     }
 
-    
+
 
     //    // -------------------------------에디터에서 오브젝트 70개 자동할당-----------------------------------
     //    // 실행 시 쓰이진 않음! 에디터에서 편의용으로 둔것
     //    [Header("검색 규칙")]
-    //    [SerializeField] private string layerPrefix = "layer";
+    //    [SerializeField] private string layerPrefix = "레이어";
     //    [SerializeField] private int minIndex = 0;
     //    [SerializeField] private int maxIndex = 69;
 
@@ -247,6 +251,8 @@ public class SceneLoader : MonoBehaviour
     //                cur = cur.parent;
     //            }
     //            if (depth != 2) continue; // 자식의 자식만
+
+    //            if (!t.gameObject.activeInHierarchy) continue; // 활성화 상태 체크 추가
 
     //            // 이름이 LayerN 형태인지 검사
     //            var name = t.name;

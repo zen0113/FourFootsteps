@@ -88,6 +88,8 @@ public class PlayerCatMovement : MonoBehaviour
     // 벽/박스 점프 개선
     [SerializeField] private float wallJumpBoost = 1.2f;     // 벽 근처 점프 배율
     [SerializeField] private float wallCheckDistance = 0.4f; // 벽 감지 거리
+    [SerializeField] private float velocityProtectionTime = 0.15f; // Y축 속도 보호 시간
+    private float velocityProtectionCounter = 0f;            // 속도 보호 타이머
 
     // 지상 감지 시스템
     [Header("지상 체크")]
@@ -349,6 +351,13 @@ public class PlayerCatMovement : MonoBehaviour
         HandleLadderInput();    // 사다리 관련 입력
         if (!isClimbing) Jump(); // 사다리 타는 중이 아니면 점프 가능
         HandleCrouch(justLanded); // 웅크리기 처리
+
+        // 👇 여기에 추가!
+        // 속도 보호 타이머 감소
+        if (velocityProtectionCounter > 0)
+        {
+            velocityProtectionCounter -= Time.deltaTime;
+        }
     }
 
     /// <summary>
@@ -581,6 +590,21 @@ public class PlayerCatMovement : MonoBehaviour
             if (!isClimbing)
             {
                 Move();             // 기본 이동 처리
+
+                // 👇 여기에 추가! (Move() 바로 다음)
+                // 벽 점프 직후 Y축 속도 보호 (벽 충돌로 인한 속도 감소 방지)
+                if (velocityProtectionCounter > 0 && rb.velocity.y > 0)
+                {
+                    // 점프 직후 최소 속도 보장 (점프력의 80% 이상 유지)
+                    float minVelocityY = jumpPower * wallJumpBoost * 0.8f;
+                    
+                    if (rb.velocity.y < minVelocityY)
+                    {
+                        // 속도가 너무 감소했으면 복원
+                        rb.velocity = new Vector2(rb.velocity.x, minVelocityY);
+                    }
+                }
+
                 BetterJump();       // 점프 중력 보정
                 HandleSound();      // 이동 사운드 처리
                 UpdateParticleState(); // 파티클 시스템 업데이트
@@ -1036,6 +1060,12 @@ public class PlayerCatMovement : MonoBehaviour
         
         jumpCount++;
         isOnGround = false;
+        
+        // 👇 벽 근처에서 점프하면 속도 보호 시작!
+        if (isNearWall)
+        {
+            velocityProtectionCounter = velocityProtectionTime;
+        }
 
         animator.SetTrigger("Jump");
 
@@ -1328,6 +1358,35 @@ public class PlayerCatMovement : MonoBehaviour
                 {
                     jumpCount = 0;
                     break;
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// 충돌이 지속되는 동안 - 점프 중 벽과의 충돌 처리
+    /// </summary>
+    private void OnCollisionStay2D(Collision2D collision)
+    {
+        // 속도 보호 중이고 점프 중일 때만 작동
+        if (velocityProtectionCounter > 0 && rb.velocity.y > 0)
+        {
+            // 벽이나 박스와 충돌 중인지 확인
+            if (collision.gameObject.CompareTag("wall") || 
+                collision.gameObject.CompareTag("Box"))
+            {
+                foreach (ContactPoint2D contact in collision.contacts)
+                {
+                    // 옆면 충돌인지 확인 (수평 방향 충돌)
+                    if (Mathf.Abs(contact.normal.x) > 0.7f)
+                    {
+                        // Y축 속도만 유지하고 X축 속도는 약간 감소
+                        float protectedYVelocity = rb.velocity.y;
+                        float reducedXVelocity = rb.velocity.x * 0.5f;
+                        
+                        rb.velocity = new Vector2(reducedXVelocity, protectedYVelocity);
+                        break;
+                    }
                 }
             }
         }

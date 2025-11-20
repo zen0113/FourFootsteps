@@ -85,6 +85,9 @@ public class PlayerCatMovement : MonoBehaviour
     private float coyoteTimeCounter = 0f;                   // 코요테 타임 카운터
     private bool isJumpButtonHeld = false;                  // 점프 버튼을 계속 누르고 있는지
 
+    // 벽/박스 점프 개선
+    [SerializeField] private float wallJumpBoost = 1.2f;     // 벽 근처 점프 배율
+    [SerializeField] private float wallCheckDistance = 0.4f; // 벽 감지 거리
 
     // 지상 감지 시스템
     [Header("지상 체크")]
@@ -1019,8 +1022,18 @@ public class PlayerCatMovement : MonoBehaviour
     /// </summary>
     void PerformJump()
     {
-        rb.velocity = new Vector2(rb.velocity.x, 0);       // y축 속도 초기화
-        rb.AddForce(Vector2.up * jumpPower, ForceMode2D.Impulse); // 점프 힘 적용
+        // 벽/박스 근처에 있는지 체크
+        bool isNearWall = CheckNearWall();
+        
+        // y축 속도를 완전히 0으로 리셋 (벽 충돌 간섭 제거)
+        rb.velocity = new Vector2(rb.velocity.x, 0);
+        
+        // 벽 근처에서는 점프력 강화
+        float actualJumpPower = isNearWall ? jumpPower * wallJumpBoost : jumpPower;
+        
+        // 점프 힘 적용
+        rb.AddForce(Vector2.up * actualJumpPower, ForceMode2D.Impulse);
+        
         jumpCount++;
         isOnGround = false;
 
@@ -1043,6 +1056,57 @@ public class PlayerCatMovement : MonoBehaviour
             audioSource.Stop();
             audioSource.PlayOneShot(jumpSound);
         }
+    }
+
+    /// <summary>
+    /// 플레이어가 벽이나 박스 근처에 있는지 체크
+    /// </summary>
+    bool CheckNearWall()
+    {
+        // 플레이어 중심 위치
+        Vector2 playerCenter = transform.position;
+        
+        // 좌우 양쪽 체크 (BoxCast 사용 - 더 정확한 감지)
+        Vector2 checkSize = new Vector2(0.1f, boxCollider.size.y * 0.8f);
+        
+        // 왼쪽 체크
+        RaycastHit2D leftCheck = Physics2D.BoxCast(
+            playerCenter,
+            checkSize,
+            0f,
+            Vector2.left,
+            wallCheckDistance,
+            groundMask
+        );
+        
+        // 오른쪽 체크
+        RaycastHit2D rightCheck = Physics2D.BoxCast(
+            playerCenter,
+            checkSize,
+            0f,
+            Vector2.right,
+            wallCheckDistance,
+            groundMask
+        );
+        
+        // Box 태그 오브젝트도 추가로 체크
+        Collider2D[] nearbyColliders = Physics2D.OverlapCircleAll(
+            playerCenter, 
+            wallCheckDistance
+        );
+        
+        foreach (Collider2D col in nearbyColliders)
+        {
+            // 자기 자신은 제외
+            if (col.gameObject == gameObject) continue;
+            
+            if (col.CompareTag("Box") || col.CompareTag("wall"))
+            {
+                return true;
+            }
+        }
+        
+        return leftCheck.collider != null || rightCheck.collider != null;
     }
 
     /// <summary>
@@ -1382,6 +1446,23 @@ public class PlayerCatMovement : MonoBehaviour
         {
             Gizmos.color = boxInteraction.IsPushing ? Color.cyan : Color.magenta;
             Gizmos.DrawWireSphere(transform.position, 0.5f);
+        }
+
+        // 👇 여기에 새로 추가!
+        // 벽/박스 감지 범위 표시 (게임 실행 중에만)
+        if (Application.isPlaying)
+        {
+            Gizmos.color = Color.yellow;
+            
+            Vector2 playerCenter = transform.position;
+            Vector2 checkSize = new Vector2(0.1f, boxCollider != null ? boxCollider.size.y * 0.8f : 1f);
+            
+            // 좌우 감지 범위 표시
+            Gizmos.DrawWireCube(playerCenter + Vector2.left * wallCheckDistance, checkSize);
+            Gizmos.DrawWireCube(playerCenter + Vector2.right * wallCheckDistance, checkSize);
+            
+            // 감지 원 표시
+            Gizmos.DrawWireSphere(playerCenter, wallCheckDistance);
         }
     }
 

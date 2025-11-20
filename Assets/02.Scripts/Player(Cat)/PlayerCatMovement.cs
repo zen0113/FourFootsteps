@@ -21,8 +21,9 @@ public class PlayerCatMovement : MonoBehaviour
     [Header("이동 및 점프")]
     [SerializeField] private float movePower = 2f;      // 기본 이동 속도
     [SerializeField] private float dashPower = 8f;      // 대시 이동 속도
-    [SerializeField] private float jumpPower = 5f;      // 점프 힘
+    [SerializeField] private float jumpPower = 7f;      // 점프 힘
     [SerializeField] private float crouchPower = 1f;    // 웅크린 상태 이동 속도
+    
     // 특정 상황 시, 점프 불가능
     [SerializeField] private bool isJumpingBlocked = false;
     public bool IsJumpingBlocked
@@ -73,7 +74,22 @@ public class PlayerCatMovement : MonoBehaviour
     // 점프 물리 관련
     [Header("점프 중력 보정")]
     [SerializeField] private float fallMultiplier = 2.5f;   // 떨어질 때 중력 배수 (자연스러운 점프감을 위함)
+    [SerializeField] private float lowJumpMultiplier = 2f;  // 스페이스를 일찍 뗄 때 중력 배수
     private int jumpCount = 0;                              // 현재 점프 횟수 (더블점프 구현용)
+
+    [Header("점프 개선 시스템")]
+    [SerializeField] private float jumpBufferTime = 0.15f;  // 점프 입력 버퍼 시간
+    [SerializeField] private float coyoteTime = 0.12f;      // 코요테 타임 (플랫폼에서 떨어진 후 점프 가능 시간)
+    [SerializeField] private float landingJumpDelay = 0.05f; // 착지 후 점프 가능까지의 최소 딜레이 (기존 0.1초에서 단축)
+    private float jumpBufferCounter = 0f;                   // 점프 버퍼 카운터
+    private float coyoteTimeCounter = 0f;                   // 코요테 타임 카운터
+    private bool isJumpButtonHeld = false;                  // 점프 버튼을 계속 누르고 있는지
+
+    // 벽/박스 점프 개선
+    [SerializeField] private float wallJumpBoost = 1.2f;     // 벽 근처 점프 배율
+    [SerializeField] private float wallCheckDistance = 0.4f; // 벽 감지 거리
+    [SerializeField] private float velocityProtectionTime = 0.15f; // Y축 속도 보호 시간
+    private float velocityProtectionCounter = 0f;            // 속도 보호 타이머
 
     // 지상 감지 시스템
     [Header("지상 체크")]
@@ -148,6 +164,9 @@ public class PlayerCatMovement : MonoBehaviour
     // 엔딩 조작 상태
     [Header("엔딩 조작 상태")]
     public bool processingBadEnding = false;
+
+    // 애니메이션 파라미터 해쉬화 부분에 추가
+    int _hashClimbDirection = Animator.StringToHash("ClimbDirection");
 
     /// <summary>
     /// 게임 시작 시 초기화 작업
@@ -281,7 +300,30 @@ public class PlayerCatMovement : MonoBehaviour
         }
 
         // 지상에 있고 떨어지는 중이면 점프 카운트 리셋
-        if (isOnGround && rb.velocity.y <= 0) jumpCount = 0;
+        if (isOnGround && rb.velocity.y <= 0) 
+        {
+            jumpCount = 0;
+            coyoteTimeCounter = coyoteTime; // 코요테 타임 리셋
+        }
+        else
+        {
+            coyoteTimeCounter -= Time.deltaTime; // 공중에 있을 때 코요테 타임 감소
+        }
+
+        // 점프 버퍼 카운터 감소
+        if (jumpBufferCounter > 0)
+        {
+            jumpBufferCounter -= Time.deltaTime;
+        }
+
+        // 점프 버튼 입력 감지 (버퍼링용)
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            jumpBufferCounter = jumpBufferTime;
+        }
+
+        // 점프 버튼을 누르고 있는지 체크 (가변 점프 높이용)
+        isJumpButtonHeld = Input.GetKey(KeyCode.Space);
 
         float horizontalInput = Input.GetAxisRaw("Horizontal");
 
@@ -309,6 +351,13 @@ public class PlayerCatMovement : MonoBehaviour
         HandleLadderInput();    // 사다리 관련 입력
         if (!isClimbing) Jump(); // 사다리 타는 중이 아니면 점프 가능
         HandleCrouch(justLanded); // 웅크리기 처리
+
+        // 👇 여기에 추가!
+        // 속도 보호 타이머 감소
+        if (velocityProtectionCounter > 0)
+        {
+            velocityProtectionCounter -= Time.deltaTime;
+        }
     }
 
     /// <summary>
@@ -425,7 +474,6 @@ public class PlayerCatMovement : MonoBehaviour
     int _hashJump = Animator.StringToHash("Jump");
 
     // 애니메이션 파라미터 동기화
-    // 애니메이션 파라미터 동기화
     void SyncAnimatorParams()
     {
         // 입력 차단/미니게임 때는 깔끔하게 0/false로
@@ -462,6 +510,17 @@ public class PlayerCatMovement : MonoBehaviour
         animator.SetFloat(_hashSpeed, speedParam);
         animator.SetBool(_hashShift, shiftDown);
         animator.SetBool(_hashIsClimbing, isClimbing && !blocked);
+
+        // ✨ 새로 추가: 사다리 타는 중일 때 방향 정보 업데이트
+        if (isClimbing && !blocked)
+        {
+            float verticalInput = Input.GetAxisRaw("Vertical");
+            animator.SetFloat(_hashClimbDirection, verticalInput);
+        }
+        else
+        {
+            animator.SetFloat(_hashClimbDirection, 0f);
+        }
 
         // 웅크림 상태 계산
         bool jumpAnim = animator.GetBool(_hashJump);
@@ -531,6 +590,21 @@ public class PlayerCatMovement : MonoBehaviour
             if (!isClimbing)
             {
                 Move();             // 기본 이동 처리
+
+                // 👇 여기에 추가! (Move() 바로 다음)
+                // 벽 점프 직후 Y축 속도 보호 (벽 충돌로 인한 속도 감소 방지)
+                if (velocityProtectionCounter > 0 && rb.velocity.y > 0)
+                {
+                    // 점프 직후 최소 속도 보장 (점프력의 80% 이상 유지)
+                    float minVelocityY = jumpPower * wallJumpBoost * 0.8f;
+                    
+                    if (rb.velocity.y < minVelocityY)
+                    {
+                        // 속도가 너무 감소했으면 복원
+                        rb.velocity = new Vector2(rb.velocity.x, minVelocityY);
+                    }
+                }
+
                 BetterJump();       // 점프 중력 보정
                 HandleSound();      // 이동 사운드 처리
                 UpdateParticleState(); // 파티클 시스템 업데이트
@@ -937,55 +1011,138 @@ public class PlayerCatMovement : MonoBehaviour
     }
 
     /// <summary>
-    /// 점프 입력 처리
-    /// 일반 점프와 더블 점프를 지원
-    /// </summary>
+/// 점프 입력 처리 - 개선 버전
+/// - 점프 버퍼링: 착지 전 입력을 기억
+/// - 코요테 타임: 플랫폼에서 떨어진 직후에도 점프 가능
+/// - 착지 딜레이 단축: 0.1초 → 0.05초
+/// </summary>
     void Jump()
     {
-        if (Time.time - lastLandingTime < 0.1f)
+            // 착지 직후 짧은 딜레이 (0.05초로 단축)
+        if (Time.time - lastLandingTime < landingJumpDelay)
         {
             return;
         }
 
         if (IsInputBlocked()) return;
-        // isOnSlope 조건 추가하여 경사면에서는 점프 못하게 변경
-        if (isJumpingBlocked || isOnSlope) return;
+        if (isJumpingBlocked) return; // 경사면 조건은 아래에서 따로 처리
+        if (isCrouching || isClimbing) return;
 
-        if (Input.GetKeyDown(KeyCode.Space) && !isCrouching && !isClimbing)
+        // 점프 가능 조건 판정 (코요테 타임 포함)
+        bool canJumpFromGround = (isOnGround || coyoteTimeCounter > 0) && !isOnSlope;
+        bool canDoubleJump = jumpCount < 2;
+
+        // 점프 버퍼가 활성화되어 있고, 점프 가능한 상태라면 점프 실행
+        if (jumpBufferCounter > 0 && (canJumpFromGround || canDoubleJump))
         {
-            // 지상에 있거나 더블 점프 가능한 상태에서만 점프
-            if (isOnGround || jumpCount < 2)
-            {
-                rb.velocity = new Vector2(rb.velocity.x, 0);       // y축 속도 초기화
-                rb.AddForce(Vector2.up * jumpPower, ForceMode2D.Impulse); // 점프 힘 적용
-                jumpCount++;
-                isOnGround = false;
-
-                animator.SetTrigger("Jump");
-
-                // 점프 시 파티클 효과
-                if (dashParticle != null)
-                {
-                    UpdateParticlePosition();
-                    if (!dashParticle.isPlaying)
-                    {
-                        dashParticle.Play();
-                    }
-                    particleEmission.rateOverTime = runEmissionRate;
-                }
-
-                // 점프 사운드 재생
-                if (jumpSound != null)
-                {
-                    audioSource.Stop();
-                    audioSource.PlayOneShot(jumpSound);
-                }
-            }
+            PerformJump();
+            jumpBufferCounter = 0; // 버퍼 소모
+            coyoteTimeCounter = 0; // 코요테 타임 소모
         }
     }
 
     /// <summary>
-    /// 점프 물리 개선 - 떨어질 때 중력을 증가시켜 자연스러운 점프감 구현
+    /// 실제 점프 실행 (중복 코드 제거용 헬퍼 함수)
+    /// </summary>
+    void PerformJump()
+    {
+        // 벽/박스 근처에 있는지 체크
+        bool isNearWall = CheckNearWall();
+        
+        // y축 속도를 완전히 0으로 리셋 (벽 충돌 간섭 제거)
+        rb.velocity = new Vector2(rb.velocity.x, 0);
+        
+        // 벽 근처에서는 점프력 강화
+        float actualJumpPower = isNearWall ? jumpPower * wallJumpBoost : jumpPower;
+        
+        // 점프 힘 적용
+        rb.AddForce(Vector2.up * actualJumpPower, ForceMode2D.Impulse);
+        
+        jumpCount++;
+        isOnGround = false;
+        
+        // 👇 벽 근처에서 점프하면 속도 보호 시작!
+        if (isNearWall)
+        {
+            velocityProtectionCounter = velocityProtectionTime;
+        }
+
+        animator.SetTrigger("Jump");
+
+        // 점프 시 파티클 효과
+        if (dashParticle != null)
+        {
+            UpdateParticlePosition();
+            if (!dashParticle.isPlaying)
+            {
+                dashParticle.Play();
+            }
+            particleEmission.rateOverTime = runEmissionRate;
+        }
+
+        // 점프 사운드 재생
+        if (jumpSound != null)
+        {
+            audioSource.Stop();
+            audioSource.PlayOneShot(jumpSound);
+        }
+    }
+
+    /// <summary>
+    /// 플레이어가 벽이나 박스 근처에 있는지 체크
+    /// </summary>
+    bool CheckNearWall()
+    {
+        // 플레이어 중심 위치
+        Vector2 playerCenter = transform.position;
+        
+        // 좌우 양쪽 체크 (BoxCast 사용 - 더 정확한 감지)
+        Vector2 checkSize = new Vector2(0.1f, boxCollider.size.y * 0.8f);
+        
+        // 왼쪽 체크
+        RaycastHit2D leftCheck = Physics2D.BoxCast(
+            playerCenter,
+            checkSize,
+            0f,
+            Vector2.left,
+            wallCheckDistance,
+            groundMask
+        );
+        
+        // 오른쪽 체크
+        RaycastHit2D rightCheck = Physics2D.BoxCast(
+            playerCenter,
+            checkSize,
+            0f,
+            Vector2.right,
+            wallCheckDistance,
+            groundMask
+        );
+        
+        // Box 태그 오브젝트도 추가로 체크
+        Collider2D[] nearbyColliders = Physics2D.OverlapCircleAll(
+            playerCenter, 
+            wallCheckDistance
+        );
+        
+        foreach (Collider2D col in nearbyColliders)
+        {
+            // 자기 자신은 제외
+            if (col.gameObject == gameObject) continue;
+            
+            if (col.CompareTag("Box") || col.CompareTag("wall"))
+            {
+                return true;
+            }
+        }
+        
+        return leftCheck.collider != null || rightCheck.collider != null;
+    }
+
+    /// <summary>
+    /// 점프 물리 개선 - 가변 점프 높이 및 자연스러운 낙하 구현
+    /// - 스페이스를 일찍 떼면 점프가 낮아짐
+    /// - 떨어질 때 중력 증가로 자연스러운 점프감 구현
     /// </summary>
     void BetterJump()
     {
@@ -995,6 +1152,11 @@ public class PlayerCatMovement : MonoBehaviour
         if (rb.velocity.y < 0)
         {
             rb.velocity += Vector2.up * Physics2D.gravity.y * (fallMultiplier - 1) * Time.deltaTime;
+        }
+        // 올라가는 중인데 스페이스를 떼면 점프를 낮게 (가변 점프 높이)
+        else if (rb.velocity.y > 0 && !isJumpButtonHeld)
+        {
+            rb.velocity += Vector2.up * Physics2D.gravity.y * (lowJumpMultiplier - 1) * Time.deltaTime;
         }
     }
 
@@ -1031,7 +1193,7 @@ public class PlayerCatMovement : MonoBehaviour
 
             // 사다리 범위 내에서만 이동 가능하도록 Y 위치 제한
             float clampedY = Mathf.Clamp(transform.position.y + moveY * Time.fixedDeltaTime,
-                                          ladderBottom + 0.2f, ladderTop - 0.2f);
+                                        ladderBottom + 0.2f, ladderTop - 0.2f);
 
             // 경계에서는 이동 불가
             if ((transform.position.y >= ladderTop - 0.2f && verticalInput > 0) ||
@@ -1043,6 +1205,9 @@ public class PlayerCatMovement : MonoBehaviour
 
         // 사다리 타기 이동 적용 (x축은 0, y축만 이동)
         rb.velocity = new Vector2(0, moveY);
+
+        // ✨ 새로 추가: 애니메이션 방향 설정
+        animator.SetFloat(_hashClimbDirection, verticalInput);
 
         // 사다리 타는 사운드 재생
         if (Mathf.Abs(verticalInput) > 0.01f && climbSound != null && Time.time - lastClimbSoundTime >= climbSoundInterval)
@@ -1199,6 +1364,35 @@ public class PlayerCatMovement : MonoBehaviour
     }
 
     /// <summary>
+    /// 충돌이 지속되는 동안 - 점프 중 벽과의 충돌 처리
+    /// </summary>
+    private void OnCollisionStay2D(Collision2D collision)
+    {
+        // 속도 보호 중이고 점프 중일 때만 작동
+        if (velocityProtectionCounter > 0 && rb.velocity.y > 0)
+        {
+            // 벽이나 박스와 충돌 중인지 확인
+            if (collision.gameObject.CompareTag("wall") || 
+                collision.gameObject.CompareTag("Box"))
+            {
+                foreach (ContactPoint2D contact in collision.contacts)
+                {
+                    // 옆면 충돌인지 확인 (수평 방향 충돌)
+                    if (Mathf.Abs(contact.normal.x) > 0.7f)
+                    {
+                        // Y축 속도만 유지하고 X축 속도는 약간 감소
+                        float protectedYVelocity = rb.velocity.y;
+                        float reducedXVelocity = rb.velocity.x * 0.5f;
+                        
+                        rb.velocity = new Vector2(reducedXVelocity, protectedYVelocity);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    /// <summary>
     /// 여러 개의 Raycast를 사용해 발밑의 경사면을 종합적으로 판단하고 부드럽게 회전합니다.
     /// 경사면 끝에서 발생하는 상태 깜빡임(jittering) 현상을 개선하고, 경사면에서 웅크리기 애니메이션이 정상적으로 재생되도록 수정합니다.
     /// </summary>
@@ -1311,6 +1505,23 @@ public class PlayerCatMovement : MonoBehaviour
         {
             Gizmos.color = boxInteraction.IsPushing ? Color.cyan : Color.magenta;
             Gizmos.DrawWireSphere(transform.position, 0.5f);
+        }
+
+        // 👇 여기에 새로 추가!
+        // 벽/박스 감지 범위 표시 (게임 실행 중에만)
+        if (Application.isPlaying)
+        {
+            Gizmos.color = Color.yellow;
+            
+            Vector2 playerCenter = transform.position;
+            Vector2 checkSize = new Vector2(0.1f, boxCollider != null ? boxCollider.size.y * 0.8f : 1f);
+            
+            // 좌우 감지 범위 표시
+            Gizmos.DrawWireCube(playerCenter + Vector2.left * wallCheckDistance, checkSize);
+            Gizmos.DrawWireCube(playerCenter + Vector2.right * wallCheckDistance, checkSize);
+            
+            // 감지 원 표시
+            Gizmos.DrawWireSphere(playerCenter, wallCheckDistance);
         }
     }
 

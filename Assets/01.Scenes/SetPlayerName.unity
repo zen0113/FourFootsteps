@@ -352,6 +352,18 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+      - m_Target: {fileID: 1281099830}
+        m_TargetAssemblyTypeName: PlayerName, Assembly-CSharp
+        m_MethodName: SaveNameValue
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &194773849
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1425,6 +1437,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d492fcbf86773d048b5f1b7fd38987db, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isUsabilityTest: 0
+  LoadGameButton: {fileID: 0}
+  NewGamePanel: {fileID: 0}
+  NoGameDataPanel: {fileID: 0}
 --- !u!1 &1333503467
 GameObject:
   m_ObjectHideFlags: 0

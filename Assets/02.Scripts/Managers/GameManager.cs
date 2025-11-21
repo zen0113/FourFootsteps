@@ -108,7 +108,7 @@ public class GameManager : MonoBehaviour
             if (index + 1 < sceneOrder.Count)
                 SetVariable("NextSceneName", sceneOrder[index + 1].sceneName);
             else
-                SetVariable("NextSceneName", null); // 마지막 씬일 경우
+                SetVariable("NextSceneName", sceneOrder[0].sceneName); // 마지막 씬일 경우
 
             if (currentScene.isRecall)
             {
@@ -322,13 +322,13 @@ public class GameManager : MonoBehaviour
             "YourCatName",
             "CurrentSceneName",
             "NextSceneName",
-            "CanMoving",
+            //"CanMoving",
             //"CanInvesigatingRecallObject",
             //"CanStartCleaningMinigame",
             "CurrentMemoryPuzzleCount",
             "MemoryPuzzleStates",
             //"CleanedObjectCount",
-
+            "isPrologueFinished"
         });
 
         foreach (var item in variables)

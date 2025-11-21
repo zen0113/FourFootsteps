@@ -141,6 +141,7 @@ public class PrologueManager : MonoBehaviour
                 Debug.Log($"프롤로그 {currentStep}");
                 // 프롤로그 끝!
                 // 스테이지1로 이동
+                EndPrologue();
                 StartCoroutine(ResultManager.Instance.ExecuteResultCoroutine("Result_DialogueFadeIn"));
                 Debug.Log("스테이지1로 이동");
                 SceneLoader.Instance.LoadScene(GameManager.Instance.GetNextSceneData().sceneName);
@@ -151,10 +152,11 @@ public class PrologueManager : MonoBehaviour
         GameManager.Instance.SetVariable("PrologueStep", currentStep);
     }
 
-    public void EndPrologue()
+    private void EndPrologue()
     {
         isPrologueFinished=true;
         GameManager.Instance.SetVariable("isPrologueFinished", isPrologueFinished);
+        SaveManager.Instance.SaveGameData();
     }
 
     // 플레이어 자동 이동 관련 메소드

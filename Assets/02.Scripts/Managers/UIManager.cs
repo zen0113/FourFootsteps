@@ -13,7 +13,7 @@ public enum eUIGameObjectName
     ResponsibilityGroup,
     ResponsibilityGauge,
     PlaceUI,
-    PuzzleBagButton
+    PuzzleBagButton,
 }
 
 public class UIManager : MonoBehaviour
@@ -141,7 +141,7 @@ public class UIManager : MonoBehaviour
                     Debug.LogWarning("[PuzzleBagButtonBinder] PuzzleMemoryManager.Instance가 null입니다.");
             });
         }
-        Debug.Log($"[button.onClick.GetPersistentEventCount()] : {button.onClick.GetPersistentEventCount()}");
+        //Debug.Log($"[button.onClick.GetPersistentEventCount()] : {button.onClick.GetPersistentEventCount()}");
     }
 
     private void EnsureFootprintsCanvasExists()

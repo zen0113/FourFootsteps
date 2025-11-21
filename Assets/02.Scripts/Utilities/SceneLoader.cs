@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using static Constants;
 
 // 씬 전환 시 로딩 화면을 보여주는 싱글턴 클래스
 public class SceneLoader : MonoBehaviour
@@ -117,6 +118,9 @@ public class SceneLoader : MonoBehaviour
                 // 플레이어 움직임 상태를 명시적으로 허용합니다.
                 GameManager.Instance.SetVariable("CanMoving", true);
                 Debug.Log($"[SceneLoader] 씬 로드 완료: {scene.name}, 움직임 강제 해제 및 DialogueManager 초기화 완료.");
+
+                // 씬 상태 저장
+                SaveManager.Instance.SaveGameData();
             }
         }
     }

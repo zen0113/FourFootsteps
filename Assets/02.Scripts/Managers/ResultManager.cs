@@ -140,6 +140,7 @@ public class ResultManager : MonoBehaviour
     {
         //GameManager.Instance.IncrementVariable("ResponsibilityScore",3);
         ResponsibilityManager.Instance.ChangeResponsibilityGauge();
+        SaveManager.Instance.SaveGameData();
     }
 
     public void ExecuteResult(string resultID)
@@ -274,6 +275,12 @@ public class ResultManager : MonoBehaviour
                     GameManager.Instance.SetVariable("CanMoving", true);
                 break;
 
+            case "Result_SaveGameData":
+                // GameData 저장
+                SaveManager.Instance.SaveGameData();
+                yield return null;
+                break;
+
             // ##################################################################
             // #################### Stage 4 설득 로직 시작 ####################
             // ##################################################################
@@ -358,6 +365,7 @@ public class ResultManager : MonoBehaviour
                         Debug.Log("JumpToTutorial에서 RecallManager 호출");
                         GameManager.Instance.SetVariable("CanInvesigatingRecallObject", true);
                         RecallManager.Instance.SetInteractKeyGroup(true);
+                        SaveManager.Instance.SaveGameData();
                     }
                 }
                 yield return null;
@@ -536,6 +544,7 @@ public class ResultManager : MonoBehaviour
                 while (DialogueManager.Instance.isDialogueActive)
                     yield return null;
                 gm.SetVariable("Monologue_Shown", true);
+                SaveManager.Instance.SaveGameData();
             }
         }
         yield return null;

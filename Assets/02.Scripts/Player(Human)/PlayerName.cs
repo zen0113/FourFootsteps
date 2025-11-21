@@ -102,6 +102,11 @@ public class PlayerName : MonoBehaviour
         saveName = null;
     }
 
+    public void SaveNameValue()
+    {
+        SaveManager.Instance.SaveGameData();
+    }
+
     // 프롤로그의 고양이 이름 설정 후 예 버튼
     public void NextPrologueStep()
     {

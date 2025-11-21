@@ -32,6 +32,11 @@ public class LobbyManager : MonoBehaviour
             SceneLoader.Instance.LoadScene(Constants.SceneType.SET_PLAYERNAME.ToSceneName());
     }
 
+    public void YesNewGameButton()
+    {
+        SceneLoader.Instance.LoadScene(Constants.SceneType.SET_PLAYERNAME.ToSceneName());
+    }
+
     public void LoadGame()
     {
         if (SaveManager.Instance.CheckGameData())

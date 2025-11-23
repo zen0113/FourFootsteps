@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -73,16 +74,22 @@ public class LobbyManager : MonoBehaviour
 
     public void ShowCaseScoreSetting(int score)
     {
-        System.Random rand = new System.Random();
-
-        GameManager.Instance.SetVariable("CurrentMemoryPuzzleCount", score);
+        //System.Random rand = new System.Random();
+        GameManager.Instance.SetVariable("CurrentMemoryPuzzleCount", 5);
         var puzzleStates = GameManager.Instance.GetVariable("MemoryPuzzleStates") as Dictionary<int, bool>;
+
+        foreach (int key in puzzleStates.Keys.ToList())
+        {
+            puzzleStates[key] = false;
+        }
 
         for (int i = 0; i < score; i++)
         {
             puzzleStates[i] = true;
         }
         GameManager.Instance.SetVariable("ResponsibilityScore", score);
+        GameManager.Instance.SetVariable("isPrologueFinished", true);
+        SaveManager.Instance.SaveGameData();
         ResultManager.Instance.Test();
     }
 

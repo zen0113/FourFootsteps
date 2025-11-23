@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using static Constants;
 
 // 씬 전환 시 로딩 화면을 보여주는 싱글턴 클래스
 public class SceneLoader : MonoBehaviour
@@ -38,6 +37,7 @@ public class SceneLoader : MonoBehaviour
     private const string RECALL_SCENE_NAME = "RecallScene";
     private const string ENDING_SCENE_NAME = "Ending";
     private bool isFading = false;
+    public bool IsFading => isFading;
 
     // Resources 폴더에서 SceneLoader 프리팹을 생성
     public static SceneLoader Create()

@@ -139,7 +139,7 @@ public class SaveManager : MonoBehaviour
 
             var loadedVars = saveData.Variables ?? new Dictionary<string, object>();
 
-            // 🔧 레거시 세이브 복구:
+            // 레거시 세이브 복구:
             // 예전 세이브에서 MemoryPuzzleStates가 string 타입("System.Collections.Generic.Dictionary`2[...]")으로
             // 잘못 저장된 경우, 현재 GameManager의 초기값(dict<int,bool>)을 복사해 덮어쓴다.
             if (loadedVars.TryGetValue("MemoryPuzzleStates", out object memVal) && memVal is string)
@@ -188,8 +188,8 @@ public class SaveManager : MonoBehaviour
         }
     }
 
-    // ⚠ 부분 저장 로직은 버그 유발 가능성이 커서,
-    //    안전하게 전체 세이브로 대체 (성능 이슈 거의 없음)
+    // 부분 저장 로직은 버그 유발 가능성이 커서,
+    // 안전하게 전체 세이브로 대체 (성능 이슈 거의 없음)
     public void SaveVariable(string variableName)
     {
         // 필요하면 나중에 최적화 가능. 일단 전체 세이브로 안전하게 처리.

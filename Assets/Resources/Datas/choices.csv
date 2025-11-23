@@ -1,18 +1,10 @@
 choice ID,Script Text,next,isGoodChoice,        TutorialIndex,Text Effect,RequiredResponsibility,,
 Choice_001,스크래쳐를 설치한다.,Recall1_003,true,3,,,고양이 스크래쳐 삼,회상1
 ,고양이를 방에 가둔다.,Recall1_004,false,8,,,가두기,
-Choice_002,네` 맞아요. {YourCatName}이한테 무슨 일이 있나요?,Recall2_004,,,TRUE,,,회상2
-,저 죄송하지만` 저는 오늘 진료 예약한 적도 없고 {YourCatName}이도 더 이상 안 키워요!,Recall2_003,,,TRUE,,,
-Choice_003,네` 맞아요. {YourCatName}이한테 무슨 일이 있나요?,Recall2_004,,,TRUE,,,
-,왜 그러시는…거죠? 수의사님 왜 그러세요?,,,,LOCK,,,
 Choice_004,비용이 좀 되지만` 둘 다 하는 게 좋겠어.,Recall2_005,true,16,,,,
 ,예방 접종도 하지 말고 그냥 돌아가자.,Recall2_007,false,18,,,,
 Choice_005,밥을 준다.,Recall3_004,true,3,,,,회상3
 ,밥을 주지 않는다.,Recall3_005,false,11,,,,
-Choice_006,…응.,Recall4_003,,,,,,회상4
-,엄마…!! 여기 꿈 아니지?? 맞지?,Recall4_002,,,SHAKE,,,
-Choice_007,…응.,Recall4_003,,,,,,
-,엄마…!! 여기 꿈 아니지?? 맞지?,,,,LOCK,,,
 Choice_008,공기청정기 설치를 권유한다.,Recall4_003,true,3,,,,
 ,엄마에게 화를 내며 이 상황을 회피한다.,Recall4_004,false,15,,,,
 Choice_Persuade_Ttoli,예,Event_StartMinigame_Ttoli,TRUE,-4,,,,또리 설득 미니게임을 시작하는 이벤트를 호출합니다.

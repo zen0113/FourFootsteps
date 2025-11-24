@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 public class LobbyManager : MonoBehaviour
 {
@@ -8,6 +10,8 @@ public class LobbyManager : MonoBehaviour
 
     [Header("Lobby UI Components")]
     [SerializeField] private GameObject LoadGameButton;
+    [SerializeField] private GameObject NewGamePanel;
+    [SerializeField] private GameObject NoGameDataPanel;
 
 
     private void Awake()
@@ -16,7 +20,46 @@ public class LobbyManager : MonoBehaviour
             LoadGameButton.SetActive(false);
 
     }
+    private void Start()
+    {
+        SaveManager.Instance.ApplySavedGameData();
+    }
 
+    public void StartNewGame()
+    {
+        if ( SaveManager.Instance.CheckGameData())  // 저장된 게임 데이터가 있는 경우
+            NewGamePanel.SetActive(true);
+        else
+            SceneLoader.Instance.LoadScene(Constants.SceneType.SET_PLAYERNAME.ToSceneName());
+    }
+
+    public void YesNewGameButton()
+    {
+        SceneLoader.Instance.LoadScene(Constants.SceneType.SET_PLAYERNAME.ToSceneName());
+    }
+
+    public void LoadGame()
+    {
+        if (SaveManager.Instance.CheckGameData())
+        {
+            string savedSceneName = GameManager.Instance.GetVariable("SavedSceneName") as string;
+
+            Constants.SceneType savedScene =
+                string.IsNullOrEmpty(savedSceneName)
+                    ? Constants.SceneType.TITLE   // 기본값
+                    : savedSceneName.ToSceneType();
+
+            if (savedScene == Constants.SceneType.TITLE)
+                SceneLoader.Instance.LoadScene(Constants.SceneType.SET_PLAYERNAME.ToSceneName());
+            else
+            {
+                SceneLoader.Instance.LoadScene(savedScene.ToSceneName());
+                ResponsibilityManager.Instance.ChangeResponsibilityGauge();
+            }
+        }
+        else
+            NoGameDataPanel.SetActive(true);
+    }
 
     public void LoadNextScene()
     {
@@ -31,16 +74,22 @@ public class LobbyManager : MonoBehaviour
 
     public void ShowCaseScoreSetting(int score)
     {
-        System.Random rand = new System.Random();
-
-        GameManager.Instance.SetVariable("CurrentMemoryPuzzleCount", score);
+        //System.Random rand = new System.Random();
+        GameManager.Instance.SetVariable("CurrentMemoryPuzzleCount", 5);
         var puzzleStates = GameManager.Instance.GetVariable("MemoryPuzzleStates") as Dictionary<int, bool>;
+
+        foreach (int key in puzzleStates.Keys.ToList())
+        {
+            puzzleStates[key] = false;
+        }
 
         for (int i = 0; i < score; i++)
         {
             puzzleStates[i] = true;
         }
         GameManager.Instance.SetVariable("ResponsibilityScore", score);
+        GameManager.Instance.SetVariable("isPrologueFinished", true);
+        SaveManager.Instance.SaveGameData();
         ResultManager.Instance.Test();
     }
 

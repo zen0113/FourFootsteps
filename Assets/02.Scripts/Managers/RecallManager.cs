@@ -16,6 +16,7 @@ public class RecallManager : MonoBehaviour
             Instance = this;
             // RecallManager가 존재하는 씬은 회상 씬으로 설정
             GameManager.Instance.SetVariable("isRecalling", true);
+            SaveManager.Instance.SaveGameData();
         }
         else
             Destroy(gameObject);
@@ -33,6 +34,7 @@ public class RecallManager : MonoBehaviour
         {
             GameManager.Instance.SetVariable("isRecalling", false);
             GameManager.Instance.SetVariable("CanInvesigatingRecallObject", false);
+            SaveManager.Instance.SaveGameData();
             Instance = null;
         }
     }
@@ -55,6 +57,7 @@ public class RecallManager : MonoBehaviour
     public void SetCanInvestigateRecallObject(bool canInvestigate)
     {
         GameManager.Instance.SetVariable("CanInvesigatingRecallObject", canInvestigate);
+        SaveManager.Instance.SaveGameData();
 
         // 조사 가능 상태가 변경되면 InteractKeyGroup도 업데이트
         SetInteractKeyGroup(canInvestigate);

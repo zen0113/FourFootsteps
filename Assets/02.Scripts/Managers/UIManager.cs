@@ -13,7 +13,7 @@ public enum eUIGameObjectName
     ResponsibilityGroup,
     ResponsibilityGauge,
     PlaceUI,
-    PuzzleBagButton
+    PuzzleBagButton,
 }
 
 public class UIManager : MonoBehaviour
@@ -56,22 +56,6 @@ public class UIManager : MonoBehaviour
     private bool isBlinkHidingActive = false;
 
     private Coroutine fadeOutRoutine;
-
-    //private void Awake()
-    //{
-    //    if (Instance == null)
-    //    {
-    //        Instance = this;
-    //        DontDestroyOnLoad(gameObject);
-    //    }
-    //    else
-    //        Destroy(gameObject);
-
-    //    AddUIGameObjects();
-
-    //    RegisterPuzzleBagButtonEvent();
-    //    SetAllUI(false);
-    //}
     private void Awake()
     {
         // 중복 인스턴스 체크를 먼저
@@ -141,7 +125,7 @@ public class UIManager : MonoBehaviour
                     Debug.LogWarning("[PuzzleBagButtonBinder] PuzzleMemoryManager.Instance가 null입니다.");
             });
         }
-        Debug.Log($"[button.onClick.GetPersistentEventCount()] : {button.onClick.GetPersistentEventCount()}");
+        //Debug.Log($"[button.onClick.GetPersistentEventCount()] : {button.onClick.GetPersistentEventCount()}");
     }
 
     private void EnsureFootprintsCanvasExists()

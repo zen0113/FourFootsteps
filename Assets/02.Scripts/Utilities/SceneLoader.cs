@@ -37,6 +37,7 @@ public class SceneLoader : MonoBehaviour
     private const string RECALL_SCENE_NAME = "RecallScene";
     private const string ENDING_SCENE_NAME = "Ending";
     private bool isFading = false;
+    public bool IsFading => isFading;
 
     // Resources 폴더에서 SceneLoader 프리팹을 생성
     public static SceneLoader Create()
@@ -117,6 +118,9 @@ public class SceneLoader : MonoBehaviour
                 // 플레이어 움직임 상태를 명시적으로 허용합니다.
                 GameManager.Instance.SetVariable("CanMoving", true);
                 Debug.Log($"[SceneLoader] 씬 로드 완료: {scene.name}, 움직임 강제 해제 및 DialogueManager 초기화 완료.");
+
+                // 씬 상태 저장
+                SaveManager.Instance.SaveGameData();
             }
         }
     }

@@ -104,11 +104,14 @@ public class GameManager : MonoBehaviour
         {
             SetVariable("CurrentSceneName", currentScene.sceneName);
 
+            if (currentScene.sceneName != Constants.SceneType.TITLE.ToSceneName())
+                SetVariable("SavedSceneName", currentScene.sceneName);
+
             int index = sceneOrder.IndexOf(currentScene);
             if (index + 1 < sceneOrder.Count)
                 SetVariable("NextSceneName", sceneOrder[index + 1].sceneName);
             else
-                SetVariable("NextSceneName", null); // 마지막 씬일 경우
+                SetVariable("NextSceneName", sceneOrder[0].sceneName); // 마지막 씬일 경우
 
             if (currentScene.isRecall)
             {
@@ -318,17 +321,18 @@ public class GameManager : MonoBehaviour
         // 화면에 표시하고 싶은 변수명 추가
         List<string> keysToShow = new List<string>(new string[]
         {
+            "SavedSceneName",
             "PlayerName",
             "YourCatName",
             "CurrentSceneName",
             "NextSceneName",
-            "CanMoving",
+            //"CanMoving",
             //"CanInvesigatingRecallObject",
             //"CanStartCleaningMinigame",
             "CurrentMemoryPuzzleCount",
             "MemoryPuzzleStates",
             //"CleanedObjectCount",
-
+            "isPrologueFinished",
         });
 
         foreach (var item in variables)

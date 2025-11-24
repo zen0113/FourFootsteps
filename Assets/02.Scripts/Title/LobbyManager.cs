@@ -30,7 +30,10 @@ public class LobbyManager : MonoBehaviour
         if ( SaveManager.Instance.CheckGameData())  // 저장된 게임 데이터가 있는 경우
             NewGamePanel.SetActive(true);
         else
+        {
+            SaveManager.Instance.LoadInitGameData();    // 게임 데이터 초기화
             SceneLoader.Instance.LoadScene(Constants.SceneType.SET_PLAYERNAME.ToSceneName());
+        }
     }
 
     public void YesNewGameButton()

@@ -77,6 +77,7 @@ public class ChaserFollower : MonoBehaviour
 
     [SerializeField] private bool isThrower = false;
     public bool IsThrower => isThrower;
+    private ChaserThrower thrower;
 
     private Rigidbody2D rb;
     private float yLock;
@@ -135,6 +136,8 @@ public class ChaserFollower : MonoBehaviour
         yLock = transform.position.y;                // y 고정
         tNoise = Random.value * 10f;
         isStartChasing = false;
+
+        if (isThrower) thrower = GetComponent<ChaserThrower>();
     }
     private void Start()
     {
@@ -160,6 +163,13 @@ public class ChaserFollower : MonoBehaviour
         isStartChasing = true;
     }
 
+    public void StopAnimationRunning()
+    {
+        if (isStartChasing) return;
+        animator.SetBool("Moving", false);
+        sfxController.StopLoop(0.5f);
+        if (isThrower) thrower.StopAll();
+    }
 
     private void FixedUpdate()
     {
@@ -305,7 +315,7 @@ public class ChaserFollower : MonoBehaviour
     private void EnterCatchMode()
     {
         OnCatchMode?.Invoke();
-        if (isThrower) GetComponent<ChaserThrower>().enabled = false;
+        if (isThrower) thrower.enabled = false;
         chasingToCatch = true;
 
         //if (col != null) col.isTrigger = false; // 실제 충돌로 전환

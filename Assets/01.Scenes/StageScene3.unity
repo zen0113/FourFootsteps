@@ -299,7 +299,7 @@ BoxCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 1
   m_UsedByComposite: 0
-  m_Offset: {x: -0.03, y: 0.82}
+  m_Offset: {x: 0.075920224, y: 0.8200002}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
@@ -310,7 +310,7 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 5.79, y: 8.4}
+  m_Size: {x: 6.0018396, y: 8.4}
   m_EdgeRadius: 0
 --- !u!212 &28228999
 SpriteRenderer:
@@ -19104,6 +19104,13 @@ MonoBehaviour:
   crouchSoundInterval: 0.5
   landingSoundDelay: 0.3
   fallMultiplier: 4.5
+  lowJumpMultiplier: 2
+  jumpBufferTime: 0.15
+  coyoteTime: 0.12
+  landingJumpDelay: 0.05
+  wallJumpBoost: 1.2
+  wallCheckDistance: 0.4
+  velocityProtectionTime: 0.15
   groundCheck: {fileID: 782047519}
   groundCheckRadius: 0.2
   groundMask:
@@ -19197,6 +19204,7 @@ MonoBehaviour:
   SFX: {fileID: 1359791481}
   catStealth: {fileID: 1769747960}
   kidsFollower: {fileID: 650302892}
+  dogFollower: {fileID: 572928855}
   Chase_Goal_Block: {fileID: 692475827}
   Bird: {fileID: 1125596588}
   centerAnchor: {fileID: 944751770}

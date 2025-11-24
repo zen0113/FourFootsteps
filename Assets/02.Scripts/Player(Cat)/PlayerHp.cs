@@ -208,12 +208,6 @@ public class PlayerHp : MonoBehaviour
 
         Debug.Log("플레이어 사망!");
 
-        // SoundPlayer를 통해 StageScene3 사운드 재생
-        if (SoundPlayer.Instance != null)
-        {
-            SoundPlayer.Instance.ChangeSceneBGM("StageScene3");
-        }
-
         // 현재 스테이지를 재시작
         StartCoroutine(RestartCurrentStage());
     }
@@ -226,8 +220,8 @@ public class PlayerHp : MonoBehaviour
         var autoRunner = GetComponent<PlayerAutoRunner>();
         
         if (catMovement != null) catMovement.enabled = false;
-        if (autoRunner != null) autoRunner.enabled = false;
-        
+        if (autoRunner != null) autoRunner.StartDeathRoutine();
+
         // 물리 처리 중지
         var rb = GetComponent<Rigidbody2D>();
         if (rb != null)

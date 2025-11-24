@@ -104,6 +104,9 @@ public class GameManager : MonoBehaviour
         {
             SetVariable("CurrentSceneName", currentScene.sceneName);
 
+            if (currentScene.sceneName != Constants.SceneType.TITLE.ToSceneName())
+                SetVariable("SavedSceneName", currentScene.sceneName);
+
             int index = sceneOrder.IndexOf(currentScene);
             if (index + 1 < sceneOrder.Count)
                 SetVariable("NextSceneName", sceneOrder[index + 1].sceneName);
@@ -318,6 +321,7 @@ public class GameManager : MonoBehaviour
         // 화면에 표시하고 싶은 변수명 추가
         List<string> keysToShow = new List<string>(new string[]
         {
+            "SavedSceneName",
             "PlayerName",
             "YourCatName",
             "CurrentSceneName",
@@ -328,7 +332,7 @@ public class GameManager : MonoBehaviour
             "CurrentMemoryPuzzleCount",
             "MemoryPuzzleStates",
             //"CleanedObjectCount",
-            "isPrologueFinished"
+            "isPrologueFinished",
         });
 
         foreach (var item in variables)

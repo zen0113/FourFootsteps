@@ -42,7 +42,7 @@ public class LobbyManager : MonoBehaviour
     {
         if (SaveManager.Instance.CheckGameData())
         {
-            string savedSceneName = GameManager.Instance.GetVariable("CurrentSceneName") as string;
+            string savedSceneName = GameManager.Instance.GetVariable("SavedSceneName") as string;
 
             Constants.SceneType savedScene =
                 string.IsNullOrEmpty(savedSceneName)

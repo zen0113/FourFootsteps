@@ -492,7 +492,21 @@ public class ResultManager : MonoBehaviour
             // 아직 설득되지 않았다면
             if (responsibilityScore >= 3)
             {
-                dialogueToStart = $"Stage04_{catName}_High_001";
+                if (allCatsInteracted)
+                {
+                    // 모든 고양이와 상호작용 완료 -> 미니게임 도전
+                    dialogueToStart = $"Stage04_{catName}_High_Choice_001";
+                }
+                else if (!interacted)
+                {
+                    // 첫 상호작용
+                    dialogueToStart = $"Stage04_{catName}_High_001";
+                }
+                else
+                {
+                    // 상호작용은 했지만, 아직 모두와 하지는 않음
+                    dialogueToStart = "Stage04_Generic_Wait";
+                }
             }
             else
             {
@@ -560,10 +574,27 @@ public class ResultManager : MonoBehaviour
 
         if (success)
         {
-            DialogueManager.Instance.StartDialogue($"Stage04_{currentMinigameCat}_Low_Success_001");
+            // 1. 현재 책임지수 가져오기
+            int responsibilityScore = (int)GameManager.Instance.GetVariable("ResponsibilityScore");
+
+            // 2. 점수에 따라 다른 성공 대사 출력
+            if (responsibilityScore >= 3)
+            {
+                // 책임지수가 높을 때의 성공 대사 (예: Stage04_Ttoli_High_Success_001)
+                // 주의: dialogues.csv에 해당 ID가 존재해야 하며, 내용은 고득점 전용이어야 함
+                Debug.Log($"미니게임 성공! (고책임지수: {responsibilityScore}) -> High Success 대사 실행");
+                DialogueManager.Instance.StartDialogue($"Stage04_{currentMinigameCat}_High_Success_001");
+            }
+            else
+            {
+                // 책임지수가 낮을 때의 성공 대사 (기존 로직)
+                Debug.Log($"미니게임 성공! (저책임지수: {responsibilityScore}) -> Low Success 대사 실행");
+                DialogueManager.Instance.StartDialogue($"Stage04_{currentMinigameCat}_Low_Success_001");
+            }
         }
         else
         {
+            // 실패 시 대사 (실패는 점수 상관없이 동일하다면 기존 유지)
             DialogueManager.Instance.StartDialogue($"Stage04_{currentMinigameCat}_Low_Fail_001");
         }
     }

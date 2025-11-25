@@ -509,7 +509,7 @@ Stage04_Ttoli_High_001,Player,,저기` 넌 이름이 뭐야? ,,temp_playerCAT,,,
 ,Player,,중요한 건 포기하지 않는 거야. 여기서 나가서` 집으로 돌아가자!,,temp_playerCAT,,,,,
 ,또리,,...정말? 정말 엄마한테 다시 갈 수 있어?,,temp_Ttoli,,,,,
 ,Player,,물론이지. 여기서 나가면 네 가족을 찾을 수 있을 거야. 나도 그렇고.\n이 안에 있는 모두 길잃은 고양이로 남기를 원하지 않는걸!,,temp_playerCAT,,,,,변경 전:물론이야. 여기서 나가서 네 가족을 찾을 수 있을 거야. 나도... 더는 누구도 길을 잃게 만들고 싶지 않으니까.
-,또리,,고마워...! 너 정말 좋은 애구나! 나도 도울 수 있는 거 다 할게! 같이 여기서 나가자!,,temp_Ttoli,,,,EventStage4_SetPersuadedTtoli,
+,또리,,정말 그러고 싶은데... 다리가 너무 떨려서 움직여지질 않아... 으으...,,temp_Ttoli,,,,EventStage4_SetInteractedTtoli,
 Stage04_Ttoli_Low_Initial_001,Player,,저기` 넌 이름이 뭐야? ,,temp_playerCAT,,,,,
 ,또리,,난 또리... 여긴 모르겠어. 너무 춥고 무서워...,,temp_Ttoli,,,,,
 ,Player,,어쩌다 이런 곳에 오게 된 거야?,,temp_playerCAT,,,,,
@@ -518,8 +518,14 @@ Stage04_Ttoli_Low_Initial_001,Player,,저기` 넌 이름이 뭐야? ,,temp_playe
 ,또리,,...! 내... 내 잘못이야...?,SHAKE,temp_Ttoli,,,,,
 ,Player,,집고양이는 약해서 밖에선 못 버티는 거 몰랐어? 그냥 집에 있었어야지.,,temp_playerCAT,,,,,
 ,또리,,...너 나빠. 나도... 밖이 궁금했을 뿐인데... 너랑 말 안 할래.,,temp_Ttoli,,,,EventStage4_SetInteractedTtoli,
+Stage04_Ttoli_High_Choice_001,Player,,또리야` 내가 옆에 있어. 우린 반드시 나갈 수 있어.,,temp_playerCAT,,,,,
+,InnerThoughts,,또리의 불안한 마음에 공감하고 설득해보자.,,temp_playerCAT,,,,Choice_Persuade_Ttoli,
 Stage04_Ttoli_Low_Choice_001,Player,,(아까 내가 너무 심하게 말했나...) 저기`또리야.,,temp_playerCAT,,,,,
 ,InnerThoughts,,또리의 불안한 마음에 공감하고 설득해보자.,,temp_Ttoli,,,,Choice_Persuade_Ttoli,
+Stage04_Ttoli_High_Success_001,InnerThoughts,,(손길이 닿자 콩닥거리는 심장박동이 점차 차분해진다... 이제야 용기를 얻은 것 같다.),,temp_playerCAT,,,,,
+,Player,,이제 좀 진정이 돼? 난 널 해치지 않아.,,temp_playerCAT,,,,,
+,또리,,응... 너한테선 좋은 냄새가 나. 따뜻하고...,,temp_Ttoli,,,,,
+,또리,,믿어볼래! {PlayerName}랑 같이 갈래! 나도 이제 안 무서워!,TRUE,temp_Ttoli,,,,EventStage4_SetPersuadedTtoli,
 Stage04_Ttoli_Low_Success_001,InnerThoughts,,(작은 심장이 불안에 떨고 있다... 이 빠르고 가느다란 박동은 두려움 그 자체구나.),,temp_playerCAT,,,,,
 ,Player,,또리야` 아까는 정말 미안해. 네가 얼마나 무서웠을지 생각도 못 했어.,,temp_playerCAT,,,,,
 ,또리,,...훌쩍.,,temp_Ttoli,,,,,
@@ -530,6 +536,7 @@ Stage04_Ttoli_Low_Success_001,InnerThoughts,,(작은 심장이 불안에 떨고 
 ,Player,,진짜 약속이야. 우리 같이 여기서 나가자.,,temp_playerCAT,,,,,
 ,또리,,(조심스럽게) ...알았어. 한 번만 더 믿어볼게.,,temp_Ttoli,,,,,
 ,또리,,나도... 열심히 도울게.,,temp_Ttoli,,,,EventStage4_SetPersuadedTtoli,
+Stage04_Ttoli_High_Fail_001,InnerThoughts,,(아직 진정이 되지 않은 것 같다... 너무 서두르지 말고 천천히 안심시켜야 해.),,temp_playerCAT,,,,,
 Stage04_Ttoli_Low_Fail_001,InnerThoughts,,(아직도 너무 무서워하고 있어... 내 말이 들리지 않나 봐. 좀 더 천천히 다가가야겠어.),,temp_playerCAT,,,,,
 Stage04_Leo_High_001,Player,,(얼굴에 있는 흉터들이 눈에 띈다...) 많이 다쳤었나 봐. 괜찮아?,,temp_playerCAT,,,,,
 ,레오,,...뭐야? 쳐다보지 마.,,temp_Leo,,,,,
@@ -545,8 +552,8 @@ Stage04_Leo_High_001,Player,,(얼굴에 있는 흉터들이 눈에 띈다...) �
 ,레오,,(잠시 침묵),,temp_Leo,,,,,
 ,레오,,...너` 진심으로 하는 말이지?,,temp_Leo,,,,,
 ,Player,,응. 진심이야.,,temp_playerCAT,,,,,
-,레오,,...흥. 이상한 놈이네. 하지만... 마음에 드는군.,,temp_Leo,,,,EventStage4_SetPersuadedLeo,레오 설득 성공
-,레오,,좋아. 나도 약한 놈들 챙기는 건 익숙해. 도움이 필요하면 말해.,,temp_Leo,,,,,
+,레오,,...흥. 말은 잘하는군. 하지만 처음 만난 놈을 쉽게 믿을 수 없어.,,temp_Leo,,,,,레오 설득 성공
+,레오,,네 눈은 다른 녀석들과 다르긴 한데... 아직 널 완전히 믿을 순 없어.,,temp_Leo,,,,EventStage4_SetInteractedLeo,
 Stage04_Leo_Low_Initial_001,Player,,저기` 넌 왜 잡혔어?,,temp_playerCAT,,,,,책임 지수 3 미만 분기
 ,레오,,...사납다고 버려졌는데` 또 잡혔다. 재수 없게.,,temp_Leo,,,,,
 ,Player,,사납다고? 사람을 할퀴거나 물었던 거야?,,temp_playerCAT,,,,,
@@ -555,8 +562,14 @@ Stage04_Leo_Low_Initial_001,Player,,저기` 넌 왜 잡혔어?,,temp_playerCAT,,
 ,레오,,...너도 그들처럼 말하는구나. 내 잘못이라고.,,temp_Leo,,,,,
 ,Player,,길 고양이 생활이 익숙해서 그런가?,,temp_playerCAT,,,,,
 ,레오,,...더 할 말 없다. 가봐.,,temp_Leo,,,,EventStage4_SetInteractedLeo,레오가 상처받고 대화를 거부한다.
+Stage04_Leo_High_Choice_001,레오,,(피하지 않고 눈을 맞추며) 난 너와 싸우려는 게 아니야. 함께 자유를 찾고 싶어.,,temp_playerCAT,,,,,
+,InnerThoughts,,레오의 억울한 마음에 공감하고 설득해보자.,,temp_playerCAT,,,,Choice_Persuade_Leo,
 Stage04_Leo_Low_Choice_001,Player,,(내가 또 상처를 줬나...) 저기` 레오.,,temp_playerCAT,,,,,4마리 모두와 상호작용 후
 ,InnerThoughts,,레오의 억울한 마음에 공감하고 설득해보자.,,temp_Leo,,,,Choice_Persuade_Leo,[선택지] 예 / 아니오
+Stage04_Leo_High_Success_001,InnerThoughts,,(거칠게 뛰던 심장박동이 묵직하고 차분하게 바뀐다... 나를 동료로 받아들인 걸까.),,temp_playerCAT,,,,,
+,Player,,난 너와 같은 편이야. 널 두고 가지 않아.,,temp_playerCAT,,,,,
+,레오,,...흥. 제법 끈질기네. 눈빛도 나쁘지 않고.,,temp_Leo,,,,,
+,레오,,좋아. 이번만 속는 셈 치고 따라가 주지.,,temp_Leo,,,,EventStage4_SetPersuadedLeo,
 Stage04_Leo_Low_Success_001,InnerThoughts,,(이 강하고 거친 박동... 분노가 아니라 억울함의 울부짖음이었어.),,temp_playerCAT,,,,,미니게임 성공 후
 ,Player,,레오` 아까 내가 완전히 틀렸어. 널 그렇게 판단할 자격이 없었어.,,temp_playerCAT,,,,,
 ,레오,,...이제 와서 뭘.,,temp_Leo,,,,,
@@ -570,6 +583,7 @@ Stage04_Leo_Low_Success_001,InnerThoughts,,(이 강하고 거친 박동... 분�
 ,레오,,(고개를 돌렸다가 다시 이쪽을 본다),,temp_Leo,,,,,
 ,레오,,...흥. 이제야 말이 좀 통하는군.,,temp_Leo,,,,,
 ,레오,,좋아. 널 돕지. 내 힘이 필요하면 언제든 말해.,,temp_Leo,,,,EventStage4_SetPersuadedLeo,
+Stage04_Leo_High_Fail_001,InnerThoughts,,(잠시 망설이더니 다시 경계하는 눈치다... 내 마음이 온전히 전해지지 않았어.),,temp_playerCAT,,,,,
 Stage04_Leo_Low_Fail_001,Player,,(분노의 벽이 너무 단단해... 아직은 내 진심을 받아들일 준비가 안 된 것 같아.),,temp_playerCAT,,,,,미니게임 실패 후
 Stage04_Bogsil_High_001,Player,,안녕? 난 {PlayerName}(이)야.,TRUE,temp_playerCAT,,,,,책임 지수 3 이상 분기
 ,복실이,,...난 복실이야. 내 유일한 친구를 찾아야 하는데... 그 친구를 찾다가 여기까지 와버렸어.,,temp_Bogsil,,,,,
@@ -582,7 +596,7 @@ Stage04_Bogsil_High_001,Player,,안녕? 난 {PlayerName}(이)야.,TRUE,temp_play
 ,Player,,물론이지. 그런 깊은 유대는 쉽게 끊어지지 않아. 그 아이도... 매일 너를 기다리고 있을 거야.,,temp_playerCAT,,,,,
 ,복실이,,...,,temp_Bogsil,,,,,
 ,Player,,여기서 나가면` 너의 소중한 친구를 다시 만날 수 있을거야. 5년을 기다렸으면.. 이제 행복한 재회가 기다리고 있을거야!,,temp_playerCAT,,,,,
-,복실이,,...고마워! 그 말을 믿을게! 나도 할 수 있는 건 다 할게! 내가 탈출을 도울게!,,temp_Bogsil,,,,EventStage4_SetPersuadedBogsil,복실이 설득 성공
+,복실이,,...이것도 꿈일까? 네가 진짜인지... 아직 잘 모르겠어...,,temp_Bogsil,,,,EventStage4_SetInteractedBogsil,복실이 설득 성공
 Stage04_Bogsil_Low_Initial_001,Player,,안녕` 난 {PlayerName}. 넌 이름이 뭐야?,TRUE,temp_playerCAT,,,,,책임 지수 3 미만 분기
 ,복실이,,복실이. 내 친구를 찾아야 하는데...,,temp_Bogsil,,,,,
 ,Player,,친구?,,temp_playerCAT,,,,,
@@ -592,8 +606,13 @@ Stage04_Bogsil_Low_Initial_001,Player,,안녕` 난 {PlayerName}. 넌 이름이 �
 ,Player,,하지만 5년이면... 그 아이도 이제 많이 변했을 텐데. 초등학생이었으면 지금쯤 고등학생이겠네.,,temp_playerCAT,,,,,
 ,Player,,그 정도 시간이면... 기억도 흐릿해지지 않았을까?,,temp_playerCAT,,,,,
 ,복실이,,...너 참 못된 아이구나. 너랑은 말 섞고 싶지 않아.,,temp_Bogsil,,,,EventStage4_SetInteractedBogsil,복실이가 상처받고 대화를 거부한다.
+Stage04_Bogsil_High_Choice_001,Player,,꿈이 아니야` 복실아. 이제 집에 가자,,temp_playerCAT,,,,,
+,InnerThoughts,,복실이의 그리운 마음에 공감하고 설득해보자.,,temp_Bogsil,,,,Choice_Persuade_Bogsil,
 Stage04_Bogsil_Low_Choice_001,Player,,(그 아이와의 추억이 전부였을 텐데` 내가 너무 차갑게 말했어...) 복실아.,,temp_playerCAT,,,,,4마리 모두와 상호작용 후
 ,InnerThoughts,,복실이의 그리운 마음에 공감하고 설득해보자.,,temp_Bogsil,,,,Choice_Persuade_Bogsil,[선택지] 예 / 아니오
+Stage04_Bogsil_High_Success_001,InnerThoughts,,(깊고 편안한 박동이 내 가슴으로 전해진다... ),,temp_playerCAT,,,,,
+,Player,,이제 다시는 널 혼자 두지 않을게. 약속해,,temp_playerCAT,,,,,
+,복실이,,정말이지...? 다시는 그 차가운 곳에 있기 싫어... 흑...,,temp_Bogsil,,,,EventStage4_SetPersuadedBogsil,
 Stage04_Bogsil_Low_Success_001,InnerThoughts,,(이 느리고 깊은 박동... 5년 동안의 그리움이 모두 담겨 있구나.),,temp_playerCAT,,,,,미니게임 성공 후
 ,Player,,복실아` 미안해. 내가 너의 소중한 마음을 함부로 판단했어.,,temp_playerCAT,,,,,
 ,복실이,,...,,temp_Bogsil,,,,,
@@ -606,6 +625,7 @@ Stage04_Bogsil_Low_Success_001,InnerThoughts,,(이 느리고 깊은 박동... 5�
 ,Player,,5년을 기다린 너의 마음처럼` 그 아이도 널 잊지 않았을 거야.,,temp_playerCAT,,,,,
 ,복실이,,...고마워. (조용히 고개를 끄덕인다),,temp_Bogsil,,,,,
 ,복실이,,너라면... 같이 가도 되겠어. 탈출하는 거 도와줄게.,,temp_Bogsil,,,,EventStage4_SetPersuadedBogsil,
+Stage04_Bogsil_High_Fail_001,InnerThoughts,,(아직 혼란스러운 것 같다... 내가 진짜라는 걸 더 확실하게 믿게 해줘야 해.),,temp_playerCAT,,,,,
 Stage04_Bogsil_Low_Fail_001,InnerThoughts,,(그리움에 너무 사로잡혀 있어... 다른 목소리는 들리지 않는 것 같아.),,temp_playerCAT,,,,,미니게임 실패 후
 Stage04_Miya_High_001,InnerThoughts,,(털은 군데군데 빠져 있고` 심하게 엉켜 있다. 복부는 앙상하게 말라 상처 입은 듯 헐어 보인다.),,temp_playerCAT,,,,,변경 전:(털이 곳곳에서 빠져있고` 많이 엉켜있다... 배 쪽은... 너무 마르고 헐어 보인다.)
 ,미야,,...왜 날 쳐다보는 거야?,,temp_Miya,,,,,
@@ -618,11 +638,7 @@ Stage04_Miya_High_001,InnerThoughts,,(털은 군데군데 빠져 있고` 심하�
 ,Player,,...혼자였던거야?,,temp_playerCAT,,,,,
 ,미야,,아니... 친구가 있었어. 하지만 친구는... 먼저 갔어. 난... 혼자 남았어.,,temp_Miya,,,,,
 ,Player,,....얼마나 무섭고 외로웠을까...,,temp_playerCAT,,,,,
-,미야,,...익숙해. 이제는... 아무것도... 기대 안 해.,,temp_Miya,,,,,
-,Player,,아니` 익숙해져선 안 되는 거였어. 미야. 여기서 나가자. 밖에는 따뜻한 햇볕이 기다리고 있어. 더 이상 어둡고 차가운 곳에 있지 않아도 돼.,,temp_playerCAT,,,,,
-,미야,,...네 말을 믿어도 될까..?,,temp_Miya,,,,,
-,Player,,응 약속해!,,temp_playerCAT,,,,,
-,미야,,...알았어. 한 번만 더 믿어볼게..,,temp_Miya,,,,EventStage4_SetPersuadedMiya,미야 설득 성공
+,미야,,...익숙해. 이제는... 아무것도... 기대 안 해... 아무것도 하고 싶지 않아...,,temp_Miya,,,,EventStage4_SetInteractedMiya,
 Stage04_Miya_Low_Initial_001,Player,,(상태가 너무 안 좋아 보인다.) 그.. 너 괜찮은거야?,,temp_playerCAT,,,,,책임 지수 3 미만 분기
 ,미야,,...가까이 오지 마.,,temp_Miya,,,,,
 ,Player,,나는 {PlayerName}(이)야. 털이 많이 엉켜보이는데 아프진 않아..?,TRUE,temp_playerCAT,,,,,
@@ -637,8 +653,15 @@ Stage04_Miya_Low_Initial_001,Player,,(상태가 너무 안 좋아 보인다.) �
 ,Player,,알아. 괜찮아질 거라는 말이 지금은 아무 의미 없다는 거.,,temp_playerCAT,,,,,
 ,Player,,하지만... 그래도 살아있잖아. 그것도 대단한 거 아니야?,,temp_playerCAT,,,,,
 ,미야,,...그만 가줘.,,temp_Miya,,,,EventStage4_SetInteractedMiya,미야가 마음의 문을 닫는다.
-Stage04_Miya_Low_Choice_001,Player,,(저 아이는 모든 걸 포기한 상태인데... 내가 너무 다그치기만 했구나.) 미야.,,temp_playerCAT,,,,,4마리 모두와 상호작용 후
+Stage04_Miya_High_Choice_001,Player,,미아야. 익숙해져선 안 되는 거였어.,,temp_playerCAT,,,,,
+,InnerThoughts,,미야의 상처받은 마음에 공감하고 설득해보자.,,temp_playerCAT,,,,Choice_Persuade_Miya,
+Stage04_Miya_Low_Choice_001,InnerThoughts,,(저 아이는 모든 걸 포기한 상태인데... 내가 너무 다그치기만 했구나.) 미야.,,temp_playerCAT,,,,,4마리 모두와 상호작용 후
 ,InnerThoughts,,미야의 상처받은 마음에 공감하고 설득해보자.,,temp_Miya,,,,Choice_Persuade_Miya,[선택지] 예 / 아니오
+Stage04_Miya_High_Success_001,InnerThoughts,,(희미하던 박동이 조금씩 강해지기 시작한다... 살고자 하는 의지가 돌아왔어.),,temp_playerCAT,,,,,
+,Player,,여기서 나가자. 밖에는 따뜻한 햇볕이 기다리고 있어. 더 이상 어둡고 차가운 곳에 있지 않아도 돼.,,temp_playerCAT,,,,,
+,미야,,...네 말을 믿어도 될까..?,,temp_Miya,,,,,
+,Player,,응 약속해!,,temp_playerCAT,,,,,
+,미야,,...알았어. 한 번만 더 믿어볼게..,,temp_Miya,,,,EventStage4_SetPersuadedMiya,
 Stage04_Miya_Low_Success_001,InnerThoughts,,(이 희미하고 불규칙한 박동... 살아있는 것조차 힘겨워하고 있어...),,temp_playerCAT,,,,,미니게임 성공 후
 ,Player,,미야` 내가 경솔했어. 미안해.,,temp_playerCAT,,,,,
 ,Player,,작은 방에서... 친구가 떠나는 걸 지켜봐야 했구나. 혼자서... 얼마나 오래... 그게 얼마나 무서웠을지...,,temp_playerCAT,,,,,
@@ -648,6 +671,7 @@ Stage04_Miya_Low_Success_001,InnerThoughts,,(이 희미하고 불규칙한 박�
 ,미야,,...정말... 그런 곳이 있어?,,temp_Miya,,,,,
 ,Player,,응. 이제는 더 나은 곳으로 갈 수 있어.,,temp_playerCAT,,,,,
 ,미야,,...너의 그 마음... 이번에는 믿어볼게.,,temp_Miya,,,,EventStage4_SetPersuadedMiya,미야 설득 성공
+Stage04_Miya_High_Fail_001,InnerThoughts,,(힘겨운 듯 다시 고개를 떨군다... 포기하지 않도록 계속 말을 걸어야 해.),,temp_playerCAT,,,,,
 Stage04_Miya_Low_Fail_001,InnerThoughts,,(마음의 문을 완전히 닫아버렸어... 모든 희망을 포기한 상태인가 봐.),,temp_playerCAT,,,,,미니게임 실패 후
 Stage04_012,Player,,이 아이들이 나에게 마음의 문을 열어준 것 같아,,temp_playerCAT,,,,,
 ,Player,,모두의 잠금을 풀어주고 탈출 계획을 설명해주자,,temp_playerCAT,,,,,

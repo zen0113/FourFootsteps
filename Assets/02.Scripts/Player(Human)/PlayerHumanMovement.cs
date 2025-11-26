@@ -16,11 +16,17 @@ public class PlayerHumanMovement : MonoBehaviour
     [Header("웅크리기")]
     [SerializeField] private bool isCrouching = false;
 
+    [Header("상태")]
+    private bool isHoldingCat = false;
+    private bool isHoldingCarrier = false;
+
     [Header("효과음")]
     [SerializeField] private AudioClip footstepSound;
     [SerializeField] private float walkSoundInterval = 0.5f;
     [SerializeField] private float dashSoundInterval = 0.2f;
     private float lastWalkSoundTime;
+
+    private bool isMiniGameInputBlocked = false;
 
     private void Start()
     {
@@ -29,7 +35,8 @@ public class PlayerHumanMovement : MonoBehaviour
         UIManager.Instance.SetUI(eUIGameObjectName.ResponsibilityGroup, true);
         UIManager.Instance.SetUI(eUIGameObjectName.ResponsibilityGauge, true);
         UIManager.Instance.SetUI(eUIGameObjectName.PlaceUI, true);
-        UIManager.Instance.SetUI(eUIGameObjectName.PuzzleBagButton, false);
+        bool puzzleBagState = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name == "Ending_Happy";
+        UIManager.Instance.SetUI(eUIGameObjectName.PuzzleBagButton, puzzleBagState);
 
         // rb = GetComponent<Rigidbody2D>(); // Rigidbody2D 관련 코드 제거
         spriteRenderer = GetComponent<SpriteRenderer>();
@@ -58,7 +65,7 @@ public class PlayerHumanMovement : MonoBehaviour
 
         // 상태 및 애니메이션 업데이트
         Crouch();
-        isDashing = Input.GetKey(KeyCode.LeftShift) && !isCrouching && horizontalInput != 0;
+        isDashing = Input.GetKey(KeyCode.LeftShift) && !isCrouching && horizontalInput != 0 && !isHoldingCat && !isHoldingCarrier;
         UpdateAnimationState(horizontalInput);
 
         // 이동 처리
@@ -85,6 +92,40 @@ public class PlayerHumanMovement : MonoBehaviour
         else if (horizontalInput != 0)
         {
             animator.SetBool("Moving", true);
+        }
+    }
+
+    public void SetPlayerHoldingCat(bool isActive)
+    {
+        isHoldingCat = isActive;
+        animator.SetBool("With_Cat", isActive);
+
+        if (isActive)
+        {
+            // 캐리어 들기 상태 강제 해제
+            isHoldingCarrier = false;
+            animator.SetBool("Holding_Carrier", false);
+
+            // 웅크리기 상태 강제 해제
+            isCrouching = false;
+            animator.SetBool("Crouch", false);
+        }
+    }
+
+    public void SetPlayerHoldingCarrier(bool isActive)
+    {
+        isHoldingCarrier = isActive;
+        animator.SetBool("Holding_Carrier", isActive);
+
+        if (isActive)
+        {
+            // 고양이 들기 상태 강제 해제
+            isHoldingCat = false;
+            animator.SetBool("With_Cat", false);
+
+            // 웅크리기 상태 강제 해제
+            isCrouching = false;
+            animator.SetBool("Crouch", false);
         }
     }
 
@@ -131,7 +172,8 @@ public class PlayerHumanMovement : MonoBehaviour
     {
         return PauseManager.IsGamePaused ||
                DialogueManager.Instance.isDialogueActive ||
-               (GameManager.Instance != null && GameManager.Instance.IsSceneLoading);
+               (GameManager.Instance != null && GameManager.Instance.IsSceneLoading)
+               || isMiniGameInputBlocked;
     }
 
     void Move(float horizontalInput)
@@ -153,7 +195,7 @@ public class PlayerHumanMovement : MonoBehaviour
 
     void Crouch()
     {
-        if (Input.GetKeyDown(KeyCode.S))
+        if (Input.GetKeyDown(KeyCode.S) && !isHoldingCat && !isHoldingCarrier)
         {
             isCrouching = true;
         }
@@ -162,4 +204,20 @@ public class PlayerHumanMovement : MonoBehaviour
             isCrouching = false;
         }
     }
+
+    public void SetCrouch(bool isActice)
+    {
+        isCrouching = isActice;
+    }
+
+    public void BlockMiniGameInput(bool isBlocked)
+    {
+        isMiniGameInputBlocked = isBlocked;
+    }
+
+    public void SetPlayerPosition(Transform transform)
+    {
+        this.transform.position = transform.position;
+    }
+
 }

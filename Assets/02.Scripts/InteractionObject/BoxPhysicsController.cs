@@ -11,10 +11,43 @@ public class BoxPhysicsController : MonoBehaviour
     [SerializeField] private LayerMask playerLayer;
     [SerializeField] private float playerCheckRadius = 0.1f;
     
+    [Header("점프 시 박스 고정")]
+    [SerializeField] private float freezeYTime = 0.2f;  
+    private float freezeYCounter = 0f;                   
+    private bool isYFrozen = false;                      
+    
     private void Start()
     {
         rb = GetComponent<Rigidbody2D>();
         pushableBox = GetComponent<PushableBox>();
+    }
+    
+    private void Update()
+    {
+        // Y축 고정 타이머 감소
+        if (freezeYCounter > 0)
+        {
+            freezeYCounter -= Time.deltaTime;
+            isYFrozen = true;
+        }
+        else
+        {
+            isYFrozen = false;
+        }
+    }
+    
+    private void FixedUpdate()
+    {
+        // Y축이 고정된 상태면 Y축 속도를 0으로 유지
+        if (isYFrozen)
+        {
+            rb.velocity = new Vector2(rb.velocity.x, 0);
+            rb.gravityScale = 0f;
+        }
+        else
+        {
+            rb.gravityScale = 1f;
+        }
     }
     
     private void OnCollisionEnter2D(Collision2D collision)
@@ -22,6 +55,16 @@ public class BoxPhysicsController : MonoBehaviour
         // 플레이어와 충돌했을 때
         if (collision.gameObject.CompareTag("Player"))
         {
+            // 플레이어가 점프 중인지 체크
+            Rigidbody2D playerRb = collision.gameObject.GetComponent<Rigidbody2D>();
+            bool isPlayerJumping = playerRb != null && playerRb.velocity.y > 2f;
+            
+            // 플레이어가 점프하고 있으면 박스 Y축 고정 시작
+            if (isPlayerJumping)
+            {
+                freezeYCounter = freezeYTime;
+            }
+            
             // 상호작용 중이 아니면 플레이어가 박스를 밀지 못하도록
             if (!IsPlayerInteracting())
             {
@@ -47,6 +90,16 @@ public class BoxPhysicsController : MonoBehaviour
         // 플레이어와 계속 충돌 중일 때
         if (collision.gameObject.CompareTag("Player"))
         {
+            // 플레이어가 점프 중인지 계속 체크
+            Rigidbody2D playerRb = collision.gameObject.GetComponent<Rigidbody2D>();
+            bool isPlayerJumping = playerRb != null && playerRb.velocity.y > 2f;
+            
+            // 플레이어가 점프하고 있으면 박스 Y축 고정 갱신
+            if (isPlayerJumping)
+            {
+                freezeYCounter = freezeYTime;
+            }
+            
             if (!IsPlayerInteracting())
             {
                 // 플레이어가 계속 밀고 있어도 박스가 움직이지 않도록

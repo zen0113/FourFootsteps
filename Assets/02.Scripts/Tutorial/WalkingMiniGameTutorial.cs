@@ -9,17 +9,18 @@ public class WalkingMiniGameTutorial : TutorialBase
     [Header("시작 전 다이얼로그")]
     [SerializeField] private string startDialogueID = ""; // 미니게임 시작 전 다이얼로그
 
-    [Header("완료 후 UI")]
-    [SerializeField] private GameObject uiToShowOnComplete; // 튜토리얼 완료 후 활성화할 UI
-
     [Header("자동 진행 설정")]
     [SerializeField] private bool autoProgressOnComplete = true; // 완료 시 자동으로 다음 튜토리얼 진행
 
+    [Header("카메라 설정")]
+    [SerializeField] private CameraShakeMinigame cameraShake; // CameraShakeMinigame 스크립트
+    [SerializeField] private FollowCamera followCamera;     // FollowCamera 스크립트
 
     private TutorialController tutorialController;
     private bool miniGameStarted = false;
     private bool miniGameCompleted = false;
     private bool hasProgressed = false;
+    private GameObject playerUICanvas; // 자동으로 찾은 Player UI Canvas 저장
 
     public override void Enter()
     {
@@ -35,11 +36,8 @@ public class WalkingMiniGameTutorial : TutorialBase
         miniGameCompleted = false;
         hasProgressed = false;
 
-        // 시작 시 완료 UI가 있다면 비활성화
-        if (uiToShowOnComplete != null)
-        {
-            uiToShowOnComplete.SetActive(false);
-        }
+        // Player UI Canvas를 자동으로 찾아서 비활성화
+        FindAndDisablePlayerUI();
 
         if (miniGame == null)
         {
@@ -80,6 +78,21 @@ public class WalkingMiniGameTutorial : TutorialBase
 
     public override void Exit()
     {
+        // 모든 미니게임이 끝났으므로 카메라 설정을 원래대로 복원합니다.
+        Debug.Log("[WalkingMiniGameTutorial] 걷기 미니게임 종료. 카메라 설정 복원.");
+        if (cameraShake != null)
+        {
+            Debug.Log("[WalkingMiniGameTutorial] CameraShake 중지 및 비활성화");
+            cameraShake.StopShake(); // 진행 중인 쉐이크 즉시 중지
+            cameraShake.enabled = false; // 쉐이크 스크립트 비활성화
+        }
+
+        if (followCamera != null)
+        {
+            Debug.Log("[WalkingMiniGameTutorial] FollowCamera 활성화");
+            followCamera.enabled = true; // 카메라 팔로우 기능 다시 활성화
+        }
+
         // 이벤트 해제 ...
         if (miniGame != null)
         {
@@ -87,11 +100,57 @@ public class WalkingMiniGameTutorial : TutorialBase
         }
         StopAllCoroutines();
 
-        // 튜토리얼 완료 후 지정된 UI 활성화
-        if (uiToShowOnComplete != null)
+        // Exit 시 Player UI Canvas 다시 활성화
+        RestorePlayerUI();
+    }
+
+    /// <summary>
+    /// Player UI Canvas를 자동으로 찾아서 비활성화합니다.
+    /// </summary>
+    private void FindAndDisablePlayerUI()
+    {
+        // 이미 찾은 경우 재사용
+        if (playerUICanvas == null)
         {
-            Debug.Log($"[WalkingMiniGameTutorial] 완료 UI '{uiToShowOnComplete.name}'를 활성화합니다.");
-            uiToShowOnComplete.SetActive(true);
+            // GameObject.Find는 활성화된 오브젝트만 찾으므로, 모든 Canvas를 검색
+            Canvas[] allCanvases = Resources.FindObjectsOfTypeAll<Canvas>();
+
+            foreach (Canvas canvas in allCanvases)
+            {
+                if (canvas.gameObject.name == "Player UI Canvas")
+                {
+                    playerUICanvas = canvas.gameObject;
+                    break;
+                }
+            }
+
+            // 찾지 못한 경우 일반 GameObject.Find 시도
+            if (playerUICanvas == null)
+            {
+                playerUICanvas = GameObject.Find("Player UI Canvas");
+            }
+        }
+
+        if (playerUICanvas != null)
+        {
+            Debug.Log("[WalkingMiniGameTutorial] Player UI Canvas를 찾아서 비활성화합니다.");
+            playerUICanvas.SetActive(false);
+        }
+        else
+        {
+            Debug.LogWarning("[WalkingMiniGameTutorial] Player UI Canvas를 찾을 수 없습니다!");
+        }
+    }
+
+    /// <summary>
+    /// 비활성화했던 Player UI Canvas를 다시 활성화합니다.
+    /// </summary>
+    private void RestorePlayerUI()
+    {
+        if (playerUICanvas != null)
+        {
+            Debug.Log("[WalkingMiniGameTutorial] Player UI Canvas를 다시 활성화합니다.");
+            playerUICanvas.SetActive(true);
         }
     }
 

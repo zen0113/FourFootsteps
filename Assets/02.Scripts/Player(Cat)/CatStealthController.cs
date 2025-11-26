@@ -43,6 +43,8 @@ public class CatStealthController : MonoBehaviour
     private Coroutine enterCo, exitCo;
     // 연출(이펙트) 코루틴 핸들(필요 시 여러 개 분리)
     private Coroutine enterFxCo, exitFxCo;
+    private Coroutine alphaChangeCo;
+    private const float OUTSIDE_PADDING_SCALE_MULTIPLIER = 1.0f;
 
     // 이벤트 훅
     public event Action<HideObject> OnEnterArea;
@@ -161,6 +163,12 @@ public class CatStealthController : MonoBehaviour
     // ===== 코루틴: 단일 플로우 =====
     private IEnumerator EnterFlow(HideObject ho)
     {
+        if (ho == null)
+        {
+            Debug.LogWarning("[CatStealthController] EnterFlow: HideObject is null");
+            yield break;
+        }
+
         state = StealthState.Entering;
 
         // 바로 잠금 & 관성 제거
@@ -185,7 +193,8 @@ public class CatStealthController : MonoBehaviour
 
         if (ho == null || !overlaps.Contains(ho))
         {
-            // 롤백
+            Debug.LogWarning("[CatStealthController] HideObject lost during enter");
+            // 롤백 처리
             if (rb) rb.bodyType = prevBody;
             movement.SetCrouchMovingState(false);
             movement.ForceCrouch = false;
@@ -244,15 +253,22 @@ public class CatStealthController : MonoBehaviour
         movement.SetCrouchMovingState(true);
         ApplyCrouchAnim(true);
 
+        // 수정사항1: Kinematic으로 전환해서 물리 간섭 방지
+        RigidbodyType2D prevBody = rb ? rb.bodyType : RigidbodyType2D.Dynamic;
+        if (rb) rb.bodyType = RigidbodyType2D.Kinematic;
+
         if (isPlaying && !currentHideObj.isGoalObject)
         {
-            ho.SetHidingAlpha(false);    // 오브젝트 알파값 조절
+            ho.SetHidingAlpha(false);
             SetHidingAlpha(false);
         }
-        
+
         // 바깥 X 계산
         float targetX = ComputeOutsideX(ho);
         yield return MoveToX(targetX);
+
+        // 수정사항2: 물리 복원
+        if (rb) rb.bodyType = prevBody;
 
         // 원복
         movement.SetMiniGameInputBlocked(false);
@@ -277,8 +293,19 @@ public class CatStealthController : MonoBehaviour
         float tol = Mathf.Max(0.0001f, settings.snapTolerance);
         float speed = Mathf.Max(0.0001f, settings.pushSpeed);
 
+        // 타임아웃 추가
+        float timeout = 4f;
+        float startTime = Time.time;
+
         while (Mathf.Abs(transform.position.x - targetX) > tol)
         {
+            // 타임아웃 체크
+            if (Time.time - startTime > timeout)
+            {
+                Debug.LogWarning($"[CatStealthController] MoveToX timeout! Current: {transform.position.x}, Target: {targetX}");
+                break; // 강제로 루프 탈출
+            }
+
             Vector3 pos = transform.position;
             float dir = Mathf.Sign(targetX - pos.x);
             float step = speed * Time.deltaTime * dir;
@@ -296,7 +323,7 @@ public class CatStealthController : MonoBehaviour
             yield return null;
         }
 
-        // 최종 스냅
+        // 최종 스냅 (타임아웃 되어도 최대한 가까운 위치로)
         Vector3 snap = transform.position;
         snap.x = targetX;
         if (rb) rb.MovePosition(snap);
@@ -311,10 +338,14 @@ public class CatStealthController : MonoBehaviour
     /// 
     public void SetHidingAlpha(bool isActive)
     {
-        if (isActive)
-            StartCoroutine(ChangeAlphaValue(settings.HidingAlphaValue));
-        else
-            StartCoroutine(ChangeAlphaValue(1f));
+        if (alphaChangeCo != null)
+        {
+            StopCoroutine(alphaChangeCo);
+            alphaChangeCo = null;
+        }
+
+        float targetAlpha = isActive ? settings.HidingAlphaValue : 1f;
+        alphaChangeCo = StartCoroutine(ChangeAlphaValue(targetAlpha));
     }
 
     private IEnumerator ChangeAlphaValue(float finalValue)
@@ -350,7 +381,7 @@ public class CatStealthController : MonoBehaviour
         // 오른쪽 바라보는 경우: sr.flipX == false
         bool facingRight = spriteRenderer ? (spriteRenderer.flipX == false) : true;
 
-        float pad = settings.pushOutsidePadding + Mathf.Abs(transform.localScale.x) * 1.0f;
+        float pad = settings.pushOutsidePadding + Mathf.Abs(transform.localScale.x) * OUTSIDE_PADDING_SCALE_MULTIPLIER;
 
         return facingRight ? (b.max.x + pad) : (b.min.x - pad);
     }
@@ -383,8 +414,14 @@ public class CatStealthController : MonoBehaviour
     {
         PlayerCatMovement.Instance.enabled = true;
 
-        if (!overlaps.Contains(ho)) overlaps.Add(ho);
-        currentHideObj = ho;
+        // OnEnterArea 이벤트도 발생시키기 위해 명시적으로 트리거
+        if (!overlaps.Contains(ho))
+        {
+            overlaps.Add(ho);
+            OnEnterArea?.Invoke(ho);
+        }
+
+        UpdateCurrentHideObj();
 
         if (exitCo != null) { StopCoroutine(exitCo); exitCo = null; }
         if (exitFxCo != null) { StopCoroutine(exitFxCo); exitFxCo = null; }
@@ -402,7 +439,7 @@ public class CatStealthController : MonoBehaviour
     public void Chase_CourchingDisabled()
     {
         // 원복
-        movement.SetMiniGameInputBlocked(false);
+        //movement.SetMiniGameInputBlocked(false);
         isHiding = false;
         this.enabled = false;
     }

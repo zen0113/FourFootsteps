@@ -17,35 +17,44 @@ public class RoomTransitionTutorial : TutorialBase
     private bool isTransitioning = false; // 이동 중 중복 방지
     private bool isInteracting = false;
     private TutorialController tutorialController;
+    private PlayerHumanMovement playerMovement; // 플레이어 이동 스크립트 참조
 
     public override void Enter()
     {
         isTransitioning = false;
         isInteracting = false;
 
+        // 플레이어 이동 스크립트 찾기
+        if (playerMovement == null)
+        {
+            GameObject player = GameObject.FindGameObjectWithTag("Player");
+            if (player != null)
+            {
+                playerMovement = player.GetComponent<PlayerHumanMovement>();
+            }
+        }
+
         // 아웃라인 활성화 (있는 경우)
         if (outlineObject != null)
         {
             outlineObject.SetActive(true);
         }
-
     }
 
     public override void Execute(TutorialController controller)
     {
         // TutorialController 참조 저장
         tutorialController = controller;
-
     }
 
     private void Update()
     {
-        // E키 입력 체크 (튜토리얼이 활성화된 상태에서만)
+        // E/W 키 입력 체크 (튜토리얼이 활성화된 상태에서만)
         if (interactionImageDisplay != null &&
-            interactionImageDisplay.IsPlayerInArea() &&
-            !isTransitioning &&
-            !isInteracting &&
-            Input.GetKeyDown(KeyCode.E))
+        interactionImageDisplay.IsPlayerInArea() &&
+        !isTransitioning &&
+        !isInteracting &&
+        (Input.GetKeyDown(KeyCode.E) || Input.GetKeyDown(KeyCode.W)))
         {
             OnPlayerInteract();
         }
@@ -87,6 +96,18 @@ public class RoomTransitionTutorial : TutorialBase
     {
         isTransitioning = true;
 
+        // 플레이어 이동 제한 활성화
+        if (playerMovement != null)
+        {
+            playerMovement.BlockMiniGameInput(true);
+        }
+
+        // GameManager의 이동 제한도 설정
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.SetVariable("CanMoving", false);
+        }
+
         // 필요한 스폰 포인트와 카메라 타겟 찾기
         GameObject playerSpawnPoint = GameObject.Find($"{targetRoomName}_PlayerSpawn");
         GameObject cameraTargetPoint = GameObject.Find($"{targetRoomName}_CameraTarget");
@@ -95,6 +116,7 @@ public class RoomTransitionTutorial : TutorialBase
         if (playerSpawnPoint == null)
         {
             Debug.LogError($"Player spawn point not found: {targetRoomName}_PlayerSpawn");
+            RestorePlayerMovement(); // 이동 복구
             isTransitioning = false;
             yield break;
         }
@@ -102,6 +124,7 @@ public class RoomTransitionTutorial : TutorialBase
         if (cameraTargetPoint == null)
         {
             Debug.LogError($"Camera target point not found: {targetRoomName}_CameraTarget");
+            RestorePlayerMovement(); // 이동 복구
             isTransitioning = false;
             yield break;
         }
@@ -145,12 +168,31 @@ public class RoomTransitionTutorial : TutorialBase
             yield return UIManager.Instance.OnFade(null, 1, 0, fadeTime);
         }
 
+        // 플레이어 이동 제한 해제
+        RestorePlayerMovement();
+
         isTransitioning = false;
 
         // 방 이동 완료 후 다음 튜토리얼로 이동
         if (tutorialController != null)
         {
             tutorialController.SetNextTutorial();
+        }
+    }
+
+    /// <summary>
+    /// 플레이어 이동을 복구하는 메서드
+    /// </summary>
+    private void RestorePlayerMovement()
+    {
+        if (playerMovement != null)
+        {
+            playerMovement.BlockMiniGameInput(false);
+        }
+
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.SetVariable("CanMoving", true);
         }
     }
 
@@ -164,6 +206,9 @@ public class RoomTransitionTutorial : TutorialBase
         {
             outlineObject.SetActive(false);
         }
+
+        // Exit 시에도 이동 제한 해제 (안전장치)
+        RestorePlayerMovement();
     }
 
     /// <summary>

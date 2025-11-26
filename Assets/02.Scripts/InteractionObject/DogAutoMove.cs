@@ -38,12 +38,15 @@ public class DogAutoMove : MonoBehaviour
     [SerializeField] private float walkSoundInterval = 0.3f;
     private float lastWalkSoundTime;
 
+    [SerializeField] private Animator animator;
+
     public Action OnArrived;
 
     private void Awake()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
         audioSource = GetComponent<AudioSource>();
+        animator = GetComponent<Animator>();
 
         if (audioSource == null) audioSource = gameObject.AddComponent<AudioSource>();
 
@@ -61,6 +64,8 @@ public class DogAutoMove : MonoBehaviour
         {
             exclamationInitialLocalPos = exclamationMark.transform.localPosition;
         }
+
+        animator.SetBool("Moving", true);
     }
 
     private void SetPatrolBoundaries()
@@ -80,22 +85,22 @@ public class DogAutoMove : MonoBehaviour
         PlaySoundIfMoving();
     }
 
-    private void OnCollisionEnter2D(Collision2D collision)
-    {
-        // 'Player' 태그를 가진 오브젝트와 부딪혔다면
-        if (collision.gameObject.CompareTag("Player"))
-        {
-            // 플레이어에게 데미지를 줌
-            PlayerHp playerHp = collision.gameObject.GetComponent<PlayerHp>();
-            if (playerHp != null)
-            {
-                playerHp.TakeDamage(attackDamage);
-            }
+    //private void OnCollisionEnter2D(Collision2D collision)
+    //{
+    //    // 'Player' 태그를 가진 오브젝트와 부딪혔다면
+    //    if (collision.gameObject.CompareTag("Player"))
+    //    {
+    //        // 플레이어에게 데미지를 줌
+    //        PlayerHp playerHp = collision.gameObject.GetComponent<PlayerHp>();
+    //        if (playerHp != null)
+    //        {
+    //            playerHp.TakeDamage(attackDamage);
+    //        }
 
-            // 추적을 멈추고 즉시 복귀 상태로 전환
-            StopChasing();
-        }
-    }
+    //        // 추적을 멈추고 즉시 복귀 상태로 전환
+    //        StopChasing();
+    //    }
+    //}
 
     private void CheckEyeContact()
     {
@@ -141,7 +146,7 @@ public class DogAutoMove : MonoBehaviour
         if (exclamationMark != null) exclamationMark.SetActive(true);
     }
 
-    private void StopChasing()
+    public void StopChasing()
     {
         isChasing = false;
         isReturning = true;

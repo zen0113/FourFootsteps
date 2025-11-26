@@ -11,11 +11,11 @@ public class TutorialController : MonoBehaviour
     private List<TutorialBase> tutorials;
     [SerializeField]
     private string nextSceneName = "";
-    // [SerializeField] // 이제 인스펙터에서 수동으로 할당할 필요가 없습니다.
     private GameObject black; // 자동으로 찾을 GameObject
+    public GameObject BlackFadeObject => black;
 
     private TutorialBase currentTutorial = null;
-    private int currentIndex = -1;
+    [SerializeField] private int currentIndex = -1;
     public int CurrentIndex => currentIndex;
 
     void Awake()
@@ -29,11 +29,10 @@ public class TutorialController : MonoBehaviour
     private void Start()
     {
         // "Black" GameObject를 계층 구조에서 자동으로 찾습니다.
-        // "Player UI Canvas" -> "Black" 경로를 가정합니다.
+        // "Player UI Canvas" -> "Black" 경로를 가정
         GameObject playerUICanvas = GameObject.Find("Player UI Canvas");
         if (playerUICanvas != null)
         {
-            // 수정된 부분: "Player UI Canvas" 바로 아래에서 "Black"을 찾습니다.
             Transform blackTransform = playerUICanvas.transform.Find("Black");
             if (blackTransform != null)
             {

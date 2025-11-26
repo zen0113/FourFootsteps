@@ -2,14 +2,18 @@ public class ChoiceLine
 {
     public string Script { get; private set; }
     public string Next { get; private set; }
+    public string IsGoodChoice { get; private set; }
     public int TutorialIndex { get; private set; } //  건너뛸 튜토리얼 인덱스 (-1이면 다음 단계)
+    public int RequiredResponsibility { get; set; }
 
     // initialize function
-    public ChoiceLine(string script, string next, int tutorialIndex = -1)
+    public ChoiceLine(string script, string next, string isGoodchoice,int tutorialIndex = -1, int requiredResponsibility = 0)
     {
         Script = script;
         Next = next;
+        IsGoodChoice = isGoodchoice;
         TutorialIndex = tutorialIndex;
+        RequiredResponsibility = requiredResponsibility;
     }
 
     public string GetScript()

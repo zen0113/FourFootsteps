@@ -23,7 +23,7 @@ public class NpcAutoMover : MonoBehaviour
 
     private SpriteRenderer spriteRenderer;
     private Animator animator;
-    private AudioSource audioSource; // AudioSource 추가
+    [SerializeField] private AudioSource sfxSource; // 발소리용
     private bool isMoving = false;
 
     private float currentSpeed; // 가변 속도(보간 대상)
@@ -36,10 +36,10 @@ public class NpcAutoMover : MonoBehaviour
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
         animator = GetComponent<Animator>();
-        audioSource = GetComponent<AudioSource>(); // AudioSource 컴포넌트 가져오기
-        if (audioSource == null) // AudioSource가 없으면 추가
+        sfxSource = GetComponent<AudioSource>(); // AudioSource 컴포넌트 가져오기
+        if (sfxSource == null) // AudioSource가 없으면 추가
         {
-            audioSource = gameObject.AddComponent<AudioSource>();
+            sfxSource = gameObject.AddComponent<AudioSource>();
         }
 
         // 시작할 때 Y축 값을 저장
@@ -48,9 +48,10 @@ public class NpcAutoMover : MonoBehaviour
 
     private void OnDisable()
     {
-        if (audioSource != null) audioSource.Stop();
+        if (sfxSource != null) sfxSource.Stop();
         //SetAnim(false, false);
         isMoving = false;
+        animator?.SetBool("Moving", false);
         state = MoveState.Idle;
     }
 
@@ -66,7 +67,7 @@ public class NpcAutoMover : MonoBehaviour
         //SetAnim(moving: true, dashing: false);
         lastWalkSoundTime = Time.time; // 이동 시작 시 바로 소리 재생을 위해 초기화
         PlayFootstepIfDue(true); // 이동 시작 시 걷는 소리 바로 재생
-        //animator?.SetBool("Moving", true); // 이동 시작 시 애니메이션 설정
+        animator?.SetBool("Moving", true); // 이동 시작 시 애니메이션 설정
         //PlayWalkSound(); // 이동 시작 시 걷는 소리 바로 재생
     }
 
@@ -76,7 +77,8 @@ public class NpcAutoMover : MonoBehaviour
         isMoving = false;
         state = MoveState.Idle;
         currentSpeed = 0f;
-        audioSource.Stop();
+        sfxSource.Stop();
+        animator?.SetBool("Moving", false);
         //SetAnim(false, false);
     }
 
@@ -108,7 +110,7 @@ public class NpcAutoMover : MonoBehaviour
             // 완전 정지
             isMoving = false;
             state = MoveState.Idle;
-            audioSource.Stop();
+            sfxSource.Stop();
             //SetAnim(false, false);
             OnArrived?.Invoke();
             return;
@@ -177,7 +179,7 @@ public class NpcAutoMover : MonoBehaviour
 
         if (force || Time.time - lastWalkSoundTime >= interval)
         {
-            audioSource.PlayOneShot(clip);
+            sfxSource.PlayOneShot(clip);
             lastWalkSoundTime = Time.time;
         }
     }

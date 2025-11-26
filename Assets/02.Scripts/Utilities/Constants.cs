@@ -1,33 +1,73 @@
 public static class Constants
 {
-    //// 씬의 종류
-    //public enum SceneType { START, ROOM_1, FOLLOW_1, ROOM_2, FOLLOW_2, ENDING }
-    //public static int ToInt(this SceneType sceneType)
-    //{
-    //    switch (sceneType)
-    //    {
-    //        case SceneType.START: return 0;
-    //        case SceneType.ROOM_1: return 1;
-    //        case SceneType.FOLLOW_1: return 2;
-    //        case SceneType.ROOM_2: return 3;
-    //        case SceneType.FOLLOW_2: return 4;
-    //        case SceneType.ENDING: return 5;
-    //        default: return 0;
-    //    }
-    //}
-    //public static SceneType ToEnum(this int sceneType)
-    //{
-    //    switch (sceneType)
-    //    {
-    //        case 0: return SceneType.START;
-    //        case 1: return SceneType.ROOM_1;
-    //        case 2: return SceneType.FOLLOW_1;
-    //        case 3: return SceneType.ROOM_2;
-    //        case 4: return SceneType.FOLLOW_2;
-    //        case 5: return SceneType.ENDING;
-    //        default: return 0;
-    //    }
-    //}
+    // 씬의 종류
+    public enum SceneType
+    {
+        TITLE,
+        SET_PLAYERNAME,
+        PROLOGUE,
+        STAGE_1, RECALL_1,
+        STAGE_2, RECALL_2,
+        STAGE_3, RECALL_3,
+        STAGE_3_2, STAGE_4_1, RECALL_4,
+        STAGE_4_2, STAGE_4_3,
+        STAGE_5, RECALL_5,
+        ENDING_HAPPY, ENDING_BAD
+    }
+
+    // SceneType -> 실제 씬 파일 이름(string)
+    public static string ToSceneName(this SceneType type)
+    {
+        switch (type)
+        {
+            case SceneType.TITLE: return "TitleScene";
+            case SceneType.SET_PLAYERNAME: return "SetPlayerName";
+            case SceneType.PROLOGUE: return "Prologue";
+            case SceneType.STAGE_1: return "StageScene1";
+            case SceneType.RECALL_1: return "RecallScene1";
+            case SceneType.STAGE_2: return "StageScene2";
+            case SceneType.RECALL_2: return "RecallScene2";
+            case SceneType.STAGE_3: return "StageScene3";
+            case SceneType.RECALL_3: return "RecallScene3";
+            case SceneType.STAGE_3_2: return "StageScene3_2";
+            case SceneType.STAGE_4_1: return "StageScene4_1";
+            case SceneType.RECALL_4: return "RecallScene4";
+            case SceneType.STAGE_4_2: return "StageScene4_2";
+            case SceneType.STAGE_4_3: return "StageScene4_3";
+            case SceneType.STAGE_5: return "StageScene5";
+            case SceneType.RECALL_5: return "RecallScene5";
+            case SceneType.ENDING_HAPPY: return "Ending_Happy";
+            case SceneType.ENDING_BAD: return "Ending_Bad";
+            default: return null;
+        }
+    }
+
+    // 씬 파일 이름(string) → SceneType 변환
+    public static SceneType ToSceneType(this string sceneName)
+    {
+        switch (sceneName)
+        {
+            case "TitleScene": return SceneType.TITLE;
+            case "SetPlayerName": return SceneType.SET_PLAYERNAME;
+            case "Prologue": return SceneType.PROLOGUE;
+            case "StageScene1": return SceneType.STAGE_1;
+            case "RecallScene1": return SceneType.RECALL_1;
+            case "StageScene2": return SceneType.STAGE_2;
+            case "RecallScene2": return SceneType.RECALL_2;
+            case "StageScene3": return SceneType.STAGE_3;
+            case "RecallScene3": return SceneType.RECALL_3;
+            case "StageScene3_2": return SceneType.STAGE_3_2;
+            case "StageScene4_1": return SceneType.STAGE_4_1;
+            case "RecallScene4": return SceneType.RECALL_4;
+            case "StageScene4_2": return SceneType.STAGE_4_2;
+            case "StageScene4_3": return SceneType.STAGE_4_3;
+            case "StageScene5": return SceneType.STAGE_5;
+            case "RecallScene5": return SceneType.RECALL_5;
+            case "Ending_Happy": return SceneType.ENDING_HAPPY;
+            case "Ending_Bad": return SceneType.ENDING_BAD;
+            default: return SceneType.TITLE;
+        }
+    }
 
     // 대화창의 종류
     public enum DialogueType { PLAYER_TALKING, PLAYER_THINKING, NPC, MONOLOG, PLAYER_BUBBLE, NPC_BUBBLE }
@@ -63,7 +103,10 @@ public static class Constants
     public const int
         Sound_WormholeActived = 1,
         Sound_FrontDoorOpenAndClose = 2,
-        Sound_RoomDoorOpenAndClose = 3;
+        Sound_RoomDoorOpenAndClose = 3,
+        Sound_birdChirps = 4,
+        Sound_catMeow = 5,
+        Sound_catMeow2 = 6;
 
 
 

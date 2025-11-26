@@ -19,13 +19,28 @@ public class ObjectDetector : MonoBehaviour
     
     private void Start()
     {
-        // 부모의 PulleyPlatform 컴포넌트 찾기
-        parentPlatform = GetComponentInParent<PulleyPlatform>();
+        // 같은 게임오브젝트 또는 부모에서 PulleyPlatform 찾기
+        parentPlatform = GetComponent<PulleyPlatform>();
+        
+        if (parentPlatform == null)
+        {
+            parentPlatform = GetComponentInParent<PulleyPlatform>();
+        }
+        
+        // 여전히 없으면 씬 전체에서 찾기 (분리된 구조)
+        if (parentPlatform == null)
+        {
+            parentPlatform = FindObjectOfType<PulleyPlatform>();
+        }
         
         if (parentPlatform == null)
         {
             Debug.LogError($"ObjectDetector({name})가 PulleyPlatform을 찾을 수 없습니다!");
+            return;
         }
+        
+        if (showDebug)
+            Debug.Log($"✓ ObjectDetector({name})가 PulleyPlatform({parentPlatform.name})을 찾았습니다.");
         
         // Trigger 설정 확인
         Collider2D collider = GetComponent<Collider2D>();
@@ -39,6 +54,10 @@ public class ObjectDetector : MonoBehaviour
     {
         if (!IsInDetectionLayer(other.gameObject)) return;
         
+        // 이미 감지된 오브젝트는 무시
+        if (detectedObjects.Any(obj => obj.objectTransform == other.transform))
+            return;
+        
         DetectedObject newObject = CreateDetectedObject(other);
         if (newObject.IsValid)
         {
@@ -46,7 +65,7 @@ public class ObjectDetector : MonoBehaviour
             EvaluatePriority();
             
             if (showDebug)
-                Debug.Log($"[{name}] 오브젝트 감지됨: {newObject.objectName} (타입: {newObject.type}, 무게: {newObject.weight})");
+                Debug.Log($"[{name}] 📦 오브젝트 올라옴: {newObject.objectName} (타입: {newObject.type}, 무게: {newObject.weight})");
         }
     }
     
@@ -59,10 +78,11 @@ public class ObjectDetector : MonoBehaviour
         
         if (removedCount > 0)
         {
-            EvaluatePriority();
-            
             if (showDebug)
-                Debug.Log($"[{name}] 오브젝트 제거됨: {other.name}");
+                Debug.Log($"[{name}] 📤 오브젝트 내려옴: {other.name}");
+            
+            // 즉시 우선순위 재평가
+            EvaluatePriority();
         }
     }
     
@@ -114,6 +134,9 @@ public class ObjectDetector : MonoBehaviour
         
         if (detectedObjects.Count == 0)
         {
+            if (showDebug)
+                Debug.Log($"[{name}] 🔄 상태 업데이트: Empty");
+            
             OnPriorityChanged?.Invoke(ObjectType.Empty, 0f);
             return;
         }
@@ -135,6 +158,9 @@ public class ObjectDetector : MonoBehaviour
             // 플레이어만 있을 때
             totalWeight = 1.0f;
         }
+        
+        if (showDebug)
+            Debug.Log($"[{name}] 🔄 상태 업데이트: {highestPriority} (무게: {totalWeight:F1})");
         
         OnPriorityChanged?.Invoke(highestPriority, totalWeight);
     }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement; 
 
 public class PlayerHp : MonoBehaviour
 {
@@ -26,7 +27,13 @@ public class PlayerHp : MonoBehaviour
     [Header("Camera Shake Effect")]
     [SerializeField] private CameraShake cameraShake;
 
+    [Header("Game Over Settings")] // 추가
+    [SerializeField] private float restartDelay = 1.5f; // 재시작 전 대기 시간
+
     private bool isGameOverLoading = false;
+
+    // Stage3의 Chase 페이즈의 무적용 변수
+    private bool isChasePhaseInvincible = false;
 
     private void Awake()
     {
@@ -47,12 +54,24 @@ public class PlayerHp : MonoBehaviour
 
         currentHp = maxHp;
         CreateHearts();
+        cameraShake.enabled = false;
+
+        isChasePhaseInvincible = false;
     }
 
     // create 5 hearts on screen on Player UI Canvas 
+    // 이게 매 스테이지마다 계속 Start때마다 호출되어서
+    // 스테이지1->회상1->스테이지2 에 왔을 때 UI의 HP가 5개->10개로 불어나있는 오류 발생
+    // Destroy(child.gameObject); 으로 UI에 남아있는 하트 삭제 후 생성되게 함
     public void CreateHearts()
     {
         int heartCount = currentHp;
+
+        if (heartParent.transform.childCount > 0)
+        {
+            foreach(Transform child in heartParent.transform)
+                Destroy(child.gameObject);
+        }
 
         // create heart on screen by creating instances of heart prefab under heart parent
         for (int i = 0; i < heartCount; i++)
@@ -114,9 +133,16 @@ public class PlayerHp : MonoBehaviour
         StartCoroutine(UIManager.Instance.WarningCoroutine());
     }
 
+    
+    public void SetChasePhaseInvincible(bool isActive)
+    {
+        isChasePhaseInvincible = isActive;
+    }
+
+
     public void TakeDamage(int damage)
     {
-        if (isInvincible || isGameOverLoading) return; // 무적 상태면 데미지 무시
+        if (isInvincible || isGameOverLoading|| isChasePhaseInvincible) return; // 무적 상태면 데미지 무시
 
         currentHp -= damage;
         currentHp = Mathf.Clamp(currentHp, 0, maxHp);
@@ -166,15 +192,91 @@ public class PlayerHp : MonoBehaviour
     //    //healthText.text = $"x {currentHealth}";
     //}
 
-    private void Die()
+   private void Die()
     {
         isGameOverLoading = true;
 
+        // UI 비활성화
+        UIManager.Instance.SetUI(eUIGameObjectName.CatVersionUIGroup, false);
+        UIManager.Instance.SetUI(eUIGameObjectName.HumanVersionUIGroup, false);
+        UIManager.Instance.SetUI(eUIGameObjectName.PuzzleBagButton, false);
+        UIManager.Instance.SetUI(eUIGameObjectName.PlaceUI, false);
+        UIManager.Instance.SetUI(eUIGameObjectName.ResponsibilityGroup, false);
+
+        // 다이얼로그 재생 중이면 강제 중지
+        DialogueManager.Instance.ForceAbortDialogue();
+
         Debug.Log("플레이어 사망!");
-        // 페이드 인 효과와 함께 게임오버 씬 로드
-        SceneLoader.Instance.LoadScene("GameOver");
+
+        // 현재 스테이지를 재시작
+        StartCoroutine(RestartCurrentStage());
+    }
+
+    // 추가된 메서드: 현재 스테이지 재시작
+    private IEnumerator RestartCurrentStage()
+    {
+        // 플레이어 동작 중지
+        var catMovement = GetComponent<PlayerCatMovement>();
+        var autoRunner = GetComponent<PlayerAutoRunner>();
+        
+        if (catMovement != null) catMovement.enabled = false;
+        if (autoRunner != null) autoRunner.StartDeathRoutine();
+
+        // 물리 처리 중지
+        var rb = GetComponent<Rigidbody2D>();
+        if (rb != null)
+        {
+            rb.velocity = Vector2.zero;
+            rb.isKinematic = true;
+        }
+
+        Animator animator = GetComponent<Animator>();
+        if (animator != null)
+        {
+            // 다른 모든 활성 상태를 false로 설정하여 충돌 방지
+            animator.SetBool("Moving", false);
+            animator.SetBool("Dash", false);
+            // animator.SetBool("Jump", false); // Jump는 Bool이 아닐 수 있으므로 확인 필요 (PlayerCatMovement에 Jump Bool이 없음)
+            animator.SetBool("Climbing", false);
+            animator.SetBool("Crouching", false); // 웅크린 채 이동 (false)
+
+            // 'idle crouch' 상태 (Crouch)를 true로 설정
+            animator.SetBool("Crouch", true);
+        }
+
+
+        // 지정된 시간만큼 대기
+        yield return new WaitForSeconds(restartDelay);
+
+        // GameManager의 변수들 리셋 (HP를 최대치로)
+        GameManager.Instance.SetVariable("CurrentHP", maxHp);
+        GameManager.Instance.SetVariable("MaxHP", maxHp);
+
+        if (SoundPlayer.Instance != null)
+        {
+            SoundPlayer.Instance.StopAllBGM();
+        }
+
+        // 현재 씬을 다시 로드
+        string currentSceneName = SceneManager.GetActiveScene().name;
+        
+        // SceneLoader를 사용하여 페이드 효과와 함께 재로드
+        if (SceneLoader.Instance != null)
+        {
+            SceneLoader.Instance.LoadScene(currentSceneName);
+        }
+        else
+        {
+            // SceneLoader가 없으면 직접 로드
+            SceneManager.LoadScene(currentSceneName);
+        }
+
+        // 다이얼로그 재생 중이면 강제 중지
+        DialogueManager.Instance.ForceAbortDialogue();
     }
 
     // 외부 접근용 프로퍼티
     public int CurrentHp => currentHp;
+
+    public void SetIsInvincible(bool isInvincible) { this.isInvincible = isInvincible; }
 }

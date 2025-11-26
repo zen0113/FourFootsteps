@@ -14,7 +14,8 @@ public class CSVDownloaderEditor : EditorWindow
         {"results", "1774091709"},
         {"dialogues", "1081818437"},
         {"choices", "1314559638"},
-        {"variables", "1868321381"}
+        {"variables", "1868321381"},
+        {"puzzlesMemory", "447158668"}
     };
 
     [MenuItem("Tools/Download CSVs")]

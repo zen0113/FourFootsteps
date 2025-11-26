@@ -30,6 +30,10 @@ public class GameManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI variablesText;
     public bool isDebug = false;
 
+    // --- 청소 카운터 관련 ---
+    // variables.csv 파일에 CleanedObjectCount를 추가했기 때문에
+    // 별도의 변수나 함수를 추가할 필요 없이, 기존 기능으로 모두 제어 가능합니다.
+
     private void Awake()
     {
         if (Instance == null)
@@ -65,14 +69,22 @@ public class GameManager : MonoBehaviour
             {
                 new SceneData("TitleScene"),
                 new SceneData("SetPlayerName"),
-                new SceneData("SetCatName"),
                 new SceneData("Prologue"),
                 new SceneData("StageScene1"),
                 new SceneData("RecallScene1", true),
                 new SceneData("StageScene2"),
                 new SceneData("RecallScene2", true),
-                new SceneData("StageScene3_IncludeMiniGame"),
-                new SceneData("RecallScene3", true)
+                new SceneData("StageScene3"),
+                new SceneData("RecallScene3", true),
+                new SceneData("StageScene3_2"),
+                new SceneData("StageScene4_1"),
+                new SceneData("RecallScene4", true),
+                new SceneData("StageScene4_2"),
+                new SceneData("StageScene4_3"),
+                new SceneData("StageScene5"),
+                new SceneData("RecallScene5", true),
+                new SceneData("Ending_Happy"),
+                new SceneData("Ending_Bad"),
             };
     }
 
@@ -87,34 +99,25 @@ public class GameManager : MonoBehaviour
     // 씬 상태 업데이트
     public void UpdateSceneProgress(string loadedSceneName)
     {
-        //string currentSceneName = loadedSceneName;
-        //SetVariable("CurrentSceneName", currentSceneName);
-        //int index = sceneOrder.FindIndex(s => s.sceneName == loadedSceneName);
-        //if (index >= 0 && index + 1 < sceneOrder.Count)
-        //{
-        //    string nextSceneName = sceneOrder[index + 1].sceneName;
-        //    SetVariable("NextSceneName", nextSceneName);
-        //}
-        //else
-        //{
-        //    SetVariable("NextSceneName", null); // 마지막 씬일 경우
-        //}
-
         var currentScene = sceneOrder.FirstOrDefault(s => s.sceneName == loadedSceneName);
         if (currentScene != null)
         {
             SetVariable("CurrentSceneName", currentScene.sceneName);
 
+            if (currentScene.sceneName != Constants.SceneType.TITLE.ToSceneName())
+                SetVariable("SavedSceneName", currentScene.sceneName);
+
             int index = sceneOrder.IndexOf(currentScene);
             if (index + 1 < sceneOrder.Count)
                 SetVariable("NextSceneName", sceneOrder[index + 1].sceneName);
             else
-                SetVariable("NextSceneName", null); // 마지막 씬일 경우
+                SetVariable("NextSceneName", sceneOrder[0].sceneName); // 마지막 씬일 경우
 
             if (currentScene.isRecall)
             {
                 SetVariable("isRecalling", true);
-            }else
+            }
+            else
                 SetVariable("isRecalling", false);
         }
     }
@@ -135,7 +138,7 @@ public class GameManager : MonoBehaviour
     {
         string[] variableLines = variablesCSV.text.Split('\n');
 
-        for(int i = 1; i<variableLines.Length; i++)
+        for (int i = 1; i < variableLines.Length; i++)
         {
             if (string.IsNullOrWhiteSpace(variableLines[i])) continue;
 
@@ -156,12 +159,76 @@ public class GameManager : MonoBehaviour
                 case "string":
                     variables.Add(variableName, variableValue);
                     break;
+                case "dict:int-bool":
+                    int count = int.Parse(variableValue);
+                    Dictionary<int, bool> dict = new Dictionary<int, bool>();
+                    for (int j = 0; j < count; j++)
+                        dict.Add(j, false); // 초기값 전부 false
+                    variables.Add(variableName, dict);
+                    break;
                 default:
                     Debug.Log($"Unknown variable type : {variableType}");
                     break;
             }
         }
+        SaveManager.Instance?.SaveInitGameData();
     }
+
+    public void ResetVariables()
+    {
+        string[] variableLines = variablesCSV.text.Split('\n');
+
+        for (int i = 1; i < variableLines.Length; i++)
+        {
+            if (string.IsNullOrWhiteSpace(variableLines[i]))
+                continue;
+
+            string[] fields = variableLines[i].Split(',');
+
+            string variableName = fields[0].Trim();
+            string variableValue = fields[1].Trim();
+            string variableType = fields[2].Trim();
+            string variableReset = fields[3].Trim();
+
+            //// 엔딩 때 초기화하지 않을 변수들은 제외
+            //if (variableReset == "FALSE") continue;
+
+            switch (variableType)
+            {
+                case "int":
+                    variables[variableName] = int.Parse(variableValue);
+                    break;
+                case "bool":
+                    variables[variableName] = bool.Parse(variableValue);
+                    break;
+                case "string":
+                    variables[variableName] = variableValue;
+                    break;
+                case "dict:int-bool":
+                    int count = int.Parse(variableValue);
+                    Dictionary<int, bool> dict = new Dictionary<int, bool>();
+                    for (int j = 0; j < count; j++)
+                        dict.Add(j, false); // 초기값 전부 false\
+                    variables[variableName] = dict;
+                    break;
+                default:
+                    Debug.Log("Unknown variable type: " + variableType);
+                    break;
+            }
+        }
+    }
+
+
+    public void LoadTitleScene()
+    {
+        SceneLoader.Instance.LoadScene("TitleScene");
+    }
+
+    public void StartEndingCredit()
+    {
+        StartCoroutine(EndingCredit.Instance.StartEndingCredit());
+    }
+
 
     // Variable 값 설정
     public void SetVariable(string variableName, object value)
@@ -254,18 +321,37 @@ public class GameManager : MonoBehaviour
         // 화면에 표시하고 싶은 변수명 추가
         List<string> keysToShow = new List<string>(new string[]
         {
+            "SavedSceneName",
             "PlayerName",
             "YourCatName",
             "CurrentSceneName",
             "NextSceneName",
-            "CanMoving",
-            "CanInvesigatingRecallObject"
+            //"CanMoving",
+            //"CanInvesigatingRecallObject",
+            //"CanStartCleaningMinigame",
+            "CurrentMemoryPuzzleCount",
+            "MemoryPuzzleStates",
+            //"CleanedObjectCount",
+            "isPrologueFinished",
         });
 
         foreach (var item in variables)
         {
-            if (keysToShow.Contains(item.Key)) variablesText.text += $"{item.Key}: {item.Value}\n";
+            if (keysToShow.Contains(item.Key))
+            {
+                if (item.Key == "MemoryPuzzleStates")
+                {
+                    variablesText.text += $"{item.Key}\n";
+                    foreach (var dict in item.Value as Dictionary<int, bool>)
+                    {
+                        variablesText.text += $"{dict.Key}: {dict.Value}\n";
+                    }
+                }
+                else
+                {
+                    variablesText.text += $"{item.Key}: {item.Value}\n";
+                }
+            }
         }
     }
-
 }

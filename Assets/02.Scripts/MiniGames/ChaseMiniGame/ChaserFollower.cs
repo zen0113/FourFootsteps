@@ -9,6 +9,8 @@ public class ChaserFollower : MonoBehaviour
     [SerializeField] private PlayerAutoRunner playerRunner;
     [SerializeField] private Camera cam;
     [SerializeField] private AnimationCurve difficultyOverX; // x→0~1
+    [SerializeField] private ObjectSfxController sfxController;
+    [SerializeField] private Animator animator;
 
     public bool isStartChasing = false;
 
@@ -46,6 +48,7 @@ public class ChaserFollower : MonoBehaviour
     [SerializeField] private bool keepVisibleAtLeft = true;
 
     [Header("Pavilion Clamp")]
+    [Tooltip("Chase_Goal Area에 있는 Key Icon으로 할당")]
     [SerializeField] private Transform pavilionClampPoint;  // 정자 앞 X 기준 오브젝트
     [SerializeField] private float clampArriveSpeed = 5f;   // 정자 앞까지 다가오는 속도
     [SerializeField] private float clampStopEpsilon = 0.02f;// 이 오차 이내면 도착으로 간주
@@ -58,7 +61,7 @@ public class ChaserFollower : MonoBehaviour
     public enum Phase { Chasing, Bird }
     public Phase phase;
 
-    private int birdTutoIndex = 10, chasingTutoIndex = 11;
+    private int birdTutoIndex = 11, chasingTutoIndex = 12;
 
     void CheckPhase()
     {
@@ -74,6 +77,7 @@ public class ChaserFollower : MonoBehaviour
 
     [SerializeField] private bool isThrower = false;
     public bool IsThrower => isThrower;
+    private ChaserThrower thrower;
 
     private Rigidbody2D rb;
     private float yLock;
@@ -111,9 +115,12 @@ public class ChaserFollower : MonoBehaviour
 
     void SwitchToReturnHome() { state = State.ReturnHome; }
 
+    public bool chaserCatchPlayer = false;
+
     void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
+        animator = GetComponent<Animator>();
         if (!col) col = GetComponent<BoxCollider2D>();
         if (!cam) cam = Camera.main;
 
@@ -129,6 +136,12 @@ public class ChaserFollower : MonoBehaviour
         yLock = transform.position.y;                // y 고정
         tNoise = Random.value * 10f;
         isStartChasing = false;
+
+        if (isThrower) thrower = GetComponent<ChaserThrower>();
+    }
+    private void Start()
+    {
+        chaserCatchPlayer = false;
     }
 
     private void OnEnable()
@@ -141,17 +154,31 @@ public class ChaserFollower : MonoBehaviour
 
     IEnumerator StartToChase()
     {
-        if(this.name== "chasingKids")
+        sfxController.StartPlayLoopByDefault();
+        animator.SetBool("Moving", true);
+        if (this.name== "chasingKids")
         {
             yield return new WaitForSeconds(3f);
         }
         isStartChasing = true;
     }
 
+    public void StopAnimationRunning()
+    {
+        if (isStartChasing) return;
+        animator.SetBool("Moving", false);
+        sfxController.StopLoop(0.5f);
+        if (isThrower) thrower.StopAll();
+    }
 
     private void FixedUpdate()
     {
         if (!isStartChasing || !playerRunner || !playerTransform) return;
+
+        if (playerRunner.AtHide)
+        {
+            if (col != null && col.isTrigger) col.isTrigger = false;
+        }
 
         // 1) 숨었으면 정자 앞에서 멈춤
         if (playerRunner.IsHiding)
@@ -164,6 +191,7 @@ public class ChaserFollower : MonoBehaviour
         if (gameOverTriggered)
         {
             rb.velocity = Vector2.zero;
+            animator.SetBool("Moving", false);
             return;
         }
 
@@ -287,9 +315,11 @@ public class ChaserFollower : MonoBehaviour
     private void EnterCatchMode()
     {
         OnCatchMode?.Invoke();
+        if (isThrower) thrower.enabled = false;
         chasingToCatch = true;
 
-        if (col != null) col.isTrigger = false; // 실제 충돌로 전환
+        //if (col != null) col.isTrigger = false; // 실제 충돌로 전환
+        if (col != null) col.isTrigger = true;
         Vector2 dir = (playerRunner.transform.position - transform.position).normalized;
         rb.velocity = dir * catchSpeed;
     }
@@ -306,9 +336,17 @@ public class ChaserFollower : MonoBehaviour
     private void ChaseGame_GameOver()
     {
         Debug.Log("추격 게임 : 추격자한테 잡힘[게임오버]");
-        StealthSFX.Instance.StopEnterSFX();
-        CatStealthController.Instance.Chase_GameOver();
-        EventManager.Instance.CallEvent(gameOverEventID);
+        chaserCatchPlayer = true;
+
+        if (isThrower)
+        {
+            sfxController.StopLoop(1f);
+            StealthSFX.Instance.StopEnterSFX();
+            CatStealthController.Instance.Chase_GameOver();
+            EventManager.Instance.CallEvent(gameOverEventID);
+        }
+
+        this.enabled = false;
     }
 
     // =========================
@@ -339,10 +377,12 @@ public class ChaserFollower : MonoBehaviour
         if (Mathf.Abs(newX - targetX) <= clampStopEpsilon)
         {
             rb.velocity = Vector2.zero;
-            col.isTrigger = true;
+            col.isTrigger = false;
+            animator.SetBool("Moving", false);
             this.enabled = false;
         }
         OnCatchMode?.Invoke();
+        sfxController.StopLoop(1f);
     }
 
     private void OnDrawGizmosSelected()
@@ -366,6 +406,7 @@ public class ChaserFollower : MonoBehaviour
         {
             gameOverTriggered = true;
             rb.velocity = Vector2.zero;
+            animator.SetBool("Moving", false);
             ChaseGame_GameOver();
         }
     }

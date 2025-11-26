@@ -96,7 +96,7 @@ public class TutorialTrigger : TutorialBase
         if (triggerObject != null)
         {
             triggerObject.gameObject.SetActive(true);
-            uiObject.gameObject.SetActive(true);
+            uiObject?.gameObject.SetActive(true);
         }
         else
         {
@@ -150,7 +150,7 @@ public class TutorialTrigger : TutorialBase
         if (triggerObject != null)
         {
             triggerObject.gameObject.SetActive(false);
-            uiObject.gameObject.SetActive(false);
+            uiObject?.gameObject.SetActive(false);
         }
     }
 

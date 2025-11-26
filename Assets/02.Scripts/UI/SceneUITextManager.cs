@@ -11,6 +11,12 @@ public class SceneUITextManager : MonoBehaviour
         public string sceneName;
         [TextArea(3, 5)]
         public string sceneDescription;
+
+        public SceneTextData(string name, string place)
+        {
+            this.sceneName = name;
+            this.sceneDescription = place;
+        }
     }
 
     [Header("UI References")]
@@ -22,9 +28,37 @@ public class SceneUITextManager : MonoBehaviour
     [Header("Default Text")]
     [SerializeField] private string defaultText = "현재 씬에 대한 설명이 없습니다.";
 
+    private void Awake()
+    {
+        InitScenePlaceData();
+    }
+
+
     private void Start()
     {
         UpdateSceneText();
+    }
+
+    private void InitScenePlaceData()
+    {
+        sceneTextDataList = new List<SceneTextData>
+        {
+            new SceneTextData("StageScene1","뒷골목"),
+            new SceneTextData("RecallScene1","집 안"),
+            new SceneTextData("StageScene2","공사장"),
+            new SceneTextData("RecallScene2","동물병원"),
+            new SceneTextData("StageScene3","공원"),
+            new SceneTextData("RecallScene3","집 안"),
+            new SceneTextData("StageScene3_2","공원"),
+            new SceneTextData("StageScene4_1","트럭 내부"),
+            new SceneTextData("RecallScene4","집 안"),
+            new SceneTextData("StageScene4_2","트럭 내부"),
+            new SceneTextData("StageScene4_3","트럭 내부"),
+            new SceneTextData("StageScene5","도로"),
+            new SceneTextData("RecallScene5","차도"),
+            new SceneTextData("Ending_Bad","뒷골목"),
+            new SceneTextData("Ending_Happy","집 안"),
+        };
     }
 
     private void OnEnable()
@@ -67,11 +101,14 @@ public class SceneUITextManager : MonoBehaviour
     // 에디터에서 씬 텍스트 데이터를 쉽게 관리할 수 있도록 도움말 메서드
     public void AddNewSceneText(string sceneName, string description)
     {
-        SceneTextData newData = new SceneTextData
-        {
-            sceneName = sceneName,
-            sceneDescription = description
-        };
+        SceneTextData newData = new SceneTextData(sceneName, description);
         sceneTextDataList.Add(newData);
+    }
+
+    // 해피 엔딩에선 장소가 2번 바뀌기 때문에 (집 안 -> 뒷골목 -> 유기동물 보호소 )
+    // 장소가 바뀔 경우 튜토리얼 매니저에서 재설정
+    public void ResetSceneText(string sceneName)
+    {
+        sceneDescriptionText.text = sceneName;
     }
 } 

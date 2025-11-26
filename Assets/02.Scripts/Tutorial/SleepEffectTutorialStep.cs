@@ -17,11 +17,9 @@ public class SleepEffectTutorialStep : TutorialBase
     [SerializeField] private Color fadeColor = Color.black;
     [SerializeField] private AnimationCurve fadeCurve = AnimationCurve.EaseInOut(0, 0, 1, 1);
 
-    // 새롭게 추가된 부분: 페이드 효과 완료 후 나타낼 오브젝트
     [Header("페이드 완료 후 나타낼 오브젝트")]
-    [SerializeField] private GameObject objectToShowAfterFade;
+    private GameObject objectToShowAfterFade;
 
-    // 새롭게 추가된 부분: UI 숨김 설정
     [Header("UI 숨김 설정")]
     [SerializeField] private bool useFadeOutForUI = true; // GuideUIController 페이드 아웃 사용 여부
 
@@ -35,11 +33,17 @@ public class SleepEffectTutorialStep : TutorialBase
     private Image fadeImage;
 
     // 카메라 일렁임용 머티리얼
-    private Material waveMaterial;
+    [SerializeField] private Material waveMaterial;
     private Camera mainCamera;
 
     // 원래 카메라 위치를 저장하기 위한 변수
     private Vector3 originalCameraPosition;
+
+    private void Awake()
+    {
+        // 일렁임 효과용 셰이더 생성 (간단한 버전)
+        CreateWaveMaterial();
+    }
 
     public override void Enter()
     {
@@ -55,9 +59,27 @@ public class SleepEffectTutorialStep : TutorialBase
             StopCoroutine(sleepEffectCoroutine);
         }
 
-        currentTutorialController = FindObjectOfType<TutorialController>();
+        currentTutorialController = TutorialController.Instance;
 
-        // 새롭게 추가된 부분: GuideUIController 숨김 처리
+        if (currentTutorialController != null && currentTutorialController.BlackFadeObject != null)
+        {
+            // 컨트롤러에서 찾은 'black' 오브젝트를 'objectToShowAfterFade'에 할당
+            objectToShowAfterFade = currentTutorialController.BlackFadeObject;
+            Debug.Log($"[SleepEffectTutorialStep] 'objectToShowAfterFade'에 TutorialController의 '{objectToShowAfterFade.name}'를 성공적으로 할당했습니다.");
+        }
+        else
+        {
+            if (currentTutorialController == null)
+            {
+                Debug.LogWarning("[SleepEffectTutorialStep] TutorialController.Instance를 찾을 수 없습니다.");
+            }
+            else
+            {
+                Debug.LogWarning("[SleepEffectTutorialStep] TutorialController.Instance.BlackFadeObject가 null입니다.");
+            }
+        }
+
+        // GuideUIController의 가이드 UI 숨기기
         if (GuideUIController.Instance != null) // GuideUIController의 싱글톤은 유지
         {
             if (useFadeOutForUI)
@@ -86,7 +108,7 @@ public class SleepEffectTutorialStep : TutorialBase
 
     public override void Execute(TutorialController controller)
     {
-        // 실행 중 특별한 로직이 필요하면 여기에 추가
+
     }
 
     public override void Exit()
@@ -112,7 +134,7 @@ public class SleepEffectTutorialStep : TutorialBase
         // 효과 초기화
         SetupEffects();
 
-        // 오브젝트를 처음에 비활성화하여 숨깁니다.
+        // 오브젝트를 처음에 비활성화
         if (objectToShowAfterFade != null)
         {
             objectToShowAfterFade.SetActive(false);
@@ -162,9 +184,6 @@ public class SleepEffectTutorialStep : TutorialBase
             originalCameraPosition = mainCamera.transform.position;
         }
 
-        // 일렁임 효과용 셰이더 생성 (간단한 버전)
-        CreateWaveMaterial();
-
         // 페이드 효과용 UI 생성
         CreateFadeCanvas();
     }
@@ -172,18 +191,15 @@ public class SleepEffectTutorialStep : TutorialBase
     private void CreateWaveMaterial()
     {
         // 간단한 일렁임 셰이더를 사용하는 머티리얼 생성
-        Shader waveShader = Shader.Find("Hidden/WaveDistortion"); // Hidden/WaveDistortion 셰이더는 예시입니다. 실제 프로젝트에 맞게 사용하세요.
-        if (waveShader == null)
+        Material sleepMat = Resources.Load<Material>("SleepMat");
+        if (sleepMat != null)
         {
-            // 기본 셰이더가 없으면 Unlit/Texture 사용
-            waveShader = Shader.Find("Unlit/Texture");
-            if (waveShader == null)
-            {
-                Debug.LogWarning("[SleepEffectTutorialStep] 'Hidden/WaveDistortion' 또는 'Unlit/Texture' 셰이더를 찾을 수 없습니다. 일렁임 효과가 제대로 작동하지 않을 수 있습니다.");
-                return;
-            }
+            waveMaterial = new Material(sleepMat.shader);
         }
-        waveMaterial = new Material(waveShader);
+        else
+        {
+            Debug.LogError("SleepMat을 찾을 수 없습니다!");
+        }
     }
 
     private void CreateFadeCanvas()
@@ -192,7 +208,7 @@ public class SleepEffectTutorialStep : TutorialBase
         GameObject canvasGO = new GameObject("SleepFadeCanvas");
         fadeCanvas = canvasGO.AddComponent<Canvas>();
         fadeCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
-        fadeCanvas.sortingOrder = 1000; // 최상위에 렌더링
+        fadeCanvas.sortingOrder = 10; // 최상위에 렌더링
 
         CanvasScaler scaler = canvasGO.AddComponent<CanvasScaler>();
         scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
@@ -205,6 +221,7 @@ public class SleepEffectTutorialStep : TutorialBase
         imageGO.transform.SetParent(fadeCanvas.transform, false);
 
         fadeImage = imageGO.AddComponent<Image>();
+        fadeImage.sprite = null;
         fadeImage.color = new Color(fadeColor.r, fadeColor.g, fadeColor.b, 0f); // 초기에는 투명
 
         // 전체 화면을 덮도록 설정

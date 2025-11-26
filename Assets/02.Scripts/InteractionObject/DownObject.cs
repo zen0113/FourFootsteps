@@ -18,6 +18,9 @@ public class DownObject : MonoBehaviour
     [Range(0f, 1f)]
     [SerializeField] private float soundVolume = 0.3f; // 사운드 볼륨 (0~1)
     
+    [Header("착지 제어")]
+    [SerializeField] private bool bIsUp = true; // True: 그라운드에 안착, False: 통과
+    
     private bool hasTriggered = false;
     private Coroutine dropRoutine;
     
@@ -73,6 +76,9 @@ public class DownObject : MonoBehaviour
                 
                 // 깨지는 효과 설정 전달
                 landingHandler.SetBreakEffects(breakSound, brokenSprite, soundVolume);
+                
+                // bIsUp 값 전달
+                landingHandler.SetIsUp(bIsUp);
                 
                 rb.AddForce(dropDirection.normalized * dropForce, ForceMode2D.Impulse);
                 
@@ -143,6 +149,9 @@ public class SimpleGroundLandingHandler : MonoBehaviour
     private Sprite originalSprite; // 원본 스프라이트 보관
     private float soundVolume = 0.3f; // 사운드 볼륨
     
+    // 착지 제어
+    private bool bIsUp = true; // True: 그라운드에 안착, False: 통과
+    
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -170,8 +179,17 @@ public class SimpleGroundLandingHandler : MonoBehaviour
         soundVolume = volume;
     }
     
+    public void SetIsUp(bool isUp)
+    {
+        bIsUp = isUp;
+    }
+    
     private void OnCollisionEnter2D(Collision2D collision)
     {
+        // bIsUp이 False면 그라운드와 상호작용하지 않음
+        if (!bIsUp)
+            return;
+        
         if (collision.gameObject.layer == LayerMask.NameToLayer("Ground") && !hasLanded)
         {
             hasLanded = true;
@@ -235,7 +253,8 @@ public class SimpleGroundLandingHandler : MonoBehaviour
     
     private void FixedUpdate()
     {
-        if (hasLanded)
+        // bIsUp이 False면 레이캐스트도 실행하지 않음
+        if (!bIsUp || hasLanded)
         {
             return;
         }

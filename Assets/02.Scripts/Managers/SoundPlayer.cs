@@ -34,6 +34,9 @@ public class SoundPlayer : MonoBehaviour
     private const int SOUND_TYPING = 0; // 타이핑 사운드 인덱스
     private const int SOUND_CLICK = 1; // 클릭 사운드 인덱스
 
+    // 일시정지 시 멈췄던 SFX 목록을 저장하기 위한 리스트
+    private List<AudioSource> sfxSourcesPausedByManager = new List<AudioSource>();
+
     [System.Serializable]
     public class SceneBGMSetting
     {
@@ -58,6 +61,7 @@ public class SoundPlayer : MonoBehaviour
             DontDestroyOnLoad(gameObject);
             SceneManager.sceneLoaded += OnSceneLoaded;
             AudioEventSystem.OnBGMVolumeFade += FadeBGMVolume;
+            PauseManager.OnPauseToggled += HandlePauseToggled;
             InitializeAudioSources();
         }
         else
@@ -78,6 +82,10 @@ public class SoundPlayer : MonoBehaviour
         {
             SceneManager.sceneLoaded -= OnSceneLoaded;
             AudioEventSystem.OnBGMVolumeFade -= FadeBGMVolume;
+            PauseManager.OnPauseToggled -= HandlePauseToggled;
+
+            // 메모리 정리
+            CleanupAllAudioResources();
         }
     }
 
@@ -135,7 +143,6 @@ public class SoundPlayer : MonoBehaviour
                     GameObject uiPlayerGo = new GameObject($"UISoundPlayer_{i}");
                     uiPlayerGo.transform.SetParent(this.transform); // SoundPlayer의 자식으로 설정
                     uiPlayers[i] = uiPlayerGo.AddComponent<UISoundPlayer>();
-                    // 수정된 라인: uiPlayerGo에 AudioSource를 추가하도록 변경
                     uiPlayers[i].Initialize(uiPlayerGo.AddComponent<AudioSource>(), masterSFXVolume);
                 }
             }
@@ -146,7 +153,6 @@ public class SoundPlayer : MonoBehaviour
             {
                 if (player != null && player.AudioSource == null)
                 {
-                    // 수정된 라인: UISoundPlayer의 GameObject에 AudioSource를 추가하도록 변경
                     player.Initialize(player.gameObject.AddComponent<AudioSource>(), masterSFXVolume);
                 }
                 else if (player != null)
@@ -167,11 +173,102 @@ public class SoundPlayer : MonoBehaviour
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
+        // 씬 로드 전 메모리 정리
+        CleanupBeforeSceneLoad();
+
         // 씬 로드 시 기존 외부 SFX AudioSource 목록 초기화 및 새로운 씬에서 검색
         sceneSFXAudioSources.Clear();
         FindAndAddSceneAudioSourcesAdvanced();
 
         CheckAndPlaySceneBGM(scene.name);
+    }
+
+    /// <summary>
+    /// 씬 전환 전 메모리 정리
+    /// </summary>
+    private void CleanupBeforeSceneLoad()
+    {
+        // 모든 코루틴 정지
+        StopAllBGMCoroutines();
+
+        // UI 사운드 플레이어 정리
+        foreach (var uiPlayer in uiPlayers)
+        {
+            if (uiPlayer != null)
+            {
+                uiPlayer.Stop();
+            }
+        }
+
+        // UI 루프 사운드 정리
+        foreach (var loopPlayer in uiSoundLoopPlayers)
+        {
+            if (loopPlayer != null && loopPlayer.isPlaying)
+            {
+                loopPlayer.Stop();
+                loopPlayer.clip = null;
+            }
+        }
+
+        // 타이핑 사운드 정리
+        if (typingSoundPlayer != null && typingSoundPlayer.isPlaying)
+        {
+            typingSoundPlayer.Stop();
+            typingSoundPlayer.clip = null;
+        }
+
+        // 일시정지 목록 초기화
+        sfxSourcesPausedByManager.Clear();
+
+        // 강제 메모리 정리
+        Resources.UnloadUnusedAssets();
+        System.GC.Collect();
+    }
+
+    /// <summary>
+    /// 모든 오디오 리소스 정리 (OnDestroy에서 호출)
+    /// </summary>
+    private void CleanupAllAudioResources()
+    {
+        StopAllBGMCoroutines();
+        StopAllBGM();
+
+        foreach (var player in bgmAudioSources)
+        {
+            if (player != null)
+            {
+                player.Stop();
+                player.clip = null;
+            }
+        }
+
+        foreach (var player in uiSoundLoopPlayers)
+        {
+            if (player != null)
+            {
+                player.Stop();
+                player.clip = null;
+            }
+        }
+
+        if (typingSoundPlayer != null)
+        {
+            typingSoundPlayer.Stop();
+            typingSoundPlayer.clip = null;
+        }
+
+        foreach (var uiPlayer in uiPlayers)
+        {
+            if (uiPlayer != null)
+            {
+                uiPlayer.Stop();
+            }
+        }
+
+        sfxSourcesPausedByManager.Clear();
+
+        Resources.UnloadUnusedAssets();
+        System.GC.Collect();
     }
 
     private void FindAndAddSceneAudioSourcesAdvanced()
@@ -207,7 +304,7 @@ public class SoundPlayer : MonoBehaviour
                 {
                     sceneSFXAudioSources.Add(source);
                     source.volume = masterSFXVolume;
-                    Debug.Log($"Found AudioSource: {source.name} on {source.gameObject.name} (Active: {source.gameObject.activeInHierarchy})");
+                    //Debug.Log($"Found AudioSource: {source.name} on {source.gameObject.name} (Active: {source.gameObject.activeInHierarchy})");
                 }
             }
         }
@@ -241,6 +338,28 @@ public class SoundPlayer : MonoBehaviour
         {
             // 씬 설정은 있지만 자동 재생을 하지 않도록 설정된 경우, 모든 BGM을 정지합니다.
             StopAllBGM();
+        }
+    }
+
+    // autoPlay false인 거 tutorial Manager에서 알맞은 타이밍에 재생함 
+    public void PlaySceneBGMNotAuto()
+    {
+        string sceneName = SceneManager.GetActiveScene().name;
+        SceneBGMSetting sceneSetting = null;
+        foreach (var setting in sceneBGMSettings)
+        {
+            if (setting.sceneName == sceneName)
+            {
+                sceneSetting = setting;
+                break;
+            }
+        }
+
+        if (sceneSetting != null && !sceneSetting.autoPlay)
+        {
+            ChangeDualBGM(sceneSetting.bgmIndex1, sceneSetting.bgmIndex2,
+                            sceneSetting.bgm1VolumeMultiplier, sceneSetting.bgm2VolumeMultiplier,
+                            sceneSetting.syncStart, sceneSetting.bgm2Delay);
         }
     }
 
@@ -456,15 +575,40 @@ public class SoundPlayer : MonoBehaviour
             return;
         }
 
-        if (activeBGMPlayers.TryGetValue(bgmIndex, out var entry))
+        // 딕셔너리에서 엔트리 찾기
+        if (!activeBGMPlayers.TryGetValue(bgmIndex, out var entry))
         {
-            float actualTargetVolume = masterBGMVolume * targetVolumeMultiplier;
-            bgmFadeCoroutines.Add(StartCoroutine(FadeVolumeCoroutine(entry.source, actualTargetVolume, duration, delay, bgmIndex, targetVolumeMultiplier)));
+            // 폴백: 같은 클립을 재생 중인 소스를 탐색
+            var targetClip = bgmClips[bgmIndex];
+            bool found = false;
+            foreach (var kv in activeBGMPlayers)
+            {
+                var s = kv.Value.source;
+                if (s != null && s.isPlaying && s.clip == targetClip)
+                {
+                    entry = kv.Value;
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found)
+            {
+                Debug.LogWarning($"BGM with index {bgmIndex} is not currently active. Cannot fade its volume.");
+                return;
+            }
         }
-        else
+
+        // 여기서 null 비교는 튜플 자체가 아니라, 내부의 참조형(AudioSource)로
+        if (entry.source == null)
         {
-            Debug.LogWarning($"BGM with index {bgmIndex} is not currently active. Cannot fade its volume.");
+            Debug.LogWarning($"BGM entry for index {bgmIndex} has no AudioSource.");
+            return;
         }
+
+        float actualTargetVolume = masterBGMVolume * Mathf.Clamp01(targetVolumeMultiplier);
+        bgmFadeCoroutines.Add(StartCoroutine(
+            FadeVolumeCoroutine(entry.source, actualTargetVolume, duration, delay, bgmIndex, targetVolumeMultiplier)));
     }
 
     private IEnumerator FadeVolumeCoroutine(AudioSource player, float targetVolume, float duration, float delay, int bgmIndex, float newVolumeMultiplier)
@@ -488,7 +632,6 @@ public class SoundPlayer : MonoBehaviour
             activeBGMPlayers[bgmIndex] = (player, newVolumeMultiplier);
         }
     }
-
 
     /// <summary>
     /// activeBGMPlayers 딕셔너리에서 특정 AudioSource를 제거합니다.
@@ -541,32 +684,37 @@ public class SoundPlayer : MonoBehaviour
         }
     }
 
-    private AudioSource GetAvailableBGMPlayer() // 이 메서드는 더 이상 ChangeDualBGM에서 직접 사용되지 않습니다.
-    {
-        // 현재 사용되지 않는 플레이어 찾기
-        foreach (AudioSource player in bgmAudioSources)
-        {
-            bool isUsed = false;
-            foreach (var activePlayerEntry in activeBGMPlayers.Values) // 튜플로 변경
-            {
-                if (activePlayerEntry.source == player) // 튜플의 source 필드 사용
-                {
-                    isUsed = true;
-                    break;
-                }
-            }
-            if (!isUsed)
-            {
-                return player;
-            }
-        }
-        Debug.LogWarning("No available BGM player found. Max 2 BGM players are allowed.");
-        return null;
-    }
+    // 이 메서드는 더 이상 ChangeDualBGM에서 직접 사용되지 않습니다.
+    //private AudioSource GetAvailableBGMPlayer()
+    //{
+    //    // 현재 사용되지 않는 플레이어 찾기
+    //    foreach (AudioSource player in bgmAudioSources)
+    //    {
+    //        bool isUsed = false;
+    //        foreach (var activePlayerEntry in activeBGMPlayers.Values) // 튜플로 변경
+    //        {
+    //            if (activePlayerEntry.source == player) // 튜플의 source 필드 사용
+    //            {
+    //                isUsed = true;
+    //                break;
+    //            }
+    //        }
+    //        if (!isUsed)
+    //        {
+    //            return player;
+    //        }
+    //    }
+    //    Debug.LogWarning("No available BGM player found. Max 2 BGM players are allowed.");
+    //    return null;
+    //}
 
     private IEnumerator FadeInCoroutine(AudioSource player, AudioClip clip, float targetVolume, float duration, float delay, int bgmIndex, float volumeMultiplier)
     {
         if (delay > 0f) yield return new WaitForSeconds(delay);
+
+        // (추가) 사전 등록: 볼륨은 일단 0 기준으로
+        RemoveBGMPlayerFromActive(player);
+        activeBGMPlayers[bgmIndex] = (player, volumeMultiplier);
 
         // 현재 클립이 재생하려는 클립과 다를 경우에만 정지하고 새로 설정
         // 또는 플레이어가 정지 상태일 경우 새로 설정
@@ -588,7 +736,6 @@ public class SoundPlayer : MonoBehaviour
             yield return null;
         }
         player.volume = targetVolume; // 최종 볼륨 보장
-
 
         RemoveBGMPlayerFromActive(player);
         activeBGMPlayers[bgmIndex] = (player, volumeMultiplier);
@@ -692,7 +839,7 @@ public class SoundPlayer : MonoBehaviour
     /// </summary>
     public void PauseBGM()
     {
-        foreach (var entry in activeBGMPlayers.Values) 
+        foreach (var entry in activeBGMPlayers.Values)
         {
             if (entry.source.isPlaying)
                 entry.source.Pause();
@@ -1010,5 +1157,69 @@ public class SoundPlayer : MonoBehaviour
     public float GetSFXVolume()
     {
         return masterSFXVolume;
+    }
+
+    /// <summary>
+    /// PauseManager의 일시정지 상태 변경 시 호출되는 핸들러
+    /// </summary>
+    private void HandlePauseToggled(bool isPaused)
+    {
+        if (isPaused)
+        {
+            // --- 일시정지 ---
+            sfxSourcesPausedByManager.Clear(); // 목록 초기화
+
+            // 1. typingSoundPlayer
+            if (typingSoundPlayer != null && typingSoundPlayer.isPlaying)
+            {
+                typingSoundPlayer.Pause();
+                sfxSourcesPausedByManager.Add(typingSoundPlayer);
+            }
+
+            // 2. uiSoundLoopPlayers
+            foreach (var source in uiSoundLoopPlayers)
+            {
+                if (source != null && source.isPlaying)
+                {
+                    source.Pause();
+                    sfxSourcesPausedByManager.Add(source);
+                }
+            }
+
+            // 3. uiPlayers (단발성 SFX)
+            foreach (var uiPlayer in uiPlayers)
+            {
+                if (uiPlayer != null && uiPlayer.AudioSource != null && uiPlayer.AudioSource.isPlaying)
+                {
+                    // UISoundPlayer는 PlayOneShot을 사용할 수 있으므로, Pause()가 필요합니다.
+                    uiPlayer.AudioSource.Pause();
+                    sfxSourcesPausedByManager.Add(uiPlayer.AudioSource);
+                }
+            }
+
+            // 4. sceneSFXAudioSources (씬에서 찾은 SFX)
+            foreach (var source in sceneSFXAudioSources)
+            {
+                // 씬에서 파괴되었을 수 있으므로 null 체크 필수
+                if (source != null && source.isPlaying)
+                {
+                    source.Pause();
+                    sfxSourcesPausedByManager.Add(source);
+                }
+            }
+        }
+        else
+        {
+            // --- 재개 ---
+            foreach (var source in sfxSourcesPausedByManager)
+            {
+                // AudioSource가 그 사이에 파괴되거나 씬이 바뀌었을 수 있으므로 null 체크
+                if (source != null)
+                {
+                    source.UnPause();
+                }
+            }
+            sfxSourcesPausedByManager.Clear(); // 목록 비우기
+        }
     }
 }

@@ -9,7 +9,7 @@ public class PrologueManager : MonoBehaviour
     public static PrologueManager Instance { get; private set; }
 
     private int currentStep;
-    private bool isPrologueFinished;
+    private bool isPrologueFinished=false;
 
     [Header("프롤로그 스테이지")]
     [SerializeField] private List<GameObject> prologueStages = new List<GameObject>();
@@ -34,12 +34,16 @@ public class PrologueManager : MonoBehaviour
 
         // 변수 시트로 통해 초기화
         currentStep = (int)GameManager.Instance.GetVariable("PrologueStep");
+        isPrologueFinished = false;
+        GameManager.Instance.SetVariable("isPrologueFinished", isPrologueFinished);
         isPrologueFinished = (bool)GameManager.Instance.GetVariable("isPrologueFinished");
 
         foreach (var stage in prologueStages)
         {
             stage.SetActive(false);
         }
+
+        SaveManager.Instance.SaveGameData();
     }
 
     void Start()

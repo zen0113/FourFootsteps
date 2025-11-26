@@ -33,6 +33,7 @@ public class KidWatcher : MonoBehaviour
     private bool isRandomWatchLooping = true;
 
     private string StealthEndDialogueID = "Stage03_004";
+    readonly private float maxDistanceValue = 222.4496f;
 
     void Awake()
     {
@@ -53,9 +54,9 @@ public class KidWatcher : MonoBehaviour
 
         player = GameObject.FindWithTag("Player").GetComponent<Transform>();
 
-        float maxDistance =Vector2.Distance(goal_Transform.position, player.position);
-        _settings.maxDistance = maxDistance;
-        Debug.Log($"은신 maxDistance: {maxDistance}");
+        //float maxDistance =Vector2.Distance(goal_Transform.position, player.position);
+        _settings.maxDistance = maxDistanceValue;
+        //Debug.Log($"은신 maxDistance: {maxDistanceValue}");
 
         if (StealthCanvas==null) StealthCanvas=GetComponent<Canvas>();
         StealthCanvas.renderMode = UnityEngine.RenderMode.WorldSpace;

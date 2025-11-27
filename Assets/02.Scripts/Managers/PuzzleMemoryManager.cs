@@ -49,7 +49,7 @@ public class PuzzleMemoryManager : MonoBehaviour
             Destroy(gameObject);
         }
 
-        ParseMemoryContents();
+        //ParseMemoryContents();
     }
 
     private void Start()
@@ -61,6 +61,8 @@ public class PuzzleMemoryManager : MonoBehaviour
     // UI Canvas의 PuzzleBag Button에 연결
     public void OnClickPuzzleBag()
     {
+        ParseMemoryContents(); // 최신 이름 기반으로 다시 파싱
+
         bool isActive = true;
         gameObject.SetActive(isActive);
         UpdateHomePuzzleState();

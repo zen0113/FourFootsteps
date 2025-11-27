@@ -31,7 +31,9 @@ public class LobbyManager : MonoBehaviour
             NewGamePanel.SetActive(true);
         else
         {
-            SaveManager.Instance.LoadInitGameData();    // 게임 데이터 초기화
+            //SaveManager.Instance.LoadInitGameData();    // 게임 데이터 초기화
+            // 지금 초기화 기능이 너무 애매해서(보완필요)..아예 새 게임데이터 만드는 쪽으로 수정....
+            SaveManager.Instance.CreateNewGameData();    // 게임 데이터 초기화
             SceneLoader.Instance.LoadScene(Constants.SceneType.SET_PLAYERNAME.ToSceneName());
         }
     }

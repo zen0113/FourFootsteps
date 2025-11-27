@@ -68,6 +68,9 @@ public class EndingCredit : MonoBehaviour
     // 엔딩크레딧 연출 시작
     public IEnumerator StartEndingCredit()
     {
+        // 게임 데이터 초기화
+        SaveManager.Instance.LoadInitGameData();
+
         if (SceneManager.GetActiveScene().name == happyEndingSceneName) isHappyEnding = true;
 
         if (isHappyEnding)
@@ -97,9 +100,6 @@ public class EndingCredit : MonoBehaviour
 
         // 타이틀씬으로 이동
         GameManager.Instance.LoadTitleScene();
-
-        // 게임 데이터 초기화
-        SaveManager.Instance.LoadInitGameData();
     }
 
 

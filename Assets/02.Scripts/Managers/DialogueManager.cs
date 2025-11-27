@@ -25,7 +25,7 @@ public class DialogueManager : MonoBehaviour
 
     // 상태 추적
     private bool lastHadCutscene = false;        // 직전 프레임(또는 현재 라인)에서 컷씬이 있었는지
-    private bool isCoverTransitioning = false;   // 커버 페이드 중인지(중복 방지)
+    [SerializeField] private bool isCoverTransitioning = false;   // 커버 페이드 중인지(중복 방지)
 
     // 스킵 전용 상태
     private bool isSkippingToLast = false;
@@ -125,7 +125,6 @@ public class DialogueManager : MonoBehaviour
             dialogueSet[dialogueType.ToInt()].transform.position =
                 Camera.main.WorldToScreenPoint(npcTransform.position + bubbleOffset);
         }
-
     }
 
     Transform FindSpeakerByName(string name)

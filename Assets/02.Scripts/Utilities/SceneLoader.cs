@@ -91,6 +91,11 @@ public class SceneLoader : MonoBehaviour
                 yield break;
             }
         }
+
+        // 가끔 이 다이얼로그패널이 1->0으로 페이드될 때 중간에 끊겨서 패널이 제대로 꺼져있지 않은 상황이 발생해서
+        // 지금 일단 임시조치...
+        if(UIManager.Instance.dialogueCoverPanel.gameObject.activeSelf)
+            UIManager.Instance.dialogueCoverPanel.gameObject.SetActive(false);
     }
 
     // 로딩된 씬이 목표 씬인지 확인 후 페이드아웃

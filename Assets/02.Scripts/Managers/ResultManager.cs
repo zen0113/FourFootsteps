@@ -251,6 +251,7 @@ public class ResultManager : MonoBehaviour
                 Debug.Log("Result_DialogueFadeIn");
                 fadeInTime = 2f;
                 yield return UIManager.Instance.OnFade(UIManager.Instance.dialogueCoverPanel, 1, 0, fadeInTime);
+                UIManager.Instance.dialogueCoverPanel.gameObject.SetActive(false);
                 break;
 
             // 프롤로그 다음 스텝으로 넘김

@@ -221,7 +221,7 @@ public class GameManager : MonoBehaviour
 
     public void LoadTitleScene()
     {
-        SceneLoader.Instance.LoadScene("TitleScene");
+        SceneLoader.Instance.LoadScene(Constants.SceneType.TITLE.ToSceneName());
     }
 
     public void StartEndingCredit()

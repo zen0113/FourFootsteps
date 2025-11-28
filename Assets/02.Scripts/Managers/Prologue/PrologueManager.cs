@@ -8,7 +8,7 @@ public class PrologueManager : MonoBehaviour
 {
     public static PrologueManager Instance { get; private set; }
 
-    private int currentStep;
+    private int currentStep = 0;
     private bool isPrologueFinished=false;
 
     [Header("프롤로그 스테이지")]
@@ -33,6 +33,8 @@ public class PrologueManager : MonoBehaviour
             Destroy(gameObject);
 
         // 변수 시트로 통해 초기화
+        currentStep = 0;
+        GameManager.Instance.SetVariable("PrologueStep", currentStep);
         currentStep = (int)GameManager.Instance.GetVariable("PrologueStep");
         isPrologueFinished = false;
         GameManager.Instance.SetVariable("isPrologueFinished", isPrologueFinished);
@@ -146,7 +148,7 @@ public class PrologueManager : MonoBehaviour
                 // 프롤로그 끝!
                 // 스테이지1로 이동
                 EndPrologue();
-                StartCoroutine(ResultManager.Instance.ExecuteResultCoroutine("Result_DialogueFadeIn"));
+                //StartCoroutine(ResultManager.Instance.ExecuteResultCoroutine("Result_DialogueFadeIn"));
                 Debug.Log("스테이지1로 이동");
                 SceneLoader.Instance.LoadScene(GameManager.Instance.GetNextSceneData().sceneName);
                 break;

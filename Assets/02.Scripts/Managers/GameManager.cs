@@ -334,6 +334,7 @@ public class GameManager : MonoBehaviour
             "MemoryPuzzleStates",
             //"CleanedObjectCount",
             "isPrologueFinished",
+            "ResponsibilityScore"
         });
 
         foreach (var item in variables)

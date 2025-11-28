@@ -218,7 +218,7 @@ public class PauseManager : MonoBehaviour
         for (int i = 0; i < fixedScore; i++)
             puzzleStates[i] = true;
 
-        SaveManager.Instance.SaveGameData();
+        //SaveManager.Instance.SaveGameData();
     }
 
     private void Showcase_SetActiveCurrentScoreOption(bool active)

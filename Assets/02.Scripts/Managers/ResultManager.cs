@@ -375,7 +375,7 @@ public class ResultManager : MonoBehaviour
                         Debug.Log("JumpToTutorial에서 RecallManager 호출");
                         GameManager.Instance.SetVariable("CanInvesigatingRecallObject", true);
                         RecallManager.Instance.SetInteractKeyGroup(true);
-                        SaveManager.Instance.SaveGameData();
+                        //SaveManager.Instance.SaveGameData();
                     }
                 }
                 yield return null;
@@ -568,7 +568,7 @@ public class ResultManager : MonoBehaviour
                 while (DialogueManager.Instance.isDialogueActive)
                     yield return null;
                 gm.SetVariable("Monologue_Shown", true);
-                SaveManager.Instance.SaveGameData();
+                //SaveManager.Instance.SaveGameData();
             }
         }
         yield return null;

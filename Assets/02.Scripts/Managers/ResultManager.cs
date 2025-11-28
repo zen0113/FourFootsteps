@@ -282,6 +282,15 @@ public class ResultManager : MonoBehaviour
                 yield return null;
                 break;
 
+            case "Result_HappyEndingVariablesReset":
+                // 해피엔딩 하다가 타이틀로 나갔을 경우, HappyEndingStep 변수가 그 진행상태 그대로 남아 있음..
+                // 우린 아직 그 상태에 플레이어 진행상황 복구는 구현 안 되어 있어서
+                // 임시조치로 해당 변수 초기화
+                int resetStepCount = 0;
+                GameManager.Instance.SetVariable("HappyEndingStep", resetStepCount);
+                yield return null;
+                break;
+
             // ##################################################################
             // #################### Stage 4 설득 로직 시작 ####################
             // ##################################################################

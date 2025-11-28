@@ -8,10 +8,12 @@ public class PuzzleMemoryManager : MonoBehaviour
 {
     public static PuzzleMemoryManager Instance { get; private set; }
 
-
+    // "원본" 스크립트 저장 딕셔너리 (치환 X)
     private Dictionary<string, (string title,string positive, string negative)> memoryDictionary 
         = new Dictionary<string, (string title, string positive, string negative)>();
+
     // MemoryPuzzleStates 가져와서 비교 후 true면 positive 내용, false면 negative 내용 저장
+    // 실제로 UI에 표시할 때 사용할 선택지 텍스트 (치환 완료된 문자열이 들어감)
     private Dictionary<string, (string title, string text)> choiceTextDictionary 
         = new Dictionary<string, (string title, string text)>();
 
@@ -49,7 +51,8 @@ public class PuzzleMemoryManager : MonoBehaviour
             Destroy(gameObject);
         }
 
-        //ParseMemoryContents();
+        // CSV에서 원본 데이터만 파싱 (치환 X)
+        ParseMemoryContents();
     }
 
     private void Start()
@@ -61,11 +64,13 @@ public class PuzzleMemoryManager : MonoBehaviour
     // UI Canvas의 PuzzleBag Button에 연결
     public void OnClickPuzzleBag()
     {
-        ParseMemoryContents(); // 최신 이름 기반으로 다시 파싱
-
         bool isActive = true;
         gameObject.SetActive(isActive);
+
+        // 현재 YourCatName 등 GameManager 상태 기준으로
+        // 다시 한 번 choiceTextDictionary를 갱신
         UpdateHomePuzzleState();
+
         var player = GameObject.FindGameObjectWithTag("Player");
         if (PlayerCatMovement.Instance != null)
             PlayerCatMovement.Instance.SetMiniGameInputBlocked(isActive);
@@ -74,6 +79,7 @@ public class PuzzleMemoryManager : MonoBehaviour
             if (player.TryGetComponent<PlayerHumanMovement>(out var human))
                 human.BlockMiniGameInput(isActive);
         }
+
         // bgm 사운드 줄이기
         float changedVolume = SoundPlayer.Instance.GetBGMVolume() * 0.5f;
         SoundPlayer.Instance.ChangeVolume(changedVolume);
@@ -96,7 +102,9 @@ public class PuzzleMemoryManager : MonoBehaviour
             button.GetComponent<Image>().color = Color.black;
 
             // ButtonAnimator의 enableHoverEffect 비활성화 
-            button.GetComponent<ButtonAnimator>().EnableHoverEffect = false;
+            var animator = button.GetComponent<ButtonAnimator>();
+            if (animator != null)
+                animator.EnableHoverEffect = false;
         }
 
         for (int i = 0; i < currentCount; i++)
@@ -105,22 +113,32 @@ public class PuzzleMemoryManager : MonoBehaviour
             // 버튼 이미지 컬러값 white로 맞춰서 활성 가능함 표시
             HomePuzzlePiecesBtns[i].interactable = true;
             HomePuzzlePiecesBtns[i].GetComponent<Image>().color = Color.white;
+
             // enableHoverEffect 활성화
-            HomePuzzlePiecesBtns[i].GetComponent<ButtonAnimator>().EnableHoverEffect = true;
+            var animator = HomePuzzlePiecesBtns[i].GetComponent<ButtonAnimator>();
+            if (animator != null)
+                animator.EnableHoverEffect = true;
 
             // puzzleStates[i] 가져와서 memoryDictionary 에 id 번호에 맞춰서
             // puzzleStates[i]이 true면 긍정 선택지 스크립트,
             // false면 부정 선택지 스크립트를 choiceTextDictionary에 저장.
             string puzzleId = "puzzle_" + (i + 1);
             var state = puzzleStates[i];
+
+            // 원본 텍스트를 가져온 뒤, 현재 GameManager 변수 상태(YourCatName 등)에 맞춰
+            // 매번 새로 치환하도록 함.
             string title = memoryDictionary[puzzleId].title;
-            string text = state ? memoryDictionary[puzzleId].positive
-                    : memoryDictionary[puzzleId].negative;
+
+            string rawText = state
+                ? memoryDictionary[puzzleId].positive   // raw positive
+                : memoryDictionary[puzzleId].negative;  // raw negative
+
+            string processedText = ProcessPlaceholders(rawText);
 
             if (choiceTextDictionary.ContainsKey(puzzleId))
-                choiceTextDictionary[puzzleId] = (title, text);
+                choiceTextDictionary[puzzleId] = (title, processedText);
             else
-                choiceTextDictionary.Add(puzzleId, (title, text));
+                choiceTextDictionary.Add(puzzleId, (title, processedText));
         }
     }
 
@@ -189,6 +207,10 @@ public class PuzzleMemoryManager : MonoBehaviour
         PuzzleHomeGroup.SetActive(true);
     }
 
+    /// <summary>
+    /// CSV에서 원본 텍스트만 파싱해서 memoryDictionary에 저장.
+    /// (이 시점에서는 플레이어/고양이 이름 치환을 하지 않음)
+    /// </summary>
     public void ParseMemoryContents()
     {
         TextAsset puzzlesMemoryCsv = Resources.Load<TextAsset>("Datas/puzzlesMemory");
@@ -213,13 +235,15 @@ public class PuzzleMemoryManager : MonoBehaviour
             // 제목
             string titleText = fields[2].Trim();
 
-            // 긍정 선택지 스크립트
+            // 긍정 선택지 스크립트 (원본)
             string positiveScript = fields[3].Trim();
-            positiveScript = ProcessPlaceholders(positiveScript);
+            //positiveScript = ProcessPlaceholders(positiveScript);
+            // 여기서는 ProcessPlaceholders 호출하지 않음
 
-            // 부정 선택지 스크립트
+            // 부정 선택지 스크립트 (원본)
             string negativeScript = fields[4].Trim();
-            negativeScript = ProcessPlaceholders(negativeScript);
+            //negativeScript = ProcessPlaceholders(negativeScript);
+            // 여기서는 ProcessPlaceholders 호출하지 않음
 
             if (memoryDictionary.ContainsKey(puzzleID))
             {
@@ -232,6 +256,7 @@ public class PuzzleMemoryManager : MonoBehaviour
     }
 
     // 단순하게 {YourCatName} 부분 바꾸는 것만 추가
+    // + 줄바꿈/백스페이스/백틱 처리까지 한 번에 수행
     private string ProcessPlaceholders(string originalString)
     {
         string yourCatName = (GameManager.Instance.GetVariable("YourCatName") as string) ?? "";
@@ -249,7 +274,6 @@ public class PuzzleMemoryManager : MonoBehaviour
 
         return modifiedString;
     }
-
 
     public void TEST_DebugingChoice(int num)
     {

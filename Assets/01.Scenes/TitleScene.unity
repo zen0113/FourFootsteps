@@ -774,6 +774,7 @@ MonoBehaviour:
   LoadGameButton: {fileID: 1982030129}
   NewGamePanel: {fileID: 555818790}
   NoGameDataPanel: {fileID: 1094463736}
+  gotoEndingButtons: {fileID: 816879392}
 --- !u!4 &263534161
 Transform:
   m_ObjectHideFlags: 0
@@ -2383,17 +2384,17 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 694642033}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 274612860}
-  m_Father: {fileID: 1361028755}
+  m_Father: {fileID: 816879393}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -833, y: -321.1}
+  m_AnchoredPosition: {x: 0, y: 67.11481}
   m_SizeDelta: {x: 212.4738, y: 113.3407}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &694642035
@@ -3123,7 +3124,7 @@ MonoBehaviour:
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []
---- !u!1 &812311470
+--- !u!1 &816879392
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -3131,42 +3132,35 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 812311472}
-  - component: {fileID: 812311471}
-  m_Layer: 0
-  m_Name: DemoCommandManager
+  - component: {fileID: 816879393}
+  m_Layer: 5
+  m_Name: gotoEndingButtons
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &812311471
-MonoBehaviour:
+--- !u!224 &816879393
+RectTransform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 812311470}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1742b43545d50c74a8fee6d7f34f924f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!4 &812311472
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 812311470}
-  serializedVersion: 2
+  m_GameObject: {fileID: 816879392}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
+  m_Children:
+  - {fileID: 694642034}
+  - {fileID: 2017331813}
+  m_Father: {fileID: 1361028755}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: -833, y: -388.21484}
+  m_SizeDelta: {x: 212.47375, y: 247.57034}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &890620300
 GameObject:
   m_ObjectHideFlags: 0
@@ -4690,8 +4684,7 @@ RectTransform:
   - {fileID: 1083932302}
   - {fileID: 555818791}
   - {fileID: 1094463737}
-  - {fileID: 694642034}
-  - {fileID: 2017331813}
+  - {fileID: 816879393}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -5247,7 +5240,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   sceneOrder: []
   variablesText: {fileID: 1471085969}
-  isDebug: 1
+  isDebug: 0
+  isReleaseBuild: 1
 --- !u!4 &1586615199
 Transform:
   m_ObjectHideFlags: 0
@@ -10998,17 +10992,17 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2017331812}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1374982071}
-  m_Father: {fileID: 1361028755}
+  m_Father: {fileID: 816879393}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -833, y: -455.32965}
+  m_AnchoredPosition: {x: 0, y: -67.11481}
   m_SizeDelta: {x: 212.4738, y: 113.3407}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2017331814
@@ -11393,4 +11387,3 @@ SceneRoots:
   - {fileID: 1795491217}
   - {fileID: 1566465941}
   - {fileID: 8345424187894910227}
-  - {fileID: 812311472}

@@ -12,7 +12,7 @@ public class LobbyManager : MonoBehaviour
     [SerializeField] private GameObject LoadGameButton;
     [SerializeField] private GameObject NewGamePanel;
     [SerializeField] private GameObject NoGameDataPanel;
-
+    [SerializeField] private GameObject gotoEndingButtons;
 
     private void Awake()
     {
@@ -23,6 +23,16 @@ public class LobbyManager : MonoBehaviour
     private void Start()
     {
         SaveManager.Instance.ApplySavedGameData();
+
+        InitializeLobbySceneButtons();
+    }
+
+    public void InitializeLobbySceneButtons()
+    {
+        if (GameManager.Instance.isReleaseBuild)
+        {
+            gotoEndingButtons.SetActive(false);
+        }
     }
 
     public void StartNewGame()

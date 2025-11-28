@@ -35,7 +35,8 @@ public class PauseManager : MonoBehaviour
         isPaused = false;
         Time.timeScale = 1f;
 
-        InitializeShortcuts();
+        if (!GameManager.Instance.isReleaseBuild)
+            InitializeShortcuts();
     }
 
     private void InitializeShortcuts()
@@ -90,6 +91,9 @@ public class PauseManager : MonoBehaviour
         isPaused = true;
 
         OnPauseToggled?.Invoke(true); // 이벤트 호출
+
+        if (GameManager.Instance.isReleaseBuild)
+            return;
 
         // -----------ShowCase-----------
         // 시연용 책임감 지수 변경

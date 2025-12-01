@@ -64,7 +64,8 @@ public class PauseManager : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Escape))
+        // 씬 로딩 중이 아닐 때만 가능
+        if (Input.GetKeyDown(KeyCode.Escape)&&!GameManager.Instance.IsSceneLoading)
         {
             // isPaused가 true일 때(퍼즈 중일 때)의 로직을 모두 삭제
             if (!isPaused) // isPaused가 false일 때(퍼즈 중이 아닐 때)만

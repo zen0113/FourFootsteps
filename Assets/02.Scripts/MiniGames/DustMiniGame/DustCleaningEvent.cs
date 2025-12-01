@@ -27,13 +27,22 @@ public class DustCleaningEvent : EventObject
     [SerializeField] private Sprite xSprite;
     [SerializeField] private float cursorFlipInterval = 0.1f;
 
+    [Header("Feedback Settings")]
+    [SerializeField] private GameObject cancelMessagePrefab;
+    [SerializeField] private Vector3 messageOffset = new Vector3(0, 50, 0);
+    [SerializeField] private float messageDuration = 2.0f; 
+
     private List<GameObject> _activeDustObjects = new List<GameObject>();
     private bool _isEventActive = false;
     private bool _isMinigameRunning = false;
     private Coroutine _cursorAnimationCoroutine;
     private bool _isMinigameFinished = false;
 
-    // 이벤트 구독/해제
+    private bool _isCleaningSuccess = false;
+
+    // 드래그 중에 먼지에 닿은 적이 있는지 확인하는 플래그
+    private bool _wasTouchingDust = false;
+
     private void OnEnable()
     {
         PauseManager.OnPauseToggled += OnPauseStateChanged;
@@ -48,15 +57,26 @@ public class DustCleaningEvent : EventObject
     {
         if (_isMinigameRunning && !PauseManager.IsGamePaused)
         {
-            // 가짜 커서 위치 업데이트
             if (fakeCursorImage != null)
             {
                 fakeCursorImage.rectTransform.position = Input.mousePosition;
             }
 
-            // 마우스 클릭 애니메이션
+            // 마우스를 누르고 있는 동안, 커서가 먼지 위에 있는지 체크
+            if (Input.GetMouseButton(0))
+            {
+                // 현재 마우스 위치에 먼지가 있는지 확인
+                if (IsMouseOverDust())
+                {
+                    _wasTouchingDust = true;
+                }
+            }
+
             if (Input.GetMouseButtonDown(0))
             {
+                _isCleaningSuccess = false;
+                _wasTouchingDust = false; // 클릭 시작 시 초기화
+
                 if (_cursorAnimationCoroutine == null)
                 {
                     _cursorAnimationCoroutine = StartCoroutine(CursorAnimationLoop());
@@ -73,12 +93,20 @@ public class DustCleaningEvent : EventObject
                         fakeCursorImage.sprite = broomSprite;
                     }
                 }
+
+                // 청소 실패 AND (실제로 먼지를 건드리고 있었을 경우에만) 메시지 출력
+                if (!_isCleaningSuccess && _wasTouchingDust)
+                {
+                    ShowCancelMessage();
+                }
+
+                // 상태 초기화
+                _wasTouchingDust = false;
             }
 
             return;
         }
 
-        // E키 이벤트 시작 로직 (미니게임 중이 아닐 때만 실행)
         if (DialogueManager.Instance.isDialogueActive) return;
 
         if (_isPlayerInRange && Input.GetKeyDown(KeyCode.E))
@@ -96,16 +124,95 @@ public class DustCleaningEvent : EventObject
         }
     }
 
+    // 마우스가 현재 살아있는 먼지 오브젝트 위에 있는지 판별하는 함수
+    private bool IsMouseOverDust()
+    {
+        foreach (var dust in _activeDustObjects)
+        {
+            if (dust == null) continue;
+
+            // UI RectTransform 기준 범위 체크
+            RectTransform rect = dust.GetComponent<RectTransform>();
+            if (rect != null)
+            {
+                // 오버레이 UI나 스크린 스페이스 카메라 UI 모두 대응하기 위한 방식
+                // (카메라가 필요하면 Camera.main 등을 사용, 여기선 null로 오버레이 가정하거나 자동 감지 시도)
+                if (RectTransformUtility.RectangleContainsScreenPoint(rect, Input.mousePosition, null) ||
+                    RectTransformUtility.RectangleContainsScreenPoint(rect, Input.mousePosition, Camera.main))
+                {
+                    return true;
+                }
+            }
+            else
+            {
+                // 만약 RectTransform이 없다면 거리로 체크 (백업 로직)
+                float dist = Vector3.Distance(Input.mousePosition, dust.transform.position);
+                if (dist < 50f) return true; // 임의의 범위
+            }
+        }
+        return false;
+    }
+
+    private void ShowCancelMessage()
+    {
+        if (cancelMessagePrefab == null || cleaningCanvas == null) return;
+
+        GameObject msgObj = Instantiate(cancelMessagePrefab, cleaningCanvas.transform);
+
+        if (msgObj.TryGetComponent<RectTransform>(out RectTransform rect))
+        {
+            rect.position = Input.mousePosition + messageOffset;
+        }
+
+        StartCoroutine(AnimateFeedbackMessage(msgObj));
+    }
+
+    private IEnumerator AnimateFeedbackMessage(GameObject msgObj)
+    {
+        float duration = messageDuration; // 변수 사용
+        float timer = 0f;
+
+        CanvasGroup canvasGroup = msgObj.GetComponent<CanvasGroup>();
+        if (canvasGroup == null) canvasGroup = msgObj.AddComponent<CanvasGroup>();
+
+        Vector3 startPos = msgObj.transform.position;
+        Vector3 endPos = startPos + new Vector3(0, 50f, 0);
+
+        while (timer < duration)
+        {
+            timer += Time.deltaTime;
+            float progress = timer / duration;
+
+            if (msgObj != null)
+            {
+                msgObj.transform.position = Vector3.Lerp(startPos, endPos, progress);
+
+                // 애니메이션: 처음 70%는 불투명하다가, 마지막 30% 동안 서서히 사라짐
+                if (progress > 0.7f)
+                {
+                    float alphaProgress = (progress - 0.7f) / 0.3f;
+                    canvasGroup.alpha = 1 - alphaProgress;
+                }
+                else
+                {
+                    canvasGroup.alpha = 1f;
+                }
+            }
+            yield return null;
+        }
+
+        if (msgObj != null) Destroy(msgObj);
+    }
+
     public void OnPauseStateChanged(bool isPaused)
     {
         if (!_isMinigameRunning) return;
 
         if (isPaused)
         {
-            // [퍼즈됨]
-            Cursor.visible = true; // 진짜 커서 켜기
+            Cursor.visible = true;
             if (fakeCursorImage != null)
-                fakeCursorImage.gameObject.SetActive(false); // 가짜 커서 끄기
+                fakeCursorImage.gameObject.SetActive(false);
 
             if (_cursorAnimationCoroutine != null)
             {
@@ -115,8 +222,6 @@ public class DustCleaningEvent : EventObject
         }
         else
         {
-            // [퍼즈 해제됨]
-            // 가짜 커서 켜기
             if (fakeCursorImage != null)
             {
                 fakeCursorImage.sprite = broomSprite;
@@ -129,10 +234,8 @@ public class DustCleaningEvent : EventObject
 
     private IEnumerator HideCursorAtEndOfFrame()
     {
-        // 이번 프레임의 모든 렌더링이 끝날 때까지 대기
         yield return new WaitForEndOfFrame();
 
-        // 대기 후에도 여전히 미니게임 중이고 퍼즈가 아니라면 (안전장치)
         if (_isMinigameRunning && !PauseManager.IsGamePaused)
         {
             Cursor.visible = false;
@@ -219,7 +322,7 @@ public class DustCleaningEvent : EventObject
             _cursorAnimationCoroutine = null;
         }
 
-        Cursor.visible = true; // '진짜 커서' 복구
+        Cursor.visible = true;
         if (fakeCursorImage != null)
         {
             fakeCursorImage.gameObject.SetActive(false);
@@ -246,6 +349,8 @@ public class DustCleaningEvent : EventObject
 
     public void OnDustCleaned(GameObject dust)
     {
+        _isCleaningSuccess = true;
+
         if (_activeDustObjects.Contains(dust))
         {
             _activeDustObjects.Remove(dust);

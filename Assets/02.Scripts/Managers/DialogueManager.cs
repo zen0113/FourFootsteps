@@ -36,6 +36,8 @@ public class DialogueManager : MonoBehaviour
     // 타자 효과 속도
     [Header("Typing Speed")]
     public float typeSpeed = 0.05f;
+    private float defaultTypeSpeed = 0.05f;
+    private float FastTypeSpeed = 0.01f;
 
     // 글자 흔들리는 효과
     [Header("Text Shake")]
@@ -684,7 +686,7 @@ public class DialogueManager : MonoBehaviour
         // FAST 되돌림
         if (isFast)
         {
-            typeSpeed *= 1.75f;
+            typeSpeed = defaultTypeSpeed;
             isFast = false;
         }
 
@@ -941,7 +943,7 @@ public class DialogueManager : MonoBehaviour
         var effectText = "";
 
         // FAST 인 경우 두배의 속도로 타이핑
-        if (isFast) typeSpeed /= 1.75f;
+        typeSpeed = isFast ? FastTypeSpeed : defaultTypeSpeed;
 
         // 타자 루프 사운드 시작
         SoundPlayer.Instance.UISoundPlay_LOOP(0, true);

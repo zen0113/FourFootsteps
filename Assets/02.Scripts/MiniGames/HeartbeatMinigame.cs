@@ -148,6 +148,12 @@ public class HeartbeatMinigame : MonoBehaviour
         };
     }
 
+    public void SetDifficulty(float newThreshold)
+    {
+        successThreshold = newThreshold;
+        Debug.Log($"심박수 미니게임 난이도 설정됨: 성공 기준 {successThreshold}%");
+    }
+
     private List<Vector2> GenerateRandomWaveform(WaveformParameters parameters)
     {
         var points = new List<Vector2> { new Vector2(0, 0) };
@@ -258,7 +264,10 @@ public class HeartbeatMinigame : MonoBehaviour
         playerLineImage.sprite = CreateSpriteFromTexture(playerTexture);
         playerLineImage.gameObject.SetActive(true);
 
-        if (feedbackText != null) { feedbackText.text = "가이드라인을 따라 그리세요! 정확도 80% 이상이어야지 성공합니다."; }
+        if (feedbackText != null)
+        {
+            feedbackText.text = $"가이드라인을 따라 그리세요! 정확도 {successThreshold}% 이상이어야지 성공합니다.";
+        }
 
         isDrawingAllowed = true;
     }

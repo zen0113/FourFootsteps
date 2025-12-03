@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
+using UnityEngine.SceneManagement;
 using System;
 
 public class AnimalDataManager : MonoBehaviour
@@ -49,15 +50,55 @@ public class AnimalDataManager : MonoBehaviour
         StartCoroutine(LoadAnimalDataFromApi());
     }
 
+    // 현재 스테이지에 맞는 페이지 번호 반환
+    private int GetPageNumberForCurrentStage()
+    {
+        string currentSceneName = SceneManager.GetActiveScene().name;
+        
+        Debug.Log($"현재 씬: {currentSceneName}");
+        
+        // 씬 이름에 따라 페이지 번호 결정
+        if (currentSceneName.Contains("StageScene1"))
+        {
+            Debug.Log("스테이지 1 감지 - 페이지 4 사용");
+            return 4;
+        }
+        else if (currentSceneName.Contains("StageScene2"))
+        {
+            Debug.Log("스테이지 2 감지 - 페이지 3 사용");
+            return 3;
+        }
+        else if (currentSceneName.Contains("StageScene3") || currentSceneName.Contains("StageScene3_2"))
+        {
+            Debug.Log("스테이지 3 감지 - 페이지 2 사용");
+            return 2;
+        }
+        else if (currentSceneName.Contains("Ending_Happy"))
+        {
+            Debug.Log("해피엔딩 감지 - 페이지 1 사용");
+            return 1;
+        }
+        else
+        {
+            // 기본값: 현재 씬 이름을 로그에 출력하고 1 반환
+            Debug.Log($"알 수 없는 씬: {currentSceneName} - 기본 페이지 1 사용");
+            return 1;
+        }
+    }
+
     private IEnumerator LoadAnimalDataFromApi()
     {
         isLoading = true;
-        Debug.Log("API 데이터 로드 시작...");
+        
+        // 현재 스테이지에 맞는 페이지 번호 가져오기
+        int pageNumber = GetPageNumberForCurrentStage();
+        
+        Debug.Log($"API 데이터 로드 시작... (페이지: {pageNumber})");
 
         string requestUrl = $"{baseUrl}/abandonmentPublic_v2" +
                           $"?serviceKey={apiKey}" +
                           $"&numOfRows=10" +
-                          $"&pageNo=1" +
+                          $"&pageNo={pageNumber}" +  // 동적으로 변경
                           $"&_type=json";
 
         Debug.Log($"API 요청 URL: {requestUrl}");
@@ -87,7 +128,7 @@ public class AnimalDataManager : MonoBehaviour
                                 animalDataPool.Add(item);
 
                             IsDataLoadedFromApi = true;
-                            Debug.Log($"API 데이터 {animalDataPool.Count}개 로드 성공!");
+                            Debug.Log($"API 데이터 {animalDataPool.Count}개 로드 성공! (페이지: {pageNumber})");
 
                             // API 데이터를 불러왔으니 셔플 큐 다시 구성
                             RefillShuffledQueue();

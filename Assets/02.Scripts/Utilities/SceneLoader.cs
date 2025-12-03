@@ -91,6 +91,11 @@ public class SceneLoader : MonoBehaviour
                 yield break;
             }
         }
+
+        // 가끔 이 다이얼로그패널이 1->0으로 페이드될 때 중간에 끊겨서 패널이 제대로 꺼져있지 않은 상황이 발생해서
+        // 지금 일단 임시조치...
+        if(UIManager.Instance.dialogueCoverPanel.gameObject.activeSelf)
+            UIManager.Instance.dialogueCoverPanel.gameObject.SetActive(false);
     }
 
     // 로딩된 씬이 목표 씬인지 확인 후 페이드아웃
@@ -119,8 +124,15 @@ public class SceneLoader : MonoBehaviour
                 GameManager.Instance.SetVariable("CanMoving", true);
                 Debug.Log($"[SceneLoader] 씬 로드 완료: {scene.name}, 움직임 강제 해제 및 DialogueManager 초기화 완료.");
 
-                // 씬 상태 저장
-                SaveManager.Instance.SaveGameData();
+                if (scene.name != Constants.SceneType.TITLE.ToSceneName())
+                {
+                    SaveManager.Instance.SaveGameData();
+                    Debug.Log("[SceneLoader] AutoSave Completed");
+                }
+                else
+                {
+                    Debug.Log("[SceneLoader] TitleScene: AutoSave SKIPPED");
+                }
             }
         }
     }

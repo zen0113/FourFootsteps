@@ -148,7 +148,7 @@ public class PrologueManager : MonoBehaviour
                 // 프롤로그 끝!
                 // 스테이지1로 이동
                 EndPrologue();
-                StartCoroutine(ResultManager.Instance.ExecuteResultCoroutine("Result_DialogueFadeIn"));
+                //StartCoroutine(ResultManager.Instance.ExecuteResultCoroutine("Result_DialogueFadeIn"));
                 Debug.Log("스테이지1로 이동");
                 SceneLoader.Instance.LoadScene(GameManager.Instance.GetNextSceneData().sceneName);
                 break;

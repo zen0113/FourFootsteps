@@ -20,6 +20,8 @@ public class PauseManager : MonoBehaviour
     public static bool IsGamePaused { get; private set; }
     public static event Action<bool> OnPauseToggled;
 
+    private bool isQuitGame = false;
+
     // -----------ShowCase-----------
     [SerializeField] private TMP_Dropdown scoreDropdown;
     [SerializeField] private GameObject scoreConfirmButton;
@@ -35,7 +37,8 @@ public class PauseManager : MonoBehaviour
         isPaused = false;
         Time.timeScale = 1f;
 
-        InitializeShortcuts();
+        if (!GameManager.Instance.isReleaseBuild)
+            InitializeShortcuts();
     }
 
     private void InitializeShortcuts()
@@ -61,7 +64,8 @@ public class PauseManager : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Escape))
+        // 씬 로딩 중이 아닐 때만 가능
+        if (Input.GetKeyDown(KeyCode.Escape)&&!GameManager.Instance.IsSceneLoading)
         {
             // isPaused가 true일 때(퍼즈 중일 때)의 로직을 모두 삭제
             if (!isPaused) // isPaused가 false일 때(퍼즈 중이 아닐 때)만
@@ -90,6 +94,9 @@ public class PauseManager : MonoBehaviour
         isPaused = true;
 
         OnPauseToggled?.Invoke(true); // 이벤트 호출
+
+        if (GameManager.Instance.isReleaseBuild)
+            return;
 
         // -----------ShowCase-----------
         // 시연용 책임감 지수 변경
@@ -131,27 +138,38 @@ public class PauseManager : MonoBehaviour
 
     public void ConfirmExitToMain()
     {
-        // 다이얼로그 출력 중이면 취소함
-        if (DialogueManager.Instance.isDialogueActive)
-            DialogueManager.Instance.ForceAbortDialogue();
-
-        // 씬을 떠나기 전에 인게임 UI(PlayerUICanvas 등)를 명시적으로 비활성화합니다.
-        if (UIManager.Instance != null)
+        if (isQuitGame) QuitGame();
+        else
         {
-            UIManager.Instance.SetUI(eUIGameObjectName.CatVersionUIGroup, false);
-            UIManager.Instance.SetUI(eUIGameObjectName.HumanVersionUIGroup, false);
-            UIManager.Instance.SetUI(eUIGameObjectName.PuzzleBagButton, false);
-            UIManager.Instance.SetUI(eUIGameObjectName.PlaceUI, false);
-            UIManager.Instance.SetUI(eUIGameObjectName.ResponsibilityGroup, false);
-        }
+            // 다이얼로그 출력 중이면 취소함
+            if (DialogueManager.Instance.isDialogueActive)
+                DialogueManager.Instance.ForceAbortDialogue();
 
-        Time.timeScale = 1f;
-        SceneLoader.Instance.LoadScene("TitleScene");
+            // 씬을 떠나기 전에 인게임 UI(PlayerUICanvas 등)를 명시적으로 비활성화합니다.
+            if (UIManager.Instance != null)
+            {
+                UIManager.Instance.SetUI(eUIGameObjectName.CatVersionUIGroup, false);
+                UIManager.Instance.SetUI(eUIGameObjectName.HumanVersionUIGroup, false);
+                UIManager.Instance.SetUI(eUIGameObjectName.PuzzleBagButton, false);
+                UIManager.Instance.SetUI(eUIGameObjectName.PlaceUI, false);
+                UIManager.Instance.SetUI(eUIGameObjectName.ResponsibilityGroup, false);
+            }
+
+            Time.timeScale = 1f;
+            SceneLoader.Instance.LoadScene("TitleScene");
+        }
+       
     }
 
     public void CancelExit()
     {
+        isQuitGame=false;
         exitWarningUI.SetActive(false);
+    }
+
+    public void SetIsQuitGame(bool active=false)
+    {
+        isQuitGame=active;
     }
 
     public void QuitGame()
@@ -190,7 +208,7 @@ public class PauseManager : MonoBehaviour
         int maxScore = setMaxResponsibilityScores[currentSceneName];
 
         List<TMP_Dropdown.OptionData> optionList = new();
-        for (int i = 1; i <= maxScore; i++)
+        for (int i = 0; i <= maxScore; i++)
             optionList.Add(new TMP_Dropdown.OptionData(i.ToString()));
 
         scoreDropdown.ClearOptions();
@@ -202,12 +220,12 @@ public class PauseManager : MonoBehaviour
     private void Showcase_SetCurrentScoreOption()
     {
         int currentScore = (int)GameManager.Instance.GetVariable("ResponsibilityScore");
-        scoreDropdown.value = (currentScore - 1 <= 0) ? 0 : currentScore - 1;
+        scoreDropdown.value = currentScore;
     }
 
     public void Showcase_ConfirmCurrentScore()
     {
-        int fixedScore = scoreDropdown.value + 1;
+        int fixedScore = scoreDropdown.value;
         GameManager.Instance.SetVariable("ResponsibilityScore", fixedScore);
         ResultManager.Instance.Test();
         var puzzleStates = GameManager.Instance.GetVariable("MemoryPuzzleStates") as Dictionary<int, bool>;
@@ -218,7 +236,7 @@ public class PauseManager : MonoBehaviour
         for (int i = 0; i < fixedScore; i++)
             puzzleStates[i] = true;
 
-        SaveManager.Instance.SaveGameData();
+        //SaveManager.Instance.SaveGameData();
     }
 
     private void Showcase_SetActiveCurrentScoreOption(bool active)

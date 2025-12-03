@@ -251,6 +251,7 @@ public class ResultManager : MonoBehaviour
                 Debug.Log("Result_DialogueFadeIn");
                 fadeInTime = 2f;
                 yield return UIManager.Instance.OnFade(UIManager.Instance.dialogueCoverPanel, 1, 0, fadeInTime);
+                UIManager.Instance.dialogueCoverPanel.gameObject.SetActive(false);
                 break;
 
             // 프롤로그 다음 스텝으로 넘김
@@ -278,6 +279,15 @@ public class ResultManager : MonoBehaviour
             case "Result_SaveGameData":
                 // GameData 저장
                 SaveManager.Instance.SaveGameData();
+                yield return null;
+                break;
+
+            case "Result_HappyEndingVariablesReset":
+                // 해피엔딩 하다가 타이틀로 나갔을 경우, HappyEndingStep 변수가 그 진행상태 그대로 남아 있음..
+                // 우린 아직 그 상태에 플레이어 진행상황 복구는 구현 안 되어 있어서
+                // 임시조치로 해당 변수 초기화
+                int resetStepCount = 0;
+                GameManager.Instance.SetVariable("HappyEndingStep", resetStepCount);
                 yield return null;
                 break;
 
@@ -340,6 +350,12 @@ public class ResultManager : MonoBehaviour
                 }
                 if (catBeatTimings.ContainsKey(currentMinigameCat))
                 {
+                    // 책임 지수가 3 이상이면 50%(쉬움), 아니면 80%(어려움)
+                    int currentRespScore = (int)GameManager.Instance.GetVariable("ResponsibilityScore");
+                    float targetThreshold = (currentRespScore >= 3) ? 50f : 80f;
+
+                    heartbeatMinigame.SetDifficulty(targetThreshold); // 난이도 적용
+
                     heartbeatMinigame.SetupWaveform(currentMinigameCat);
                     heartbeatMinigame.OnMinigameEnd += HandleMinigameResult;
                     heartbeatMinigame.gameObject.SetActive(true);
@@ -365,7 +381,7 @@ public class ResultManager : MonoBehaviour
                         Debug.Log("JumpToTutorial에서 RecallManager 호출");
                         GameManager.Instance.SetVariable("CanInvesigatingRecallObject", true);
                         RecallManager.Instance.SetInteractKeyGroup(true);
-                        SaveManager.Instance.SaveGameData();
+                        //SaveManager.Instance.SaveGameData();
                     }
                 }
                 yield return null;
@@ -558,7 +574,7 @@ public class ResultManager : MonoBehaviour
                 while (DialogueManager.Instance.isDialogueActive)
                     yield return null;
                 gm.SetVariable("Monologue_Shown", true);
-                SaveManager.Instance.SaveGameData();
+                //SaveManager.Instance.SaveGameData();
             }
         }
         yield return null;

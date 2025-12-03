@@ -33,6 +33,12 @@ public class DemoCommandManager : MonoBehaviour
         InitializeShortcuts();
     }
 
+    private void Start()
+    {
+        if (GameManager.Instance.isReleaseBuild)
+            this.enabled = false;
+    }
+
     private void InitializeShortcuts()
     {
         // Ctrl + Shift + 숫자 = Stage 씬들
@@ -67,6 +73,9 @@ public class DemoCommandManager : MonoBehaviour
 
     void Update()
     {
+        if (GameManager.Instance.isReleaseBuild)
+            return;
+
         bool ctrlPressed = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
         bool shiftPressed = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
 

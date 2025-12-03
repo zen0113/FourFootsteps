@@ -15,10 +15,10 @@ public class SettingsUIController : MonoBehaviour
     [Header("Volume Settings")]
     [Tooltip("기본 BGM 볼륨 (0.0 ~ 1.0)")]
     [Range(0f, 1f)] // 인스펙터에서 슬라이더 범위를 0~1로 제한
-    [SerializeField] private float defaultBGMVolume = 0.3f;
+    [SerializeField] private float defaultBGMVolume = 0.5f;
     [Tooltip("기본 SFX 볼륨 (0.0 ~ 1.0)")]
     [Range(0f, 1f)] // 인스펙터에서 슬라이더 범위를 0~1로 제한
-    [SerializeField] private float defaultSFXVolume = 0.3f;
+    [SerializeField] private float defaultSFXVolume = 0.5f;
 
     // 임시 볼륨 값들 (확인/취소 기능용)
     private float tempBGMVolume;

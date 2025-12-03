@@ -12,7 +12,7 @@ public class ChaserThrower : MonoBehaviour
     [SerializeField] private ChaserFollower chaser;
 
     [Header("Timing")]
-    [SerializeField] private Vector2 throwIntervalRange = new Vector2(2.4f, 4.5f);
+    [SerializeField] private Vector2 throwIntervalRange = new Vector2(3.5f, 6.5f);
     [SerializeField] private AnimationCurve difficultyOverX; // x좌표→난이도(0~1)
     [SerializeField] private float minFlightTime = 0.6f;
     [SerializeField] private float maxFlightTime = 1.4f;

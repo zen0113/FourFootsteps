@@ -12,7 +12,7 @@ public class LobbyManager : MonoBehaviour
     [SerializeField] private GameObject LoadGameButton;
     [SerializeField] private GameObject NewGamePanel;
     [SerializeField] private GameObject NoGameDataPanel;
-
+    [SerializeField] private GameObject gotoEndingButtons;
 
     private void Awake()
     {
@@ -23,6 +23,16 @@ public class LobbyManager : MonoBehaviour
     private void Start()
     {
         SaveManager.Instance.ApplySavedGameData();
+
+        InitializeLobbySceneButtons();
+    }
+
+    public void InitializeLobbySceneButtons()
+    {
+        if (GameManager.Instance.isReleaseBuild)
+        {
+            gotoEndingButtons.SetActive(false);
+        }
     }
 
     public void StartNewGame()
@@ -35,12 +45,17 @@ public class LobbyManager : MonoBehaviour
             // 지금 초기화 기능이 너무 애매해서(보완필요)..아예 새 게임데이터 만드는 쪽으로 수정....
             SaveManager.Instance.CreateNewGameData();    // 게임 데이터 초기화
             SceneLoader.Instance.LoadScene(Constants.SceneType.SET_PLAYERNAME.ToSceneName());
+            // 책임 게이지 UI 초기화
+            ResponsibilityManager.Instance.InitGaugeUI();
         }
     }
 
     public void YesNewGameButton()
     {
+        SaveManager.Instance.CreateNewGameData();
         SceneLoader.Instance.LoadScene(Constants.SceneType.SET_PLAYERNAME.ToSceneName());
+        // 책임 게이지 UI 초기화
+        ResponsibilityManager.Instance.InitGaugeUI();
     }
 
     public void LoadGame()

@@ -13,6 +13,7 @@ public class InputTextTypingPlayer : MonoBehaviour
         typingSound = GetComponent<AudioSource>();
         // 이름 설정씬 들어오자마자 바로 포커스해줌
         inputField.ActivateInputField();
+        Input.imeCompositionMode = IMECompositionMode.Auto;
     }
 
     //private int previousTextLength = 0;

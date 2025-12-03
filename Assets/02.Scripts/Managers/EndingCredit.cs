@@ -63,6 +63,10 @@ public class EndingCredit : MonoBehaviour
         animator.speed = 0f;
 
         backgroundImage.sprite = (isHappyEnding) ? backgroundSprites[happyBG] : backgroundSprites[badBG];
+
+        //// 게임 데이터 초기화
+        ////SaveManager.Instance.LoadInitGameData();
+        //SaveManager.Instance.CreateNewGameData();
     }
 
     // 엔딩크레딧 연출 시작
@@ -97,6 +101,10 @@ public class EndingCredit : MonoBehaviour
 
         // 페이드 아웃
         yield return StartCoroutine(Fade(false));
+
+        // 게임 데이터 초기화
+        //SaveManager.Instance.LoadInitGameData();
+        SaveManager.Instance.CreateNewGameData();
 
         // 타이틀씬으로 이동
         GameManager.Instance.LoadTitleScene();

@@ -68,4 +68,10 @@ public class ResponsibilityManager : MonoBehaviour
         responsibilitySlider.value = targetValue; // 마지막에 정확히 맞춰줌
     }
 
+    // 책임감 게이지 0으로 초기화
+    public void InitGaugeUI()
+    {
+        responsibilitySlider.value = 0f;
+        GameManager.Instance.SetVariable("ResponsibilityScore", 0);
+    }
 }

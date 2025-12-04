@@ -350,6 +350,12 @@ public class ResultManager : MonoBehaviour
                 }
                 if (catBeatTimings.ContainsKey(currentMinigameCat))
                 {
+                    // 책임 지수가 3 이상이면 50%(쉬움), 아니면 80%(어려움)
+                    int currentRespScore = (int)GameManager.Instance.GetVariable("ResponsibilityScore");
+                    float targetThreshold = (currentRespScore >= 3) ? 50f : 80f;
+
+                    heartbeatMinigame.SetDifficulty(targetThreshold); // 난이도 적용
+
                     heartbeatMinigame.SetupWaveform(currentMinigameCat);
                     heartbeatMinigame.OnMinigameEnd += HandleMinigameResult;
                     heartbeatMinigame.gameObject.SetActive(true);
@@ -375,7 +381,7 @@ public class ResultManager : MonoBehaviour
                         Debug.Log("JumpToTutorial에서 RecallManager 호출");
                         GameManager.Instance.SetVariable("CanInvesigatingRecallObject", true);
                         RecallManager.Instance.SetInteractKeyGroup(true);
-                        SaveManager.Instance.SaveGameData();
+                        //SaveManager.Instance.SaveGameData();
                     }
                 }
                 yield return null;
@@ -568,7 +574,7 @@ public class ResultManager : MonoBehaviour
                 while (DialogueManager.Instance.isDialogueActive)
                     yield return null;
                 gm.SetVariable("Monologue_Shown", true);
-                SaveManager.Instance.SaveGameData();
+                //SaveManager.Instance.SaveGameData();
             }
         }
         yield return null;

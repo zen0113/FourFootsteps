@@ -31,7 +31,11 @@ public class AdvancedPushableBox : MonoBehaviour
     [Header("구멍 감지")]
     [SerializeField] private float holeDetectionDistance = 0.2f;   
     [SerializeField] private float normalFallCheckTime = 0.3f;     
-    [SerializeField] private LayerMask groundLayerMask = -1;       
+    [SerializeField] private LayerMask groundLayerMask = -1;
+    
+    [Header("도르래 시스템")]
+    [SerializeField] private string pulleyTag = "wall";
+    [SerializeField] private float pulleyGravityScale = 0.3f;
     
     // 상태 변수들
     private Vector3 originalPosition;
@@ -41,6 +45,8 @@ public class AdvancedPushableBox : MonoBehaviour
     private bool isFalling = false;
     private bool isInHole = false;
     private float timeNotGrounded = 0f;
+    private bool isOnPulley = false;
+    private bool wasOnPulley = false;
     
     // 복귀 시스템 변수들
     private Vector3 lastIntegerPosition;
@@ -65,7 +71,7 @@ public class AdvancedPushableBox : MonoBehaviour
         // Rigidbody2D 설정
         rb.bodyType = RigidbodyType2D.Dynamic;
         rb.freezeRotation = true;
-        rb.gravityScale = normalGravityScale; // 기본 중력 유지
+        rb.gravityScale = normalGravityScale;
         rb.mass = boxMass;
         rb.drag = normalDrag;
         
@@ -83,15 +89,14 @@ public class AdvancedPushableBox : MonoBehaviour
         Debug.Log("[AdvancedPushableBox] 상자 초기화 완료");
     }
     
-    private void FixedUpdate() // Update 대신 FixedUpdate 사용
+    private void FixedUpdate()
     {
         CheckGroundStatus();
         HandlePlayerInteraction();
         OptimizePhysics();
         HandleMovementBasedReturn();
         CheckForHoleFall();
-        
-        // 낙하 속도 제어
+        StabilizeOnPulley();
         HandleFallSpeed();
     }
     
@@ -232,6 +237,32 @@ public class AdvancedPushableBox : MonoBehaviour
         }
     }
     
+    private void StabilizeOnPulley()
+    {
+        if (isOnPulley)
+        {
+            // 도르래 위에서는 Y축 속도를 크게 제한
+            Vector2 velocity = rb.velocity;
+            velocity.y = Mathf.Clamp(velocity.y, -2f, 2f);
+            rb.velocity = velocity;
+            
+            // 중력 영향 감소
+            if (rb.gravityScale != pulleyGravityScale)
+            {
+                rb.gravityScale = pulleyGravityScale;
+                Debug.Log("[AdvancedPushableBox] 도르래 위 - 중력 감소");
+            }
+        }
+        else if (wasOnPulley)
+        {
+            // 도르래에서 내려왔을 때 원래 중력으로 복구
+            rb.gravityScale = normalGravityScale;
+            Debug.Log("[AdvancedPushableBox] 도르래 벗어남 - 중력 복구");
+        }
+        
+        wasOnPulley = isOnPulley;
+    }
+    
     private void HandleMovementBasedReturn()
     {
         if (!enableReturnToOrigin) return;
@@ -331,6 +362,7 @@ public class AdvancedPushableBox : MonoBehaviour
         isWaitingForReturn = false;
         isFalling = false;
         isInHole = false;
+        isOnPulley = false;
         
         lastIntegerPosition = new Vector3(
             Mathf.RoundToInt(transform.position.x),
@@ -343,6 +375,14 @@ public class AdvancedPushableBox : MonoBehaviour
     
     private void OnCollisionEnter2D(Collision2D collision)
     {
+        // 도르래 감지
+        if (collision.gameObject.CompareTag(pulleyTag))
+        {
+            isOnPulley = true;
+            rb.velocity = new Vector2(rb.velocity.x, 0);
+            Debug.Log("[AdvancedPushableBox] 도르래 위에 올라감");
+        }
+        
         if (collision.gameObject.CompareTag("Ground"))
         {
             if (isInHole)
@@ -358,7 +398,7 @@ public class AdvancedPushableBox : MonoBehaviour
         
         if (collision.gameObject.CompareTag("Player"))
         {
-            if (!isBeingPushed)
+            if (!isBeingPushed && !isOnPulley)
             {
                 rb.velocity = new Vector2(0, rb.velocity.y);
             }
@@ -367,19 +407,43 @@ public class AdvancedPushableBox : MonoBehaviour
     
     private void OnCollisionStay2D(Collision2D collision)
     {
+        // 도르래 위에 있을 때 계속 안정화
+        if (collision.gameObject.CompareTag(pulleyTag))
+        {
+            isOnPulley = true;
+            
+            // Y축 속도가 너무 크면 강제로 제한
+            if (Mathf.Abs(rb.velocity.y) > 1f)
+            {
+                rb.velocity = new Vector2(rb.velocity.x, 0);
+            }
+        }
+        
         if (collision.gameObject.CompareTag("Player"))
         {
-            if (!isBeingPushed)
+            if (!isBeingPushed && !isOnPulley)
             {
                 rb.velocity = new Vector2(0, rb.velocity.y);
             }
         }
     }
     
+    private void OnCollisionExit2D(Collision2D collision)
+    {
+        // 도르래에서 벗어남
+        if (collision.gameObject.CompareTag(pulleyTag))
+        {
+            isOnPulley = false;
+            Debug.Log("[AdvancedPushableBox] 도르래에서 벗어남");
+        }
+    }
+    
     // 디버그용 기즈모
     private void OnDrawGizmosSelected()
     {
-        if (isInHole)
+        if (isOnPulley)
+            Gizmos.color = Color.cyan;
+        else if (isInHole)
             Gizmos.color = Color.red;
         else if (isBeingPushed)
             Gizmos.color = Color.green;
@@ -420,6 +484,7 @@ public class AdvancedPushableBox : MonoBehaviour
     public bool IsBeingPushed => isBeingPushed;
     public bool IsFalling => isFalling;
     public bool IsInHole => isInHole;
+    public bool IsOnPulley => isOnPulley;
     public Vector3 OriginalPosition => originalPosition;
     public Vector3 ReturnPosition => targetReturnPosition;
     

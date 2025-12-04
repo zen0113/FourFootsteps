@@ -82,6 +82,8 @@ public class AnimationLooper : MonoBehaviour
 
         // 애니메이션 파라미터 설정 (Bool 타입 가정)
         animator.SetBool(animationParameterName, true);
+        if(animationParameterName== "Climbing")
+            animator.SetFloat("ClimbDirection", 1.0f);
 
         OnLoopStart?.Invoke();
 
@@ -210,6 +212,9 @@ public class AnimationLooper : MonoBehaviour
             {
                 // 딜레이 후 애니메이션 다시 트리거 (필요한 경우)
                 animator.SetBool(animationParameterName, false);
+
+                yield return new WaitForSeconds(0.05f);
+
                 yield return null; // 한 프레임 대기하여 애니메이션 파라미터 업데이트 보장
                 animator.SetBool(animationParameterName, true);
             }

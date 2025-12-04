@@ -124,8 +124,15 @@ public class SceneLoader : MonoBehaviour
                 GameManager.Instance.SetVariable("CanMoving", true);
                 Debug.Log($"[SceneLoader] 씬 로드 완료: {scene.name}, 움직임 강제 해제 및 DialogueManager 초기화 완료.");
 
-                // 씬 상태 저장
-                SaveManager.Instance.SaveGameData();
+                if (scene.name != Constants.SceneType.TITLE.ToSceneName())
+                {
+                    SaveManager.Instance.SaveGameData();
+                    Debug.Log("[SceneLoader] AutoSave Completed");
+                }
+                else
+                {
+                    Debug.Log("[SceneLoader] TitleScene: AutoSave SKIPPED");
+                }
             }
         }
     }

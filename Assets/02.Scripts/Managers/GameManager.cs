@@ -29,6 +29,7 @@ public class GameManager : MonoBehaviour
     // 디버깅용
     [SerializeField] private TextMeshProUGUI variablesText;
     public bool isDebug = false;
+    public bool isReleaseBuild;
 
     // --- 청소 카운터 관련 ---
     // variables.csv 파일에 CleanedObjectCount를 추가했기 때문에
@@ -58,7 +59,7 @@ public class GameManager : MonoBehaviour
         // 시작 시 현재 씬 이름 자동 등록
         InitCurrentSceneInfo();
 
-        if (isDebug)
+        if (isDebug&&!isReleaseBuild)
             ShowVariables();
     }
 
@@ -333,6 +334,7 @@ public class GameManager : MonoBehaviour
             "MemoryPuzzleStates",
             //"CleanedObjectCount",
             "isPrologueFinished",
+            "ResponsibilityScore"
         });
 
         foreach (var item in variables)

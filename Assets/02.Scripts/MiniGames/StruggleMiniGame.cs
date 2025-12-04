@@ -616,7 +616,7 @@ public class StruggleMiniGame : MonoBehaviour
         if (playerMovement != null)
         {
             Debug.Log("[StruggleMiniGame] 플레이어 상태 복원 - 웅크리기 및 점프 차단 해제");
-            playerMovement.SetMiniGameInputBlocked(false); // 플레이어 입력 차단 해제
+            //playerMovement.SetMiniGameInputBlocked(false); // 플레이어 입력 차단 해제
             playerMovement.ForceCrouch = false; // 강제 웅크리기 해제
             playerMovement.SetCrouchMovingState(false); // 웅크리기 이동 상태 해제
 

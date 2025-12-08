@@ -144,6 +144,11 @@ public class PlayerCatMovement : MonoBehaviour
     private Transform currentCart;          // 현재 탑승 중인 카트
     private float originalGravityScale;     // 원본 중력 값 (카트 탑승 시 복원용)
 
+    // 엘리베이터 탑승 시스템
+    [Header("엘리베이터 관련")]
+    private bool isOnElevator = false;
+    private bool elevatorMoving = false;
+
     // 박스 상호작용 관련
     [Header("박스 상호작용")]
     private PlayerBoxInteraction boxInteraction;    // 박스 밀기/당기기 컴포넌트
@@ -646,6 +651,34 @@ public class PlayerCatMovement : MonoBehaviour
     }
 
     /// <summary>
+    /// 엘리베이터 탑승 상태를 설정합니다.
+    /// </summary>
+    public void SetOnElevator(bool onElevator, bool isMoving)
+    {
+        isOnElevator = onElevator;
+        elevatorMoving = isMoving;
+        
+        if (onElevator && isMoving)
+        {
+            // 엘리베이터가 이동 중이면 자동으로 앉기
+            ForceCrouch = true;
+            Debug.Log("엘리베이터 이동 중 - 자동 앉기 활성화");
+        }
+        else if (onElevator && !isMoving)
+        {
+            // 엘리베이터가 멈추면 다시 움직일 수 있음
+            ForceCrouch = false;
+            Debug.Log("엘리베이터 정지 - 이동 가능");
+        }
+        else
+        {
+            // 엘리베이터에서 내렸을 때
+            ForceCrouch = false;
+            Debug.Log("엘리베이터 하차");
+        }
+    }
+
+    /// <summary>
     /// 파티클 시스템 상태 업데이트
     /// 이동 상태에 따라 발자국 파티클의 발생량과 재생 상태를 조절
     /// </summary>
@@ -926,7 +959,7 @@ public class PlayerCatMovement : MonoBehaviour
         bool isInteractingWithBox = boxInteraction != null && boxInteraction.IsInteracting;
         bool isPullingBox = boxInteraction != null && boxInteraction.IsPulling;
 
-        if (isMiniGameInputBlocked || forceCrouch)
+        if (isMiniGameInputBlocked || forceCrouch || (isOnElevator && elevatorMoving))
         {
             horizontalInput = 0;
         }

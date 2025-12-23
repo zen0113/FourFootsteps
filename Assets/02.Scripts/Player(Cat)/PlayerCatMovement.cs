@@ -304,6 +304,13 @@ public class PlayerCatMovement : MonoBehaviour
             lastLandingTime = Time.time;
         }
 
+        // 착지/지상 판정 시 점프 애니메이션(BOOL) 확실히 종료
+        // - 벽/모서리에서 상태가 꼬여 Jump가 true로 남는 문제 방지
+        if (isOnGround)
+        {
+            animator.SetBool(_hashJump, false);
+        }
+
         // 지상에 있고 떨어지는 중이면 점프 카운트 리셋
         if (isOnGround && rb.velocity.y <= 0) 
         {
@@ -491,6 +498,7 @@ public class PlayerCatMovement : MonoBehaviour
             animator.SetFloat(_hashSpeed, 0f);
             animator.SetBool(_hashShift, false);
             animator.SetBool(_hashIsClimbing, false);
+            animator.SetBool(_hashJump, false);
 
             // 강제/수동 웅크림 유지: isCrouchMoving에 따라 Crouching/Crouch 상호배타
             bool crouchAny = (isCrouching || forceCrouch);
@@ -1100,7 +1108,7 @@ public class PlayerCatMovement : MonoBehaviour
             velocityProtectionCounter = velocityProtectionTime;
         }
 
-        animator.SetTrigger("Jump");
+        animator.SetBool(_hashJump, true);
 
         // 점프 시 파티클 효과
         if (dashParticle != null)

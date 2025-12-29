@@ -14,6 +14,7 @@ public class PulleySystem : MonoBehaviour
     [SerializeField] private float minHeight = -4f;
     [SerializeField] private float weightThreshold = 0.1f;
     [SerializeField] private bool enableDebugLogs = true;
+    [SerializeField] private float stateChangeCooldown = 0.2f; // 타겟 흔들림으로 중간에서 멈추는 현상 방지
 
     [Header("상태 모니터링 (읽기 전용)")]
     [SerializeField] private ObjectType platformA_Priority = ObjectType.Empty;
@@ -25,6 +26,14 @@ public class PulleySystem : MonoBehaviour
 
     // ✅ 추가: 현재 우선권을 가진 플랫폼 (오브젝트가 올라간 쪽)
     private PulleyPlatform activePlatform = null;
+
+    private float nextAllowedStateChangeTime = 0f;
+    private float lastTargetA = float.NaN;
+    private float lastTargetB = float.NaN;
+
+    [Header("우선권 해제 유예(떨림 방지)")]
+    [SerializeField] private float activeReleaseGraceTime = 0.25f;
+    private float activeReleaseAtTime = -1f;
 
     private void Start()
     {
@@ -51,8 +60,9 @@ public class PulleySystem : MonoBehaviour
             Debug.Log("✓ 현실적인 PulleySystem 초기화 완료 (분리된 플랫폼)");
     }
 
-    private void Update()
+    private void FixedUpdate()
     {
+        // 물리 상태(Trigger/Collision) 기반 시스템이므로 FixedUpdate에서 평가하는 게 더 안정적입니다.
         EvaluateSystemState();
     }
 
@@ -117,8 +127,8 @@ public class PulleySystem : MonoBehaviour
         if (activePlatform == source && priority == ObjectType.Empty)
         {
             if (enableDebugLogs)
-                Debug.Log($"🔓 우선권 해제: {source.name}");
-            activePlatform = null;
+                Debug.Log($"⏳ 우선권 해제 예약: {source.name} (+{activeReleaseGraceTime:F2}s)");
+            activeReleaseAtTime = Time.time + activeReleaseGraceTime;
         }
 
         // 시스템 재평가
@@ -135,8 +145,24 @@ public class PulleySystem : MonoBehaviour
     {
         if (platformA == null || platformB == null) return;
 
+        // 예약된 우선권 해제 처리(유예 시간 동안 다시 들어오면 유지)
+        if (activePlatform != null && activeReleaseAtTime > 0f && Time.time >= activeReleaseAtTime)
+        {
+            if (activePlatform.CurrentPriority == ObjectType.Empty)
+            {
+                if (enableDebugLogs)
+                    Debug.Log($"🔓 우선권 해제 확정: {activePlatform.name}");
+                activePlatform = null;
+            }
+            activeReleaseAtTime = -1f;
+        }
+
         if (activePlatform != null)
         {
+            // 다시 감지되면 해제 예약 취소
+            if (activePlatform.CurrentPriority == ObjectType.PhysicsObject)
+                activeReleaseAtTime = -1f;
+
             // 🔒 activePlatform이 설정되어 있으면 오브젝트 쪽 유지
             if (activePlatform == platformA)
                 MovePlatformsToExtremes(minHeight, maxHeight, $"{activePlatform.name} locked (PhysicsObject)");
@@ -203,18 +229,48 @@ public class PulleySystem : MonoBehaviour
 
     private void MovePlatformsToExtremes(float a, float b, string reason)
     {
+        // (중요) 감지 떨림/플레이어 접촉 등으로 상태가 매 프레임 바뀌면
+        // 플랫폼이 목표에 도달하기 전에 타겟이 다시 바뀌어 "중간에서 멈춘 것처럼" 보일 수 있습니다.
+        // 짧은 쿨다운으로 상태 변경을 억제합니다.
+        if (Time.time < nextAllowedStateChangeTime)
+            return;
+
+        if (!float.IsNaN(lastTargetA) && Mathf.Approximately(lastTargetA, a) &&
+            !float.IsNaN(lastTargetB) && Mathf.Approximately(lastTargetB, b))
+        {
+            // 같은 타겟이면 굳이 상태 갱신하지 않음
+            return;
+        }
+
         platformA.MoveToHeight(a);
         platformB.MoveToHeight(b);
         currentState = reason;
         lastAction = $"A→{a:F1}, B→{b:F1}";
+
+        lastTargetA = a;
+        lastTargetB = b;
+        nextAllowedStateChangeTime = Time.time + stateChangeCooldown;
     }
 
     private void MovePlatformsToBalance(string reason)
     {
+        if (Time.time < nextAllowedStateChangeTime)
+            return;
+
+        if (!float.IsNaN(lastTargetA) && Mathf.Approximately(lastTargetA, 0f) &&
+            !float.IsNaN(lastTargetB) && Mathf.Approximately(lastTargetB, 0f))
+        {
+            return;
+        }
+
         platformA.MoveToHeight(0);
         platformB.MoveToHeight(0);
         currentState = reason;
         lastAction = "Balance";
+
+        lastTargetA = 0f;
+        lastTargetB = 0f;
+        nextAllowedStateChangeTime = Time.time + stateChangeCooldown;
     }
 
     private void OnDestroy()

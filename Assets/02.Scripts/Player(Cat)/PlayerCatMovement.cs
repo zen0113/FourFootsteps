@@ -96,6 +96,8 @@ public class PlayerCatMovement : MonoBehaviour
     [SerializeField] private Transform groundCheck;         // 지상 체크 포인트
     [SerializeField] private float groundCheckRadius = 0.2f; // 지상 체크 반경
     [SerializeField] private LayerMask groundMask;          // 지상으로 인식할 레이어
+    [SerializeField] private string floorLayerName = "Floor"; // Ground/Wall처럼 취급할 추가 바닥 레이어
+    private int floorLayer = -1;
     private bool isOnGround;                                // 현재 지상에 있는지 여부
     private bool justLanded = false;
     private Vector3 originalGroundCheckLocalPosition;
@@ -226,6 +228,17 @@ public class PlayerCatMovement : MonoBehaviour
         {
             originalGroundCheckLocalPosition = groundCheck.localPosition;
         }
+
+        // Floor 레이어를 groundMask에 자동 포함 (인스펙터에서 누락돼도 동작하도록)
+        floorLayer = LayerMask.NameToLayer(floorLayerName);
+        if (floorLayer >= 0)
+        {
+            groundMask |= (1 << floorLayer);
+        }
+        else
+        {
+            Debug.LogWarning($"[PlayerCatMovement] 레이어 '{floorLayerName}'를 찾지 못했습니다. (Project Settings > Tags and Layers 확인)");
+        }
     }
 
     /// <summary>
@@ -284,7 +297,12 @@ public class PlayerCatMovement : MonoBehaviour
 
         foreach (Collider2D col in colliders)
         {
-            if (col.CompareTag("Box") || col.CompareTag("wall") || col.CompareTag("Cart"))
+            if (col == null || col.gameObject == gameObject) continue;
+
+            // (중요) 태그 기반("wall") 외에도 레이어 기반으로 Ground/Wall/Floor를 지면으로 인정
+            bool isGroundLikeLayer = ((groundMask.value & (1 << col.gameObject.layer)) != 0);
+
+            if (isGroundLikeLayer || col.CompareTag("Box") || col.CompareTag("wall") || col.CompareTag("Cart"))
             {
                 onBox = true;
                 break;
@@ -1388,7 +1406,11 @@ public class PlayerCatMovement : MonoBehaviour
     /// </summary>
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (collision.gameObject.CompareTag("Ground") ||
+        // Ground/Wall/Floor 레이어도 지면으로 인정 (애니메이션/점프 카운트 리셋 안정화)
+        bool isGroundLikeLayer = ((groundMask.value & (1 << collision.gameObject.layer)) != 0);
+
+        if (isGroundLikeLayer ||
+            collision.gameObject.CompareTag("Ground") ||
             collision.gameObject.CompareTag("Box") ||
             collision.gameObject.CompareTag("wall"))
         {

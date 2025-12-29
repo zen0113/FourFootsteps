@@ -154,6 +154,8 @@ public class PauseManager : MonoBehaviour
                 UIManager.Instance.SetUI(eUIGameObjectName.PlaceUI, false);
                 UIManager.Instance.SetUI(eUIGameObjectName.ResponsibilityGroup, false);
             }
+            // 모든 이펙트 코루틴 정지 및 리셋
+            UIManager.Instance?.AbortAllUIEffectsAndReset();
 
             Time.timeScale = 1f;
             SceneLoader.Instance.LoadScene("TitleScene");

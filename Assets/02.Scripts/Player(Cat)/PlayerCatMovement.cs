@@ -96,6 +96,8 @@ public class PlayerCatMovement : MonoBehaviour
     [SerializeField] private Transform groundCheck;         // 지상 체크 포인트
     [SerializeField] private float groundCheckRadius = 0.2f; // 지상 체크 반경
     [SerializeField] private LayerMask groundMask;          // 지상으로 인식할 레이어
+    [SerializeField] private string floorLayerName = "Floor"; // Ground/Wall처럼 취급할 추가 바닥 레이어
+    private int floorLayer = -1;
     private bool isOnGround;                                // 현재 지상에 있는지 여부
     private bool justLanded = false;
     private Vector3 originalGroundCheckLocalPosition;
@@ -180,13 +182,7 @@ public class PlayerCatMovement : MonoBehaviour
     private void Start()
     {
         // UI 상태 설정 (고양이 버전 UI 활성화, 사람 버전 UI 비활성화)
-        UIManager.Instance.SetUI(eUIGameObjectName.HumanVersionUIGroup, false);
-        UIManager.Instance.SetUI(eUIGameObjectName.CatVersionUIGroup, true);
-        UIManager.Instance.SetUI(eUIGameObjectName.ResponsibilityGroup, true);
-        UIManager.Instance.SetUI(eUIGameObjectName.ResponsibilityGauge, true);
-        UIManager.Instance.SetUI(eUIGameObjectName.PlaceUI, true);
-        // 필요한 컴포넌트들 가져오기
-        UIManager.Instance.SetUI(eUIGameObjectName.PuzzleBagButton, true);
+        UIManager.Instance.SetPlayerVersionUI(UIManager.PlayerType.Cat);
 
         rb = GetComponent<Rigidbody2D>();
         boxCollider = GetComponent<BoxCollider2D>();
@@ -225,6 +221,17 @@ public class PlayerCatMovement : MonoBehaviour
         if (groundCheck != null)
         {
             originalGroundCheckLocalPosition = groundCheck.localPosition;
+        }
+
+        // Floor 레이어를 groundMask에 자동 포함 (인스펙터에서 누락돼도 동작하도록)
+        floorLayer = LayerMask.NameToLayer(floorLayerName);
+        if (floorLayer >= 0)
+        {
+            groundMask |= (1 << floorLayer);
+        }
+        else
+        {
+            Debug.LogWarning($"[PlayerCatMovement] 레이어 '{floorLayerName}'를 찾지 못했습니다. (Project Settings > Tags and Layers 확인)");
         }
     }
 
@@ -284,7 +291,12 @@ public class PlayerCatMovement : MonoBehaviour
 
         foreach (Collider2D col in colliders)
         {
-            if (col.CompareTag("Box") || col.CompareTag("wall") || col.CompareTag("Cart"))
+            if (col == null || col.gameObject == gameObject) continue;
+
+            // (중요) 태그 기반("wall") 외에도 레이어 기반으로 Ground/Wall/Floor를 지면으로 인정
+            bool isGroundLikeLayer = ((groundMask.value & (1 << col.gameObject.layer)) != 0);
+
+            if (isGroundLikeLayer || col.CompareTag("Box") || col.CompareTag("wall") || col.CompareTag("Cart"))
             {
                 onBox = true;
                 break;
@@ -302,6 +314,13 @@ public class PlayerCatMovement : MonoBehaviour
         if (justLanded)
         {
             lastLandingTime = Time.time;
+        }
+
+        // 착지/지상 판정 시 점프 애니메이션(BOOL) 확실히 종료
+        // - 벽/모서리에서 상태가 꼬여 Jump가 true로 남는 문제 방지
+        if (isOnGround)
+        {
+            animator.SetBool(_hashJump, false);
         }
 
         // 지상에 있고 떨어지는 중이면 점프 카운트 리셋
@@ -491,6 +510,7 @@ public class PlayerCatMovement : MonoBehaviour
             animator.SetFloat(_hashSpeed, 0f);
             animator.SetBool(_hashShift, false);
             animator.SetBool(_hashIsClimbing, false);
+            animator.SetBool(_hashJump, false);
 
             // 강제/수동 웅크림 유지: isCrouchMoving에 따라 Crouching/Crouch 상호배타
             bool crouchAny = (isCrouching || forceCrouch);
@@ -1100,7 +1120,7 @@ public class PlayerCatMovement : MonoBehaviour
             velocityProtectionCounter = velocityProtectionTime;
         }
 
-        animator.SetTrigger("Jump");
+        animator.SetBool(_hashJump, true);
 
         // 점프 시 파티클 효과
         if (dashParticle != null)
@@ -1380,7 +1400,11 @@ public class PlayerCatMovement : MonoBehaviour
     /// </summary>
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (collision.gameObject.CompareTag("Ground") ||
+        // Ground/Wall/Floor 레이어도 지면으로 인정 (애니메이션/점프 카운트 리셋 안정화)
+        bool isGroundLikeLayer = ((groundMask.value & (1 << collision.gameObject.layer)) != 0);
+
+        if (isGroundLikeLayer ||
+            collision.gameObject.CompareTag("Ground") ||
             collision.gameObject.CompareTag("Box") ||
             collision.gameObject.CompareTag("wall"))
         {

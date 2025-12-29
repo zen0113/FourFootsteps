@@ -29,6 +29,18 @@ public class Elevator : MonoBehaviour
     private bool playerOnElevator = false;
     private Coroutine returnCoroutine;
     
+    /// <summary>
+    /// 비활성화/비활성화 직전(씬 전환 등) 타이밍에 OnTriggerExit가 호출될 수 있어
+    /// StartCoroutine이 경고를 뿜는 케이스를 방지한다.
+    /// </summary>
+    private Coroutine TryStartCoroutine(IEnumerator routine)
+    {
+        if (!isActiveAndEnabled)
+            return null;
+        
+        return StartCoroutine(routine);
+    }
+    
     // 플레이어 추적을 위한 변수들
     private List<GameObject> playersOnElevator = new List<GameObject>();
     private Vector3 lastElevatorPosition;
@@ -139,7 +151,7 @@ public class Elevator : MonoBehaviour
                 // 시작 지점에서 대기 중일 때만 이동 시작
                 if (currentState == ElevatorState.AtStart)
                 {
-                    StartCoroutine(MoveToEnd());
+                    TryStartCoroutine(MoveToEnd());
                 }
                 
                 // 복귀 코루틴이 실행 중이면 취소
@@ -170,7 +182,7 @@ public class Elevator : MonoBehaviour
                 // 플레이어가 모두 내렸고 도착 지점에 있을 때 복귀 시작
                 if (playersOnElevator.Count == 0 && currentState == ElevatorState.AtEnd)
                 {
-                    returnCoroutine = StartCoroutine(ReturnToStartAfterDelay());
+                    returnCoroutine = TryStartCoroutine(ReturnToStartAfterDelay());
                 }
             }
         }
@@ -309,7 +321,7 @@ public class Elevator : MonoBehaviour
         
         if (!playerOnElevator)
         {
-            returnCoroutine = StartCoroutine(ReturnToStartAfterDelay());
+            returnCoroutine = TryStartCoroutine(ReturnToStartAfterDelay());
         }
     }
     

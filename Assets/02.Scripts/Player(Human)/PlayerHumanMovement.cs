@@ -30,11 +30,7 @@ public class PlayerHumanMovement : MonoBehaviour
 
     private void Start()
     {
-        UIManager.Instance.SetUI(eUIGameObjectName.HumanVersionUIGroup, true);
-        UIManager.Instance.SetUI(eUIGameObjectName.CatVersionUIGroup, false);
-        UIManager.Instance.SetUI(eUIGameObjectName.ResponsibilityGroup, true);
-        UIManager.Instance.SetUI(eUIGameObjectName.ResponsibilityGauge, true);
-        UIManager.Instance.SetUI(eUIGameObjectName.PlaceUI, true);
+        UIManager.Instance.SetPlayerVersionUI(UIManager.PlayerType.Human);
         bool puzzleBagState = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name == "Ending_Happy";
         UIManager.Instance.SetUI(eUIGameObjectName.PuzzleBagButton, puzzleBagState);
 

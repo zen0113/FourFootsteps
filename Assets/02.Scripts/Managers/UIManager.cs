@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using UnityEngine.SceneManagement;
 
 public enum eUIGameObjectName
 {
@@ -56,6 +57,13 @@ public class UIManager : MonoBehaviour
     private bool isBlinkHidingActive = false;
 
     private Coroutine fadeOutRoutine;
+    private Coroutine blinkRoutine;
+
+    private const string STAGE_SCENE_NAME = "StageScene";
+    private const string RECALL_SCENE_NAME = "RecallScene";
+
+    private CanvasGroup canvasGroup;
+
     private void Awake()
     {
         // 중복 인스턴스 체크를 먼저
@@ -71,6 +79,63 @@ public class UIManager : MonoBehaviour
         AddUIGameObjects();
         RegisterPuzzleBagButtonEvent();
         SetAllUI(false);
+
+        canvasGroup = GetComponent<CanvasGroup>();
+    }
+
+    private void OnEnable()
+    {
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    private void OnDisable()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        AbortAllUIEffectsAndReset();
+
+        // UI 캔버스 알파값 강제 복구
+        if (canvasGroup != null)
+            canvasGroup.alpha = 1f;
+
+        bool isCatVerUI = scene.name.Contains(STAGE_SCENE_NAME);
+        bool isHumanVerUI = scene.name.Contains(RECALL_SCENE_NAME);
+
+        if (isCatVerUI)
+            SetPlayerVersionUI(PlayerType.Cat);
+        else if(isHumanVerUI)
+            SetPlayerVersionUI(PlayerType.Human);
+    }
+
+    public enum PlayerType
+    {
+        Human,
+        Cat
+    }
+
+    public void SetPlayerVersionUI(PlayerType playerType)
+    {
+        switch (playerType)
+        {
+            case PlayerType.Human:
+                UIManager.Instance.SetUI(eUIGameObjectName.CatVersionUIGroup, false);
+                UIManager.Instance.SetUI(eUIGameObjectName.HumanVersionUIGroup, true);
+                UIManager.Instance.SetUI(eUIGameObjectName.ResponsibilityGroup, true);
+                UIManager.Instance.SetUI(eUIGameObjectName.ResponsibilityGauge, true);
+                UIManager.Instance.SetUI(eUIGameObjectName.PlaceUI, true);
+                break;
+            case PlayerType.Cat:
+                UIManager.Instance.SetUI(eUIGameObjectName.HumanVersionUIGroup, false);
+                UIManager.Instance.SetUI(eUIGameObjectName.CatVersionUIGroup, true);
+                UIManager.Instance.SetUI(eUIGameObjectName.ResponsibilityGroup, true);
+                UIManager.Instance.SetUI(eUIGameObjectName.ResponsibilityGauge, true);
+                UIManager.Instance.SetUI(eUIGameObjectName.PlaceUI, true);
+                UIManager.Instance.SetUI(eUIGameObjectName.PuzzleBagButton, true);
+                break;
+        }
     }
 
     private void AddUIGameObjects()
@@ -109,54 +174,53 @@ public class UIManager : MonoBehaviour
         return uiGameObjects[uiName];
     }
 
-    private void RegisterPuzzleBagButtonEvent()
+    /// <summary>
+    /// 씬 전환이나 타이틀로 돌아갈 때 모든 진행 중인 페이드/블링크 효과를 즉시 정리
+    /// </summary>
+    public void AbortAllUIEffectsAndReset()
     {
-        var button = puzzleBagButton.GetComponentInChildren<Button>(true);
-        // 씬에 FootprintsOfMemory Canvas 존재 확인, 없으면 프리팹 생성
-        EnsureFootprintsCanvasExists();
-        // 버튼에 아무 것도 등록되지 않았다면 OnClickPuzzleBag 등록
-        if (button.onClick.GetPersistentEventCount() == 0)
-        {
-            button.onClick.AddListener(() =>
-            {
-                if (PuzzleMemoryManager.Instance != null)
-                    PuzzleMemoryManager.Instance.OnClickPuzzleBag();
-                else
-                    Debug.LogWarning("[PuzzleBagButtonBinder] PuzzleMemoryManager.Instance가 null입니다.");
-            });
-        }
-        //Debug.Log($"[button.onClick.GetPersistentEventCount()] : {button.onClick.GetPersistentEventCount()}");
+        // 1) 실행 중 코루틴 전부 중지
+        StopAllCoroutines();
+        fadeOutRoutine = null;
+        blinkRoutine = null;
+
+        // 2) 내부 상태 변수 초기화
+        isBlinkHidingActive = false;
+
+        // 3) 패널/비네팅/커버 계열을 "기본값"으로 강제 복구
+        ResetFadeImage(coverPanel, alpha: 0f, active: false, black: true);
+        ResetFadeImage(dialogueCoverPanel, alpha: 0f, active: false, black: true);
+
+        ResetVignette(warningVignette, warningVignetteQVignetteSingle, active: false, alpha: 0f);
+        ResetVignette(hidingVignette, hidingVignetteQVignetteSingle, active: false, alpha: 0f);
     }
 
-    private void EnsureFootprintsCanvasExists()
+    private void ResetFadeImage(Image img, float alpha, bool active, bool black)
     {
-        var existing = GameObject.Find(footprintsCanvasName);
-        if (existing != null) return; // 이미 있음
+        if (!img) return;
+        var c = black ? Color.black : Color.white;
+        c.a = alpha;
+        img.color = c;
+        img.gameObject.SetActive(active);
+    }
 
-        // 프리팹 레퍼런스가 할당되지 않았다면 에디터 환경에서 경로로 로드 시도
-        if (footprintsCanvasPrefab == null)
+    private void ResetVignette(GameObject go, Q_Vignette_Single q, bool active, float alpha)
+    {
+        if (q != null)
         {
-#if UNITY_EDITOR
-            // 사용자 제공 경로: Assets\03.Prefabs\Canvas\FootprintsOfMemory Canvas.prefab
-            string assetPath = "Assets/03.Prefabs/Canvas/FootprintsOfMemory Canvas.prefab";
-            footprintsCanvasPrefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(assetPath);
-            if (footprintsCanvasPrefab == null)
-            {
-                Debug.LogWarning($"[PuzzleBagButtonBinder] 프리팹을 경로에서 찾지 못했습니다: {assetPath}. " +
-                                 $"인스펙터에 프리팹을 직접 할당해 주세요.");
-                return;
-            }
-#else
-            Debug.LogWarning("[PuzzleBagButtonBinder] footprintsCanvasPrefab이 비어 있고 런타임에서는 경로 로드를 할 수 없습니다. " +
-                             "인스펙터에 프리팹을 할당해 주세요.");
-            return;
-#endif
+            var c = q.mainColor;
+            c.a = alpha;
+            q.mainColor = c;
         }
+        if (go != null) go.SetActive(active);
+    }
 
-        var spawned = Instantiate(footprintsCanvasPrefab);
-        // 씬에서 이름으로 탐색하기 쉽게 동일 이름 보장
-        spawned.name = footprintsCanvasName;
-        // Debug.Log("[PuzzleBagButtonBinder] FootprintsOfMemory Canvas 프리팹을 씬에 생성했습니다.");
+    private void ResetCanvasGroup(CanvasGroup cg, bool visible)
+    {
+        if (!cg) return;
+        cg.alpha = visible ? 1f : 0f;
+        cg.interactable = visible;
+        cg.blocksRaycasts = visible;
     }
 
     // StartWhiteOut과 StartBlackOut, StartBlackIn은 TutorialController에서
@@ -354,23 +418,35 @@ public class UIManager : MonoBehaviour
             yield return null;
         }
 
-        // 종료 시 원래 색상으로 복원
-        Color finalColor = hidingVignetteQVignetteSingle.mainColor;
-        finalColor.a = 1f;
-        hidingVignetteQVignetteSingle.mainColor = finalColor;
+        //Color finalColor = hidingVignetteQVignetteSingle.mainColor;
+        //finalColor.a = 1f;
+        //hidingVignetteQVignetteSingle.mainColor = finalColor;
+
+        // 종료 시 기본 상태로 복원
+        ResetVignette(hidingVignette, hidingVignetteQVignetteSingle, active: false, alpha: 0f);
+        blinkRoutine = null;
     }
 
     public void SetBlinkHidingCoroutine(bool isActive)
     {
         if (isActive)
         {
+            if (blinkRoutine != null) StopCoroutine(blinkRoutine);
+
             isBlinkHidingActive = true;
-            StartCoroutine(BlinkHidingCoroutine());
+            blinkRoutine = StartCoroutine(BlinkHidingCoroutine());
         }
         else
         {
-            StopCoroutine(BlinkHidingCoroutine());
             isBlinkHidingActive = false;
+            if (blinkRoutine != null)
+            {
+                StopCoroutine(blinkRoutine);
+                blinkRoutine = null;
+            }
+
+            // 종료 시 상태 강제 복구
+            ResetVignette(hidingVignette, hidingVignetteQVignetteSingle, active: false, alpha: 0f);
         }
     }
 
@@ -444,5 +520,55 @@ public class UIManager : MonoBehaviour
         }
     }
 
+    //----------------------------가방 버튼 연결 관련------------------------------------
+    private void RegisterPuzzleBagButtonEvent()
+    {
+        var button = puzzleBagButton.GetComponentInChildren<Button>(true);
+        // 씬에 FootprintsOfMemory Canvas 존재 확인, 없으면 프리팹 생성
+        EnsureFootprintsCanvasExists();
+        // 버튼에 아무 것도 등록되지 않았다면 OnClickPuzzleBag 등록
+        if (button.onClick.GetPersistentEventCount() == 0)
+        {
+            button.onClick.AddListener(() =>
+            {
+                if (PuzzleMemoryManager.Instance != null)
+                    PuzzleMemoryManager.Instance.OnClickPuzzleBag();
+                else
+                    Debug.LogWarning("[PuzzleBagButtonBinder] PuzzleMemoryManager.Instance가 null입니다.");
+            });
+        }
+        //Debug.Log($"[button.onClick.GetPersistentEventCount()] : {button.onClick.GetPersistentEventCount()}");
+    }
 
+    private void EnsureFootprintsCanvasExists()
+    {
+        var existing = GameObject.Find(footprintsCanvasName);
+        if (existing != null) return; // 이미 있음
+
+        // 프리팹 레퍼런스가 할당되지 않았다면 에디터 환경에서 경로로 로드 시도
+        if (footprintsCanvasPrefab == null)
+        {
+#if UNITY_EDITOR
+            // 사용자 제공 경로: Assets\03.Prefabs\Canvas\FootprintsOfMemory Canvas.prefab
+            string assetPath = "Assets/03.Prefabs/Canvas/FootprintsOfMemory Canvas.prefab";
+            footprintsCanvasPrefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(assetPath);
+            if (footprintsCanvasPrefab == null)
+            {
+                Debug.LogWarning($"[PuzzleBagButtonBinder] 프리팹을 경로에서 찾지 못했습니다: {assetPath}. " +
+                                 $"인스펙터에 프리팹을 직접 할당해 주세요.");
+                return;
+            }
+#else
+            Debug.LogWarning("[PuzzleBagButtonBinder] footprintsCanvasPrefab이 비어 있고 런타임에서는 경로 로드를 할 수 없습니다. " +
+                             "인스펙터에 프리팹을 할당해 주세요.");
+            return;
+#endif
+        }
+
+        var spawned = Instantiate(footprintsCanvasPrefab);
+        // 씬에서 이름으로 탐색하기 쉽게 동일 이름 보장
+        spawned.name = footprintsCanvasName;
+        // Debug.Log("[PuzzleBagButtonBinder] FootprintsOfMemory Canvas 프리팹을 씬에 생성했습니다.");
+    }
+    //-------------------------------------------------------------------------------------------------
 }

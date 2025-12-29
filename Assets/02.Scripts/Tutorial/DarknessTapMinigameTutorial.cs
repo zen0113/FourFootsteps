@@ -132,8 +132,9 @@ public class DarknessTapMinigameTutorial : TutorialBase
 
         if (playerUICanvas != null)
         {
-            Debug.Log("[DarknessTapMinigameTutorial] Player UI Canvas를 찾아서 비활성화합니다.");
-            playerUICanvas.SetActive(false);
+            CanvasGroup canvasGroup = playerUICanvas.GetComponent<CanvasGroup>();
+            canvasGroup.alpha = 0f;
+            Debug.Log("[DarknessTapMinigameTutorial] Player UI Canvas CanvasGroup alpha를 0으로 설정.");
         }
         else
         {

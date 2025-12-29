@@ -182,13 +182,7 @@ public class PlayerCatMovement : MonoBehaviour
     private void Start()
     {
         // UI 상태 설정 (고양이 버전 UI 활성화, 사람 버전 UI 비활성화)
-        UIManager.Instance.SetUI(eUIGameObjectName.HumanVersionUIGroup, false);
-        UIManager.Instance.SetUI(eUIGameObjectName.CatVersionUIGroup, true);
-        UIManager.Instance.SetUI(eUIGameObjectName.ResponsibilityGroup, true);
-        UIManager.Instance.SetUI(eUIGameObjectName.ResponsibilityGauge, true);
-        UIManager.Instance.SetUI(eUIGameObjectName.PlaceUI, true);
-        // 필요한 컴포넌트들 가져오기
-        UIManager.Instance.SetUI(eUIGameObjectName.PuzzleBagButton, true);
+        UIManager.Instance.SetPlayerVersionUI(UIManager.PlayerType.Cat);
 
         rb = GetComponent<Rigidbody2D>();
         boxCollider = GetComponent<BoxCollider2D>();

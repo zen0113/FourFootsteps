@@ -1,8 +1,10 @@
-using UnityEngine;
-using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
+using UnityEngine;
+using UnityEngine.UI;
 
+[RequireComponent(typeof(AudioSource))] // AudioSource 컴포넌트 자동 추가
 public class HeartbeatMinigame : MonoBehaviour
 {
     [Header("=== UI 요소 ===")]
@@ -10,6 +12,7 @@ public class HeartbeatMinigame : MonoBehaviour
     [SerializeField] private Image targetLineImage;
     [SerializeField] private Image playerLineImage;
     [SerializeField] private Text feedbackText;
+    [SerializeField] private TextMeshProUGUI catNameText;
 
     [SerializeField] private HeartRateDisplay heartRateDisplay;
 
@@ -22,6 +25,11 @@ public class HeartbeatMinigame : MonoBehaviour
     [Header("=== 게임플레이 설정 ===")]
     [SerializeField] private float gameDuration = 5.0f;
     [SerializeField] private float showPatternTime = 2.0f;
+
+    [Header("=== 오디오 설정 (New) ===")]
+    [SerializeField] private AudioClip minigameBgm; // 인스펙터에서 BGM 파일 연결
+    [Range(0f, 1f)][SerializeField] private float bgmVolume = 0.5f;
+    private AudioSource audioSource;
 
     private struct WaveformParameters
     {
@@ -39,6 +47,7 @@ public class HeartbeatMinigame : MonoBehaviour
     }
 
     private Dictionary<string, WaveformParameters> catWaveformParameters;
+    private Dictionary<string, string> catNameTranslation;
     private List<Vector2> currentWaveformPoints;
     private Texture2D targetTexture;
     private Texture2D playerTexture;
@@ -66,6 +75,13 @@ public class HeartbeatMinigame : MonoBehaviour
         targetLineImage.transform.localPosition = Vector3.zero;
         playerLineImage.transform.SetParent(drawingArea, false);
         playerLineImage.transform.localPosition = Vector3.zero;
+
+        // [오디오 설정 초기화]
+        audioSource = GetComponent<AudioSource>();
+        if (audioSource == null) audioSource = gameObject.AddComponent<AudioSource>();
+
+        audioSource.loop = true;           // 반복 재생 설정
+        audioSource.playOnAwake = false;   // 시작하자마자 켜지는 것 방지 (OnEnable에서 제어)
 
         InitializeWaveformParameters();
     }
@@ -145,6 +161,12 @@ public class HeartbeatMinigame : MonoBehaviour
             minSpecialDip = 10f,
             maxSpecialDip = 35f
         };
+
+        catNameTranslation = new Dictionary<string, string>();
+        catNameTranslation["Ttoli"] = "똘이";
+        catNameTranslation["Leo"] = "레오";
+        catNameTranslation["Bogsil"] = "복실이";
+        catNameTranslation["Miya"] = "미야";
     }
 
     public void SetDifficulty(float newThreshold)
@@ -157,6 +179,19 @@ public class HeartbeatMinigame : MonoBehaviour
         if (catWaveformParameters == null) InitializeWaveformParameters();
 
         currentCatName = catName;
+
+        if (catNameText != null)
+        {
+            if (catNameTranslation.ContainsKey(catName))
+            {
+                catNameText.text = catNameTranslation[catName]; // 한글 이름 표시
+            }
+            else
+            {
+                catNameText.text = catName; // 데이터가 없으면 영어 이름 그대로 표시
+                Debug.LogWarning($"'{catName}'에 대한 한글 이름 데이터가 없습니다.");
+            }
+        }
 
         WaveformParameters parameters;
         if (catWaveformParameters.ContainsKey(catName))
@@ -228,17 +263,34 @@ public class HeartbeatMinigame : MonoBehaviour
         return points;
     }
 
+    // [BGM 재생 로직 추가]
     void OnEnable()
     {
         Debug.Log($"게임 활성화됨. '{currentCatName}' 데이터 로드 시작.");
+
+        // BGM 재생
+        if (minigameBgm != null && audioSource != null)
+        {
+            audioSource.clip = minigameBgm;
+            audioSource.volume = bgmVolume;
+            audioSource.Play();
+        }
+
         SetupWaveform(currentCatName);
     }
 
+    // [BGM 정지 로직 추가]
     void OnDisable()
     {
         isDrawingAllowed = false;
         isDrawing = false;
         StopAllCoroutines();
+
+        // BGM 정지
+        if (audioSource != null)
+        {
+            audioSource.Stop();
+        }
 
         if (targetTexture != null) Destroy(targetTexture);
         if (playerTexture != null) Destroy(playerTexture);
@@ -319,25 +371,21 @@ public class HeartbeatMinigame : MonoBehaviour
         }
     }
 
-    // [핵심 수정] 정확도 계산 방식 개선
     private void CalculateAccuracyAndEnd()
     {
         int matchedPixels = 0;
         int totalTargetPixels = 0;
 
-        // 모든 X 좌표에서 타겟 Y값 계산 (선형 보간 사용)
         for (int x = 0; x < drawingWidth; x++)
         {
             float time = (float)x / drawingWidth * gameDuration;
             float targetY = GetTargetYAtTime(time);
 
-            // [수정 1] 모든 픽셀을 채점 대상으로 포함 (베이스라인 제외 조건 삭제)
             totalTargetPixels++;
 
-            // [수정 2] 플레이어 Y값을 중앙값으로 찾기 (두꺼운 선 고려)
             float playerY = GetPlayerYAtX_Center(x);
 
-            if (playerY >= 0) // 플레이어가 그린 부분이 있으면
+            if (playerY >= 0)
             {
                 if (Mathf.Abs(playerY - targetY) <= matchTolerance)
                 {
@@ -351,7 +399,8 @@ public class HeartbeatMinigame : MonoBehaviour
 
         bool success = accuracy >= successThreshold;
 
-        Debug.Log($"[정확도] {currentCatName}: {accuracy:F1}% (매칭: {matchedPixels}/{totalTargetPixels})");
+        string displayName = catNameTranslation.ContainsKey(currentCatName) ? catNameTranslation[currentCatName] : currentCatName;
+        Debug.Log($"[정확도] {displayName}: {accuracy:F1}% (매칭: {matchedPixels}/{totalTargetPixels})");
 
         EndMinigame(success, accuracy);
     }
@@ -370,6 +419,8 @@ public class HeartbeatMinigame : MonoBehaviour
     private IEnumerator DelayedEnd(bool success)
     {
         yield return new WaitForSeconds(1.5f);
+
+        // [중요] 게임 오브젝트가 꺼질 때(OnDisable) BGM도 같이 꺼집니다.
         OnMinigameEnd?.Invoke(success);
         gameObject.SetActive(false);
     }
@@ -400,7 +451,6 @@ public class HeartbeatMinigame : MonoBehaviour
         return Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
     }
 
-    // [기존] 선형 보간으로 정확한 Y값 계산
     private float GetTargetYAtTime(float time)
     {
         if (currentWaveformPoints == null || currentWaveformPoints.Count < 2) return drawingHeight / 2f;
@@ -417,12 +467,10 @@ public class HeartbeatMinigame : MonoBehaviour
         return drawingHeight / 2f;
     }
 
-    // [개선된 함수] 두꺼운 선의 중앙값 찾기
     private float GetPlayerYAtX_Center(int x)
     {
         List<int> yPositions = new List<int>();
 
-        // X 좌표에서 그려진 모든 Y값 수집
         for (int y = 0; y < drawingHeight; y++)
         {
             if (playerTexture.GetPixel(x, y).a > 0.5f)
@@ -433,12 +481,10 @@ public class HeartbeatMinigame : MonoBehaviour
 
         if (yPositions.Count == 0) return -1;
 
-        // 중앙값 반환 (두꺼운 선의 중심)
         yPositions.Sort();
         return yPositions[yPositions.Count / 2];
     }
 
-    // [사용 안 함 - 참고용으로 남김]
     private float GetTargetYAtX(int x)
     {
         for (int y = 0; y < drawingHeight; y++)

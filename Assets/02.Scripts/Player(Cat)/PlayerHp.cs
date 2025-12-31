@@ -74,58 +74,96 @@ public class PlayerHp : MonoBehaviour
         }
 
         // create heart on screen by creating instances of heart prefab under heart parent
-        for (int i = 0; i < heartCount; i++)
+        for (int i = 0; i < maxHp; i++) // 수정: currentHp가 아니라 maxHp만큼 칸을 만들어야 빈 칸도 보입니다.
         {
-            Instantiate(heartPrefab, heartParent.transform);
+            GameObject newHeart = Instantiate(heartPrefab, heartParent.transform);
+
+            // 초기 상태 설정 (현재 체력보다 낮으면 꽉 찬 하트)
+            Image heartImg = newHeart.GetComponent<Image>();
+            if (i < currentHp) heartImg.sprite = fullHeart;
+            else heartImg.sprite = emptyHeart;
         }
     }
 
     public void DecrementHealthPoint()
     {
-        //int presentHeartIndex = currentHp - 1;
+        // 1. 전체적으로 이미지를 업데이트 (안전장치)
+        // 체력이 깎인 직후이므로, currentHp 인덱스에 해당하는 하트가 방금 잃은 하트입니다.
+        // 예: 체력 3 -> 2가 됨. 인덱스 0, 1은 생존. 인덱스 2가 방금 죽음.
 
-        //// pop heart on screen
-        //GameObject heart = heartParent.transform.GetChild(presentHeartIndex).gameObject;
+        int lostHeartIndex = currentHp; // 방금 잃어버린 하트의 인덱스
 
-        //// animate heart by triggering "break" animation
-        //heart.GetComponent<Animator>().SetTrigger("Break");
+        // UI 효과 실행 (범위 체크)
+        if (lostHeartIndex >= 0 && lostHeartIndex < heartParent.transform.childCount)
+        {
+            GameObject lostHeartObj = heartParent.transform.GetChild(lostHeartIndex).gameObject;
+            StartCoroutine(AnimateHeartLoss(lostHeartObj));
+        }
 
+        // 나머지 하트 상태 동기화 
         for (int i = 0; i < heartParent.transform.childCount; i++)
         {
-            if (i < currentHp)
+            // 방금 잃은 하트는 애니메이션 중일 수 있으니 건너뛰거나, 
+            // 애니메이션 코루틴 내부에서 처리하게 둡니다.
+            if (i != lostHeartIndex)
             {
-                heartParent.transform.GetChild(i).GetComponent<Image>().sprite = fullHeart;
-            }
-            else
-            {
-                heartParent.transform.GetChild(i).GetComponent<Image>().sprite = emptyHeart;
+                Image img = heartParent.transform.GetChild(i).GetComponent<Image>();
+                if (i < currentHp) img.sprite = fullHeart;
+                else img.sprite = emptyHeart;
             }
         }
 
+        // 사운드 재생 로직 
         var catMovement = gameObject.GetComponent<PlayerCatMovement>();
-
-        if (catMovement != null && catMovement.enabled)
-        {
-            catMovement.PlayHurtSound();
-        }
+        if (catMovement != null && catMovement.enabled) catMovement.PlayHurtSound();
         else
         {
             var autoRunner = gameObject.GetComponent<PlayerAutoRunner>();
-            if (autoRunner != null)
-            {
-                autoRunner.PlayHurtSound();
-            }
-            else
-            {
-                Debug.LogWarning("Neither PlayerCatMovement nor PlayerAutoRunner is active!");
-            }
+            if (autoRunner != null) autoRunner.PlayHurtSound();
         }
 
-        // 빨간 비네팅 실행
+        // 비네팅 및 카메라 쉐이크
         Warning();
-        // 카메라 흔들림 효과
-        cameraShake.enabled = true;
-        cameraShake.ShakeAndDisable(0.5f, 0.25f);
+        if (cameraShake != null)
+        {
+            cameraShake.enabled = true;
+            cameraShake.ShakeAndDisable(0.5f, 0.25f);
+        }
+    }
+
+    private IEnumerator AnimateHeartLoss(GameObject heartObj)
+    {
+        Image heartImg = heartObj.GetComponent<Image>();
+        RectTransform heartRect = heartObj.GetComponent<RectTransform>();
+        Vector2 originalPos = heartRect.anchoredPosition;
+
+        // 1. 빨간색으로 깜빡이며 흔들림 (0.3초 정도)
+        float duration = 0.3f;
+        float elapsed = 0f;
+
+        while (elapsed < duration)
+        {
+            // 랜덤하게 위치 흔들기 (강도 5f)
+            float x = Random.Range(-5f, 5f);
+            float y = Random.Range(-5f, 5f);
+            heartRect.anchoredPosition = originalPos + new Vector2(x, y);
+
+            // 색상을 붉은색으로 틴트
+            heartImg.color = Color.Lerp(Color.white, Color.red, Mathf.PingPong(elapsed * 10, 1));
+
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+
+        // 2. 원상복구 및 빈 하트로 교체
+        heartRect.anchoredPosition = originalPos;
+        heartImg.sprite = emptyHeart;
+        heartImg.color = Color.white; // 색상 초기화
+
+        // 3. 살짝 작아졌다 커지는 느낌으로 '터지는' 느낌 주기
+        heartRect.localScale = Vector3.one * 0.8f;
+        yield return new WaitForSeconds(0.1f);
+        heartRect.localScale = Vector3.one;
     }
 
     protected void Warning()

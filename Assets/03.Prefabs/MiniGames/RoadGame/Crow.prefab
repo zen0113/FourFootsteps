@@ -31,7 +31,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 10.046528, y: 1.354936, z: 2.9453692}
-  m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
+  m_LocalScale: {x: 0.32, y: 0.32, z: 0.32}
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 0}
@@ -76,7 +76,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 4
   m_Sprite: {fileID: 21300000, guid: 807b88d0fb5537045b3df4380247578a, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -122,7 +122,7 @@ CircleCollider2D:
   m_UsedByComposite: 0
   m_Offset: {x: -0.15, y: -0.23}
   serializedVersion: 2
-  m_Radius: 3
+  m_Radius: 3.2
 --- !u!50 &2619524327509408205
 Rigidbody2D:
   serializedVersion: 4
@@ -162,10 +162,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 675ef22e6291ab74ebded90558166c08, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  warningDuration: 1
-  warningCircleSprite: {fileID: 21300000, guid: e2ecb1587bed3484ea01e2f717d85271, type: 3}
-  warningIconSprite: {fileID: 21300000, guid: 6eb29e4e26e11e245bac50060acc72b0, type: 3}
-  circleScale: {x: 1, y: 1}
+  warningDuration: 1.5
+  warningCircleSprite: {fileID: 21300000, guid: 8b6bdc6d2c52376449fd3223d62077b0, type: 3}
+  warningIconSprite: {fileID: 21300000, guid: c3b6d99b8d7f99748b2de5d06000b160, type: 3}
+  circleScale: {x: 0.5, y: 0.5}
   iconScale: {x: 0.5, y: 0.5}
   iconOffset: {x: 0, y: 1}
   circleSortingOrder: 5

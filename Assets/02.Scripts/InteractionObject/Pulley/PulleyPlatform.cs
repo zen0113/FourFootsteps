@@ -9,6 +9,11 @@ public class PulleyPlatform : MonoBehaviour
 {
     [Header("플랫폼 설정")]
     [SerializeField] private string platformName = "Platform";
+
+    [Header("박스 고정 스냅 포인트")]
+    [SerializeField] private Transform hardLockSnapPoint;
+    [Tooltip("스냅 포인트에 부착된 Collider2D(보통 isTrigger=true 권장). 비워두면 hardLockSnapPoint에서 자동으로 찾습니다.")]
+    [SerializeField] private Collider2D hardLockSnapCollider;
     
     [Header("이동 설정")]
     [SerializeField] private float moveSpeed = 2f;
@@ -50,6 +55,8 @@ public class PulleyPlatform : MonoBehaviour
     public bool IsMoving => isMoving;
     public float CurrentHeight => currentHeight;
     public float TargetHeight => targetHeight;
+    public Transform HardLockSnapPoint => hardLockSnapPoint;
+    public Collider2D HardLockSnapCollider => hardLockSnapCollider;
     
     // 이벤트
     public System.Action<PulleyPlatform, ObjectType, float> OnPriorityChanged;
@@ -61,6 +68,10 @@ public class PulleyPlatform : MonoBehaviour
         absoluteWorldPosition = transform.position;
         platformCollider = GetComponent<Collider2D>();
         platformRigidbody = GetComponent<Rigidbody2D>();
+
+        // 스냅 콜라이더 자동 연결(지정 누락 방지)
+        if (hardLockSnapCollider == null && hardLockSnapPoint != null)
+            hardLockSnapCollider = hardLockSnapPoint.GetComponent<Collider2D>();
 
         if (platformRigidbody == null)
         {

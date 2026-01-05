@@ -53,6 +53,7 @@ public class AdvancedPushableBox : MonoBehaviour
     [SerializeField] private bool forceNonTriggerCollider = true;
     [SerializeField] private bool forceContinuousCollision = true;
     [SerializeField] private bool debugCollisionLayerLog = false; // 특정 구간에서 왜 막히는지(레이어/오브젝트) 추적용
+    [SerializeField] private bool debugFloorPhaseLog = false; // [FloorPhase] 로그만 별도 토글(스팸 방지)
     
     // 상태 변수들
     private Vector3 originalPosition;
@@ -1011,20 +1012,20 @@ public class AdvancedPushableBox : MonoBehaviour
         // “도르레를 타고 내려갈 때 Floor를 뚫고 내려가야 함” 요구사항을 그대로 반영
         if (!isOnPulleyPlatform || currentPulleyPlatform == null)
         {
-            if (debugCollisionLayerLog)
+            if (debugCollisionLayerLog && debugFloorPhaseLog)
                 Debug.Log($"[AdvancedPushableBox][FloorPhase] ShouldPhase=false: isOnPulley={isOnPulleyPlatform}, platform={currentPulleyPlatform != null}");
             return false;
         }
         if (!currentPulleyPlatform.IsMoving)
         {
-            if (debugCollisionLayerLog)
+            if (debugCollisionLayerLog && debugFloorPhaseLog)
                 Debug.Log($"[AdvancedPushableBox][FloorPhase] ShouldPhase=false: platform not moving");
             return false;
         }
 
         // TargetHeight가 현재보다 낮으면 내려가는 중
         bool isDescending = currentPulleyPlatform.TargetHeight < currentPulleyPlatform.CurrentHeight;
-        if (debugCollisionLayerLog && isDescending)
+        if (debugCollisionLayerLog && debugFloorPhaseLog && isDescending)
         {
             Debug.Log($"[AdvancedPushableBox][FloorPhase] ShouldPhase=true: descending (T={currentPulleyPlatform.TargetHeight:F1} < H={currentPulleyPlatform.CurrentHeight:F1})");
         }
@@ -1045,7 +1046,7 @@ public class AdvancedPushableBox : MonoBehaviour
             Physics2D.IgnoreCollision(boxCollider, collision.collider, true);
             ignoredFloorColliders.Add(collision.collider);
 
-            if (debugCollisionLayerLog)
+            if (debugCollisionLayerLog && debugFloorPhaseLog)
             {
                 Debug.Log($"[AdvancedPushableBox][FloorPhase] IgnoreCollision ON -> '{collision.collider.name}' layer='{LayerMask.LayerToName(collision.gameObject.layer)}'");
             }
@@ -1092,13 +1093,13 @@ public class AdvancedPushableBox : MonoBehaviour
                 {
                     effector.enabled = false;
                     disabledFloorEffectors.Add(effector);
-                    if (debugCollisionLayerLog)
+                    if (debugCollisionLayerLog && debugFloorPhaseLog)
                     {
                         Debug.Log($"[AdvancedPushableBox][FloorPhase] PlatformEffector2D DISABLED -> '{h.name}'");
                     }
                 }
 
-                if (debugCollisionLayerLog)
+                if (debugCollisionLayerLog && debugFloorPhaseLog)
                 {
                     Debug.Log($"[AdvancedPushableBox][FloorPhase] IgnoreCollision ON(overlap) -> '{h.name}' layer='{LayerMask.LayerToName(h.gameObject.layer)}'");
                 }
@@ -1123,7 +1124,7 @@ public class AdvancedPushableBox : MonoBehaviour
             if (effector != null)
             {
                 effector.enabled = true;
-                if (debugCollisionLayerLog)
+                if (debugCollisionLayerLog && debugFloorPhaseLog)
                 {
                     Debug.Log($"[AdvancedPushableBox][FloorPhase] PlatformEffector2D ENABLED -> '{effector.name}'");
                 }
@@ -1131,7 +1132,7 @@ public class AdvancedPushableBox : MonoBehaviour
         }
         disabledFloorEffectors.Clear();
 
-        if (debugCollisionLayerLog)
+        if (debugCollisionLayerLog && debugFloorPhaseLog)
             Debug.Log("[AdvancedPushableBox][FloorPhase] IgnoreCollision OFF (restore)");
     }
 
@@ -1140,7 +1141,7 @@ public class AdvancedPushableBox : MonoBehaviour
         // 인스펙터에서 지정한 바닥 오브젝트가 없으면 무시
         if (floorObjectsToDisable == null || floorObjectsToDisable.Length == 0)
         {
-            if (debugCollisionLayerLog && shouldDisable)
+            if (debugCollisionLayerLog && debugFloorPhaseLog && shouldDisable)
                 Debug.LogWarning("[AdvancedPushableBox][FloorPhase] floorObjectsToDisable 배열이 비어있습니다!");
             return;
         }
@@ -1155,7 +1156,7 @@ public class AdvancedPushableBox : MonoBehaviour
         {
             if (floorObj == null)
             {
-                if (debugCollisionLayerLog)
+                if (debugCollisionLayerLog && debugFloorPhaseLog)
                     Debug.LogWarning("[AdvancedPushableBox][FloorPhase] floorObjectsToDisable 배열에 null이 있습니다!");
                 continue;
             }
@@ -1164,13 +1165,13 @@ public class AdvancedPushableBox : MonoBehaviour
             floorObj.SetActive(!shouldDisable);
             disabledCount++;
 
-            if (debugCollisionLayerLog)
+            if (debugCollisionLayerLog && debugFloorPhaseLog)
             {
                 Debug.Log($"[AdvancedPushableBox][FloorPhase] Floor object '{floorObj.name}' {(shouldDisable ? "DISABLED" : "ENABLED")} (was: {wasActive})");
             }
         }
 
-        if (debugCollisionLayerLog && disabledCount == 0)
+        if (debugCollisionLayerLog && debugFloorPhaseLog && disabledCount == 0)
         {
             Debug.LogWarning("[AdvancedPushableBox][FloorPhase] 비활성화할 바닥 오브젝트가 없습니다!");
         }

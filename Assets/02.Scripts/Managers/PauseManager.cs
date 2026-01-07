@@ -22,13 +22,13 @@ public class PauseManager : MonoBehaviour
 
     private bool isQuitGame = false;
 
-    // -----------ShowCase-----------
-    [SerializeField] private TMP_Dropdown scoreDropdown;
-    [SerializeField] private GameObject scoreConfirmButton;
-    private Dictionary<string, int> setMaxResponsibilityScores;
-    private const string ENDING_SCENE_NAME = "Ending";
-    [SerializeField] private bool isProhibittedScore = false;
-    // ------------------------------
+    //// -----------ShowCase-----------
+    //[SerializeField] private TMP_Dropdown scoreDropdown;
+    //[SerializeField] private GameObject scoreConfirmButton;
+    //private Dictionary<string, int> setMaxResponsibilityScores;
+    //private const string ENDING_SCENE_NAME = "Ending";
+    //[SerializeField] private bool isProhibittedScore = false;
+    //// ------------------------------
 
     // [중요] 씬이 로드될 때 퍼즈 상태가 아니도록 초기화
     private void Awake()
@@ -37,29 +37,8 @@ public class PauseManager : MonoBehaviour
         isPaused = false;
         Time.timeScale = 1f;
 
-        if (!GameManager.Instance.isReleaseBuild)
-            InitializeShortcuts();
-    }
-
-    private void InitializeShortcuts()
-    {
-        // Stage 씬, Recall 씬에서 최대 설정 가능한 책임감 지수
-        setMaxResponsibilityScores = new Dictionary<string, int>
-        {
-            { "StageScene1", 0 },
-            { "StageScene2", 1},
-            { "StageScene3", 2},
-            { "StageScene3_2", 3},
-            { "StageScene4_1", 3 },
-            { "StageScene4_2", 4 },
-            { "StageScene4_3", 4 },
-            { "StageScene5", 4 },
-            { "RecallScene1", 1 },
-            { "RecallScene2", 2 },
-            { "RecallScene3", 3 },
-            { "RecallScene4", 4 },
-            { "RecallScene5", 5 }
-        };
+        //if (!GameManager.Instance.isReleaseBuild)
+        //    InitializeShortcuts();
     }
 
     void Update()
@@ -98,30 +77,30 @@ public class PauseManager : MonoBehaviour
         if (GameManager.Instance.isReleaseBuild)
             return;
 
-        // -----------ShowCase-----------
-        // 시연용 책임감 지수 변경
-        // 현재씬이 회상씬인 경우에는 CanInvesigatingRecallObject 이 true일 때만 
-        // 시연용 책임감 지수 변경 사용 가능
-        bool isToEnding = GameManager.Instance.GetVariable("CurrentSceneName").ToString().Contains(ENDING_SCENE_NAME);
+        //// -----------ShowCase-----------
+        //// 시연용 책임감 지수 변경
+        //// 현재씬이 회상씬인 경우에는 CanInvesigatingRecallObject 이 true일 때만 
+        //// 시연용 책임감 지수 변경 사용 가능
+        //bool isToEnding = GameManager.Instance.GetVariable("CurrentSceneName").ToString().Contains(ENDING_SCENE_NAME);
 
-        // 엔딩에선 해당 기능 사용 불가능
-        if (isToEnding|| isProhibittedScore) {
-            Showcase_SetActiveCurrentScoreOption(false);
-            return;
-        }
+        //// 엔딩에선 해당 기능 사용 불가능
+        //if (isToEnding|| isProhibittedScore) {
+        //    Showcase_SetActiveCurrentScoreOption(false);
+        //    return;
+        //}
 
-        if (!(bool)GameManager.Instance.GetVariable("isRecalling"))
-            Showcase_ChangeScoreOption();
-        else if((bool)GameManager.Instance.GetVariable("isRecalling")&&
-            (bool)GameManager.Instance.GetVariable("CanInvesigatingRecallObject"))
-        {
-            Showcase_ChangeScoreOption();
-        }
-        else
-        {
-            Showcase_SetActiveCurrentScoreOption(false);
-        }
-        // ------------------------------
+        //if (!(bool)GameManager.Instance.GetVariable("isRecalling"))
+        //    Showcase_ChangeScoreOption();
+        //else if((bool)GameManager.Instance.GetVariable("isRecalling")&&
+        //    (bool)GameManager.Instance.GetVariable("CanInvesigatingRecallObject"))
+        //{
+        //    Showcase_ChangeScoreOption();
+        //}
+        //else
+        //{
+        //    Showcase_SetActiveCurrentScoreOption(false);
+        //}
+        //// ------------------------------
     }
 
     public void TogglePause()
@@ -202,50 +181,71 @@ public class PauseManager : MonoBehaviour
         guideUI.SetActive(false);
     }
 
-    // -----------ShowCase-----------
-    // 시연 치트용 : 책임감 지수 토글 설정
-    public void Showcase_ChangeScoreOption()
-    {
-        Showcase_SetActiveCurrentScoreOption(true);
+    //// -----------ShowCase-----------
+    //private void InitializeShortcuts()
+    //{
+    //    // Stage 씬, Recall 씬에서 최대 설정 가능한 책임감 지수
+    //    setMaxResponsibilityScores = new Dictionary<string, int>
+    //    {
+    //        { "StageScene1", 0 },
+    //        { "StageScene2", 1},
+    //        { "StageScene3", 2},
+    //        { "StageScene3_2", 3},
+    //        { "StageScene4_1", 3 },
+    //        { "StageScene4_2", 4 },
+    //        { "StageScene4_3", 4 },
+    //        { "StageScene5", 4 },
+    //        { "RecallScene1", 1 },
+    //        { "RecallScene2", 2 },
+    //        { "RecallScene3", 3 },
+    //        { "RecallScene4", 4 },
+    //        { "RecallScene5", 5 }
+    //    };
+    //}
 
-        string currentSceneName = GameManager.Instance.GetVariable("CurrentSceneName").ToString();
-        int maxScore = setMaxResponsibilityScores[currentSceneName];
+    //// 시연 치트용 : 책임감 지수 토글 설정
+    //public void Showcase_ChangeScoreOption()
+    //{
+    //    Showcase_SetActiveCurrentScoreOption(true);
 
-        List<TMP_Dropdown.OptionData> optionList = new();
-        for (int i = 0; i <= maxScore; i++)
-            optionList.Add(new TMP_Dropdown.OptionData(i.ToString()));
+    //    string currentSceneName = GameManager.Instance.GetVariable("CurrentSceneName").ToString();
+    //    int maxScore = setMaxResponsibilityScores[currentSceneName];
 
-        scoreDropdown.ClearOptions();
-        scoreDropdown.AddOptions(optionList);
+    //    List<TMP_Dropdown.OptionData> optionList = new();
+    //    for (int i = 0; i <= maxScore; i++)
+    //        optionList.Add(new TMP_Dropdown.OptionData(i.ToString()));
 
-        Showcase_SetCurrentScoreOption();
-    }
+    //    scoreDropdown.ClearOptions();
+    //    scoreDropdown.AddOptions(optionList);
 
-    private void Showcase_SetCurrentScoreOption()
-    {
-        int currentScore = (int)GameManager.Instance.GetVariable("ResponsibilityScore");
-        scoreDropdown.value = currentScore;
-    }
+    //    Showcase_SetCurrentScoreOption();
+    //}
 
-    public void Showcase_ConfirmCurrentScore()
-    {
-        int fixedScore = scoreDropdown.value;
-        GameManager.Instance.SetVariable("ResponsibilityScore", fixedScore);
-        ResultManager.Instance.Test();
-        var puzzleStates = GameManager.Instance.GetVariable("MemoryPuzzleStates") as Dictionary<int, bool>;
+    //private void Showcase_SetCurrentScoreOption()
+    //{
+    //    int currentScore = (int)GameManager.Instance.GetVariable("ResponsibilityScore");
+    //    scoreDropdown.value = currentScore;
+    //}
 
-        foreach (int key in puzzleStates.Keys.ToList())
-            puzzleStates[key] = false;
+    //public void Showcase_ConfirmCurrentScore()
+    //{
+    //    int fixedScore = scoreDropdown.value;
+    //    GameManager.Instance.SetVariable("ResponsibilityScore", fixedScore);
+    //    ResultManager.Instance.Test();
+    //    var puzzleStates = GameManager.Instance.GetVariable("MemoryPuzzleStates") as Dictionary<int, bool>;
 
-        for (int i = 0; i < fixedScore; i++)
-            puzzleStates[i] = true;
+    //    foreach (int key in puzzleStates.Keys.ToList())
+    //        puzzleStates[key] = false;
 
-        //SaveManager.Instance.SaveGameData();
-    }
+    //    for (int i = 0; i < fixedScore; i++)
+    //        puzzleStates[i] = true;
 
-    private void Showcase_SetActiveCurrentScoreOption(bool active)
-    {
-        scoreDropdown.gameObject.SetActive(active);
-        scoreConfirmButton.SetActive(active);
-    }
+    //    //SaveManager.Instance.SaveGameData();
+    //}
+
+    //private void Showcase_SetActiveCurrentScoreOption(bool active)
+    //{
+    //    scoreDropdown.gameObject.SetActive(active);
+    //    scoreConfirmButton.SetActive(active);
+    //}
 }

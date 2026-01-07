@@ -652,7 +652,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &382460662
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1179,6 +1179,7 @@ GameObject:
   - component: {fileID: 587330075}
   - component: {fileID: 587330074}
   - component: {fileID: 587330073}
+  - component: {fileID: 587330076}
   m_Layer: 5
   m_Name: CloseButton
   m_TagString: Untagged
@@ -1300,6 +1301,22 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 587330071}
   m_CullTransparentMesh: 1
+--- !u!114 &587330076
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 587330071}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d6fe6deffcdf31549a6fcb6ca044e5b3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  enableHoverEffect: 1
+  hoverScaleAmount: 1.3
+  alphaChangeEffect: 0
+  image: {fileID: 0}
 --- !u!1 &606558666
 GameObject:
   m_ObjectHideFlags: 0
@@ -3002,9 +3019,6 @@ MonoBehaviour:
   settingsUI: {fileID: 1240115064}
   guideUI: {fileID: 0}
   exitWarningUI: {fileID: 0}
-  scoreDropdown: {fileID: 0}
-  scoreConfirmButton: {fileID: 0}
-  isProhibittedScore: 1
 --- !u!114 &1233597711
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8784,6 +8798,7 @@ GameObject:
   - component: {fileID: 1704114209}
   - component: {fileID: 1704114208}
   - component: {fileID: 1704114207}
+  - component: {fileID: 1704114210}
   m_Layer: 5
   m_Name: NewGameButton
   m_TagString: Untagged
@@ -8905,6 +8920,22 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1704114205}
   m_CullTransparentMesh: 1
+--- !u!114 &1704114210
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1704114205}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d6fe6deffcdf31549a6fcb6ca044e5b3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  enableHoverEffect: 1
+  hoverScaleAmount: 1.3
+  alphaChangeEffect: 0
+  image: {fileID: 0}
 --- !u!1 &1758590977
 GameObject:
   m_ObjectHideFlags: 0
@@ -9098,6 +9129,7 @@ GameObject:
   - component: {fileID: 1954778187}
   - component: {fileID: 1954778186}
   - component: {fileID: 1954778185}
+  - component: {fileID: 1954778188}
   m_Layer: 5
   m_Name: SettingButton
   m_TagString: Untagged
@@ -9219,6 +9251,22 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1954778183}
   m_CullTransparentMesh: 1
+--- !u!114 &1954778188
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1954778183}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d6fe6deffcdf31549a6fcb6ca044e5b3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  enableHoverEffect: 1
+  hoverScaleAmount: 1.3
+  alphaChangeEffect: 0
+  image: {fileID: 0}
 --- !u!1 &1982030129
 GameObject:
   m_ObjectHideFlags: 0
@@ -9231,6 +9279,7 @@ GameObject:
   - component: {fileID: 1982030133}
   - component: {fileID: 1982030132}
   - component: {fileID: 1982030131}
+  - component: {fileID: 1982030134}
   m_Layer: 5
   m_Name: LoadGameButton
   m_TagString: Untagged
@@ -9352,6 +9401,22 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1982030129}
   m_CullTransparentMesh: 1
+--- !u!114 &1982030134
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1982030129}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d6fe6deffcdf31549a6fcb6ca044e5b3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  enableHoverEffect: 1
+  hoverScaleAmount: 1.3
+  alphaChangeEffect: 0
+  image: {fileID: 0}
 --- !u!1 &2017331812
 GameObject:
   m_ObjectHideFlags: 0

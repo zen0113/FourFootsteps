@@ -154,6 +154,8 @@ public class PauseManager : MonoBehaviour
                 UIManager.Instance.SetUI(eUIGameObjectName.PlaceUI, false);
                 UIManager.Instance.SetUI(eUIGameObjectName.ResponsibilityGroup, false);
             }
+            // 기억 발자취 켜져 있으면 비활성화
+            PuzzleMemoryManager.Instance?.DisableMemoryCanvas();
             // 모든 이펙트 코루틴 정지 및 리셋
             UIManager.Instance?.AbortAllUIEffectsAndReset();
 

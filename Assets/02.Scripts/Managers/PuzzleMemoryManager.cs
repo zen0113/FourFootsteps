@@ -207,6 +207,19 @@ public class PuzzleMemoryManager : MonoBehaviour
         PuzzleHomeGroup.SetActive(true);
     }
 
+    // 타이틀 화면으로 이동할 경우 켜져 있으면 캔버스 끄고 원래 상태로 복구.
+    public void DisableMemoryCanvas()
+    {
+        if (gameObject.activeSelf)
+        {
+            OnClickCloseButton();
+            OnClickExitButton();
+        }
+        else
+            return;
+    }
+
+
     /// <summary>
     /// CSV에서 원본 텍스트만 파싱해서 memoryDictionary에 저장.
     /// (이 시점에서는 플레이어/고양이 이름 치환을 하지 않음)

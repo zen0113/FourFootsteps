@@ -53,6 +53,7 @@ public class AdvancedPushableBox : MonoBehaviour
     [SerializeField] private bool forceNonTriggerCollider = true;
     [SerializeField] private bool forceContinuousCollision = true;
     [SerializeField] private bool debugCollisionLayerLog = false; // 특정 구간에서 왜 막히는지(레이어/오브젝트) 추적용
+    [SerializeField] private bool debugFloorPhaseLog = false; // [FloorPhase] 로그만 별도 토글(스팸 방지)
     
     // 상태 변수들
     private Vector3 originalPosition;
@@ -74,6 +75,36 @@ public class AdvancedPushableBox : MonoBehaviour
     // 도르레 플랫폼 위(운반 중) 판정
     private PulleyPlatform currentPulleyPlatform = null;
     private bool isOnPulleyPlatform = false;
+    
+    [Header("도르레 하드 고정(미끄러짐 방지)")]
+    [SerializeField] private bool enablePulleyHardLock = true;
+    [SerializeField] private float pulleyHardLockContactEpsilon = 0.002f; // 콜라이더 거리(표면 간격)가 이 값 이하면 '닿음'으로 판정
+    [SerializeField] private float pulleyHardLockSnapDistance = 0.12f; // (호환/백업) 콜라이더가 없을 때만 거리 기반으로 사용
+    
+    [Header("도르레 하드락 해제/원상복귀")]
+    [Tooltip("이 콜라이더에 닿으면(겹치거나 접촉) 도르레 하드락을 즉시 해제하고, delay 후 원상복귀(InstantReturnToOrigin)합니다.")]
+    [SerializeField] private Collider2D pulleyHardLockReleaseCollider;
+    [SerializeField] private float pulleyHardLockReleaseReturnDelay = 2f;
+
+    // 도르레 위에 올라갔을 때 박스를 완전 고정(좌우로 밀리지 않게)하기 위한 상태/백업
+    private bool isPulleyHardLocked = false;
+    private PulleyPlatform lockedPulleyPlatform = null;
+    private Transform lockedPulleySnapPoint = null;
+    private Collider2D lockedPulleySnapCollider = null;
+    private bool warnedMissingSnapColliderOnce = false;
+    private Rigidbody2D lockedPulleyPlatformRb = null;
+    private Vector2 pulleyLockOffsetFromPlatform = Vector2.zero;
+    private Coroutine pulleyHardLockReturnCoroutine = null;
+    private float suppressPulleyHardLockUntilTime = -1f;
+
+    // 하드락 해제 시 원래 값 복원용
+    private RigidbodyType2D prevBodyType;
+    private float prevGravityScale;
+    private float prevDrag;
+    private RigidbodyConstraints2D prevConstraints;
+    private CollisionDetectionMode2D prevCollisionDetectionMode;
+    private RigidbodyInterpolation2D prevInterpolation;
+    private bool prevSimulated;
 
     // 플레이어가 박스에 "닿아있는 동안"은 복귀하면 안됨(밀기 판정이 간헐적으로 끊기는 케이스 방어)
     private bool isPlayerTouching = false;
@@ -154,6 +185,12 @@ public class AdvancedPushableBox : MonoBehaviour
     {
         // 리스폰/원상복구 과정에서 콜라이더가 꺼지거나 Trigger로 바뀌는 케이스 방어
         EnsureColliderState();
+
+        // (중요) 특정 콜라이더에 닿으면 하드락 해제 + 지연 복귀
+        CheckPulleyHardLockRelease();
+
+        // 도르레 위 하드락(완전 고정): 플랫폼 위치에 강제 동기화
+        SyncPulleyHardLock();
 
         // 도르레로 운반(특히 내려갈 때) 중에는 Floor를 통과시키기 위해 IgnoreCollision을 토글
         MaintainFloorPhasing();
@@ -325,6 +362,16 @@ public class AdvancedPushableBox : MonoBehaviour
 
         if (isOnPulley)
         {
+            // 하드락 모드에서는 물리 안정화(속도/중력 조정)보다 "완전 고정"이 우선입니다.
+            if (enablePulleyHardLock && isPulleyHardLocked)
+            {
+                rb.velocity = Vector2.zero;
+                rb.angularVelocity = 0f;
+                rb.gravityScale = 0f;
+                wasOnPulley = isOnPulley;
+                return;
+            }
+
             // 도르래 위에서는 Y축 속도를 크게 제한
             Vector2 velocity = rb.velocity;
             velocity.y = Mathf.Clamp(velocity.y, -2f, 2f);
@@ -345,6 +392,212 @@ public class AdvancedPushableBox : MonoBehaviour
         }
         
         wasOnPulley = isOnPulley;
+    }
+
+    private void EngagePulleyHardLock(PulleyPlatform pp, Transform snapPoint)
+    {
+        if (!enablePulleyHardLock) return;
+        if (rb == null) return;
+        if (pp == null) return;
+        if (snapPoint == null) return;
+
+        // 같은 플랫폼에 이미 락이 걸려있으면 무시
+        if (isPulleyHardLocked && lockedPulleyPlatform == pp && lockedPulleySnapPoint == snapPoint)
+            return;
+
+        // 첫 진입 시 원래 상태 백업
+        if (!isPulleyHardLocked)
+        {
+            prevBodyType = rb.bodyType;
+            prevGravityScale = rb.gravityScale;
+            prevDrag = rb.drag;
+            prevConstraints = rb.constraints;
+            prevCollisionDetectionMode = rb.collisionDetectionMode;
+            prevInterpolation = rb.interpolation;
+            prevSimulated = rb.simulated;
+        }
+
+        lockedPulleyPlatform = pp;
+        lockedPulleySnapPoint = snapPoint;
+        lockedPulleySnapCollider = pp.HardLockSnapCollider;
+        lockedPulleyPlatformRb = pp.GetComponent<Rigidbody2D>();
+
+        // (중요) 순간이동(스냅 포인트로 텔레포트) 느낌을 줄이기 위해,
+        // '접촉 순간의 현재 위치'를 그대로 고정하고 플랫폼 움직임만 따라가도록 상대 오프셋을 저장합니다.
+        Vector2 platformPos = lockedPulleyPlatformRb != null ? lockedPulleyPlatformRb.position : (Vector2)pp.transform.position;
+        pulleyLockOffsetFromPlatform = rb.position - platformPos;
+
+        // 완전 고정 세팅
+        rb.velocity = Vector2.zero;
+        rb.angularVelocity = 0f;
+        rb.simulated = true;
+        rb.bodyType = RigidbodyType2D.Kinematic;
+        rb.gravityScale = 0f;
+        rb.constraints = RigidbodyConstraints2D.FreezeRotation;
+
+        isPulleyHardLocked = true;
+    }
+
+    private void ReleasePulleyHardLock()
+    {
+        if (!isPulleyHardLocked) return;
+        if (rb == null) return;
+
+        // 원래 상태 복원
+        rb.bodyType = prevBodyType;
+        rb.gravityScale = prevGravityScale;
+        rb.drag = prevDrag;
+        rb.constraints = prevConstraints;
+        rb.collisionDetectionMode = prevCollisionDetectionMode;
+        rb.interpolation = prevInterpolation;
+        rb.simulated = prevSimulated;
+
+        isPulleyHardLocked = false;
+        lockedPulleyPlatform = null;
+        lockedPulleySnapPoint = null;
+        lockedPulleySnapCollider = null;
+        lockedPulleyPlatformRb = null;
+        pulleyLockOffsetFromPlatform = Vector2.zero;
+    }
+
+    private void CheckPulleyHardLockRelease()
+    {
+        if (pulleyHardLockReleaseCollider == null) return;
+        if (boxCollider == null) return;
+
+        // 하드락이 걸렸거나, 도르레 판정 중일 때만 해제 조건을 체크(불필요한 비용 감소)
+        if (!isPulleyHardLocked && !isOnPulleyPlatform) return;
+
+        // 콜라이더 기준 접촉/겹침 판정
+        ColliderDistance2D cd = pulleyHardLockReleaseCollider.Distance(boxCollider);
+        if (!(cd.isOverlapped || cd.distance <= pulleyHardLockContactEpsilon)) return;
+
+        TriggerPulleyHardLockReleaseAndScheduleReturn();
+    }
+
+    private void TriggerPulleyHardLockReleaseAndScheduleReturn()
+    {
+        // 일정 시간 동안 도르레 판정/하드락 재진입을 막아(트리거 겹침으로 계속 붙는 현상 방지)
+        suppressPulleyHardLockUntilTime = Time.time + pulleyHardLockReleaseReturnDelay + 0.1f;
+
+        // 즉시 해제(물리값 복원 + 도르레 판정 해제)
+        if (enablePulleyHardLock && isPulleyHardLocked)
+            ReleasePulleyHardLock();
+
+        // 도르레 판정도 강제로 끊는다(Trigger 겹침으로 onPlatform이 계속 true로 남는 문제 방지)
+        currentPulleyPlatform = null;
+        isOnPulleyPlatform = false;
+        isOnPulley = false;
+        wasOnPulley = false;
+
+        // Floor 관련 상태도 안전하게 복구
+        ManageFloorObjects(false);
+
+        // 기존 예약이 있으면 교체
+        if (pulleyHardLockReturnCoroutine != null)
+            StopCoroutine(pulleyHardLockReturnCoroutine);
+        pulleyHardLockReturnCoroutine = StartCoroutine(PulleyHardLockReturnRoutine());
+    }
+
+    private IEnumerator PulleyHardLockReturnRoutine()
+    {
+        yield return new WaitForSeconds(pulleyHardLockReleaseReturnDelay);
+
+        // 혹시 다시 잠겨있으면 풀고 복귀
+        if (enablePulleyHardLock && isPulleyHardLocked)
+            ReleasePulleyHardLock();
+
+        currentPulleyPlatform = null;
+        isOnPulleyPlatform = false;
+        isOnPulley = false;
+        wasOnPulley = false;
+
+        InstantReturnToOrigin();
+
+        pulleyHardLockReturnCoroutine = null;
+    }
+
+    private void SyncPulleyHardLock()
+    {
+        if (!enablePulleyHardLock) return;
+        if (rb == null) return;
+
+        // 도르레 판정이 풀렸으면 즉시 해제
+        if (!isOnPulleyPlatform || currentPulleyPlatform == null)
+        {
+            if (isPulleyHardLocked)
+                ReleasePulleyHardLock();
+            return;
+        }
+
+        // 해제 후 유예 시간 동안은 도르레 하드락 로직을 실행하지 않는다
+        if (suppressPulleyHardLockUntilTime > 0f && Time.time < suppressPulleyHardLockUntilTime)
+            return;
+
+        // 아직 락이 안 걸렸다면: 스냅 포인트에 "닿았을 때만" 락을 건다
+        if (!isPulleyHardLocked)
+        {
+            Transform snapPoint = currentPulleyPlatform.HardLockSnapPoint;
+            if (snapPoint == null) return;
+
+            // 1) 콜라이더가 있으면 콜라이더 기준(접촉/겹침)으로 판정
+            Collider2D snapCol = currentPulleyPlatform.HardLockSnapCollider;
+            if (snapCol != null && boxCollider != null)
+            {
+                // ColliderDistance2D.distance: 표면 간 거리(겹치면 음수)
+                ColliderDistance2D cd = snapCol.Distance(boxCollider);
+                if (cd.isOverlapped || cd.distance <= pulleyHardLockContactEpsilon)
+                {
+                    EngagePulleyHardLock(currentPulleyPlatform, snapPoint);
+                }
+                return;
+            }
+
+            // 2) 콜라이더가 없으면(세팅 누락) 거리 기반 백업
+            if (!warnedMissingSnapColliderOnce)
+            {
+                warnedMissingSnapColliderOnce = true;
+                Debug.LogWarning("[AdvancedPushableBox] PulleyPlatform.HardLockSnapCollider가 비어있어 거리 기반 스냅으로 대체합니다. SnapPoint에 Collider2D(Trigger 권장)를 추가하세요.");
+            }
+
+            float dist = Vector2.Distance(rb.position, (Vector2)snapPoint.position);
+            if (dist <= pulleyHardLockSnapDistance)
+            {
+                EngagePulleyHardLock(currentPulleyPlatform, snapPoint);
+            }
+            return;
+        }
+
+        // 락이 걸린 상태인데 플랫폼이 바뀌었으면 해제(안전)
+        if (lockedPulleyPlatform != currentPulleyPlatform)
+        {
+            ReleasePulleyHardLock();
+            return;
+        }
+
+        if (rb.bodyType != RigidbodyType2D.Kinematic)
+            rb.bodyType = RigidbodyType2D.Kinematic;
+
+        if (lockedPulleySnapPoint == null)
+        {
+            ReleasePulleyHardLock();
+            return;
+        }
+
+        // 락 유지 중에도 스냅 콜라이더가 사라졌다면 해제(안전)
+        if (lockedPulleyPlatform != null && lockedPulleyPlatform.HardLockSnapCollider != null)
+            lockedPulleySnapCollider = lockedPulleyPlatform.HardLockSnapCollider;
+
+        Vector2 platformPos = lockedPulleyPlatformRb != null ? lockedPulleyPlatformRb.position : (Vector2)lockedPulleyPlatform.transform.position;
+        Vector2 target = platformPos + pulleyLockOffsetFromPlatform;
+
+        // 하드락 유지: 플랫폼에 강제 동기화
+        rb.position = target;
+        transform.position = target;
+        rb.velocity = Vector2.zero;
+        rb.angularVelocity = 0f;
+        rb.gravityScale = 0f;
+        rb.constraints = RigidbodyConstraints2D.FreezeRotation;
     }
     
     private void HandleMovementBasedReturn()
@@ -459,6 +712,9 @@ public class AdvancedPushableBox : MonoBehaviour
         isFalling = false;
         isInHole = false;
         isOnPulley = false;
+        isOnPulleyPlatform = false;
+        currentPulleyPlatform = null;
+        wasOnPulley = false;
         
         lastIntegerPosition = new Vector3(
             Mathf.RoundToInt(transform.position.x),
@@ -710,6 +966,10 @@ public class AdvancedPushableBox : MonoBehaviour
 
     private void SetOnPulleyPlatform(PulleyPlatform pp, bool onPlatform)
     {
+        // 하드락 해제 직후에는 트리거 겹침으로 다시 도르레 판정이 켜지는 것을 막는다
+        if (onPlatform && suppressPulleyHardLockUntilTime > 0f && Time.time < suppressPulleyHardLockUntilTime)
+            return;
+
         currentPulleyPlatform = pp;
         isOnPulleyPlatform = onPlatform;
         lastInteractionTime = Time.time;
@@ -723,6 +983,10 @@ public class AdvancedPushableBox : MonoBehaviour
         {
             // 도르레에서 벗어났으므로 바닥 오브젝트 다시 활성화
             ManageFloorObjects(false);
+
+            // 도르레 하드락 해제(원래 물리값으로 복원)
+            if (enablePulleyHardLock)
+                ReleasePulleyHardLock();
         }
     }
 
@@ -748,20 +1012,20 @@ public class AdvancedPushableBox : MonoBehaviour
         // “도르레를 타고 내려갈 때 Floor를 뚫고 내려가야 함” 요구사항을 그대로 반영
         if (!isOnPulleyPlatform || currentPulleyPlatform == null)
         {
-            if (debugCollisionLayerLog)
+            if (debugCollisionLayerLog && debugFloorPhaseLog)
                 Debug.Log($"[AdvancedPushableBox][FloorPhase] ShouldPhase=false: isOnPulley={isOnPulleyPlatform}, platform={currentPulleyPlatform != null}");
             return false;
         }
         if (!currentPulleyPlatform.IsMoving)
         {
-            if (debugCollisionLayerLog)
+            if (debugCollisionLayerLog && debugFloorPhaseLog)
                 Debug.Log($"[AdvancedPushableBox][FloorPhase] ShouldPhase=false: platform not moving");
             return false;
         }
 
         // TargetHeight가 현재보다 낮으면 내려가는 중
         bool isDescending = currentPulleyPlatform.TargetHeight < currentPulleyPlatform.CurrentHeight;
-        if (debugCollisionLayerLog && isDescending)
+        if (debugCollisionLayerLog && debugFloorPhaseLog && isDescending)
         {
             Debug.Log($"[AdvancedPushableBox][FloorPhase] ShouldPhase=true: descending (T={currentPulleyPlatform.TargetHeight:F1} < H={currentPulleyPlatform.CurrentHeight:F1})");
         }
@@ -782,7 +1046,7 @@ public class AdvancedPushableBox : MonoBehaviour
             Physics2D.IgnoreCollision(boxCollider, collision.collider, true);
             ignoredFloorColliders.Add(collision.collider);
 
-            if (debugCollisionLayerLog)
+            if (debugCollisionLayerLog && debugFloorPhaseLog)
             {
                 Debug.Log($"[AdvancedPushableBox][FloorPhase] IgnoreCollision ON -> '{collision.collider.name}' layer='{LayerMask.LayerToName(collision.gameObject.layer)}'");
             }
@@ -829,13 +1093,13 @@ public class AdvancedPushableBox : MonoBehaviour
                 {
                     effector.enabled = false;
                     disabledFloorEffectors.Add(effector);
-                    if (debugCollisionLayerLog)
+                    if (debugCollisionLayerLog && debugFloorPhaseLog)
                     {
                         Debug.Log($"[AdvancedPushableBox][FloorPhase] PlatformEffector2D DISABLED -> '{h.name}'");
                     }
                 }
 
-                if (debugCollisionLayerLog)
+                if (debugCollisionLayerLog && debugFloorPhaseLog)
                 {
                     Debug.Log($"[AdvancedPushableBox][FloorPhase] IgnoreCollision ON(overlap) -> '{h.name}' layer='{LayerMask.LayerToName(h.gameObject.layer)}'");
                 }
@@ -860,7 +1124,7 @@ public class AdvancedPushableBox : MonoBehaviour
             if (effector != null)
             {
                 effector.enabled = true;
-                if (debugCollisionLayerLog)
+                if (debugCollisionLayerLog && debugFloorPhaseLog)
                 {
                     Debug.Log($"[AdvancedPushableBox][FloorPhase] PlatformEffector2D ENABLED -> '{effector.name}'");
                 }
@@ -868,7 +1132,7 @@ public class AdvancedPushableBox : MonoBehaviour
         }
         disabledFloorEffectors.Clear();
 
-        if (debugCollisionLayerLog)
+        if (debugCollisionLayerLog && debugFloorPhaseLog)
             Debug.Log("[AdvancedPushableBox][FloorPhase] IgnoreCollision OFF (restore)");
     }
 
@@ -877,7 +1141,7 @@ public class AdvancedPushableBox : MonoBehaviour
         // 인스펙터에서 지정한 바닥 오브젝트가 없으면 무시
         if (floorObjectsToDisable == null || floorObjectsToDisable.Length == 0)
         {
-            if (debugCollisionLayerLog && shouldDisable)
+            if (debugCollisionLayerLog && debugFloorPhaseLog && shouldDisable)
                 Debug.LogWarning("[AdvancedPushableBox][FloorPhase] floorObjectsToDisable 배열이 비어있습니다!");
             return;
         }
@@ -892,7 +1156,7 @@ public class AdvancedPushableBox : MonoBehaviour
         {
             if (floorObj == null)
             {
-                if (debugCollisionLayerLog)
+                if (debugCollisionLayerLog && debugFloorPhaseLog)
                     Debug.LogWarning("[AdvancedPushableBox][FloorPhase] floorObjectsToDisable 배열에 null이 있습니다!");
                 continue;
             }
@@ -901,13 +1165,13 @@ public class AdvancedPushableBox : MonoBehaviour
             floorObj.SetActive(!shouldDisable);
             disabledCount++;
 
-            if (debugCollisionLayerLog)
+            if (debugCollisionLayerLog && debugFloorPhaseLog)
             {
                 Debug.Log($"[AdvancedPushableBox][FloorPhase] Floor object '{floorObj.name}' {(shouldDisable ? "DISABLED" : "ENABLED")} (was: {wasActive})");
             }
         }
 
-        if (debugCollisionLayerLog && disabledCount == 0)
+        if (debugCollisionLayerLog && debugFloorPhaseLog && disabledCount == 0)
         {
             Debug.LogWarning("[AdvancedPushableBox][FloorPhase] 비활성화할 바닥 오브젝트가 없습니다!");
         }

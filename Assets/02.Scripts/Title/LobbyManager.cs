@@ -24,16 +24,16 @@ public class LobbyManager : MonoBehaviour
     {
         SaveManager.Instance.ApplySavedGameData();
 
-        InitializeLobbySceneButtons();
+        //InitializeLobbySceneButtons();
     }
 
-    public void InitializeLobbySceneButtons()
-    {
-        if (GameManager.Instance.isReleaseBuild)
-        {
-            gotoEndingButtons.SetActive(false);
-        }
-    }
+    //public void InitializeLobbySceneButtons()
+    //{
+    //    if (GameManager.Instance.isReleaseBuild)
+    //    {
+    //        gotoEndingButtons.SetActive(false);
+    //    }
+    //}
 
     public void StartNewGame()
     {

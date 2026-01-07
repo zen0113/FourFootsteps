@@ -6,34 +6,26 @@ using UnityEngine.Rendering;
 
 public class LobbyManager : MonoBehaviour
 {
-    public bool isUsabilityTest = false;
-
     [Header("Lobby UI Components")]
     [SerializeField] private GameObject LoadGameButton;
     [SerializeField] private GameObject NewGamePanel;
     [SerializeField] private GameObject NoGameDataPanel;
     [SerializeField] private GameObject gotoEndingButtons;
 
-    private void Awake()
-    {
-        if (isUsabilityTest)
-            LoadGameButton.SetActive(false);
-
-    }
     private void Start()
     {
         SaveManager.Instance.ApplySavedGameData();
 
-        //InitializeLobbySceneButtons();
+        InitializeLobbySceneButtons();
     }
 
-    //public void InitializeLobbySceneButtons()
-    //{
-    //    if (GameManager.Instance.isReleaseBuild)
-    //    {
-    //        gotoEndingButtons.SetActive(false);
-    //    }
-    //}
+    public void InitializeLobbySceneButtons()
+    {
+        if (GameManager.Instance.isReleaseBuild)
+        {
+            gotoEndingButtons.SetActive(false);
+        }
+    }
 
     public void StartNewGame()
     {

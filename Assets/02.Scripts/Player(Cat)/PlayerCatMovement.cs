@@ -988,23 +988,44 @@ public class PlayerCatMovement : MonoBehaviour
     /// </summary>
     bool IsObstacleDirectlyAbove()
     {
-        // Raycast로 머리와 꼬리 위를 각각 체크
-        RaycastHit2D headHit = Physics2D.Raycast(headCheck.position, Vector2.up, headCheckLength, obstacleMask);
-        RaycastHit2D tailHit = Physics2D.Raycast(tailCheck.position, Vector2.up, tailCheckLength, obstacleMask);
+        // NOTE:
+        // PlatformEffector2D(One Way, 180° 등)는 "물리 접촉"에만 영향을 주고 Raycast에는 그대로 맞습니다.
+        // 그래서 아래에서 통과 가능한 원웨이 플랫폼(예: StealGround)을 머리 위 장애물로 오인하여
+        // 자동 웅크림이 걸릴 수 있어, 여기서 원웨이 플랫폼의 '아랫면' 히트는 천장 장애물에서 제외합니다.
 
-        // 머리 위에 무언가 감지되었고, 그것이 '통과 가능' 태그가 아닐 경우 => 장애물임
-        if (headHit.collider != null && !headHit.collider.CompareTag(passableTag))
+        bool IsBlockingOverhead(RaycastHit2D hit)
         {
+            if (hit.collider == null) return false;
+
+            // '통과 가능' 태그는 천장 장애물로 취급하지 않음
+            if (hit.collider.CompareTag(passableTag)) return false;
+
+            // 원웨이 플랫폼(PlatformEffector2D)의 아랫면에 맞은 경우는 장애물로 취급하지 않음
+            // (hit.normal.y < 0 => 아래쪽 면/하부에서의 히트 확률이 높음)
+            PlatformEffector2D effector =
+                hit.collider.GetComponent<PlatformEffector2D>() ??
+                hit.collider.GetComponentInParent<PlatformEffector2D>();
+
+            if (effector != null && effector.enabled && effector.useOneWay && hit.normal.y < -0.01f)
+                return false;
+
             return true;
         }
 
-        // 꼬리 위에 무언가 감지되었고, 그것이 '통과 가능' 태그가 아닐 경우 => 장애물임
-        if (tailHit.collider != null && !tailHit.collider.CompareTag(passableTag))
+        // RaycastAll로 쏴서, 첫 히트가 원웨이 플랫폼(아랫면)일 경우 다음 히트를 계속 검사
+        RaycastHit2D[] headHits = Physics2D.RaycastAll(headCheck.position, Vector2.up, headCheckLength, obstacleMask);
+        foreach (var h in headHits)
         {
-            return true;
+            if (IsBlockingOverhead(h)) return true;
         }
 
-        // 위 두 경우에 해당하지 않으면 (아무것도 없거나, '통과 가능' 태그만 있을 경우) => 장애물이 아님
+        RaycastHit2D[] tailHits = Physics2D.RaycastAll(tailCheck.position, Vector2.up, tailCheckLength, obstacleMask);
+        foreach (var t in tailHits)
+        {
+            if (IsBlockingOverhead(t)) return true;
+        }
+
+        // 위 조건에 해당하지 않으면 (아무것도 없거나, '통과 가능' 태그/원웨이 플랫폼 아랫면만 있을 경우)
         return false;
     }
 

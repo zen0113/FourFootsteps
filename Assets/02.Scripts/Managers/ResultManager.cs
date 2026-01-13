@@ -166,15 +166,30 @@ public class ResultManager : MonoBehaviour
             // GameManager의 해당 변수를 조정 가능(+1 / -1)
             case string when resultID.StartsWith("Result_Increment"):  // 값++
                 variableName = resultID["Result_Increment".Length..];
+                // ResponsibilityScore 상한 가드
+                if (variableName == "ResponsibilityScore")
+                {
+                    int current = (int)GameManager.Instance.GetVariable("ResponsibilityScore");
+                    int max = (int)GameManager.Instance.GetVariable("CurrentMemoryPuzzleCount");
+
+                    // 이미 최대면 증가 금지
+                    if (current >= max)
+                    {
+                        yield break;
+                    }
+                }
+
+                // 실제 증가
                 GameManager.Instance.IncrementVariable(variableName);
 
-                // 증가시킨게 책임감 점수면 ChangeResponsibilityGauge 호출
+                // UI 갱신은 실제로 증가했을 때만
                 if (variableName == "ResponsibilityScore")
                 {
                     if (ResponsibilityManager.Instance)
                         ResponsibilityManager.Instance.ChangeResponsibilityGauge();
                 }
-                yield return null; // 바로 실행이지만 코루틴 일관성 유지
+
+                yield return null;
                 break;
 
             case string when resultID.StartsWith("Result_Decrement"):  // 값--

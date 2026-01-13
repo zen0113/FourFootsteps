@@ -1234,6 +1234,7 @@ GameObject:
   - component: {fileID: 7570814439967457007}
   - component: {fileID: 797649647900630600}
   - component: {fileID: 5558527865048279027}
+  - component: {fileID: 870787298661498776}
   m_Layer: 5
   m_Name: UI Canvas
   m_TagString: Untagged
@@ -1564,6 +1565,18 @@ MonoBehaviour:
   autoToggleLayer: 1
   layerOffDelay: 0.25
   initialPool: 2
+--- !u!225 &870787298661498776
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4135296550664430820}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &4179926353680494984
 GameObject:
   m_ObjectHideFlags: 0
@@ -3011,7 +3024,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: -680.6, y: 325.1}
+  m_AnchoredPosition: {x: -677.95, y: 327.98}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &4430082004634334527
@@ -3034,8 +3047,8 @@ MonoBehaviour:
   m_ChildAlignment: 0
   m_StartCorner: 0
   m_StartAxis: 1
-  m_CellSize: {x: 60, y: 60}
-  m_Spacing: {x: 42, y: 0}
+  m_CellSize: {x: 55, y: 55}
+  m_Spacing: {x: 40, y: 0}
   m_Constraint: 0
   m_ConstraintCount: 2
 --- !u!1001 &3402110242042687631

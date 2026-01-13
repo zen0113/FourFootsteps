@@ -144,6 +144,11 @@ public class PlayerCatMovement : MonoBehaviour
     private Transform currentCart;          // 현재 탑승 중인 카트
     private float originalGravityScale;     // 원본 중력 값 (카트 탑승 시 복원용)
 
+    // 엘리베이터 탑승 시스템
+    [Header("엘리베이터 관련")]
+    private bool isOnElevator = false;
+    private bool elevatorMoving = false;
+
     // 박스 상호작용 관련
     [Header("박스 상호작용")]
     private PlayerBoxInteraction boxInteraction;    // 박스 밀기/당기기 컴포넌트
@@ -279,15 +284,90 @@ public class PlayerCatMovement : MonoBehaviour
 
         foreach (Collider2D col in colliders)
         {
-            if (col.CompareTag("Box") || col.CompareTag("wall") || col.CompareTag("Cart"))
+            // NOTE:
+            // - 카트의 상단 콜라이더가 자식 오브젝트인 경우, 그 자식이 Cart 태그가 아닐 수 있습니다.
+            // - 가장자리 충돌/미세한 떨림 상황에서 태그 기반 판정이 깨지면 Jump 애니메이션이 고정될 수 있으므로,
+            //   Cart 컴포넌트를 부모에서 찾아 추가로 지상 판정에 포함합니다.
+            bool isCartCollider =
+                col.CompareTag("Cart") ||
+                (col.GetComponentInParent<Cart>() != null);
+
+            if (col.CompareTag("Box") || col.CompareTag("wall") || isCartCollider)
             {
                 onBox = true;
                 break;
             }
         }
 
+        // 앞발만 걸치는 경우, groundCheck 위치가 카트 위가 아니라면 위 OverlapCircle 로직이 실패할 수 있음.
+        // 다른 게임들처럼 "발 위치 3점(앞/중앙/뒤)"에서 아래로 캐스팅해 카트/지면을 감지해 Jump 고정을 끊는다.
+        // 중요: Ray 시작점이 콜라이더 내부/너무 낮으면 히트를 놓칠 수 있어, 콜라이더 중심 높이에서 아래로 쏜다.
+        // 또한 탑승용 콜라이더가 trigger일 수도 있으므로 트리거 포함으로 검사한다.
+        if (!onBox && boxCollider != null)
+        {
+            Bounds b = boxCollider.bounds;
+            float inset = Mathf.Min(0.06f, b.extents.x * 0.25f);
+            float castDist = b.extents.y + Mathf.Max(groundCheckRadius * 2f, 0.25f);
+
+            Vector2 front = new Vector2(b.max.x - inset, b.center.y);
+            Vector2 back = new Vector2(b.min.x + inset, b.center.y);
+            Vector2 center = new Vector2(b.center.x, b.center.y);
+
+            bool HitIsCartOrGround(RaycastHit2D hit)
+            {
+                if (!hit) return false;
+                if (hit.collider == null) return false;
+                // 카트 콜라이더(자식/탑승용/출발용 트리거 포함)면 즉시 지상 처리
+                if (hit.collider.GetComponentInParent<Cart>() != null) return true;
+                // 원래 로직과 동일하게 Box/Wall도 지상 취급
+                if (hit.collider.CompareTag("Box") || hit.collider.CompareTag("wall")) return true;
+                // groundMask에 포함되는 레이어면 지상 취급
+                if (((groundMask.value & (1 << hit.collider.gameObject.layer)) != 0)) return true;
+                return false;
+            }
+
+            ContactFilter2D filter = new ContactFilter2D();
+            filter.useTriggers = true;
+            filter.useLayerMask = true;
+            filter.SetLayerMask(~0);
+
+            RaycastHit2D[] hits = new RaycastHit2D[8];
+
+            bool AnyHit(Vector2 origin)
+            {
+                int count = Physics2D.Raycast(origin, Vector2.down, filter, hits, castDist);
+                for (int i = 0; i < count; i++)
+                {
+                    if (HitIsCartOrGround(hits[i])) return true;
+                }
+                return false;
+            }
+
+            if (AnyHit(front) || AnyHit(center) || AnyHit(back))
+            {
+                onBox = true;
+            }
+        }
+
         // 땅이나 박스 위에 있으면 지상으로 판정
         if (onBox)
+        {
+            isOnGround = true;
+            // 착지로 판단되면 Jump 애니 잔상도 즉시 종료(앞발만 걸치는 케이스 포함)
+            animator.SetBool(_hashJump, false);
+        }
+
+        // 카트(스케이트) 위에서 앞발만 걸치는 등으로 groundCheck가 순간적으로 끊기면
+        // Jump 애니(Bool)가 계속 true로 남는 문제가 생긴다.
+        // 현재 카트는 SetParent로 탑승 처리하므로, 부모가 Cart면 지상으로 강제 취급하고 Jump를 즉시 종료한다.
+        if (transform.parent != null && transform.parent.GetComponent<Cart>() != null)
+        {
+            isOnGround = true;
+            animator.SetBool(_hashJump, false);
+        }
+
+        // 카트 탑승 중엔 지상 판정을 안정적으로 유지 (충돌/진동으로 OverlapCircle이 순간적으로 끊기는 경우 방지)
+        if (isOnCart)
         {
             isOnGround = true;
         }
@@ -304,6 +384,9 @@ public class PlayerCatMovement : MonoBehaviour
         {
             jumpCount = 0;
             coyoteTimeCounter = coyoteTime; // 코요테 타임 리셋
+
+            // 착지 시 점프 애니메이션 종료 (Jump 파라미터는 Bool로 운용)
+            animator.SetBool(_hashJump, false);
         }
         else
         {
@@ -636,12 +719,46 @@ public class PlayerCatMovement : MonoBehaviour
             transform.SetParent(cartTransform);
             rb.gravityScale = 0;        // 중력 제거로 카트에 완전히 밀착
             rb.velocity = Vector2.zero; // 탑승 시 속도 초기화
+
+            // 카트 탑승 시 점프 애니메이션/플래그 잔상 제거
+            if (animator != null)
+            {
+                animator.SetBool(_hashJump, false);
+            }
         }
         else
         {
             // 카트에서 하차: 독립적인 움직임 복원
             transform.SetParent(null);
             rb.gravityScale = originalGravityScale; // 원래 중력값 복원
+        }
+    }
+
+    /// <summary>
+    /// 엘리베이터 탑승 상태를 설정합니다.
+    /// </summary>
+    public void SetOnElevator(bool onElevator, bool isMoving)
+    {
+        isOnElevator = onElevator;
+        elevatorMoving = isMoving;
+        
+        if (onElevator && isMoving)
+        {
+            // 엘리베이터가 이동 중이면 자동으로 앉기
+            ForceCrouch = true;
+            Debug.Log("엘리베이터 이동 중 - 자동 앉기 활성화");
+        }
+        else if (onElevator && !isMoving)
+        {
+            // 엘리베이터가 멈추면 다시 움직일 수 있음
+            ForceCrouch = false;
+            Debug.Log("엘리베이터 정지 - 이동 가능");
+        }
+        else
+        {
+            // 엘리베이터에서 내렸을 때
+            ForceCrouch = false;
+            Debug.Log("엘리베이터 하차");
         }
     }
 
@@ -741,6 +858,11 @@ public class PlayerCatMovement : MonoBehaviour
         get { return forceCrouch; }
         set
         {
+            if (forceCrouch == value) return;
+
+            // 크러쉬로 콜라이더가 바뀌어도 발이 뜨지 않게(스케이트 위 붕뜸/미끄럼 안착 방지)
+            float oldBottomY = (boxCollider != null) ? boxCollider.bounds.min.y : transform.position.y;
+
             forceCrouch = value;
             Debug.Log($"[PlayerCatMovement] 강제 웅크리기 설정: {value}");
 
@@ -785,6 +907,18 @@ public class PlayerCatMovement : MonoBehaviour
                     crouchStickyUntil = Time.time + Mathf.Max(crouchReleaseGrace, 0.15f);
                     animator.SetBool("Crouching", false);
                     animator.SetBool("Crouch", true);
+                }
+            }
+
+            // 콜라이더 변경 후 발 위치 보정
+            if (boxCollider != null && rb != null)
+            {
+                float newBottomY = boxCollider.bounds.min.y;
+                float deltaY = oldBottomY - newBottomY;
+                if (Mathf.Abs(deltaY) > 0.0001f)
+                {
+                    rb.position += Vector2.up * deltaY;
+                    Physics2D.SyncTransforms();
                 }
             }
         }
@@ -854,23 +988,44 @@ public class PlayerCatMovement : MonoBehaviour
     /// </summary>
     bool IsObstacleDirectlyAbove()
     {
-        // Raycast로 머리와 꼬리 위를 각각 체크
-        RaycastHit2D headHit = Physics2D.Raycast(headCheck.position, Vector2.up, headCheckLength, obstacleMask);
-        RaycastHit2D tailHit = Physics2D.Raycast(tailCheck.position, Vector2.up, tailCheckLength, obstacleMask);
+        // NOTE:
+        // PlatformEffector2D(One Way, 180° 등)는 "물리 접촉"에만 영향을 주고 Raycast에는 그대로 맞습니다.
+        // 그래서 아래에서 통과 가능한 원웨이 플랫폼(예: StealGround)을 머리 위 장애물로 오인하여
+        // 자동 웅크림이 걸릴 수 있어, 여기서 원웨이 플랫폼의 '아랫면' 히트는 천장 장애물에서 제외합니다.
 
-        // 머리 위에 무언가 감지되었고, 그것이 '통과 가능' 태그가 아닐 경우 => 장애물임
-        if (headHit.collider != null && !headHit.collider.CompareTag(passableTag))
+        bool IsBlockingOverhead(RaycastHit2D hit)
         {
+            if (hit.collider == null) return false;
+
+            // '통과 가능' 태그는 천장 장애물로 취급하지 않음
+            if (hit.collider.CompareTag(passableTag)) return false;
+
+            // 원웨이 플랫폼(PlatformEffector2D)의 아랫면에 맞은 경우는 장애물로 취급하지 않음
+            // (hit.normal.y < 0 => 아래쪽 면/하부에서의 히트 확률이 높음)
+            PlatformEffector2D effector =
+                hit.collider.GetComponent<PlatformEffector2D>() ??
+                hit.collider.GetComponentInParent<PlatformEffector2D>();
+
+            if (effector != null && effector.enabled && effector.useOneWay && hit.normal.y < -0.01f)
+                return false;
+
             return true;
         }
 
-        // 꼬리 위에 무언가 감지되었고, 그것이 '통과 가능' 태그가 아닐 경우 => 장애물임
-        if (tailHit.collider != null && !tailHit.collider.CompareTag(passableTag))
+        // RaycastAll로 쏴서, 첫 히트가 원웨이 플랫폼(아랫면)일 경우 다음 히트를 계속 검사
+        RaycastHit2D[] headHits = Physics2D.RaycastAll(headCheck.position, Vector2.up, headCheckLength, obstacleMask);
+        foreach (var h in headHits)
         {
-            return true;
+            if (IsBlockingOverhead(h)) return true;
         }
 
-        // 위 두 경우에 해당하지 않으면 (아무것도 없거나, '통과 가능' 태그만 있을 경우) => 장애물이 아님
+        RaycastHit2D[] tailHits = Physics2D.RaycastAll(tailCheck.position, Vector2.up, tailCheckLength, obstacleMask);
+        foreach (var t in tailHits)
+        {
+            if (IsBlockingOverhead(t)) return true;
+        }
+
+        // 위 조건에 해당하지 않으면 (아무것도 없거나, '통과 가능' 태그/원웨이 플랫폼 아랫면만 있을 경우)
         return false;
     }
 
@@ -926,7 +1081,7 @@ public class PlayerCatMovement : MonoBehaviour
         bool isInteractingWithBox = boxInteraction != null && boxInteraction.IsInteracting;
         bool isPullingBox = boxInteraction != null && boxInteraction.IsPulling;
 
-        if (isMiniGameInputBlocked || forceCrouch)
+        if (isMiniGameInputBlocked || forceCrouch || (isOnElevator && elevatorMoving))
         {
             horizontalInput = 0;
         }
@@ -1067,7 +1222,8 @@ public class PlayerCatMovement : MonoBehaviour
             velocityProtectionCounter = velocityProtectionTime;
         }
 
-        animator.SetTrigger("Jump");
+        // Jump 파라미터는 Bool로 운용 (다른 컨트롤러/미니게임과 일관성 유지)
+        animator.SetBool(_hashJump, true);
 
         // 점프 시 파티클 효과
         if (dashParticle != null)

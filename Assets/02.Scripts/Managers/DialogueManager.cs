@@ -151,10 +151,18 @@ public class DialogueManager : MonoBehaviour
 
         isDialogueActive = true;
 
-        // 대사가 2개 이상이라면 skip 버튼 활성화
-        if (dialogues[dialogueID].Lines.Count > 1)
+        // 대사가 2개 이상이고, 시작이 마지막이 아닐 때만 skip 버튼 활성화
+        int lineCount = dialogues[dialogueID].Lines.Count;
+        if (lineCount > 1)
+        {
             foreach (GameObject skip in skipText)
                 skip.SetActive(true);
+        }
+        else
+        {
+            foreach (GameObject skip in skipText)
+                skip.SetActive(false);
+        }
 
         dialogues[dialogueID].SetCurrentLineIndex(0);
         currentDialogueID = dialogueID;
@@ -710,9 +718,17 @@ public class DialogueManager : MonoBehaviour
             // 다음으로 자동 진행
             OnDialoguePanelClick();
 
-            // 스킵 텍스트 복구(디자인에 따라 유지/제거)
-            foreach (GameObject skip in skipText)
-                skip.SetActive(true);
+            // 지금이 마지막 라인인지 체크
+            int currentIndex = dialogues[currentDialogueID].CurrentLineIndex;
+            int totalLines = dialogues[currentDialogueID].Lines.Count;
+            bool isLastLine = (currentIndex >= totalLines - 1);
+
+            // 마지막 라인이 아닐 때만 스킵 텍스트 복구
+            if (!isLastLine)
+            {
+                foreach (GameObject skip in skipText)
+                    skip.SetActive(true);
+            }
 
             // (선택) 말풍선/타입에 따라 컬러 복구
             if (dialogueType == DialogueType.PLAYER_TALKING || dialogueType == DialogueType.NPC)

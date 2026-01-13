@@ -13,6 +13,16 @@ public class RoadCrow : MonoBehaviour
     [Header("Warning Display Settings")]
     [Tooltip("경고 지속 시간 (초)")]
     public float warningDuration = 1f;
+
+    [Header("Warning Prefabs (Recommended)")]
+    [Tooltip("경고 반원 프리팹 (있으면 이 프리팹을 사용합니다). 프리팹 루트에 SpriteRenderer가 있어야 합니다.")]
+    public GameObject warningCirclePrefab;
+
+    [Tooltip("경고 아이콘 프리팹 (있으면 이 프리팹을 사용합니다). 프리팹 루트에 SpriteRenderer가 있어야 합니다. SpriteGlowEffect를 여기에 붙여두면 조절이 편합니다.")]
+    public GameObject warningIconPrefab;
+
+    [Tooltip("아이콘 프리팹(또는 생성된 아이콘)에 SpriteGlowEffect가 있으면 자동으로 활성화합니다.")]
+    public bool enableWarningIconGlow = true;
     
     [Tooltip("경고 반원 스프라이트")]
     public Sprite warningCircleSprite;
@@ -318,28 +328,95 @@ public class RoadCrow : MonoBehaviour
     /// </summary>
     void CreateWarningDisplay()
     {
+        // 기존 경고 표시가 남아있으면 정리
+        DestroyWarningDisplay();
+
         // 반원 오브젝트 생성
-        if (warningCircleSprite != null)
+        if (warningCirclePrefab != null)
+        {
+            warningCircleObj = Instantiate(warningCirclePrefab, attackTargetPosition, Quaternion.identity);
+            warningCircleObj.name = "WarningCircle";
+            warningCircleObj.transform.localScale = circleScale;
+
+            circleRenderer = warningCircleObj.GetComponent<SpriteRenderer>();
+            if (circleRenderer == null)
+            {
+                Debug.LogWarning("[RoadCrow] warningCirclePrefab에 SpriteRenderer가 없습니다. 경고 반원 표시가 정상 동작하지 않을 수 있습니다.");
+            }
+            else
+            {
+                if (warningCircleSprite != null) circleRenderer.sprite = warningCircleSprite; // 선택적 오버라이드
+                circleRenderer.sortingOrder = circleSortingOrder;
+            }
+        }
+        else if (warningCircleSprite != null)
         {
             warningCircleObj = new GameObject("WarningCircle");
             warningCircleObj.transform.position = attackTargetPosition;
             warningCircleObj.transform.localScale = circleScale;
-            
+
             circleRenderer = warningCircleObj.AddComponent<SpriteRenderer>();
             circleRenderer.sprite = warningCircleSprite;
             circleRenderer.sortingOrder = circleSortingOrder;
         }
         
         // 아이콘 오브젝트 생성
-        if (warningIconSprite != null)
+        if (warningIconPrefab != null)
+        {
+            warningIconObj = Instantiate(warningIconPrefab, (Vector3)(attackTargetPosition + iconOffset), Quaternion.identity);
+            warningIconObj.name = "WarningIcon";
+            warningIconObj.transform.localScale = iconScale;
+
+            iconRenderer = warningIconObj.GetComponent<SpriteRenderer>();
+            if (iconRenderer == null)
+            {
+                Debug.LogWarning("[RoadCrow] warningIconPrefab에 SpriteRenderer가 없습니다. 경고 아이콘 표시가 정상 동작하지 않을 수 있습니다.");
+            }
+            else
+            {
+                if (warningIconSprite != null) iconRenderer.sprite = warningIconSprite; // 선택적 오버라이드
+                iconRenderer.sortingOrder = iconSortingOrder;
+            }
+
+            // SpriteGlowEffect가 있으면 활성화(조절은 프리팹에서)
+            if (enableWarningIconGlow)
+            {
+                var glow = warningIconObj.GetComponentInChildren<SpriteGlow.SpriteGlowEffect>(true);
+                if (glow != null) glow.enabled = true;
+            }
+        }
+        else if (warningIconSprite != null)
         {
             warningIconObj = new GameObject("WarningIcon");
             warningIconObj.transform.position = attackTargetPosition + iconOffset;
             warningIconObj.transform.localScale = iconScale;
-            
+
             iconRenderer = warningIconObj.AddComponent<SpriteRenderer>();
             iconRenderer.sprite = warningIconSprite;
             iconRenderer.sortingOrder = iconSortingOrder;
+
+            // 런타임 생성이라도, 혹시 SpriteGlowEffect를 붙여둔 경우 활성화
+            if (enableWarningIconGlow)
+            {
+                var glow = warningIconObj.GetComponentInChildren<SpriteGlow.SpriteGlowEffect>(true);
+                if (glow != null) glow.enabled = true;
+            }
+        }
+    }
+
+    void DestroyWarningDisplay()
+    {
+        if (warningCircleObj != null)
+        {
+            Destroy(warningCircleObj);
+            warningCircleObj = null;
+            circleRenderer = null;
+        }
+        if (warningIconObj != null)
+        {
+            Destroy(warningIconObj);
+            warningIconObj = null;
+            iconRenderer = null;
         }
     }
 
@@ -390,8 +467,7 @@ public class RoadCrow : MonoBehaviour
         Debug.Log($"[RoadCrow] isAttacking = {isAttacking}");
         
         // 경고 표시 제거
-        if (warningCircleObj != null) Destroy(warningCircleObj);
-        if (warningIconObj != null) Destroy(warningIconObj);
+        DestroyWarningDisplay();
         
         // Kinematic 유지 (애니메이션을 위해)
         rb.isKinematic = true;
@@ -418,8 +494,7 @@ public class RoadCrow : MonoBehaviour
         Debug.Log($"[RoadCrow] isEscaping = {isEscaping}");
         
         // 경고 표시 제거 (혹시 남아있을 경우)
-        if (warningCircleObj != null) Destroy(warningCircleObj);
-        if (warningIconObj != null) Destroy(warningIconObj);
+        DestroyWarningDisplay();
         
         // 콜라이더 비활성화 (더 이상 충돌 안 함)
         if (crowCollider != null)

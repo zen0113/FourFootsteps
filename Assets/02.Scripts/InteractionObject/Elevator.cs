@@ -29,6 +29,18 @@ public class Elevator : MonoBehaviour
     private bool playerOnElevator = false;
     private Coroutine returnCoroutine;
     
+    /// <summary>
+    /// 비활성화/비활성화 직전(씬 전환 등) 타이밍에 OnTriggerExit가 호출될 수 있어
+    /// StartCoroutine이 경고를 뿜는 케이스를 방지한다.
+    /// </summary>
+    private Coroutine TryStartCoroutine(IEnumerator routine)
+    {
+        if (!isActiveAndEnabled)
+            return null;
+        
+        return StartCoroutine(routine);
+    }
+    
     // 플레이어 추적을 위한 변수들
     private List<GameObject> playersOnElevator = new List<GameObject>();
     private Vector3 lastElevatorPosition;
@@ -129,13 +141,17 @@ public class Elevator : MonoBehaviour
                 {
                     playersOnElevator.Add(other.gameObject);
                     UpdatePlayerOnElevatorStatus();
+                    
+                    // 플레이어 컨트롤러에 엘리베이터 탑승 알림
+                    NotifyPlayerBoarded(other.gameObject);
+                    
                     Debug.Log($"플레이어가 엘리베이터에 올라탔습니다. (총 {playersOnElevator.Count}명)");
                 }
                 
                 // 시작 지점에서 대기 중일 때만 이동 시작
                 if (currentState == ElevatorState.AtStart)
                 {
-                    StartCoroutine(MoveToEnd());
+                    TryStartCoroutine(MoveToEnd());
                 }
                 
                 // 복귀 코루틴이 실행 중이면 취소
@@ -157,12 +173,16 @@ public class Elevator : MonoBehaviour
             {
                 playersOnElevator.Remove(other.gameObject);
                 UpdatePlayerOnElevatorStatus();
+                
+                // 플레이어 컨트롤러에 엘리베이터 하차 알림
+                NotifyPlayerExited(other.gameObject);
+                
                 Debug.Log($"플레이어가 엘리베이터에서 내렸습니다. (남은 인원: {playersOnElevator.Count}명)");
                 
                 // 플레이어가 모두 내렸고 도착 지점에 있을 때 복귀 시작
                 if (playersOnElevator.Count == 0 && currentState == ElevatorState.AtEnd)
                 {
-                    returnCoroutine = StartCoroutine(ReturnToStartAfterDelay());
+                    returnCoroutine = TryStartCoroutine(ReturnToStartAfterDelay());
                 }
             }
         }
@@ -197,34 +217,76 @@ public class Elevator : MonoBehaviour
         playerOnElevator = playersOnElevator.Count > 0;
     }
     
+    // 플레이어에게 엘리베이터 탑승 알림
+    private void NotifyPlayerBoarded(GameObject player)
+    {
+        PlayerCatMovement playerMovement = player.GetComponent<PlayerCatMovement>();
+        if (playerMovement != null)
+        {
+            playerMovement.SetOnElevator(true, IsElevatorMoving());
+        }
+    }
+    
+    // 플레이어에게 엘리베이터 하차 알림
+    private void NotifyPlayerExited(GameObject player)
+    {
+        PlayerCatMovement playerMovement = player.GetComponent<PlayerCatMovement>();
+        if (playerMovement != null)
+        {
+            playerMovement.SetOnElevator(false, false);
+        }
+    }
+    
+    // 엘리베이터가 이동 중인지 확인
+    private bool IsElevatorMoving()
+    {
+        return currentState == ElevatorState.MovingUp || currentState == ElevatorState.MovingDown;
+    }
+    
+    // 모든 플레이어에게 상태 업데이트
+    private void UpdateAllPlayersState()
+    {
+        bool isMoving = IsElevatorMoving();
+        foreach (GameObject player in playersOnElevator)
+        {
+            if (player != null)
+            {
+                PlayerCatMovement playerMovement = player.GetComponent<PlayerCatMovement>();
+                if (playerMovement != null)
+                {
+                    playerMovement.SetOnElevator(true, isMoving);
+                }
+            }
+        }
+    }
+    
     private void MovePlayersWithElevator()
     {
-        // 엘리베이터가 이동한 거리만큼 플레이어들도 함께 이동
         Vector3 elevatorMovement = transform.position - lastElevatorPosition;
         
-        if (elevatorMovement.magnitude > 0.001f) // 미세한 움직임 무시
+        if (elevatorMovement.magnitude > 0.001f)
         {
             for (int i = playersOnElevator.Count - 1; i >= 0; i--)
             {
                 if (playersOnElevator[i] != null)
                 {
-                    // 플레이어가 여전히 엘리베이터 위에 있는지 확인
                     if (IsPlayerAboveElevator(playersOnElevator[i].transform))
                     {
-                        // 플레이어 위치를 엘리베이터와 함께 이동
                         playersOnElevator[i].transform.position += elevatorMovement;
                         
-                        // 플레이어에 Rigidbody2D가 있다면 velocity도 동기화
                         Rigidbody2D playerRb = playersOnElevator[i].GetComponent<Rigidbody2D>();
-                        if (playerRb != null && currentState != ElevatorState.AtStart && currentState != ElevatorState.AtEnd)
+                        if (playerRb != null)
                         {
-                            playerRb.velocity = new Vector2(playerRb.velocity.x, rb.velocity.y);
+                            // 엘리베이터 이동 중일 때 플레이어의 velocity를 0으로 설정
+                            if (IsElevatorMoving())
+                            {
+                                playerRb.velocity = Vector2.zero;
+                            }
                         }
                     }
                 }
                 else
                 {
-                    // null 참조 제거
                     playersOnElevator.RemoveAt(i);
                 }
             }
@@ -235,26 +297,31 @@ public class Elevator : MonoBehaviour
     {
         currentState = ElevatorState.MovingUp;
         Vector3 targetPosition = endPosition;
+        
+        // 이동 시작 시 모든 플레이어에게 알림
+        UpdateAllPlayersState();
+        
         Debug.Log("엘리베이터가 올라가기 시작합니다.");
         
         while (Vector3.Distance(transform.position, targetPosition) > 0.01f)
         {
-            // 엘리베이터 이동 (Rigidbody2D.MovePosition 사용)
             Vector3 newPosition = Vector3.MoveTowards(transform.position, targetPosition, speed * Time.fixedDeltaTime);
             rb.MovePosition(newPosition);
             
             yield return new WaitForFixedUpdate();
         }
         
-        // 정확한 위치로 설정
         rb.MovePosition(targetPosition);
         currentState = ElevatorState.AtEnd;
+        
+        // 도착 시 모든 플레이어에게 알림 (움직임 가능)
+        UpdateAllPlayersState();
+        
         Debug.Log("엘리베이터가 목적지에 도착했습니다.");
         
-        // 플레이어가 없으면 바로 복귀 시작
         if (!playerOnElevator)
         {
-            returnCoroutine = StartCoroutine(ReturnToStartAfterDelay());
+            returnCoroutine = TryStartCoroutine(ReturnToStartAfterDelay());
         }
     }
     
@@ -263,7 +330,6 @@ public class Elevator : MonoBehaviour
         Debug.Log($"{delayBeforeDown}초 후 엘리베이터가 내려갑니다.");
         yield return new WaitForSeconds(delayBeforeDown);
         
-        // 대기 시간 후에도 플레이어가 없으면 복귀
         if (!playerOnElevator && currentState == ElevatorState.AtEnd)
         {
             yield return StartCoroutine(MoveToStart());
@@ -274,24 +340,29 @@ public class Elevator : MonoBehaviour
     {
         currentState = ElevatorState.MovingDown;
         Vector3 targetPosition = startPosition;
+        
+        // 이동 시작 시 모든 플레이어에게 알림
+        UpdateAllPlayersState();
+        
         Debug.Log("엘리베이터가 아래로 내려갑니다.");
         
         while (Vector3.Distance(transform.position, targetPosition) > 0.01f)
         {
-            // 엘리베이터 이동 (Rigidbody2D.MovePosition 사용)
             Vector3 newPosition = Vector3.MoveTowards(transform.position, targetPosition, speed * Time.fixedDeltaTime);
             rb.MovePosition(newPosition);
             
             yield return new WaitForFixedUpdate();
         }
         
-        // 정확한 위치로 설정
         rb.MovePosition(targetPosition);
         currentState = ElevatorState.AtStart;
+        
+        // 도착 시 모든 플레이어에게 알림 (움직임 가능)
+        UpdateAllPlayersState();
+        
         Debug.Log("엘리베이터가 시작 지점으로 돌아왔습니다.");
     }
     
-    // 인스펙터에서 시작점과 끝점을 쉽게 설정할 수 있도록 도우미 메서드
     [ContextMenu("현재 위치를 시작점으로 설정")]
     private void SetCurrentPositionAsStart()
     {
@@ -312,7 +383,6 @@ public class Elevator : MonoBehaviour
         SetupElevatorStructure();
     }
     
-    // 디버깅을 위한 기즈모
     private void OnDrawGizmos()
     {
         // 시작점 표시
@@ -388,17 +458,15 @@ public class Elevator : MonoBehaviour
             case ElevatorState.AtStart: return Color.green;
             case ElevatorState.MovingUp: return Color.blue;
             case ElevatorState.AtEnd: return Color.red;
-            case ElevatorState.MovingDown: return new Color(1f, 0.5f, 0f); // 오렌지 색상
+            case ElevatorState.MovingDown: return new Color(1f, 0.5f, 0f);
             default: return Color.white;
         }
     }
     
-    // 퍼블릭 프로퍼티들 (다른 스크립트에서 상태 확인용)
     public ElevatorState CurrentState => currentState;
     public bool PlayerOnElevator => playerOnElevator;
     public int PlayerCount => playersOnElevator.Count;
     
-    // 인스펙터에서 위치를 직접 설정할 수 있도록 하는 프로퍼티
     public Vector3 StartPosition 
     { 
         get => startPosition; 

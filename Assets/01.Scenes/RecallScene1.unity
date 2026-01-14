@@ -821,6 +821,52 @@ MonoBehaviour:
   alphaThreshold: 0.01
   drawOutside: 0
   enableInstancing: 0
+--- !u!1 &159008388
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 159008389}
+  - component: {fileID: 159008390}
+  m_Layer: 0
+  m_Name: 06_CatAni
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &159008389
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 159008388}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 14.679342, y: 3.1438732, z: -0.05444984}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1703816156}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &159008390
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 159008388}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2d3f98860fb5fba468bd818fe259cd7f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  animationLooper: {fileID: 940554987}
+  loopDuration: 3
 --- !u!1 &190147188
 GameObject:
   m_ObjectHideFlags: 0
@@ -3227,6 +3273,7 @@ GameObject:
   - component: {fileID: 940554982}
   - component: {fileID: 940554981}
   - component: {fileID: 940554980}
+  - component: {fileID: 940554987}
   m_Layer: 13
   m_Name: YourCat
   m_TagString: Untagged
@@ -3516,6 +3563,24 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1602679260}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &940554987
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 940554979}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ea8a475e4aeb5ef43a00d44f03db4862, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  animationParameterName: Crouching
+  startOnAwake: 0
+  loopDelay: 0
+  loopSound: {fileID: 8300000, guid: c3796f96ef507de43ad3f38e99c0dce3, type: 3}
+  playAudioWithAnimation: 1
+  audioInterval: 1
 --- !u!1 &944954493
 GameObject:
   m_ObjectHideFlags: 0
@@ -7144,6 +7209,7 @@ MonoBehaviour:
   - {fileID: 2083716874}
   - {fileID: 760062084}
   - {fileID: 1861684781}
+  - {fileID: 159008390}
   - {fileID: 537201571}
   - {fileID: 2025927088}
   - {fileID: 1802929048}
@@ -7179,6 +7245,7 @@ Transform:
   - {fileID: 2083716873}
   - {fileID: 760062087}
   - {fileID: 1861684780}
+  - {fileID: 159008389}
   - {fileID: 537201570}
   - {fileID: 426394132}
   - {fileID: 2025927091}

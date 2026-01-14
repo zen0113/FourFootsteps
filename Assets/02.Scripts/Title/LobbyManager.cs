@@ -47,6 +47,8 @@ public class LobbyManager : MonoBehaviour
             SceneLoader.Instance.LoadScene(Constants.SceneType.SET_PLAYERNAME.ToSceneName());
             // 책임 게이지 UI 초기화
             ResponsibilityManager.Instance.InitGaugeUI();
+
+            EndingLogQueueManager.Instance.StartNewRun();
         }
     }
 
@@ -56,6 +58,7 @@ public class LobbyManager : MonoBehaviour
         SceneLoader.Instance.LoadScene(Constants.SceneType.SET_PLAYERNAME.ToSceneName());
         // 책임 게이지 UI 초기화
         ResponsibilityManager.Instance.InitGaugeUI();
+        EndingLogQueueManager.Instance.StartNewRun();
     }
 
     public void LoadGame()

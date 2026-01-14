@@ -19,6 +19,7 @@ public class EndingLogQueueManager : MonoBehaviour
 
     private const string UUID_KEY = "ANON_UUID";
     private const string QUEUE_KEY = "ENDING_LOG_QUEUE_JSON";
+    private const string RUN_ID_KEY = "RUN_ID";
 
     private bool isSending;
     private int retryCountThisSession;
@@ -45,6 +46,26 @@ public class EndingLogQueueManager : MonoBehaviour
         // 익명 UUID 기반
         string uuid = GetOrCreateUuid();
         return uuid; // 또는 $"{uuid}_{playerName}_{catName}";
+    }
+
+    public string GetCurrentRunId()
+    {
+        if (PlayerPrefs.HasKey(RUN_ID_KEY))
+            return PlayerPrefs.GetString(RUN_ID_KEY);
+
+        // 없으면 “현재 세션 최초”로 하나 만들어 둠(안전장치)
+        string runId = System.Guid.NewGuid().ToString("N");
+        PlayerPrefs.SetString(RUN_ID_KEY, runId);
+        PlayerPrefs.Save();
+        return runId;
+    }
+
+    public string StartNewRun()
+    {
+        string runId = System.Guid.NewGuid().ToString("N");
+        PlayerPrefs.SetString(RUN_ID_KEY, runId);
+        PlayerPrefs.Save();
+        return runId;
     }
 
     public void EnqueueAndSend(EndingLogPayload payload)
@@ -140,7 +161,7 @@ public class EndingLogQueueManager : MonoBehaviour
     private IEnumerator PostPayload(EndingLogPayload payload, Action<bool> onDone)
     {
         // apiKey 주입
-        payload.apiKey = apiKey;
+        payload.apiKey = (apiKey ?? "").Trim();        
         //payload.gameVersion = Application.version;
         //payload.platform = Application.platform.ToString();
 

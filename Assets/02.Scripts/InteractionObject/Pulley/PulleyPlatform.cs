@@ -25,10 +25,16 @@ public class PulleyPlatform : MonoBehaviour
     [SerializeField] private bool autoFindFloorObjectsByName = false; // 이름으로 자동 찾기
     [SerializeField] private string floorObjectNamePattern = "StealGround"; // 찾을 오브젝트 이름 패턴
     [SerializeField] private float disableFloorHeight = 0f; // 이 높이 이하로 내려가면 바닥 오브젝트 비활성화
+    [Tooltip("disableFloorHeight 경계에서 흔들릴 때 토글 스팸을 줄이기 위한 여유값")]
+    [SerializeField] private float floorToggleHysteresis = 0.05f;
     private bool floorObjectsDisabled = false;
     private readonly List<Collider2D> disabledColliders = new List<Collider2D>(); // 비활성화한 콜라이더들
     private float floorStateChangeCooldown = 0f; // 상태 변경 쿨다운
     private List<GameObject> actualFloorObjects = new List<GameObject>(); // 실제 비활성화할 오브젝트 리스트
+
+    // 여러 플랫폼이 같은 바닥 오브젝트를 공유할 수 있어, 플랫폼별 토글이 충돌하지 않도록 Ref-count로 관리
+    private static readonly Dictionary<GameObject, int> s_floorDisableRefCount = new Dictionary<GameObject, int>();
+    private static readonly Dictionary<Collider2D, int> s_colliderDisableRefCount = new Dictionary<Collider2D, int>();
     
     [Header("현재 상태 (읽기 전용)")]
     [SerializeField] private float currentHeight = 0f;
@@ -185,6 +191,12 @@ public class PulleyPlatform : MonoBehaviour
             }
         }
     }
+
+    private void FixedUpdate()
+    {
+        // 이동 코루틴 여부와 무관하게, 현재 높이에 따라 바닥 오브젝트 상태를 일관되게 갱신
+        UpdateFloorObjectsByHeight(currentHeight);
+    }
     
     private void OnDetectorPriorityChanged(ObjectType priority, float weight)
     {
@@ -210,6 +222,10 @@ public class PulleyPlatform : MonoBehaviour
         }
         
         targetHeight = height;
+
+        // 목표 높이가 disableFloorHeight 이하로 내려갈 예정이면, 충돌 해제를 위해 즉시 비활성화(실무에서 흔한 선(先)조치)
+        float predictedLowest = Mathf.Min(currentHeight, targetHeight);
+        UpdateFloorObjectsByHeight(predictedLowest);
         
         if (moveCoroutine != null)
         {
@@ -246,12 +262,6 @@ public class PulleyPlatform : MonoBehaviour
         // 이동 방향 확인 (내려가는지 올라가는지)
         bool isDescending = targetHeight < startHeight;
         
-        // 내려가는 경우 시작 시 즉시 바닥 오브젝트 비활성화
-        if (isDescending && !floorObjectsDisabled)
-        {
-            SetFloorObjectsState(shouldDisable: true);
-        }
-        
         while (elapsed < duration)
         {
             // 물리 스텝 기준으로 진행 (FixedUpdate 타이밍)
@@ -265,18 +275,17 @@ public class PulleyPlatform : MonoBehaviour
             
             Vector3 newPosition = absoluteWorldPosition + Vector3.up * currentHeight;
             ApplyPlatformPosition(newPosition);
+
+            // 현재 높이에 따라 바닥 상태 갱신(코루틴/타겟 변경에도 일관)
+            UpdateFloorObjectsByHeight(currentHeight);
         }
         
         currentHeight = targetHeight;
         ApplyPlatformPosition(absoluteWorldPosition + Vector3.up * currentHeight);
+        UpdateFloorObjectsByHeight(currentHeight);
         
         isMoving = false;
-        
-        // 이동 완료 후: 내려가기가 끝났으면 바닥 오브젝트 복구
-        if (isDescending && floorObjectsDisabled)
-        {
-            SetFloorObjectsState(shouldDisable: false);
-        }
+        // 바닥 오브젝트 복구/비활성화는 높이 기반으로 이미 처리됨
         
         OnMoveComplete?.Invoke(this);
         
@@ -381,51 +390,121 @@ public class PulleyPlatform : MonoBehaviour
         floorObjectsDisabled = shouldDisable;
         floorStateChangeCooldown = Time.time + 0.1f; // 0.1초 쿨다운
 
-        int disabledCount = 0;
+        int affectedCount = 0;
         foreach (var floorObj in actualFloorObjects)
         {
             if (floorObj == null) continue;
 
             if (shouldDisable)
             {
-                // 비활성화: 먼저 모든 콜라이더를 찾아서 비활성화 (물리 충돌 즉시 해제)
-                Collider2D[] colliders = floorObj.GetComponentsInChildren<Collider2D>(true);
-                foreach (var col in colliders)
-                {
-                    if (col != null && col.enabled)
-                    {
-                        col.enabled = false;
-                        disabledColliders.Add(col);
-                    }
-                }
-                
-                // 그 다음 GameObject 비활성화
-                floorObj.SetActive(false);
-                disabledCount++;
-                Debug.Log($"[PulleyPlatform][{platformName}] Floor object '{floorObj.name}' DISABLED (콜라이더 {colliders.Length}개 비활성화)");
+                AcquireFloorDisable(floorObj);
+                affectedCount++;
             }
             else
             {
-                // 활성화: GameObject 먼저 활성화
-                floorObj.SetActive(true);
-                
-                // 비활성화했던 콜라이더들 복구
-                foreach (var col in disabledColliders)
-                {
-                    if (col != null)
-                    {
-                        col.enabled = true;
-                    }
-                }
-                disabledColliders.Clear();
-                
-                Debug.Log($"[PulleyPlatform][{platformName}] Floor object '{floorObj.name}' ENABLED");
+                ReleaseFloorDisable(floorObj);
+                affectedCount++;
             }
         }
         
         if (shouldDisable)
         {
-            Debug.Log($"[PulleyPlatform][{platformName}] 총 {disabledCount}개 바닥 오브젝트 비활성화 완료 (H={currentHeight:F1}, T={targetHeight:F1}, Descending={targetHeight < startHeight})");
+            Debug.Log($"[PulleyPlatform][{platformName}/{name}] 총 {affectedCount}개 바닥 오브젝트 비활성화 요청 처리 (H={currentHeight:F2}, T={targetHeight:F2})");
+        }
+    }
+
+    private void AcquireFloorDisable(GameObject floorObj)
+    {
+        if (floorObj == null) return;
+
+        int newCount = 1;
+        if (s_floorDisableRefCount.TryGetValue(floorObj, out int existing))
+            newCount = existing + 1;
+        s_floorDisableRefCount[floorObj] = newCount;
+
+        // 최초 요청일 때만 실제 disable 수행
+        if (newCount != 1) return;
+
+        // 물리 충돌 즉시 해제를 위해 collider도 disable(포함 비활성 오브젝트)
+        Collider2D[] colliders = floorObj.GetComponentsInChildren<Collider2D>(true);
+        foreach (var col in colliders)
+        {
+            if (col == null) continue;
+            int cCount = 1;
+            if (s_colliderDisableRefCount.TryGetValue(col, out int cExisting))
+                cCount = cExisting + 1;
+            s_colliderDisableRefCount[col] = cCount;
+
+            if (cCount == 1)
+                col.enabled = false;
+        }
+
+        floorObj.SetActive(false);
+        Debug.Log($"[PulleyPlatform][{platformName}/{name}] Floor object '{floorObj.name}' DISABLED (ref=1, colliders={colliders.Length})");
+    }
+
+    private void ReleaseFloorDisable(GameObject floorObj)
+    {
+        if (floorObj == null) return;
+
+        if (!s_floorDisableRefCount.TryGetValue(floorObj, out int existing) || existing <= 0)
+            return;
+
+        int newCount = existing - 1;
+        if (newCount > 0)
+        {
+            s_floorDisableRefCount[floorObj] = newCount;
+            return; // 아직 다른 플랫폼이 disable 유지 중
+        }
+
+        s_floorDisableRefCount.Remove(floorObj);
+
+        // GameObject를 먼저 활성화한 뒤 collider를 복구
+        floorObj.SetActive(true);
+
+        Collider2D[] colliders = floorObj.GetComponentsInChildren<Collider2D>(true);
+        foreach (var col in colliders)
+        {
+            if (col == null) continue;
+            if (!s_colliderDisableRefCount.TryGetValue(col, out int cExisting) || cExisting <= 0)
+            {
+                col.enabled = true;
+                continue;
+            }
+
+            int cNew = cExisting - 1;
+            if (cNew > 0)
+            {
+                s_colliderDisableRefCount[col] = cNew;
+            }
+            else
+            {
+                s_colliderDisableRefCount.Remove(col);
+                col.enabled = true;
+            }
+        }
+
+        Debug.Log($"[PulleyPlatform][{platformName}/{name}] Floor object '{floorObj.name}' ENABLED (ref=0, colliders={colliders.Length})");
+    }
+
+    /// <summary>
+    /// 현재/예측 높이에 따라 StealGround(바닥 오브젝트) 상태를 결정합니다.
+    /// - height <= disableFloorHeight 이면 비활성화
+    /// - height > disableFloorHeight + hysteresis 이면 활성화
+    /// </summary>
+    private void UpdateFloorObjectsByHeight(float height)
+    {
+        if (actualFloorObjects == null || actualFloorObjects.Count == 0) return;
+
+        if (!floorObjectsDisabled)
+        {
+            if (height <= disableFloorHeight)
+                SetFloorObjectsState(shouldDisable: true);
+        }
+        else
+        {
+            if (height > disableFloorHeight + floorToggleHysteresis)
+                SetFloorObjectsState(shouldDisable: false);
         }
     }
     

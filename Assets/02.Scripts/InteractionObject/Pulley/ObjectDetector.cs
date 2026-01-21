@@ -11,13 +11,21 @@ public class ObjectDetector : MonoBehaviour
     [SerializeField] private LayerMask detectionLayer = -1;
     [SerializeField] private bool showDebug = true;
     [SerializeField] private float exitGraceTime = 0.15f; // 경계 떨림/플랫폼 이동으로 인한 Exit 스팸 방지
+    [Tooltip("Trigger Enter/Exit 누락(비활성화/Destroy/워프/경계 떨림 등)을 복구하기 위해 FixedUpdate에서 현재 겹침을 재스캔합니다.")]
+    [SerializeField] private bool enableFixedRescan = true;
+    [Tooltip("재스캔 빈도(초). 0이면 FixedUpdate마다 재스캔합니다.")]
+    [SerializeField] private float rescanInterval = 0f;
     
     private List<DetectedObject> detectedObjects = new List<DetectedObject>();
     private PulleyPlatform parentPlatform;
+    private Collider2D triggerCollider;
+    private float nextRescanTime;
 
     // 여러 콜라이더/미세한 떨림을 안정화하기 위한 카운트/유예 타이머
     private readonly Dictionary<Transform, int> overlapCounts = new Dictionary<Transform, int>();
     private readonly Dictionary<Transform, float> pendingExitDeadline = new Dictionary<Transform, float>();
+    private readonly List<Collider2D> overlapResults = new List<Collider2D>(32);
+    private readonly Dictionary<Transform, int> rescanCounts = new Dictionary<Transform, int>();
     
     // 이벤트
     public System.Action<ObjectType, float> OnPriorityChanged;
@@ -35,12 +43,19 @@ public class ObjectDetector : MonoBehaviour
         // 여전히 없으면 씬 전체에서 찾기 (분리된 구조)
         if (parentPlatform == null)
         {
-            parentPlatform = FindObjectOfType<PulleyPlatform>();
+            // 다수의 플랫폼이 있는 씬에서 FindObjectOfType는 잘못된 플랫폼에 붙는 원인이 될 수 있어
+            // “단 하나만 존재할 때”만 허용합니다.
+            PulleyPlatform[] platforms = FindObjectsOfType<PulleyPlatform>();
+            if (platforms != null && platforms.Length == 1)
+            {
+                parentPlatform = platforms[0];
+            }
         }
         
         if (parentPlatform == null)
         {
             Debug.LogError($"ObjectDetector({name})가 PulleyPlatform을 찾을 수 없습니다!");
+            enabled = false;
             return;
         }
         
@@ -48,8 +63,8 @@ public class ObjectDetector : MonoBehaviour
             Debug.Log($"✓ ObjectDetector({name})가 PulleyPlatform({parentPlatform.name})을 찾았습니다.");
         
         // Trigger 설정 확인
-        Collider2D collider = GetComponent<Collider2D>();
-        if (collider != null && !collider.isTrigger)
+        triggerCollider = GetComponent<Collider2D>();
+        if (triggerCollider != null && !triggerCollider.isTrigger)
         {
             Debug.LogWarning($"ObjectDetector({name})의 Collider가 Trigger로 설정되지 않았습니다!");
         }
@@ -76,7 +91,8 @@ public class ObjectDetector : MonoBehaviour
 
         // 처음 들어온 경우에만 DetectedObject 추가/로그
         DetectedObject newObject = CreateDetectedObject(other, key);
-        if (newObject.IsValid)
+        // Player/PhysicsObject만 판정 대상 (환경/바닥 등은 무시)
+        if (newObject.IsValid && newObject.type != ObjectType.Empty)
         {
             detectedObjects.Add(newObject);
             EvaluatePriority();
@@ -161,13 +177,149 @@ public class ObjectDetector : MonoBehaviour
             }
         }
     }
+
+    private void FixedUpdate()
+    {
+        if (!enableFixedRescan) return;
+        if (triggerCollider == null) return;
+
+        if (rescanInterval > 0f && Time.time < nextRescanTime) return;
+        nextRescanTime = rescanInterval > 0f ? Time.time + rescanInterval : Time.time;
+
+        RescanOverlapsAuthoritatively();
+    }
+
+    /// <summary>
+    /// TriggerEnter/Exit 누락을 복구하기 위한 권위적 재스캔.
+    /// 현재 트리거 영역에 실제로 겹치는 대상만 남기고, 사라진 대상은 유예시간 후 제거합니다.
+    /// </summary>
+    private void RescanOverlapsAuthoritatively()
+    {
+        overlapResults.Clear();
+        rescanCounts.Clear();
+
+        ContactFilter2D filter = new ContactFilter2D();
+        filter.useLayerMask = true;
+        filter.layerMask = detectionLayer;
+        filter.useTriggers = true;
+
+        // 현재 트리거 콜라이더와 겹치는 모든 콜라이더를 수집
+        int hitCount = Physics2D.OverlapCollider(triggerCollider, filter, overlapResults);
+        if (hitCount > overlapResults.Count) hitCount = overlapResults.Count;
+
+        for (int i = 0; i < hitCount; i++)
+        {
+            Collider2D other = overlapResults[i];
+            if (other == null) continue;
+            if (other == triggerCollider) continue;
+
+            // 플랫폼(자기 자신) 계열은 방지
+            if (parentPlatform != null && other.transform.IsChildOf(parentPlatform.transform)) continue;
+
+            if (!IsInDetectionLayer(other.gameObject)) continue;
+
+            Transform key = GetKeyTransform(other);
+            if (key == null) continue;
+
+            if (rescanCounts.ContainsKey(key))
+                rescanCounts[key] += 1;
+            else
+                rescanCounts[key] = 1;
+        }
+
+        bool stateChanged = false;
+
+        // 1) 현재 겹치는 키는 카운트/목록을 확정
+        foreach (var pair in rescanCounts)
+        {
+            Transform key = pair.Key;
+            int count = pair.Value;
+
+            // Exit 유예 중이었다면 취소
+            if (pendingExitDeadline.ContainsKey(key))
+                pendingExitDeadline.Remove(key);
+
+            if (!overlapCounts.ContainsKey(key) || overlapCounts[key] != count)
+            {
+                overlapCounts[key] = count;
+            }
+
+            bool exists = detectedObjects.Any(o => o.objectTransform == key);
+            if (!exists)
+            {
+                // 대표 콜라이더가 없어도 key 기준으로 타입/무게를 계산해서 추가
+                ObjectType type = DetermineObjectType(key.gameObject);
+                if (type == ObjectType.Empty) continue; // 환경/바닥 등은 무시
+                float weight = GetObjectWeight(key.gameObject, type);
+
+                DetectedObject newObj = new DetectedObject(key, type, weight);
+                if (newObj.IsValid)
+                {
+                    detectedObjects.Add(newObj);
+                    stateChanged = true;
+
+                    if (showDebug)
+                        Debug.Log($"[{name}] 🔁 재스캔으로 오브젝트 복구: {newObj.objectName} (타입: {newObj.type}, 무게: {newObj.weight})");
+                }
+            }
+        }
+
+        // 2) 현재 겹치지 않는 키는 유예시간 후 제거(경계 떨림/플랫폼 이동 안정화)
+        // 안전하게 복사해서 순회
+        var existingKeys = overlapCounts.Keys.ToList();
+        foreach (var key in existingKeys)
+        {
+            if (key == null)
+            {
+                overlapCounts.Remove(key);
+                pendingExitDeadline.Remove(key);
+                int removedNull = detectedObjects.RemoveAll(o => o.objectTransform == key);
+                if (removedNull > 0) stateChanged = true;
+                continue;
+            }
+
+            if (rescanCounts.ContainsKey(key))
+                continue; // 여전히 겹침
+
+            // 겹침이 사라졌는데, 아직 유예가 없으면 예약
+            if (!pendingExitDeadline.ContainsKey(key))
+            {
+                pendingExitDeadline[key] = Time.time + exitGraceTime;
+                overlapCounts[key] = 0;
+                continue;
+            }
+
+            // 유예 시간이 지났고 여전히 겹치지 않으면 제거 확정
+            if (Time.time < pendingExitDeadline[key]) continue;
+
+            pendingExitDeadline.Remove(key);
+            overlapCounts.Remove(key);
+
+            int removed = detectedObjects.RemoveAll(o => o.objectTransform == key);
+            if (removed > 0)
+            {
+                stateChanged = true;
+                if (showDebug)
+                    Debug.Log($"[{name}] 🔁 재스캔으로 오브젝트 제거 확정: {key.name}");
+            }
+        }
+
+        if (stateChanged)
+            EvaluatePriority();
+    }
     
     private ObjectType DetermineObjectType(GameObject obj)
     {
         if (obj.CompareTag("Player"))
             return ObjectType.Player;
             
-        if (obj.CompareTag("PhysicsObject") || obj.GetComponent<Rigidbody2D>() != null)
+        // PhysicsObject는 태그가 가장 확실한 기준
+        if (obj.CompareTag("PhysicsObject"))
+            return ObjectType.PhysicsObject;
+
+        // 태그가 빠진 물리 오브젝트를 구제하되, Static(바닥/타일맵 등) Rigidbody2D는 제외
+        Rigidbody2D rb = obj.GetComponent<Rigidbody2D>();
+        if (rb != null && rb.bodyType != RigidbodyType2D.Static)
             return ObjectType.PhysicsObject;
             
         return ObjectType.Empty;

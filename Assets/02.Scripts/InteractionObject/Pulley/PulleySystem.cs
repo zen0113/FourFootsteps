@@ -145,6 +145,17 @@ public class PulleySystem : MonoBehaviour
     {
         if (platformA == null || platformB == null) return;
 
+        // (안전장치) activePlatform 잠금은 PhysicsObject일 때만 유지
+        // PhysicsObject가 내려간 뒤 Player 등으로 바뀌었는데도 lock이 남아 있으면
+        // 다른 플랫폼과의 비교가 막혀 비정상 상태가 될 수 있습니다.
+        if (activePlatform != null && activePlatform.CurrentPriority != ObjectType.PhysicsObject)
+        {
+            if (enableDebugLogs)
+                Debug.Log($"🔓 우선권 강제 해제: {activePlatform.name} (CurrentPriority={activePlatform.CurrentPriority})");
+            activePlatform = null;
+            activeReleaseAtTime = -1f;
+        }
+
         // 예약된 우선권 해제 처리(유예 시간 동안 다시 들어오면 유지)
         if (activePlatform != null && activeReleaseAtTime > 0f && Time.time >= activeReleaseAtTime)
         {

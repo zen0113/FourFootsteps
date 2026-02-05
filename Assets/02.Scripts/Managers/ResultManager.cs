@@ -167,14 +167,7 @@ public class ResultManager : MonoBehaviour
             case string when resultID.StartsWith("Result_Increment"):  // 값++
                 variableName = resultID["Result_Increment".Length..];
                 GameManager.Instance.IncrementVariable(variableName);
-
-                // 증가시킨게 책임감 점수면 ChangeResponsibilityGauge 호출
-                if (variableName == "ResponsibilityScore")
-                {
-                    if (ResponsibilityManager.Instance)
-                        ResponsibilityManager.Instance.ChangeResponsibilityGauge();
-                }
-                yield return null; // 바로 실행이지만 코루틴 일관성 유지
+                yield return null;
                 break;
 
             case string when resultID.StartsWith("Result_Decrement"):  // 값--
@@ -213,6 +206,15 @@ public class ResultManager : MonoBehaviour
                 {
                     Debug.LogError("Result_RespScoreToastText 뒤에 0이나 1의 숫자 입력 필요!!");
                 }
+                yield return null;
+                break;
+
+            case "Result_MemoryChoiceUpdated": // 회상_선택 이후 업데이트(점수, 선택 상태)
+                RecalculateResponsibilityScoreFromMemoryStates();
+
+                if (ResponsibilityManager.Instance)
+                    ResponsibilityManager.Instance.ChangeResponsibilityGauge();
+
                 yield return null;
                 break;
 
@@ -481,6 +483,44 @@ public class ResultManager : MonoBehaviour
                 break;
         }
     }
+
+    private void RecalculateResponsibilityScoreFromMemoryStates()
+    {
+        int currentCount = (int)GameManager.Instance.GetVariable("CurrentMemoryPuzzleCount");
+        int maxCount = (int)GameManager.Instance.GetVariable("MaxMemoryPuzzleCount");
+
+        // Dictionary<int, bool> 가져오기
+        var puzzleStates = GameManager.Instance.GetVariable("MemoryPuzzleStates") as Dictionary<int, bool>;
+        if (puzzleStates == null)
+        {
+            Debug.LogWarning("[ResultManager] MemoryPuzzleStates is null or not Dictionary<int, bool>.");
+            return;
+        }
+
+        // currentCount가 0이거나 maxCount가 잘못된 경우 방어
+        if (maxCount <= 0)
+        {
+            Debug.LogWarning("[ResultManager] MaxMemoryPuzzleCount is invalid.");
+            return;
+        }
+
+        // idx: 현재 회상 인덱스(0-based)
+        int idx = Mathf.Clamp(currentCount - 1, 0, maxCount - 1);
+
+        int score = 0;
+
+        // 0..idx 범위 true 개수 카운트
+        for (int i = 0; i <= idx; i++)
+        {
+            // 키가 없을 수도 있으니 방어적으로 TryGetValue 사용
+            if (puzzleStates.TryGetValue(i, out bool isTrue) && isTrue)
+                score++;
+        }
+
+        // 점수는 증가가 아니라 Set(대입)
+        GameManager.Instance.SetVariable("ResponsibilityScore", score);
+    }
+
 
     /// <summary>
     /// 고양이와의 상호작용 분기를 처리하는 핵심 함수

@@ -1,4 +1,8 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+using static Constants;
 
 // 이 스크립트가 작동하려면 TutorialController가 사용하던
 // 'SceneLoader' 싱글톤이 필요합니다.
@@ -31,9 +35,16 @@ public class LoadSceneTutorial : TutorialBase
         // 2. 씬 로더가 있는지 확인
         if (SceneLoader.Instance != null)
         {
-            // 3. 지정된 씬 로드 실행
-            Debug.Log($"[LoadSceneTutorial] '{sceneToLoad}' 씬을 로드합니다.");
-            SceneLoader.Instance.LoadScene(sceneToLoad);
+            if (SceneManager.GetActiveScene().name== SceneType.RECALL_5.ToSceneName())
+            {
+                StartCoroutine(LoadEndingScene());
+            }
+            else
+            {
+                // 3. 지정된 씬 로드 실행
+                Debug.Log($"[LoadSceneTutorial] '{sceneToLoad}' 씬을 로드합니다.");
+                SceneLoader.Instance.LoadScene(sceneToLoad);
+            }
         }
         else
         {
@@ -54,5 +65,16 @@ public class LoadSceneTutorial : TutorialBase
     public override void Exit()
     {
         // 씬이 로드되므로 Exit가 호출될 일이 거의 없습니다.
+    }
+
+    private IEnumerator LoadEndingScene()
+    {
+        int currentScore = (int)GameManager.Instance.GetVariable("ResponsibilityScore");
+
+        sceneToLoad = (currentScore >= 3) ? SceneType.ENDING_HAPPY.ToSceneName() : SceneType.ENDING_BAD.ToSceneName();
+
+        yield return new WaitForSecondsRealtime(1.5f);
+        Debug.Log($"[LoadSceneTutorial] '{sceneToLoad}' 씬을 로드합니다.");
+        SceneLoader.Instance.LoadScene(sceneToLoad);
     }
 }

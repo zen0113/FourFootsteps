@@ -152,9 +152,9 @@
 
 ## 👥 Team Meowment
 
-| <img width="200" src="https://avatars.githubusercontent.com/u/98133327?v=4"> | <img width="200" src="https://avatars.githubusercontent.com/u/105269153?v=4"> | <img width="200" src="https://avatars.githubusercontent.com/u/87838320?v=4"> | <img width="200" src="https://avatars.githubusercontent.com/u/YOUR_ID4?v=4"> |
+| <img width="200" src="https://avatars.githubusercontent.com/u/98133327?v=4"> | <img width="200" src="https://avatars.githubusercontent.com/u/105269153?v=4"> | <img width="200" src="https://avatars.githubusercontent.com/u/87838320?v=4"> | <img width="200" src="https://github.com/zen0113/FourFootsteps/blob/main/readme/leo.png"> |
 |:-----------------------------------------------------------------------------:|:-----------------------------------------------------------------------------:|:-----------------------------------------------------------------------------:|:-----------------------------------------------------------------------------:|
-| [김바다](https://github.com/viabe)<br>**Client Development** | [김채민](https://github.com/zen0113)<br>**PM / Client Development** | [오지은](https://github.com/jieundino)<br>**Client Development** | [김지유](https://github.com/USERNAME4)<br>**Design** |
+| [김바다](https://github.com/viabe)<br>**Client Development** | [김채민](https://github.com/zen0113)<br>**PM / Client Development** | [오지은](https://github.com/jieundino)<br>**Client Development** | 김지유<br>**Design** |
 
 <br>
 

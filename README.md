@@ -1,60 +1,177 @@
-# FourFootsteps
-캡스톤디자인 2D 어드벤처 게임 네 발자국
-<br/>
+# 네발자국 (FourFootSteps)
 
-## 깃허브 커밋 규칙
-- Ref: [Git Commit Message Convention](https://github.com/gyoogle/tech-interview-for-developer/blob/master/ETC/Git%20Commit%20Message%20Convention.md)
+<br>
 
-**커밋 메세지 형식**
-> type: Subject (제목)
-> <br/>
-> body (본문)
-> <br/>
-> footer (꼬리말)
+> 유기묘의 시선으로 바라보는 세상
+<img src="https://github.com/zen0113/FourFootsteps/blob/main/readme/fourfootsteps_1.PNG?raw=true" width="640"/>
 
-- `feat` : 새로운 기능에 대한 커밋
-- `fix` : 버그 수정에 대한 커밋
-- `build` : 빌드 관련 파일 수정에 대한 커밋
-- `chore` : 그 외 자잘한 수정에 대한 커밋
-- `ci` : CI관련 설정 수정에 대한 커밋
-- `docs` : 문서 수정에 대한 커밋
-- `style` : 코드 스타일 혹은 포맷 등에 관한 커밋
-- `refactor` : 코드 리팩토링에 대한 커밋
-- `test` : 테스트 코드 수정에 대한 커밋
+<br>
 
-**Subject (제목)**
+[![StoveStore](https://img.shields.io/badge/🎮_Stove_Store에서_플레이-FF6B35?style=for-the-badge)](https://store.onstove.com/ko/games/103726)
+[![YouTube](https://img.shields.io/badge/트레일러_보기-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://www.youtube.com/watch?v=A5n4hy8R2SY)
 
-- *한글*로 간결하게 작성
+<br>
 
-**Body (본문)**
+## 📊 게임 정보
 
-- 상세히 작성, 기본적으로 무엇을 왜 진행 하였는지 작성
-- Issue 등록 시, Issue 태그
+| 항목 | 내용 |
+|:---:|:---|
+| **장르** | 어드벤처, 플랫포머 |
+| **개발팀** | Meowment |
+| **출시일** | 2026.01.20 |
+| **이용등급** | 전체 이용가 |
+| **플랫폼** | PC (Windows) |
+| **개발 기간** | 2025.04 ~ 2026.01 (10개월) |
 
-**footer (꼬리말)**
+<br>
 
-- 참고사항
+## 🎮 게임 소개
 
-<br/>
+유기묘의 시선으로 도시를 바라보며, 곳곳에 흩어진 기억을 따라 자신의 과거를 천천히 되짚어가는 **2D 감성 어드벤처 게임**입니다.
 
-## 깃허브 브랜치 규칙
-- Ref: [Git Branch & Naming](https://ej-developer.tistory.com/75)
+당신의 작은 선택이 한 생명의 운명을 바꿉니다.
 
-**크게 3가지 유형의 브랜치로 분기하여 사용**
+<br>
 
-- `main` : 유저에게 배포가능한 상태를 관리하는 브랜치. 절대 함부로 병합 시키지 말것
-- `develop` : 기능개발을 위한 브랜들을 병합시키는 브랜치. feature/... 브랜치는 이곳에서 분기하여 병합, 안정적인 상태일때, main에 병합
-- `feature/...` : 새로운 기능 및 버그 수정이 필요할 때 사용하는 브랜치. develop 브랜치에서 분기하여 병합, 더 이상 필요가 없다면 삭제 naming ex) feature/dialogue ex) main -> develop -> feature 분기 feature -> develop -> main 병합
 
-## PR 규칙
-**PR 제목**: 03.26 작업 제목
+## ⚙️ Technical Stack
 
-개인 브랜치 -> merge 브랜치에 pr
-문제 없으면 merge 브랜치 -> main 에 머지
+<div>
+<img src="https://img.shields.io/badge/Unity-000000?style=flat-square&logo=unity&logoColor=white"/>
+<img src="https://img.shields.io/badge/C%23-239120?style=flat-square&logo=csharp&logoColor=white"/>
+<img src="https://img.shields.io/badge/Git-F05032?style=flat-square&logo=git&logoColor=white"/>
+</div>
 
-**Comment**
+<br>
 
-- 작업에 대한 자세한 내용(이유)
-- 작업 내용
-- 미리보기(첨부)
-<img width="640" alt="img1 daumcdn" src="https://github.com/user-attachments/assets/feda2e1e-8965-46fc-8548-48fc970402c8" />
+- **Game Engine**: Unity 2021.3 LTS
+- **Language**: C#
+- **Version Control**: Git-flow
+- **Platform**: Windows
+
+<br>
+
+
+
+## 📱 Screenshots
+
+| ![Screenshot1](https://raw.githubusercontent.com/zen0113/FourFootsteps/main/readme/fourfootsteps_2.jpg)  | ![Screenshot2](https://raw.githubusercontent.com/zen0113/FourFootsteps/main/readme/fourfootsteps_3.jpg)  | ![Screenshot3](https://raw.githubusercontent.com/zen0113/FourFootsteps/main/readme/fourfootsteps_4.jpg)  | 
+|-|-|-|
+| ![Screenshot4](https://raw.githubusercontent.com/zen0113/FourFootsteps/main/readme/fourfootsteps_5.jpg) | ![Screenshot5](https://raw.githubusercontent.com/zen0113/FourFootsteps/main/readme/fourfootsteps_6.jpg) | ![Screenshot6](https://raw.githubusercontent.com/zen0113/FourFootsteps/main/readme/fourfootsteps_7.jpg) |
+
+<br>
+
+
+
+## 💡 개발 배경
+
+### 사회적 문제 인식
+
+- **국내 반려동물 유기 연간 10만 마리 초과**
+- 보호소 내 절반 가까이 생존 불가능
+- 우리나라의 유기동물 수치 심각성
+
+### 개발 목적
+
+유기동물 문제에 대한 **경험 없는 공감의 한계**를 넘어, 유기묘의 시선으로 도심을 탐험하며 기억과 감정을 따라가는 내러티브 게임을 통해:
+
+1. **책임감 있는 입양 문화 형성**
+2. **생명 존중과 성찰의 기회 제공**
+3. **생명 가치 전달**
+
+<br>
+
+**기능성 게임(Serious Game)의 효과**
+- 문제 해결을 위한 행동 의지 증가 **60%**
+- 사회적 이슈에 대한 관심도 증가 **70%**
+
+<br>
+
+## ✨ 게임 특징
+
+### 1) 두가지 시점 시스템
+
+<img src="https://github.com/zen0113/FourFootsteps/blob/main/readme/fourfootsteps_8.png?raw=true" width="640"/>
+
+인간과 고양이, 두 관점을 직접 오가며 상황의 감정과 책임을 입체적으로 이해합니다.
+
+<br>
+
+### 2) 어드벤처 및 플랫포머 시스템
+
+<img src="https://github.com/zen0113/FourFootsteps/blob/main/readme/fourfootsteps_9.png?raw=true" width="420"/>
+
+탐험, 점프, 숨기 등 2D 조작을 통해 유기 동물의 생존 환경을 체험합니다.
+
+<br>
+
+### 3) 미니게임 시스템
+
+<img src="https://github.com/zen0113/FourFootsteps/blob/main/readme/fourfootsteps_10.png?raw=true" width="420"/>
+
+추격, 철장 탈출, 도로 횡단 등 유기동물이 마주하는 위험을 체험합니다.
+
+<br>
+
+## 🎬 게임 구조
+
+### 전체 플레이 흐름
+
+총 **13개의 씬**으로 구성된 감성 인터랙티브 스토리
+```
+프롤로그 → 고양이 시점 (5개 스테이지) ⇄ 인간 시점 회상 (5개) → 엔딩 (2개)
+```
+
+<br>
+
+### 스테이지 구성
+
+**고양이 시점 (현재)**
+1. 스테이지 1: 뒷골목
+2. 스테이지 2: 동물병원
+3. 스테이지 3: 아파트 단지
+4. 스테이지 4: 트럭
+5. 스테이지 5: 차도
+
+**인간 시점 (회상)**
+- 5개의 회상 씬을 통해 과거의 기억 탐험
+
+**엔딩**
+- 엔딩 1: 해피엔딩
+- 엔딩 2: 배드엔딩
+
+<br>
+
+
+## 🏆  핵심 성과
+
+- **한국멀티미디어학회 추계학술발표대회 논문 발표** (2025.11)
+- **스토브 스토어 정식 출시** (2026.01)
+
+<br>
+
+## 👥 Team Meowment
+
+| <img width="200" src="https://avatars.githubusercontent.com/u/98133327?v=4"> | <img width="200" src="https://avatars.githubusercontent.com/u/105269153?v=4"> | <img width="200" src="https://avatars.githubusercontent.com/u/87838320?v=4"> | <img width="200" src="https://avatars.githubusercontent.com/u/YOUR_ID4?v=4"> |
+|:-----------------------------------------------------------------------------:|:-----------------------------------------------------------------------------:|:-----------------------------------------------------------------------------:|:-----------------------------------------------------------------------------:|
+| [김바다](https://github.com/viabe)<br>**Client Development** | [김채민](https://github.com/zen0113)<br>**PM / Client Development** | [오지은](https://github.com/jieundino)<br>**Client Development** | [김지유](https://github.com/USERNAME4)<br>**Design** |
+
+<br>
+
+
+
+## 📞 Contact
+
+프로젝트 관련 문의
+
+- **Email**: meowment.studio@gmail.com
+
+---
+
+<div align="center">
+
+**Made with 💜 by Team Meowment**
+
+유기와 책임, 생명의 가치를 전하는 게임
+
+</div>

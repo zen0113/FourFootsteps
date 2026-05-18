@@ -123,47 +123,50 @@ public class SaveManager : MonoBehaviour
     // 불러오기
     public void ApplySavedGameData()
     {
-        if (!File.Exists(SAVE_DATA_FILE_PATH)) return; // no save game data
-
-        try
+        lock (_saveLock) 
         {
-            // 저장된 파일 읽어오고 Json을 클래스 형식으로 전환해서 할당
-            string fromJsonData = File.ReadAllText(SAVE_DATA_FILE_PATH);
-            SaveData saveData = JsonConvert.DeserializeObject<SaveData>(fromJsonData);
+            if (!File.Exists(SAVE_DATA_FILE_PATH)) return; // no save game data
 
-            if (saveData == null)
+            try
             {
-                Debug.LogWarning("[SaveManager] ApplySavedGameData: saveData is null");
-                return;
+                // 저장된 파일 읽어오고 Json을 클래스 형식으로 전환해서 할당
+                string fromJsonData = File.ReadAllText(SAVE_DATA_FILE_PATH);
+                SaveData saveData = JsonConvert.DeserializeObject<SaveData>(fromJsonData);
+
+                if (saveData == null)
+                {
+                    Debug.LogWarning("[SaveManager] ApplySavedGameData: saveData is null");
+                    return;
+                }
+
+                var loadedVars = saveData.Variables ?? new Dictionary<string, object>();
+
+                // 레거시 세이브 복구:
+                // 예전 세이브에서 MemoryPuzzleStates가 string 타입("System.Collections.Generic.Dictionary`2[...]")으로
+                // 잘못 저장된 경우, 현재 GameManager의 초기값(dict<int,bool>)을 복사해 덮어쓴다.
+                if (loadedVars.TryGetValue("MemoryPuzzleStates", out object memVal) && memVal is string)
+                {
+                    if (GameManager.Instance.Variables != null &&
+                        GameManager.Instance.Variables.TryGetValue("MemoryPuzzleStates", out object defaultVal) &&
+                        defaultVal is Dictionary<int, bool> defaultDict)
+                    {
+                        loadedVars["MemoryPuzzleStates"] = new Dictionary<int, bool>(defaultDict);
+                        Debug.Log("[SaveManager] Fixed legacy MemoryPuzzleStates (string -> dict) using GameManager defaults.");
+                    }
+                    else
+                    {
+                        loadedVars["MemoryPuzzleStates"] = new Dictionary<int, bool>();
+                        Debug.Log("[SaveManager] Fixed legacy MemoryPuzzleStates to empty dict<int,bool>.");
+                    }   
+                }
+
+                // 게임 쪽 변수에 반영
+                GameManager.Instance.Variables = loadedVars;
             }
-
-            var loadedVars = saveData.Variables ?? new Dictionary<string, object>();
-
-            // 레거시 세이브 복구:
-            // 예전 세이브에서 MemoryPuzzleStates가 string 타입("System.Collections.Generic.Dictionary`2[...]")으로
-            // 잘못 저장된 경우, 현재 GameManager의 초기값(dict<int,bool>)을 복사해 덮어쓴다.
-            if (loadedVars.TryGetValue("MemoryPuzzleStates", out object memVal) && memVal is string)
+            catch (Exception e)
             {
-                if (GameManager.Instance.Variables != null &&
-                    GameManager.Instance.Variables.TryGetValue("MemoryPuzzleStates", out object defaultVal) &&
-                    defaultVal is Dictionary<int, bool> defaultDict)
-                {
-                    loadedVars["MemoryPuzzleStates"] = new Dictionary<int, bool>(defaultDict);
-                    Debug.Log("[SaveManager] Fixed legacy MemoryPuzzleStates (string -> dict) using GameManager defaults.");
-                }
-                else
-                {
-                    loadedVars["MemoryPuzzleStates"] = new Dictionary<int, bool>();
-                    Debug.Log("[SaveManager] Fixed legacy MemoryPuzzleStates to empty dict<int,bool>.");
-                }
+                Debug.LogError($"[SaveManager] ApplySavedGameData failed: {e}");
             }
-
-            // 게임 쪽 변수에 반영
-            GameManager.Instance.Variables = loadedVars;
-        }
-        catch (Exception e)
-        {
-            Debug.LogError($"[SaveManager] ApplySavedGameData failed: {e}");
         }
     }
 

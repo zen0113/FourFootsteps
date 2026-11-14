@@ -1,0 +1,159 @@
+<svg width="2120" height="1735" xmlns="http://www.w3.org/2000/svg" font-family="'Noto Sans CJK KR','Noto Sans CJK JP','Noto Sans CJK HK',sans-serif">
+ <defs>
+  <marker orient="auto" markerHeight="5" markerWidth="5" refY="6" refX="10" viewBox="0 0 12 12" id="en">
+   <path id="svg_1" fill="#1e1b4b" d="m0,0l12,6l-12,6l0,-12z"/>
+  </marker>
+  <marker orient="auto" markerHeight="5" markerWidth="5" refY="6" refX="10" viewBox="0 0 12 12" id="em">
+   <path id="svg_3" fill="#4a4780" d="m0,0l12,6l-12,6l0,-12z"/>
+  </marker>
+  <marker orient="auto" markerHeight="5" markerWidth="5" refY="6" refX="2" viewBox="0 0 12 12" id="sm">
+   <path id="svg_4" fill="#4a4780" d="m12,0l-12,6l12,6l0,-12z"/>
+  </marker>
+ </defs>
+ <g>
+  <title>Layer 1</title>
+  <text id="svg_8" text-anchor="start" fill="#1e1b4b" font-weight="700" font-size="62" y="74" x="40">Architecture</text>
+  <text id="svg_9" text-anchor="start" fill="#6b6a86" font-weight="400" font-size="26" y="108" x="40">FourFootsteps</text>
+  <line id="svg_10" marker-end="url(#en)" stroke-width="4" stroke="#1e1b4b" y2="46.32456" x2="1799.36923" y1="46.32456" x1="1709.36923"/>
+  <text id="svg_11" text-anchor="start" fill="#1e1b4b" font-weight="400" font-size="24" y="54.32456" x="1815.36923">호출 / 실행 흐름</text>
+  <line id="svg_12" marker-end="url(#em)" stroke-dasharray="14 9" stroke-width="4" stroke="#4a4780" y2="84.32456" x2="1799.36923" y1="84.32456" x1="1709.36923"/>
+  <text id="svg_13" text-anchor="start" fill="#1e1b4b" font-weight="400" font-size="24" y="92.32456" x="1815.36923">데이터 읽기 / 쓰기 / 파싱</text>
+  <g id="svg_16">
+   <rect id="svg_17" stroke-width="4" stroke="#1e1b4b" fill="#fff3d6" rx="38" height="200" width="1920" y="150" x="40"/>
+   <text id="svg_18" text-anchor="middle" fill="#1e1b4b" font-weight="700" font-size="40" y="206" x="1000">CSV Data  (Resources/Datas)</text>
+   <line id="svg_19" stroke-width="3" stroke="#1e1b4b" y2="234" x2="1960" y1="234" x1="40"/>
+   <rect id="svg_20" stroke-width="2.5" stroke="#1e1b4b" fill="#ffffff" ry="20" rx="20" height="64" width="225" y="260" x="50"/>
+   <text id="svg_21" text-anchor="middle" fill="#1e1b4b" font-weight="500" font-size="25" y="301" x="162.5">dialogues.csv</text>
+   <rect id="svg_22" stroke-width="2.5" stroke="#1e1b4b" fill="#ffffff" ry="20" rx="20" height="64" width="225" y="260" x="290"/>
+   <text id="svg_23" text-anchor="middle" fill="#1e1b4b" font-weight="500" font-size="25" y="301" x="402.5">choices.csv</text>
+   <rect id="svg_24" stroke-width="2.5" stroke="#1e1b4b" fill="#ffffff" ry="20" rx="20" height="64" width="225" y="260" x="750"/>
+   <text id="svg_25" text-anchor="middle" fill="#1e1b4b" font-weight="500" font-size="25" y="301" x="862.5">events.csv</text>
+   <rect id="svg_26" stroke-width="2.5" stroke="#1e1b4b" fill="#ffffff" ry="20" rx="20" height="64" width="225" y="260" x="990"/>
+   <text id="svg_27" text-anchor="middle" fill="#1e1b4b" font-weight="500" font-size="25" y="301" x="1102.5">conditions.csv</text>
+   <rect id="svg_28" stroke-width="2.5" stroke="#1e1b4b" fill="#ffffff" ry="20" rx="20" height="64" width="225" y="260" x="1450"/>
+   <text id="svg_29" text-anchor="middle" fill="#1e1b4b" font-weight="500" font-size="25" y="301" x="1562.5">results.csv</text>
+   <text id="svg_30" text-anchor="start" fill="#6b6a86" font-weight="400" font-size="22" y="288" x="1700">그 외: variables.csv</text>
+   <text id="svg_31" text-anchor="start" fill="#6b6a86" font-weight="400" font-size="22" y="316" x="1700">puzzlesMemory.csv</text>
+   <rect id="svg_32" stroke-width="4" stroke="#1e1b4b" fill="#ffffff" ry="38" rx="38" height="358" width="480" y="500" x="40"/>
+   <text id="svg_33" text-anchor="middle" fill="#1e1b4b" font-weight="700" font-size="42" y="556" x="280">DialogueManager</text>
+   <line id="svg_34" stroke-width="3" stroke="#1e1b4b" y2="584" x2="520" y1="584" x1="40"/>
+   <circle id="svg_35" fill="#1e1b4b" r="5" cy="628" cx="74"/>
+   <text id="svg_36" text-anchor="start" fill="#1e1b4b" font-weight="400" font-size="28" y="638" x="96">대사 출력</text>
+   <circle id="svg_37" fill="#1e1b4b" r="5" cy="674" cx="74"/>
+   <text id="svg_38" text-anchor="start" fill="#1e1b4b" font-weight="400" font-size="28" y="684" x="96">선택지 표시</text>
+   <circle id="svg_39" fill="#1e1b4b" r="5" cy="720" cx="74"/>
+   <text id="svg_40" text-anchor="start" fill="#1e1b4b" font-weight="400" font-size="28" y="730" x="96">타자 효과</text>
+   <circle id="svg_41" fill="#1e1b4b" r="5" cy="766" cx="74"/>
+   <text id="svg_42" text-anchor="start" fill="#1e1b4b" font-weight="400" font-size="28" y="776" x="96">컷씬 이미지 처리</text>
+   <circle id="svg_43" fill="#1e1b4b" r="5" cy="812" cx="74"/>
+   <text id="svg_44" text-anchor="start" fill="#1e1b4b" font-weight="400" font-size="28" y="822" x="96">Dialogue Queue 관리</text>
+   <rect id="svg_45" stroke-width="4" stroke="#1e1b4b" fill="#ffffff" ry="38" rx="38" height="358" width="480" y="500" x="740"/>
+   <text id="svg_46" text-anchor="middle" fill="#1e1b4b" font-weight="700" font-size="42" y="556" x="980">EventManager</text>
+   <line id="svg_47" stroke-width="3" stroke="#1e1b4b" y2="584" x2="1220" y1="584" x1="740"/>
+   <circle id="svg_48" fill="#1e1b4b" r="5" cy="628" cx="774"/>
+   <text id="svg_49" text-anchor="start" fill="#1e1b4b" font-weight="400" font-size="28" y="638" x="796">Event ID 호출</text>
+   <circle id="svg_50" fill="#1e1b4b" r="5" cy="674" cx="774"/>
+   <text id="svg_51" text-anchor="start" fill="#1e1b4b" font-weight="400" font-size="28" y="684" x="796">조건 검사</text>
+   <circle id="svg_52" fill="#1e1b4b" r="5" cy="720" cx="774"/>
+   <text id="svg_53" text-anchor="start" fill="#1e1b4b" font-weight="400" font-size="28" y="730" x="796">AND / OR 조건 처리</text>
+   <circle id="svg_54" fill="#1e1b4b" r="5" cy="766" cx="774"/>
+   <text id="svg_55" text-anchor="start" fill="#1e1b4b" font-weight="400" font-size="28" y="776" x="796">Instant / Sequential</text>
+   <text id="svg_56" text-anchor="start" fill="#1e1b4b" font-weight="400" font-size="28" y="822" x="796">실행 모드 분기</text>
+   <rect id="svg_57" stroke-width="4" stroke="#1e1b4b" fill="#ffffff" ry="38" rx="38" height="404" width="520" y="500" x="1440"/>
+   <text id="svg_58" text-anchor="middle" fill="#1e1b4b" font-weight="700" font-size="42" y="556" x="1700">ResultManager</text>
+   <line id="svg_59" stroke-width="3" stroke="#1e1b4b" y2="584" x2="1960" y1="584" x1="1440"/>
+   <circle id="svg_60" fill="#1e1b4b" r="5" cy="628" cx="1474"/>
+   <text id="svg_61" text-anchor="start" fill="#1e1b4b" font-weight="400" font-size="28" y="638" x="1496">Result ID 실행</text>
+   <circle id="svg_62" fill="#1e1b4b" r="5" cy="674" cx="1474"/>
+   <text id="svg_63" text-anchor="start" fill="#1e1b4b" font-weight="400" font-size="28" y="684" x="1496">대사 시작</text>
+   <circle id="svg_64" fill="#1e1b4b" r="5" cy="720" cx="1474"/>
+   <text id="svg_65" text-anchor="start" fill="#1e1b4b" font-weight="400" font-size="28" y="730" x="1496">변수 증감 / 반전</text>
+   <circle id="svg_66" fill="#1e1b4b" r="5" cy="766" cx="1474"/>
+   <text id="svg_67" text-anchor="start" fill="#1e1b4b" font-weight="400" font-size="28" y="776" x="1496">페이드 인 / 아웃</text>
+   <circle id="svg_68" fill="#1e1b4b" r="5" cy="812" cx="1474"/>
+   <text id="svg_69" text-anchor="start" fill="#1e1b4b" font-weight="400" font-size="28" y="822" x="1496">씬 이동</text>
+   <circle id="svg_70" fill="#1e1b4b" r="5" cy="858" cx="1474"/>
+   <text id="svg_71" text-anchor="start" fill="#1e1b4b" font-weight="400" font-size="28" y="868" x="1496">퍼즐 및 오브젝트 행동 실행</text>
+   <path id="svg_72" stroke-linejoin="round" stroke-width="12" stroke="#ffffff" fill="none" d="m280,350l0,150"/>
+   <path id="svg_73" marker-end="url(#em)" stroke-linejoin="round" stroke-dasharray="14 9" stroke-width="4" stroke="#4a4780" fill="none" d="m280,350l0,150"/>
+   <path id="svg_74" stroke-linejoin="round" stroke-width="12" stroke="#ffffff" fill="none" d="m980,350l0,150"/>
+   <path id="svg_75" marker-end="url(#em)" stroke-linejoin="round" stroke-dasharray="14 9" stroke-width="4" stroke="#4a4780" fill="none" d="m980,350l0,150"/>
+   <path id="svg_76" stroke-linejoin="round" stroke-width="12" stroke="#ffffff" fill="none" d="m1560,350l0,150"/>
+   <path id="svg_77" marker-end="url(#em)" stroke-linejoin="round" stroke-dasharray="14 9" stroke-width="4" stroke="#4a4780" fill="none" d="m1560,350l0,150"/>
+   <rect id="svg_78" fill-opacity="0.96" fill="#ffffff" rx="10" height="68" width="264.44" y="391" x="147.78"/>
+   <text id="svg_79" text-anchor="middle" fill="#4a4780" font-weight="500" font-size="22" y="415" x="280">dialogues · choices</text>
+   <text id="svg_80" text-anchor="middle" fill="#4a4780" font-weight="500" font-size="22" y="443" x="280">파싱</text>
+   <rect id="svg_81" fill-opacity="0.96" fill="#ffffff" rx="10" height="68" width="264.44" y="391" x="847.78"/>
+   <text id="svg_82" text-anchor="middle" fill="#4a4780" font-weight="500" font-size="22" y="415" x="980">events · conditions</text>
+   <text id="svg_83" text-anchor="middle" fill="#4a4780" font-weight="500" font-size="22" y="443" x="980">파싱</text>
+   <rect id="svg_84" fill-opacity="0.96" fill="#ffffff" rx="10" height="68" width="111.32" y="391" x="1504.34"/>
+   <text id="svg_85" text-anchor="middle" fill="#4a4780" font-weight="500" font-size="22" y="415" x="1560">results</text>
+   <text id="svg_86" text-anchor="middle" fill="#4a4780" font-weight="500" font-size="22" y="443" x="1560">파싱</text>
+   <path id="svg_87" stroke-linejoin="round" stroke-width="12" stroke="#ffffff" fill="none" d="m520,610l220,0"/>
+   <path id="svg_88" marker-end="url(#en)" stroke-linejoin="round" stroke-width="4" stroke="#1e1b4b" fill="none" d="m520,610l220,0"/>
+   <rect id="svg_89" fill-opacity="0.96" fill="#ffffff" rx="10" height="68" width="186.56" y="528" x="536.72"/>
+   <text id="svg_90" text-anchor="middle" fill="#1e1b4b" font-weight="500" font-size="22" y="552" x="630">CallEvent()</text>
+   <text id="svg_91" text-anchor="middle" fill="#1e1b4b" font-weight="500" font-size="22" y="580" x="630">다음이 Event면</text>
+   <path id="svg_92" stroke-linejoin="round" stroke-width="12" stroke="#ffffff" fill="none" d="m1220,610l220,0"/>
+   <path id="svg_93" marker-end="url(#en)" stroke-linejoin="round" stroke-width="4" stroke="#1e1b4b" fill="none" d="m1220,610l220,0"/>
+   <rect id="svg_94" fill-opacity="0.96" fill="#ffffff" rx="10" height="68" width="155.32" y="528" x="1252.34"/>
+   <text id="svg_95" text-anchor="middle" fill="#1e1b4b" font-weight="500" font-size="22" y="552" x="1330">Result 실행</text>
+   <text id="svg_96" text-anchor="middle" fill="#1e1b4b" font-weight="500" font-size="22" y="580" x="1330">(결과 목록)</text>
+   <path id="svg_97" stroke-linejoin="round" stroke-width="12" stroke="#ffffff" fill="none" d="m1510,904l0,196l-1110,0l0,-242"/>
+   <path id="svg_98" marker-end="url(#en)" stroke-linejoin="round" stroke-width="4" stroke="#1e1b4b" fill="none" d="m1510,904l0,196l-1110,0l0,-242"/>
+   <rect id="svg_99" fill-opacity="0.96" fill="#ffffff" rx="10" height="68" width="506.88" y="1066" x="436.56"/>
+   <text id="svg_100" text-anchor="middle" fill="#1e1b4b" font-weight="500" font-size="22" y="1090" x="690">Result_StartDialogue → StartDialogue()</text>
+   <text id="svg_101" text-anchor="middle" fill="#1e1b4b" font-weight="500" font-size="22" y="1118" x="690">(대사가 끝날 때까지 대기)</text>
+   <rect id="svg_102" stroke-width="4" stroke="#1e1b4b" fill="#f4f4fb" ry="38" rx="38" height="312" width="480" y="1210" x="740"/>
+   <text id="svg_103" text-anchor="middle" fill="#1e1b4b" font-weight="700" font-size="42" y="1266" x="980">GameManager</text>
+   <line id="svg_104" stroke-width="3" stroke="#1e1b4b" y2="1294" x2="1220" y1="1294" x1="740"/>
+   <circle id="svg_105" fill="#1e1b4b" r="5" cy="1338" cx="774"/>
+   <text id="svg_106" text-anchor="start" fill="#1e1b4b" font-weight="400" font-size="28" y="1348" x="796">변수(Variables) 보관</text>
+   <circle id="svg_107" fill="#1e1b4b" r="5" cy="1384" cx="774"/>
+   <text id="svg_108" text-anchor="start" fill="#1e1b4b" font-weight="400" font-size="28" y="1394" x="796">variables.csv로 초기화</text>
+   <circle id="svg_109" fill="#1e1b4b" r="5" cy="1430" cx="774"/>
+   <text id="svg_110" text-anchor="start" fill="#1e1b4b" font-weight="400" font-size="28" y="1440" x="796">조건 판정·결과 실행의</text>
+   <text id="svg_111" text-anchor="start" fill="#1e1b4b" font-weight="400" font-size="28" y="1486" x="796">변수 읽기 / 쓰기</text>
+   <rect id="svg_112" stroke-width="4" stroke="#1e1b4b" fill="#ffffff" ry="38" rx="38" height="312" width="420" y="1210" x="1640"/>
+   <text id="svg_113" text-anchor="middle" fill="#1e1b4b" font-weight="700" font-size="42" y="1266" x="1850">SaveManager</text>
+   <line id="svg_114" stroke-width="3" stroke="#1e1b4b" y2="1294" x2="2060" y1="1294" x1="1640"/>
+   <circle id="svg_115" fill="#1e1b4b" r="5" cy="1338" cx="1674"/>
+   <text id="svg_116" text-anchor="start" fill="#1e1b4b" font-weight="400" font-size="28" y="1348" x="1696">플레이 상태 저장</text>
+   <circle id="svg_117" fill="#1e1b4b" r="5" cy="1384" cx="1674"/>
+   <text id="svg_118" text-anchor="start" fill="#1e1b4b" font-weight="400" font-size="28" y="1394" x="1696">변수 상태 복구</text>
+   <circle id="svg_119" fill="#1e1b4b" r="5" cy="1430" cx="1674"/>
+   <text id="svg_120" text-anchor="start" fill="#1e1b4b" font-weight="400" font-size="28" y="1440" x="1696">레거시 데이터 복구</text>
+   <circle id="svg_121" fill="#1e1b4b" r="5" cy="1476" cx="1674"/>
+   <text id="svg_122" text-anchor="start" fill="#1e1b4b" font-weight="400" font-size="28" y="1486" x="1696">Atomic Write 적용</text>
+   <path id="svg_123" stroke-linejoin="round" stroke-width="12" stroke="#ffffff" fill="none" d="m980,858l0,352"/>
+   <path id="svg_124" marker-end="url(#em)" stroke-linejoin="round" stroke-dasharray="14 9" stroke-width="4" stroke="#4a4780" fill="none" d="m980,858l0,352"/>
+   <rect id="svg_125" fill-opacity="0.96" fill="#ffffff" rx="10" height="68" width="261.8" y="951" x="849.1"/>
+   <text id="svg_126" text-anchor="middle" fill="#4a4780" font-weight="500" font-size="22" y="975" x="980">조건 검사 → 변수 읽기</text>
+   <text id="svg_127" text-anchor="middle" fill="#4a4780" font-weight="500" font-size="22" y="1003" x="980">(ConditionManager)</text>
+   <path id="svg_128" stroke-linejoin="round" stroke-width="12" stroke="#ffffff" fill="none" d="m200,858l0,412l540,0"/>
+   <path id="svg_129" marker-end="url(#em)" stroke-linejoin="round" stroke-dasharray="14 9" stroke-width="4" stroke="#4a4780" fill="none" d="m200,858l0,412l540,0"/>
+   <rect id="svg_130" fill-opacity="0.96" fill="#ffffff" rx="10" height="68" width="277.2" y="1198" x="331.4"/>
+   <text id="svg_131" text-anchor="middle" fill="#4a4780" font-weight="500" font-size="22" y="1222" x="470">선택 결과 기록</text>
+   <text id="svg_132" text-anchor="middle" fill="#4a4780" font-weight="500" font-size="22" y="1250" x="470">(MemoryPuzzleStates)</text>
+   <path id="svg_133" stroke-linejoin="round" stroke-width="12" stroke="#ffffff" fill="none" d="m1590,904l0,366l-370,0"/>
+   <path id="svg_134" marker-end="url(#em)" stroke-linejoin="round" stroke-dasharray="14 9" stroke-width="4" stroke="#4a4780" fill="none" d="m1590,904l0,366l-370,0"/>
+   <rect id="svg_135" fill-opacity="0.96" fill="#ffffff" rx="10" height="40" width="236.28" y="1212" x="1286.86"/>
+   <text id="svg_136" text-anchor="middle" fill="#4a4780" font-weight="500" font-size="22" y="1236" x="1405">변수 증감·반전·설정</text>
+   <path id="svg_137" stroke-linejoin="round" stroke-width="12" stroke="#ffffff" fill="none" d="m1850,904l0,306"/>
+   <path id="svg_138" marker-end="url(#en)" stroke-linejoin="round" stroke-width="4" stroke="#1e1b4b" fill="none" d="m1850,904l0,306"/>
+   <rect id="svg_139" fill-opacity="0.96" fill="#ffffff" rx="10" height="68" width="250.36" y="1031" x="1724.82"/>
+   <text id="svg_140" text-anchor="middle" fill="#1e1b4b" font-weight="500" font-size="22" y="1055" x="1850">SaveGameData()</text>
+   <text id="svg_141" text-anchor="middle" fill="#1e1b4b" font-weight="500" font-size="22" y="1083" x="1850">씬 로드 후 AutoSave</text>
+   <path id="svg_142" stroke-linejoin="round" stroke-width="12" stroke="#ffffff" fill="none" d="m1640,1410l-420,0"/>
+   <path id="svg_143" marker-end="url(#em)" marker-start="url(#sm)" stroke-linejoin="round" stroke-dasharray="14 9" stroke-width="4" stroke="#4a4780" fill="none" d="m1640,1410l-420,0"/>
+   <rect id="svg_144" fill-opacity="0.96" fill="#ffffff" rx="10" height="40" width="297.88" y="1350" x="1281.06"/>
+   <text id="svg_145" text-anchor="middle" fill="#4a4780" font-weight="500" font-size="22" y="1374" x="1430">Variables 직렬화 / 복구</text>
+   <rect id="svg_146" stroke-width="3" stroke="#1e1b4b" fill="#fff3d6" ry="26" rx="26" height="80" width="420" y="1620" x="1640"/>
+   <text id="svg_147" text-anchor="middle" fill="#1e1b4b" font-weight="700" font-size="28" y="1669" x="1850">GameData.json</text>
+   <path id="svg_148" stroke-linejoin="round" stroke-width="12" stroke="#ffffff" fill="none" d="m1850,1522l0,98"/>
+   <path id="svg_149" marker-end="url(#en)" stroke-linejoin="round" stroke-width="4" stroke="#1e1b4b" fill="none" d="m1850,1522l0,98"/>
+   <rect id="svg_150" fill-opacity="0.96" fill="#ffffff" rx="10" height="40" width="175.12" y="1555" x="1642.44"/>
+   <text id="svg_151" text-anchor="middle" fill="#1e1b4b" font-weight="500" font-size="22" y="1579" x="1730">Atomic Write</text>
+  </g>
+ </g>
+</svg>

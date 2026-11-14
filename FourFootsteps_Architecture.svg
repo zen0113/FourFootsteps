@@ -1,0 +1,201 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2120" height="2500" viewBox="0 0 2120 2500" font-family="'Noto Sans CJK KR','Noto Sans CJK JP','Noto Sans CJK HK',sans-serif">
+<rect width="2120" height="2500" fill="#ffffff"/>
+<defs><marker id="en" viewBox="0 0 12 12" refX="10" refY="6" markerWidth="5" markerHeight="5" orient="auto"><path d="M 0 0 L 12 6 L 0 12 z" fill="#1e1b4b"/></marker><marker id="sn" viewBox="0 0 12 12" refX="2" refY="6" markerWidth="5" markerHeight="5" orient="auto"><path d="M 12 0 L 0 6 L 12 12 z" fill="#1e1b4b"/></marker><marker id="em" viewBox="0 0 12 12" refX="10" refY="6" markerWidth="5" markerHeight="5" orient="auto"><path d="M 0 0 L 12 6 L 0 12 z" fill="#4a4780"/></marker><marker id="sm" viewBox="0 0 12 12" refX="2" refY="6" markerWidth="5" markerHeight="5" orient="auto"><path d="M 12 0 L 0 6 L 12 12 z" fill="#4a4780"/></marker><marker id="et" viewBox="0 0 12 12" refX="10" refY="6" markerWidth="5" markerHeight="5" orient="auto"><path d="M 0 0 L 12 6 L 0 12 z" fill="#0d7c75"/></marker><marker id="st" viewBox="0 0 12 12" refX="2" refY="6" markerWidth="5" markerHeight="5" orient="auto"><path d="M 12 0 L 0 6 L 12 12 z" fill="#0d7c75"/></marker></defs>
+<text x="40" y="74" font-size="62" font-weight="700" fill="#1e1b4b" text-anchor="start">Architecture</text>
+<text x="40" y="108" font-size="26" font-weight="400" fill="#6b6a86" text-anchor="start">FourFootsteps · event-log-tracking 브랜치</text>
+<line x1="1380" y1="40" x2="1470" y2="40" stroke="#1e1b4b" stroke-width="4" marker-end="url(#en)"/>
+<text x="1486" y="48" font-size="24" font-weight="400" fill="#1e1b4b" text-anchor="start">호출 / 실행 흐름</text>
+<line x1="1380" y1="78" x2="1470" y2="78" stroke="#4a4780" stroke-width="4" stroke-dasharray="14 9" marker-end="url(#em)"/>
+<text x="1486" y="86" font-size="24" font-weight="400" fill="#1e1b4b" text-anchor="start">데이터 읽기 / 쓰기 / 파싱</text>
+<line x1="1850" y1="40" x2="1940" y2="40" stroke="#0d7c75" stroke-width="4" marker-end="url(#et)"/>
+<text x="1956" y="48" font-size="24" font-weight="400" fill="#0d7c75" text-anchor="start">로그 전송 흐름</text>
+<g transform="translate(0,150)">
+<rect x="40" y="0" width="1920" height="200" rx="38" fill="#fff3d6" stroke="#1e1b4b" stroke-width="4"/>
+<text x="1000" y="56" font-size="40" font-weight="700" fill="#1e1b4b" text-anchor="middle">CSV Data  (Resources/Datas)</text>
+<line x1="40" y1="84" x2="1960" y2="84" stroke="#1e1b4b" stroke-width="3"/>
+<rect x="50" y="110" width="225" height="64" rx="20" ry="20" fill="#ffffff" stroke="#1e1b4b" stroke-width="2.5"/>
+<text x="162.5" y="151.0" font-size="25" font-weight="500" fill="#1e1b4b" text-anchor="middle">dialogues.csv</text>
+<rect x="290" y="110" width="225" height="64" rx="20" ry="20" fill="#ffffff" stroke="#1e1b4b" stroke-width="2.5"/>
+<text x="402.5" y="151.0" font-size="25" font-weight="500" fill="#1e1b4b" text-anchor="middle">choices.csv</text>
+<rect x="750" y="110" width="225" height="64" rx="20" ry="20" fill="#ffffff" stroke="#1e1b4b" stroke-width="2.5"/>
+<text x="862.5" y="151.0" font-size="25" font-weight="500" fill="#1e1b4b" text-anchor="middle">events.csv</text>
+<rect x="990" y="110" width="225" height="64" rx="20" ry="20" fill="#ffffff" stroke="#1e1b4b" stroke-width="2.5"/>
+<text x="1102.5" y="151.0" font-size="25" font-weight="500" fill="#1e1b4b" text-anchor="middle">conditions.csv</text>
+<rect x="1450" y="110" width="225" height="64" rx="20" ry="20" fill="#ffffff" stroke="#1e1b4b" stroke-width="2.5"/>
+<text x="1562.5" y="151.0" font-size="25" font-weight="500" fill="#1e1b4b" text-anchor="middle">results.csv</text>
+<text x="1700" y="138" font-size="22" font-weight="400" fill="#6b6a86" text-anchor="start">그 외: variables.csv</text>
+<text x="1700" y="166" font-size="22" font-weight="400" fill="#6b6a86" text-anchor="start">puzzlesMemory.csv</text>
+<rect x="40" y="350" width="480" height="358" rx="38" ry="38" fill="#ffffff" stroke="#1e1b4b" stroke-width="4"/>
+<text x="280.0" y="406" font-size="42" font-weight="700" fill="#1e1b4b" text-anchor="middle">DialogueManager</text>
+<line x1="40" y1="434" x2="520" y2="434" stroke="#1e1b4b" stroke-width="3"/>
+<circle cx="74" cy="478" r="5" fill="#1e1b4b"/>
+<text x="96" y="488" font-size="28" font-weight="400" fill="#1e1b4b" text-anchor="start">대사 출력</text>
+<circle cx="74" cy="524" r="5" fill="#1e1b4b"/>
+<text x="96" y="534" font-size="28" font-weight="400" fill="#1e1b4b" text-anchor="start">선택지 표시</text>
+<circle cx="74" cy="570" r="5" fill="#1e1b4b"/>
+<text x="96" y="580" font-size="28" font-weight="400" fill="#1e1b4b" text-anchor="start">타자 효과</text>
+<circle cx="74" cy="616" r="5" fill="#1e1b4b"/>
+<text x="96" y="626" font-size="28" font-weight="400" fill="#1e1b4b" text-anchor="start">컷씬 이미지 처리</text>
+<circle cx="74" cy="662" r="5" fill="#1e1b4b"/>
+<text x="96" y="672" font-size="28" font-weight="400" fill="#1e1b4b" text-anchor="start">Dialogue Queue 관리</text>
+<rect x="740" y="350" width="480" height="358" rx="38" ry="38" fill="#ffffff" stroke="#1e1b4b" stroke-width="4"/>
+<text x="980.0" y="406" font-size="42" font-weight="700" fill="#1e1b4b" text-anchor="middle">EventManager</text>
+<line x1="740" y1="434" x2="1220" y2="434" stroke="#1e1b4b" stroke-width="3"/>
+<circle cx="774" cy="478" r="5" fill="#1e1b4b"/>
+<text x="796" y="488" font-size="28" font-weight="400" fill="#1e1b4b" text-anchor="start">Event ID 호출</text>
+<circle cx="774" cy="524" r="5" fill="#1e1b4b"/>
+<text x="796" y="534" font-size="28" font-weight="400" fill="#1e1b4b" text-anchor="start">조건 검사</text>
+<circle cx="774" cy="570" r="5" fill="#1e1b4b"/>
+<text x="796" y="580" font-size="28" font-weight="400" fill="#1e1b4b" text-anchor="start">AND / OR 조건 처리</text>
+<circle cx="774" cy="616" r="5" fill="#1e1b4b"/>
+<text x="796" y="626" font-size="28" font-weight="400" fill="#1e1b4b" text-anchor="start">Instant / Sequential</text>
+<text x="796" y="672" font-size="28" font-weight="400" fill="#1e1b4b" text-anchor="start">실행 모드 분기</text>
+<rect x="1440" y="350" width="520" height="404" rx="38" ry="38" fill="#ffffff" stroke="#1e1b4b" stroke-width="4"/>
+<text x="1700.0" y="406" font-size="42" font-weight="700" fill="#1e1b4b" text-anchor="middle">ResultManager</text>
+<line x1="1440" y1="434" x2="1960" y2="434" stroke="#1e1b4b" stroke-width="3"/>
+<circle cx="1474" cy="478" r="5" fill="#1e1b4b"/>
+<text x="1496" y="488" font-size="28" font-weight="400" fill="#1e1b4b" text-anchor="start">Result ID 실행</text>
+<circle cx="1474" cy="524" r="5" fill="#1e1b4b"/>
+<text x="1496" y="534" font-size="28" font-weight="400" fill="#1e1b4b" text-anchor="start">대사 시작</text>
+<circle cx="1474" cy="570" r="5" fill="#1e1b4b"/>
+<text x="1496" y="580" font-size="28" font-weight="400" fill="#1e1b4b" text-anchor="start">변수 증감 / 반전</text>
+<circle cx="1474" cy="616" r="5" fill="#1e1b4b"/>
+<text x="1496" y="626" font-size="28" font-weight="400" fill="#1e1b4b" text-anchor="start">페이드 인 / 아웃</text>
+<circle cx="1474" cy="662" r="5" fill="#1e1b4b"/>
+<text x="1496" y="672" font-size="28" font-weight="400" fill="#1e1b4b" text-anchor="start">씬 이동</text>
+<circle cx="1474" cy="708" r="5" fill="#1e1b4b"/>
+<text x="1496" y="718" font-size="28" font-weight="400" fill="#1e1b4b" text-anchor="start">퍼즐 및 오브젝트 행동 실행</text>
+<path d="M 280 200 L 280 350" fill="none" stroke="#ffffff" stroke-width="12" stroke-linejoin="round" stroke-linecap="butt"/>
+<path d="M 280 200 L 280 350" fill="none" stroke="#4a4780" stroke-width="4" stroke-dasharray="14 9" stroke-linejoin="round" marker-end="url(#em)"/>
+<path d="M 980 200 L 980 350" fill="none" stroke="#ffffff" stroke-width="12" stroke-linejoin="round" stroke-linecap="butt"/>
+<path d="M 980 200 L 980 350" fill="none" stroke="#4a4780" stroke-width="4" stroke-dasharray="14 9" stroke-linejoin="round" marker-end="url(#em)"/>
+<path d="M 1560 200 L 1560 350" fill="none" stroke="#ffffff" stroke-width="12" stroke-linejoin="round" stroke-linecap="butt"/>
+<path d="M 1560 200 L 1560 350" fill="none" stroke="#4a4780" stroke-width="4" stroke-dasharray="14 9" stroke-linejoin="round" marker-end="url(#em)"/>
+<rect x="147.78000000000003" y="241.0" width="264.43999999999994" height="68" rx="10" fill="#ffffff" fill-opacity="0.96"/>
+<text x="280" y="265.0" font-size="22" font-weight="500" fill="#4a4780" text-anchor="middle">dialogues · choices</text>
+<text x="280" y="293.0" font-size="22" font-weight="500" fill="#4a4780" text-anchor="middle">파싱</text>
+<rect x="847.78" y="241.0" width="264.43999999999994" height="68" rx="10" fill="#ffffff" fill-opacity="0.96"/>
+<text x="980" y="265.0" font-size="22" font-weight="500" fill="#4a4780" text-anchor="middle">events · conditions</text>
+<text x="980" y="293.0" font-size="22" font-weight="500" fill="#4a4780" text-anchor="middle">파싱</text>
+<rect x="1504.34" y="241.0" width="111.32000000000001" height="68" rx="10" fill="#ffffff" fill-opacity="0.96"/>
+<text x="1560" y="265.0" font-size="22" font-weight="500" fill="#4a4780" text-anchor="middle">results</text>
+<text x="1560" y="293.0" font-size="22" font-weight="500" fill="#4a4780" text-anchor="middle">파싱</text>
+<path d="M 520 460 L 740 460" fill="none" stroke="#ffffff" stroke-width="12" stroke-linejoin="round" stroke-linecap="butt"/>
+<path d="M 520 460 L 740 460" fill="none" stroke="#1e1b4b" stroke-width="4" stroke-linejoin="round" marker-end="url(#en)"/>
+<rect x="536.72" y="378.0" width="186.56" height="68" rx="10" fill="#ffffff" fill-opacity="0.96"/>
+<text x="630" y="402.0" font-size="22" font-weight="500" fill="#1e1b4b" text-anchor="middle">CallEvent()</text>
+<text x="630" y="430.0" font-size="22" font-weight="500" fill="#1e1b4b" text-anchor="middle">다음이 Event면</text>
+<path d="M 1220 460 L 1440 460" fill="none" stroke="#ffffff" stroke-width="12" stroke-linejoin="round" stroke-linecap="butt"/>
+<path d="M 1220 460 L 1440 460" fill="none" stroke="#1e1b4b" stroke-width="4" stroke-linejoin="round" marker-end="url(#en)"/>
+<rect x="1252.34" y="378.0" width="155.32" height="68" rx="10" fill="#ffffff" fill-opacity="0.96"/>
+<text x="1330" y="402.0" font-size="22" font-weight="500" fill="#1e1b4b" text-anchor="middle">Result 실행</text>
+<text x="1330" y="430.0" font-size="22" font-weight="500" fill="#1e1b4b" text-anchor="middle">(결과 목록)</text>
+<path d="M 1510 754 L 1510 950 L 400 950 L 400 708" fill="none" stroke="#ffffff" stroke-width="12" stroke-linejoin="round" stroke-linecap="butt"/>
+<path d="M 1510 754 L 1510 950 L 400 950 L 400 708" fill="none" stroke="#1e1b4b" stroke-width="4" stroke-linejoin="round" marker-end="url(#en)"/>
+<rect x="436.5600000000001" y="916.0" width="506.87999999999977" height="68" rx="10" fill="#ffffff" fill-opacity="0.96"/>
+<text x="690" y="940.0" font-size="22" font-weight="500" fill="#1e1b4b" text-anchor="middle">Result_StartDialogue → StartDialogue()</text>
+<text x="690" y="968.0" font-size="22" font-weight="500" fill="#1e1b4b" text-anchor="middle">(대사가 끝날 때까지 대기)</text>
+<rect x="740" y="1060" width="480" height="312" rx="38" ry="38" fill="#f4f4fb" stroke="#1e1b4b" stroke-width="4"/>
+<text x="980.0" y="1116" font-size="42" font-weight="700" fill="#1e1b4b" text-anchor="middle">GameManager</text>
+<line x1="740" y1="1144" x2="1220" y2="1144" stroke="#1e1b4b" stroke-width="3"/>
+<circle cx="774" cy="1188" r="5" fill="#1e1b4b"/>
+<text x="796" y="1198" font-size="28" font-weight="400" fill="#1e1b4b" text-anchor="start">변수(Variables) 보관</text>
+<circle cx="774" cy="1234" r="5" fill="#1e1b4b"/>
+<text x="796" y="1244" font-size="28" font-weight="400" fill="#1e1b4b" text-anchor="start">variables.csv로 초기화</text>
+<circle cx="774" cy="1280" r="5" fill="#1e1b4b"/>
+<text x="796" y="1290" font-size="28" font-weight="400" fill="#1e1b4b" text-anchor="start">조건 판정·결과 실행의</text>
+<text x="796" y="1336" font-size="28" font-weight="400" fill="#1e1b4b" text-anchor="start">변수 읽기 / 쓰기</text>
+<rect x="1640" y="1060" width="420" height="312" rx="38" ry="38" fill="#ffffff" stroke="#1e1b4b" stroke-width="4"/>
+<text x="1850.0" y="1116" font-size="42" font-weight="700" fill="#1e1b4b" text-anchor="middle">SaveManager</text>
+<line x1="1640" y1="1144" x2="2060" y2="1144" stroke="#1e1b4b" stroke-width="3"/>
+<circle cx="1674" cy="1188" r="5" fill="#1e1b4b"/>
+<text x="1696" y="1198" font-size="28" font-weight="400" fill="#1e1b4b" text-anchor="start">플레이 상태 저장</text>
+<circle cx="1674" cy="1234" r="5" fill="#1e1b4b"/>
+<text x="1696" y="1244" font-size="28" font-weight="400" fill="#1e1b4b" text-anchor="start">변수 상태 복구</text>
+<circle cx="1674" cy="1280" r="5" fill="#1e1b4b"/>
+<text x="1696" y="1290" font-size="28" font-weight="400" fill="#1e1b4b" text-anchor="start">레거시 데이터 복구</text>
+<circle cx="1674" cy="1326" r="5" fill="#1e1b4b"/>
+<text x="1696" y="1336" font-size="28" font-weight="400" fill="#1e1b4b" text-anchor="start">Atomic Write 적용</text>
+<path d="M 980 708 L 980 1060" fill="none" stroke="#ffffff" stroke-width="12" stroke-linejoin="round" stroke-linecap="butt"/>
+<path d="M 980 708 L 980 1060" fill="none" stroke="#4a4780" stroke-width="4" stroke-dasharray="14 9" stroke-linejoin="round" marker-end="url(#em)"/>
+<rect x="849.1" y="801.0" width="261.79999999999995" height="68" rx="10" fill="#ffffff" fill-opacity="0.96"/>
+<text x="980" y="825.0" font-size="22" font-weight="500" fill="#4a4780" text-anchor="middle">조건 검사 → 변수 읽기</text>
+<text x="980" y="853.0" font-size="22" font-weight="500" fill="#4a4780" text-anchor="middle">(ConditionManager)</text>
+<path d="M 200 708 L 200 1120 L 740 1120" fill="none" stroke="#ffffff" stroke-width="12" stroke-linejoin="round" stroke-linecap="butt"/>
+<path d="M 200 708 L 200 1120 L 740 1120" fill="none" stroke="#4a4780" stroke-width="4" stroke-dasharray="14 9" stroke-linejoin="round" marker-end="url(#em)"/>
+<rect x="331.40000000000003" y="1048.0" width="277.19999999999993" height="68" rx="10" fill="#ffffff" fill-opacity="0.96"/>
+<text x="470" y="1072.0" font-size="22" font-weight="500" fill="#4a4780" text-anchor="middle">선택 결과 기록</text>
+<text x="470" y="1100.0" font-size="22" font-weight="500" fill="#4a4780" text-anchor="middle">(MemoryPuzzleStates)</text>
+<path d="M 1590 754 L 1590 1120 L 1220 1120" fill="none" stroke="#ffffff" stroke-width="12" stroke-linejoin="round" stroke-linecap="butt"/>
+<path d="M 1590 754 L 1590 1120 L 1220 1120" fill="none" stroke="#4a4780" stroke-width="4" stroke-dasharray="14 9" stroke-linejoin="round" marker-end="url(#em)"/>
+<rect x="1286.8600000000001" y="1062.0" width="236.27999999999997" height="40" rx="10" fill="#ffffff" fill-opacity="0.96"/>
+<text x="1405" y="1086.0" font-size="22" font-weight="500" fill="#4a4780" text-anchor="middle">변수 증감·반전·설정</text>
+<path d="M 1850 754 L 1850 1060" fill="none" stroke="#ffffff" stroke-width="12" stroke-linejoin="round" stroke-linecap="butt"/>
+<path d="M 1850 754 L 1850 1060" fill="none" stroke="#1e1b4b" stroke-width="4" stroke-linejoin="round" marker-end="url(#en)"/>
+<rect x="1724.82" y="881.0" width="250.35999999999993" height="68" rx="10" fill="#ffffff" fill-opacity="0.96"/>
+<text x="1850" y="905.0" font-size="22" font-weight="500" fill="#1e1b4b" text-anchor="middle">SaveGameData()</text>
+<text x="1850" y="933.0" font-size="22" font-weight="500" fill="#1e1b4b" text-anchor="middle">씬 로드 후 AutoSave</text>
+<path d="M 1640 1260 L 1220 1260" fill="none" stroke="#ffffff" stroke-width="12" stroke-linejoin="round" stroke-linecap="butt"/>
+<path d="M 1640 1260 L 1220 1260" fill="none" stroke="#4a4780" stroke-width="4" stroke-dasharray="14 9" stroke-linejoin="round" marker-start="url(#sm)" marker-end="url(#em)"/>
+<rect x="1281.06" y="1200.0" width="297.88" height="40" rx="10" fill="#ffffff" fill-opacity="0.96"/>
+<text x="1430" y="1224.0" font-size="22" font-weight="500" fill="#4a4780" text-anchor="middle">Variables 직렬화 / 복구</text>
+<rect x="1640" y="1470" width="420" height="80" rx="26" ry="26" fill="#fff3d6" stroke="#1e1b4b" stroke-width="3"/>
+<text x="1850.0" y="1519.0" font-size="28" font-weight="700" fill="#1e1b4b" text-anchor="middle">GameData.json</text>
+<path d="M 1850 1372 L 1850 1470" fill="none" stroke="#ffffff" stroke-width="12" stroke-linejoin="round" stroke-linecap="butt"/>
+<path d="M 1850 1372 L 1850 1470" fill="none" stroke="#1e1b4b" stroke-width="4" stroke-linejoin="round" marker-end="url(#en)"/>
+<rect x="1642.44" y="1405.0" width="175.12" height="40" rx="10" fill="#ffffff" fill-opacity="0.96"/>
+<text x="1730" y="1429.0" font-size="22" font-weight="500" fill="#1e1b4b" text-anchor="middle">Atomic Write</text>
+<text x="40" y="1640" font-size="28" font-weight="700" fill="#0d7c75" text-anchor="start">엔딩 로그 전송 파이프라인</text>
+<line x1="40" y1="1658" x2="2060" y2="1658" stroke="#0d7c75" stroke-width="2" stroke-dasharray="6 8"/>
+<rect x="740" y="1690" width="540" height="444" rx="38" ry="38" fill="#ffffff" stroke="#0d7c75" stroke-width="4"/>
+<text x="1010.0" y="1746" font-size="40" font-weight="700" fill="#1e1b4b" text-anchor="middle">Log Tracking System</text>
+<text x="1010.0" y="1804" font-size="22" font-weight="400" fill="#6b6a86" text-anchor="middle">EndingLogReporter · EndingLogQueueManager</text>
+<line x1="740" y1="1814" x2="1280" y2="1814" stroke="#0d7c75" stroke-width="3"/>
+<circle cx="774" cy="1858" r="5" fill="#1e1b4b"/>
+<text x="796" y="1868" font-size="28" font-weight="400" fill="#1e1b4b" text-anchor="start">엔딩·선택지(기억 퍼즐)</text>
+<text x="796" y="1914" font-size="28" font-weight="400" fill="#1e1b4b" text-anchor="start">로그 기록</text>
+<circle cx="774" cy="1950" r="5" fill="#1e1b4b"/>
+<text x="796" y="1960" font-size="28" font-weight="400" fill="#1e1b4b" text-anchor="start">RunID 기반 중복 방지</text>
+<circle cx="774" cy="1996" r="5" fill="#1e1b4b"/>
+<text x="796" y="2006" font-size="28" font-weight="400" fill="#1e1b4b" text-anchor="start">네트워크 실패 시</text>
+<text x="796" y="2052" font-size="28" font-weight="400" fill="#1e1b4b" text-anchor="start">재전송 큐 관리</text>
+<circle cx="774" cy="2088" r="5" fill="#1e1b4b"/>
+<text x="796" y="2098" font-size="28" font-weight="400" fill="#1e1b4b" text-anchor="start">익명 UUID로 플레이어 식별</text>
+<rect x="40" y="1740" width="480" height="150" rx="26" ry="26" fill="#f4f4fb" stroke="#0d7c75" stroke-width="3"/>
+<text x="280.0" y="1791.0" font-size="26" font-weight="700" fill="#1e1b4b" text-anchor="middle">Ending_Happy / Ending_Bad 씬</text>
+<text x="280.0" y="1823.0" font-size="22" font-weight="400" fill="#6b6a86" text-anchor="middle">ReportEndingOnStart</text>
+<text x="280.0" y="1855.0" font-size="22" font-weight="400" fill="#6b6a86" text-anchor="middle">(Result의 씬 이동으로 진입)</text>
+<path d="M 520 1815 L 740 1815" fill="none" stroke="#ffffff" stroke-width="12" stroke-linejoin="round" stroke-linecap="butt"/>
+<path d="M 520 1815 L 740 1815" fill="none" stroke="#0d7c75" stroke-width="4" stroke-linejoin="round" marker-end="url(#et)"/>
+<rect x="529.6800000000001" y="1752.0" width="200.64" height="40" rx="10" fill="#ffffff" fill-opacity="0.96"/>
+<text x="630" y="1776.0" font-size="22" font-weight="500" fill="#0d7c75" text-anchor="middle">ReportEnding()</text>
+<rect x="40" y="1960" width="480" height="110" rx="26" ry="26" fill="#f4f4fb" stroke="#0d7c75" stroke-width="3"/>
+<text x="280.0" y="2007.0" font-size="26" font-weight="700" fill="#1e1b4b" text-anchor="middle">TitleScene · LobbyManager</text>
+<text x="280.0" y="2039.0" font-size="22" font-weight="400" fill="#6b6a86" text-anchor="middle">새 게임 시작 시</text>
+<path d="M 520 2015 L 740 2015" fill="none" stroke="#ffffff" stroke-width="12" stroke-linejoin="round" stroke-linecap="butt"/>
+<path d="M 520 2015 L 740 2015" fill="none" stroke="#0d7c75" stroke-width="4" stroke-linejoin="round" marker-end="url(#et)"/>
+<rect x="536.06" y="1932.0" width="187.88" height="68" rx="10" fill="#ffffff" fill-opacity="0.96"/>
+<text x="630" y="1956.0" font-size="22" font-weight="500" fill="#0d7c75" text-anchor="middle">StartNewRun()</text>
+<text x="630" y="1984.0" font-size="22" font-weight="500" fill="#0d7c75" text-anchor="middle">(RunID 발급)</text>
+<path d="M 1640 1510 L 1450 1510 L 1450 1840 L 1280 1840" fill="none" stroke="#ffffff" stroke-width="12" stroke-linejoin="round" stroke-linecap="butt"/>
+<path d="M 1640 1510 L 1450 1510 L 1450 1840 L 1280 1840" fill="none" stroke="#0d7c75" stroke-width="4" stroke-dasharray="14 9" stroke-linejoin="round" marker-end="url(#et)"/>
+<rect x="1331.8600000000001" y="1577.0" width="236.27999999999997" height="96" rx="10" fill="#ffffff" fill-opacity="0.96"/>
+<text x="1450" y="1601.0" font-size="22" font-weight="500" fill="#0d7c75" text-anchor="middle">GameData.json에서</text>
+<text x="1450" y="1629.0" font-size="22" font-weight="500" fill="#0d7c75" text-anchor="middle">이름·책임지수·</text>
+<text x="1450" y="1657.0" font-size="22" font-weight="500" fill="#0d7c75" text-anchor="middle">퍼즐 선택 결과 읽기</text>
+<rect x="1640" y="1940" width="420" height="130" rx="26" ry="26" fill="#f4f4fb" stroke="#0d7c75" stroke-width="3"/>
+<text x="1850.0" y="1998.0" font-size="28" font-weight="700" fill="#1e1b4b" text-anchor="middle">Google Sheets</text>
+<text x="1850.0" y="2030.0" font-size="22" font-weight="400" fill="#6b6a86" text-anchor="middle">Apps Script Web App</text>
+<path d="M 1280 2005 L 1640 2005" fill="none" stroke="#ffffff" stroke-width="12" stroke-linejoin="round" stroke-linecap="butt"/>
+<path d="M 1280 2005 L 1640 2005" fill="none" stroke="#0d7c75" stroke-width="4" stroke-linejoin="round" marker-end="url(#et)"/>
+<rect x="1346.92" y="1940.0" width="226.15999999999997" height="40" rx="10" fill="#ffffff" fill-opacity="0.96"/>
+<text x="1460" y="1964.0" font-size="22" font-weight="500" fill="#0d7c75" text-anchor="middle">HTTP POST (JSON)</text>
+<rect x="740" y="2230" width="540" height="100" rx="26" ry="26" fill="#f4f4fb" stroke="#0d7c75" stroke-width="3"/>
+<text x="1010.0" y="2273.0" font-size="28" font-weight="700" fill="#1e1b4b" text-anchor="middle">PlayerPrefs</text>
+<text x="1010.0" y="2305.0" font-size="22" font-weight="400" fill="#6b6a86" text-anchor="middle">RunID · UUID · 재전송 큐</text>
+<path d="M 1010 2134 L 1010 2230" fill="none" stroke="#ffffff" stroke-width="12" stroke-linejoin="round" stroke-linecap="butt"/>
+<path d="M 1010 2134 L 1010 2230" fill="none" stroke="#0d7c75" stroke-width="4" stroke-dasharray="14 9" stroke-linejoin="round" marker-start="url(#st)" marker-end="url(#et)"/>
+<rect x="1042.72" y="2162.0" width="274.56" height="40" rx="10" fill="#ffffff" fill-opacity="0.96"/>
+<text x="1180" y="2186.0" font-size="22" font-weight="500" fill="#0d7c75" text-anchor="middle">큐 저장 / 성공 시 제거</text>
+</g>
+</svg>

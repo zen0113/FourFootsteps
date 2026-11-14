@@ -33,7 +33,6 @@
 
 <br>
 
-
 ## ⚙️ Technical Stack
 
 <div>
@@ -51,17 +50,33 @@
 
 <br>
 
+## 🏗️ System Architecture
 
+CSV 기반 데이터 처리와 주요 매니저 간의 호출 및 데이터 흐름을 나타낸 시스템 아키텍처입니다.
+
+- **DialogueManager**: CSV 데이터를 기반으로 대사와 선택지를 출력하고 Dialogue Queue 및 타자 효과를 관리합니다.
+- **EventManager**: Event ID를 호출하고 조건 검사, AND / OR 조건 처리 및 실행 모드를 분기합니다.
+- **ResultManager**: 결과 ID에 따라 대사 시작, 변수 변경, 페이드 처리, 씬 이동 및 오브젝트 동작을 실행합니다.
+- **GameManager**: 게임 내 변수(Variables)를 관리하고 조건 판정 및 결과 실행에 필요한 변수 읽기 / 쓰기를 담당합니다.
+- **SaveManager**: 플레이 상태와 변수 상태를 저장 및 복구하며, JSON 기반 세이브 데이터에 Atomic Write를 적용합니다.
+
+<p align="center">
+  <img
+    src="readme/FourFootsteps_Architecture.svg"
+    alt="FourFootsteps System Architecture"
+    width="850"
+  />
+</p>
+
+<br>
 
 ## 📱 Screenshots
 
-| ![Screenshot1](https://raw.githubusercontent.com/zen0113/FourFootsteps/main/readme/fourfootsteps_2.jpg)  | ![Screenshot2](https://raw.githubusercontent.com/zen0113/FourFootsteps/main/readme/fourfootsteps_3.jpg)  | ![Screenshot3](https://raw.githubusercontent.com/zen0113/FourFootsteps/main/readme/fourfootsteps_4.jpg)  | 
+| ![Screenshot1](https://raw.githubusercontent.com/zen0113/FourFootsteps/main/readme/fourfootsteps_2.jpg)  | ![Screenshot2](https://raw.githubusercontent.com/zen0113/FourFootsteps/main/readme/fourfootsteps_3.jpg)  | ![Screenshot3](https://raw.githubusercontent.com/zen0113/FourFootsteps/main/readme/fourfootsteps_4.jpg)  |
 |-|-|-|
 | ![Screenshot4](https://raw.githubusercontent.com/zen0113/FourFootsteps/main/readme/fourfootsteps_5.jpg) | ![Screenshot5](https://raw.githubusercontent.com/zen0113/FourFootsteps/main/readme/fourfootsteps_6.jpg) | ![Screenshot6](https://raw.githubusercontent.com/zen0113/FourFootsteps/main/readme/fourfootsteps_7.jpg) |
 
 <br>
-
-
 
 ## 💡 개발 배경
 
@@ -142,9 +157,9 @@
 
 <br>
 
-
 ## 🏆  핵심 성과
 
+- **컴퓨터게임및콘텐츠논문지(KCI 등재학술지) 논문 게재** (2026.04)
 - **한국멀티미디어학회 추계학술발표대회 논문 발표** (2025.11)
 - **스토브 스토어 정식 출시** (2026.01)
 
@@ -157,8 +172,6 @@
 | [김바다](https://github.com/viabe)<br>**Client Development** | [김채민](https://github.com/zen0113)<br>**PM / Client Development** | [오지은](https://github.com/jieundino)<br>**Client Development** | 김지유<br>**Design** |
 
 <br>
-
-
 
 ## 📞 Contact
 

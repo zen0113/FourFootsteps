@@ -48,7 +48,6 @@ Unity 프로젝트 내 이벤트 발생 데이터를 추적하기 위한 시스�
 
 <br>
 
-
 ## ⚙️ Technical Stack
 
 <div>
@@ -66,17 +65,28 @@ Unity 프로젝트 내 이벤트 발생 데이터를 추적하기 위한 시스�
 
 <br>
 
+## 🏗️ System Architecture
 
+CSV 기반 대화 및 이벤트 처리 구조와 세이브 데이터 관리,
+엔딩 결과 기록 및 Google Sheets 연동을 통한 이벤트 로그 수집 흐름을 나타냅니다.
+
+<p align="center">
+  <img
+    src="./FourFootsteps_Architecture.svg"
+    alt="FourFootsteps System Architecture"
+    width="850"
+  />
+</p>
+
+<br>
 
 ## 📱 Screenshots
 
-| ![Screenshot1](https://raw.githubusercontent.com/zen0113/FourFootsteps/main/readme/fourfootsteps_2.jpg)  | ![Screenshot2](https://raw.githubusercontent.com/zen0113/FourFootsteps/main/readme/fourfootsteps_3.jpg)  | ![Screenshot3](https://raw.githubusercontent.com/zen0113/FourFootsteps/main/readme/fourfootsteps_4.jpg)  | 
+| ![Screenshot1](https://raw.githubusercontent.com/zen0113/FourFootsteps/main/readme/fourfootsteps_2.jpg) | ![Screenshot2](https://raw.githubusercontent.com/zen0113/FourFootsteps/main/readme/fourfootsteps_3.jpg) | ![Screenshot3](https://raw.githubusercontent.com/zen0113/FourFootsteps/main/readme/fourfootsteps_4.jpg) |
 |-|-|-|
 | ![Screenshot4](https://raw.githubusercontent.com/zen0113/FourFootsteps/main/readme/fourfootsteps_5.jpg) | ![Screenshot5](https://raw.githubusercontent.com/zen0113/FourFootsteps/main/readme/fourfootsteps_6.jpg) | ![Screenshot6](https://raw.githubusercontent.com/zen0113/FourFootsteps/main/readme/fourfootsteps_7.jpg) |
 
 <br>
-
-
 
 ## 💡 개발 배경
 
@@ -133,6 +143,7 @@ Unity 프로젝트 내 이벤트 발생 데이터를 추적하기 위한 시스�
 ### 전체 플레이 흐름
 
 총 **13개의 씬**으로 구성된 감성 인터랙티브 스토리
+
 ```
 프롤로그 → 고양이 시점 (5개 스테이지) ⇄ 인간 시점 회상 (5개) → 엔딩 (2개)
 ```
@@ -157,8 +168,7 @@ Unity 프로젝트 내 이벤트 발생 데이터를 추적하기 위한 시스�
 
 <br>
 
-
-## 🏆  핵심 성과
+## 🏆 핵심 성과
 
 - **한국멀티미디어학회 추계학술발표대회 논문 발표** (2025.11)
 - **스토브 스토어 정식 출시** (2026.01)
@@ -173,8 +183,6 @@ Unity 프로젝트 내 이벤트 발생 데이터를 추적하기 위한 시스�
 | [김바다](https://github.com/viabe)<br>**Client Development** | [김채민](https://github.com/zen0113)<br>**PM / Client Development** | [오지은](https://github.com/jieundino)<br>**Client Development** | 김지유<br>**Design** |
 
 <br>
-
-
 
 ## 📞 Contact
 
